@@ -27,7 +27,7 @@ lemma dcballs_n_lt_first {α : Type*}
   [PseudoMetricSpace α] [SphericallyCompleteSpace α]
   {seq : ℕ → α} (hseq : ∀ ε > 0, ∃ N, ∀ m ≥ N, ∀ n ≥ N, dist (seq m) (seq n) < ε)
   (n : ℕ) : n < (dcballs hseq n).1 := by
-  induction' n with k hk
+  induction n
   · simp [dcballs]
   · simp [dcballs]
 
@@ -47,7 +47,7 @@ lemma dcballs_radius_inv_k_succ {α : Type*}
   [PseudoMetricSpace α] [SphericallyCompleteSpace α]
   {seq : ℕ → α} (hseq : ∀ ε > 0, ∃ N, ∀ m ≥ N, ∀ n ≥ N, dist (seq m) (seq n) < ε)
   (i : ℕ) : (dcballs hseq i).2 ≤ 1 / (i + 1) := by
-  induction' i with k hk
+  induction i
   · unfold dcballs
     norm_num
   · simp only [dcballs, ge_iff_le, one_div, Nat.cast_add, Nat.cast_one, inf_le_iff,
