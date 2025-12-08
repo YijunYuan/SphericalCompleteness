@@ -40,7 +40,7 @@ lemma dcballs_antitone {α : Type*}
   simp only [Set.le_eq_subset]
   intro z hz
   simp only [mem_closedBall] at *
-  simp [dcballs] at hz
+  simp only [dcballs, ge_iff_le, one_div, le_inf_iff] at hz
   exact le_trans (dist_triangle _ _ _) <| add_le_of_le_sub_right hz.2
 
 lemma dcballs_radius_inv_k_succ {α : Type*}
@@ -50,7 +50,8 @@ lemma dcballs_radius_inv_k_succ {α : Type*}
   induction' i with k hk
   · unfold dcballs
     norm_num
-  · simp [dcballs]
+  · simp only [dcballs, ge_iff_le, one_div, Nat.cast_add, Nat.cast_one, inf_le_iff,
+    tsub_le_iff_right]
     exact Or.inl <| inv_anti₀ (by linarith) (by linarith)
 
 open Classical in
@@ -58,12 +59,12 @@ instance instCompleteOfSphericallyComplete (α : Type*)
   [PseudoMetricSpace α] [sc : SphericallyCompleteSpace α] : CompleteSpace α := by
   apply UniformSpace.complete_of_cauchySeq_tendsto
   intro seq hseq
-  simp [Metric.tendsto_nhds]
+  simp only [Metric.tendsto_nhds, gt_iff_lt, Filter.eventually_atTop, ge_iff_le]
   rw [Metric.cauchySeq_iff] at hseq
   obtain ⟨z, hz⟩ := sc.isSphericallyComplete <| dcballs_antitone hseq
   use z
   intro ε hε
-  simp at hz
+  simp only [Set.mem_iInter, mem_ball] at hz
   replace hz : ∀ (i : ℕ), dist z (seq (dcballs hseq i).1) < 1 / (i + 1) :=
     fun i ↦ lt_of_lt_of_le (hz i) (dcballs_radius_inv_k_succ hseq i)
   let N₀ := Nat.ceil (2 / ε) - 1
@@ -81,11 +82,9 @@ instance instCompleteOfSphericallyComplete (α : Type*)
     rw [(by aesop : (↑(⌈2 / ε⌉₊ - 1) + 1 : ℝ) = ⌈2 / ε⌉₊)]
     exact (div_le_iff₀' hε).mp <| Nat.le_ceil _
   have c2 : dist (seq (dcballs hseq N).1) (seq n) < ε / 2 := by
-    have := (hseq (ε / 2) (by linarith)).choose_spec
-    specialize this n (le_trans (by omega) hn)
     rw [dist_comm]
-    apply this
+    apply (hseq (ε / 2) (by linarith)).choose_spec n (le_trans (by omega) hn)
     exact le_trans (by omega) (dcballs_n_lt_first hseq N)
   rw [dist_comm]
-  refine lt_of_le_of_lt (dist_triangle z (seq (dcballs hseq N).1) (seq n)) ?_
+  refine lt_of_le_of_lt (dist_triangle _ (seq (dcballs hseq N).1) _) ?_
   linarith
