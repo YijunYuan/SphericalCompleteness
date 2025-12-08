@@ -2,6 +2,8 @@ import Mathlib.Topology.MetricSpace.Pseudo.Defs
 import Mathlib.Topology.UniformSpace.Cauchy
 import Mathlib.Topology.MetricSpace.Cauchy
 import Mathlib.Tactic
+import Mathlib.Topology.Algebra.Valued.NormedValued
+import Mathlib.Analysis.Normed.Module.Basic
 
 open Metric
 class SphericallyCompleteSpace (α : Type*) [PseudoMetricSpace α] : Prop where
@@ -88,3 +90,19 @@ instance instCompleteOfSphericallyComplete (α : Type*)
   rw [dist_comm]
   refine lt_of_le_of_lt (dist_triangle _ (seq (dcballs hseq N).1) _) ?_
   linarith
+
+#check NormedField.toValued
+
+#check NormedSpace
+
+variable {K : Type*} [hK : NormedField K] [IsUltrametricDist K]
+
+theorem direct_sum_spherically_complete {E F : Type*}
+[SeminormedAddCommGroup E] [NormedSpace K E]
+[SeminormedAddCommGroup F] [NormedSpace K F]
+[SphericallyCompleteSpace E] [SphericallyCompleteSpace F] :
+    SphericallyCompleteSpace (E × F) where
+  isSphericallyComplete := by
+    intro ci ri hanti
+
+    sorry
