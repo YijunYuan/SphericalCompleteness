@@ -26,36 +26,37 @@ noncomputable def dcidx {α : Type*} [PseudoMetricSpace α] {seq : ℕ → α}
   | n + 1 => max (1 + dcidx hseq n) ((Metric.cauchySeq_iff.1 hseq)
       (1 / (2 : ℝ) ^ (n + 1)) (by positivity)).choose
 
-lemma dcidx_prop {α : Type*} [PseudoMetricSpace α] {seq : ℕ → α}
+lemma dcidx_controlled_converge {α : Type*} [PseudoMetricSpace α] {seq : ℕ → α}
   (hseq : CauchySeq seq) (k : ℕ) :
   ∀ n > (dcidx hseq k), dist (seq n) (seq (dcidx hseq k)) < 1 / (2 : ℝ) ^ k := by
   intro n hn
   if hk : k = 0 then
     simp [hk, dcidx]
     rw [Metric.cauchySeq_iff] at hseq
-    have := (hseq 1 zero_lt_one).choose_spec
-    apply this
-    · rw [hk] at hn
-      unfold dcidx at hn
+    apply (hseq 1 zero_lt_one).choose_spec
+    · rw [hk, dcidx] at hn
       linarith
     · exact Nat.le_refl _
   else
     have : k = (k - 1) + 1 := by omega
     rw [this, dcidx]
-    have this':= ((Metric.cauchySeq_iff.1 hseq) (1 / (2 : ℝ) ^ k) (by norm_num)).choose_spec
     simp only [Nat.sub_one_add_one hk]
-    apply this'
-    · rw [this] at hn
-      unfold dcidx at hn
-      simp at hn
-      replace hn := hn.2
+    apply ((Metric.cauchySeq_iff.1 hseq) (1 / (2 : ℝ) ^ k) (by positivity)).choose_spec
+    · rw [this, dcidx] at hn
+      simp only [ge_iff_le, one_div, gt_iff_lt, sup_lt_iff] at hn
       apply le_of_lt
-      convert hn
+      convert hn.2
       unfold Inv.inv HDiv.hDiv Real.instDivInvMonoid instHDiv
       unfold DivInvMonoid.div' Real.instInv
-      simp
-    · exact
-      Nat.le_max_right _ _
+      simp only [one_mul]
+    · exact Nat.le_max_right _ _
+
+lemma dcidx_strict_mono {α : Type*} [PseudoMetricSpace α] {seq : ℕ → α}
+  (hseq : CauchySeq seq) : StrictMono (dcidx hseq) := by
+  refine strictMono_nat_of_lt_succ ?_
+  intro n
+  conv => arg 2; unfold dcidx
+  simp only [ge_iff_le, one_div, lt_sup_iff, lt_add_iff_pos_left, zero_lt_one, true_or]
 
 theorem completeSpace_iff_nested_ball_with_radius_tendsto_zero_has_nonempty_inter
   (α : Type*) [PseudoMetricSpace α] :
@@ -73,9 +74,7 @@ theorem completeSpace_iff_nested_ball_with_radius_tendsto_zero_has_nonempty_inte
       simp only [Set.nonempty_iInter, Set.mem_iInter, mem_closedBall, dist_le_coe]
       use ci n
       intro i hi
-      specialize hanti hi
-      simp at hanti
-      refine mem_closedBall.mp <| hanti ?_
+      refine mem_closedBall.mp <| hanti hi ?_
       simp only [mem_closedBall, dist_self, NNReal.zero_le_coe]
     · refine Metric.tendsto_atTop'.mpr ?_
       rw [Metric.tendsto_atTop'] at htd
@@ -94,10 +93,63 @@ theorem completeSpace_iff_nested_ball_with_radius_tendsto_zero_has_nonempty_inte
   · intro h
     refine UniformSpace.complete_of_cauchySeq_tendsto ?_
     intro seq hseq
+    let ci := fun n => seq (dcidx hseq n)
+    let ri : ℕ → NNReal := fun n => ⟨1 / (2 : ℝ) ^ (n - 1 : ℤ), by positivity⟩
+    have hanti : Antitone (fun i => closedBall (ci i) (ri i)) := by
+      refine antitone_nat_of_succ_le ?_
+      intro n
+      intro z hz
+      simp only [mem_closedBall, ci, ri] at *
+      simp only [NNReal.coe_mk] at hz
+      refine le_trans (dist_triangle _ (seq (dcidx hseq (n + 1))) _) ?_
+      have := dcidx_controlled_converge hseq n ((dcidx hseq (n+1))) (
+        dcidx_strict_mono hseq (by norm_num))
+      replace := add_le_add hz (le_of_lt this)
+      refine le_trans this ?_
+      field_simp
+      simp only [Nat.cast_add, Nat.cast_one, add_sub_cancel_right, zpow_natCast, one_div,
+        NNReal.coe_mk]
+      refine (le_mul_inv_iff₀ (by positivity)).mpr ?_
+      field_simp
+      rw [(by norm_num : ((1 : ℝ) + 1 = 2))]
+      apply le_of_eq
+      rw [zpow_natCast_sub_one₀, mul_div,mul_comm]
+      · simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, mul_div_cancel_right₀]
+      exact Ne.symm (NeZero.ne' 2)
+    have : Tendsto ri atTop (nhds 0) := by
+      simp only [Metric.tendsto_nhds, gt_iff_lt, Filter.eventually_atTop, ge_iff_le]
+      intro ε hε
+      unfold ri
+      simp [NNReal.dist_eq,NNReal.coe_mk, NNReal.coe_zero, sub_zero]
+      obtain ⟨n, hn⟩ := @ENNReal.exists_inv_two_pow_lt ε.toNNReal (by simp [hε])
+      use n.succ
+      have : (2 : ENNReal)⁻¹ ^ n = ENNReal.ofNNReal ⟨(2 : ℝ)⁻¹ ^ n, by positivity⟩ := by
+        refine (ENNReal.toReal_eq_toReal ?_ ?_).mp ?_
+        · exact LT.lt.ne_top hn
+        · exact ENNReal.coe_ne_top
+        · simp only [ENNReal.toReal_pow, ENNReal.toReal_inv, ENNReal.toReal_ofNat, inv_pow,
+          ENNReal.coe_toReal, NNReal.coe_mk]
+      rw [this] at hn
+      simp at hn
+      rw [← NNReal.coe_lt_coe] at hn
+      simp at hn
+      replace hn := hn.resolve_right (by norm_num)
+      field_simp at hn
+      intro m hm
+      rw [abs_eq_self.2 <| by positivity]
+      field_simp
+      refine lt_of_lt_of_le hn ?_
+      refine mul_le_mul_of_nonneg_right ?_ ?_
+      · --field_simp
 
-
+        sorry
+      · exact le_of_lt hε
+    specialize h hanti this
+    obtain ⟨x, hx⟩ := h
+    simp only [Set.mem_iInter, mem_closedBall, dist_le_coe] at hx
     sorry
 
+lemma test (n : ℕ) : 2 * (2 : ℝ) ^ ((↑n : ℤ) - 1) = 2 ^ n := sorry
 
 class SphericallyCompleteSpace (α : Type*) [PseudoMetricSpace α] : Prop where
   isSphericallyComplete : ∀ ⦃ci : ℕ → α⦄, ∀ ⦃ri : ℕ → NNReal⦄,
