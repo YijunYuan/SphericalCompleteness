@@ -141,8 +141,11 @@ theorem completeSpace_iff_nested_ball_with_radius_tendsto_zero_has_nonempty_inte
       refine lt_of_lt_of_le hn ?_
       refine mul_le_mul_of_nonneg_right ?_ ?_
       · --field_simp
+        rw [zpow_natCast_sub_one₀]
+        · field_simp
 
-        sorry
+          sorry
+        · linarith
       · exact le_of_lt hε
     specialize h hanti this
     obtain ⟨x, hx⟩ := h
