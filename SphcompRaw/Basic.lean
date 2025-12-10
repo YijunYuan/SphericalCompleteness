@@ -71,9 +71,7 @@ theorem completeSpace_iff_nested_ball_with_radius_tendsto_zero_has_nonempty_inte
     · exact fun _ ↦ isBounded_closedBall
     · intro n
       simp only [Set.nonempty_iInter, Set.mem_iInter, mem_closedBall, dist_le_coe]
-      use ci n
-      intro i hi
-      refine mem_closedBall.mp <| hanti hi ?_
+      refine ⟨ci n, fun i hi ↦ mem_closedBall.mp <| hanti hi ?_⟩
       simp only [mem_closedBall, dist_self, NNReal.zero_le_coe]
     · apply Metric.tendsto_atTop'.mpr
       rw [Metric.tendsto_atTop'] at htd
@@ -90,8 +88,7 @@ theorem completeSpace_iff_nested_ball_with_radius_tendsto_zero_has_nonempty_inte
         linarith
       · exact diam_nonneg
   · intro h
-    refine UniformSpace.complete_of_cauchySeq_tendsto ?_
-    intro seq hseq
+    refine UniformSpace.complete_of_cauchySeq_tendsto fun seq hseq ↦ ?_
     let ci := fun n => seq (dcidx hseq n)
     let ri : ℕ → NNReal := fun n => ⟨1 / (2 : ℝ) ^ (n - 1 : ℤ), by positivity⟩
     have hanti : Antitone (fun i => closedBall (ci i) (ri i)) := by
@@ -109,15 +106,14 @@ theorem completeSpace_iff_nested_ball_with_radius_tendsto_zero_has_nonempty_inte
       field_simp
       rw [(by norm_num : ((1 : ℝ) + 1 = 2))]
       apply le_of_eq
-      rw [zpow_natCast_sub_one₀, mul_div,mul_comm]
-      · simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, mul_div_cancel_right₀]
-      · exact Ne.symm (NeZero.ne' 2)
+      rw [zpow_natCast_sub_one₀ <| Ne.symm (NeZero.ne' 2), mul_div,mul_comm]
+      simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, mul_div_cancel_right₀]
     have : Tendsto ri atTop (nhds 0) := by
       simp only [Metric.tendsto_nhds, gt_iff_lt, Filter.eventually_atTop, ge_iff_le]
       intro ε hε
-      simp [ri, NNReal.dist_eq,NNReal.coe_mk, NNReal.coe_zero, sub_zero]
+      simp only [one_div, NNReal.dist_eq, NNReal.coe_mk, NNReal.coe_zero, sub_zero, abs_inv, ri]
       obtain ⟨n, hn⟩ := @ENNReal.exists_inv_two_pow_lt ε.toNNReal (by simp [hε])
-      use n.succ
+      refine ⟨n.succ, fun m hm ↦ ?_⟩
       have : (2 : ENNReal)⁻¹ ^ n = ENNReal.ofNNReal ⟨(2 : ℝ)⁻¹ ^ n, by positivity⟩ := by
         refine (ENNReal.toReal_eq_toReal_iff' (LT.lt.ne_top hn) ENNReal.coe_ne_top).mp ?_
         simp only [ENNReal.toReal_pow, ENNReal.toReal_inv, ENNReal.toReal_ofNat, inv_pow,
@@ -126,7 +122,6 @@ theorem completeSpace_iff_nested_ball_with_radius_tendsto_zero_has_nonempty_inte
         Real.coe_toNNReal', lt_sup_iff, inv_neg''] at hn
       replace hn := hn.resolve_right (by norm_num)
       field_simp at hn
-      intro m hm
       rw [abs_eq_self.2 <| by positivity]
       field_simp
       refine lt_of_lt_of_le hn <| mul_le_mul_of_nonneg_right ?_ <| le_of_lt hε
@@ -138,28 +133,33 @@ theorem completeSpace_iff_nested_ball_with_radius_tendsto_zero_has_nonempty_inte
     obtain ⟨x, hx⟩ := h hanti this
     simp only [Set.mem_iInter, mem_closedBall] at hx
     refine ⟨x, Metric.tendsto_atTop'.mpr <| fun ε hε ↦ ?_⟩
-    simp only [dist_comm]
-    unfold ci ri at hx
-    obtain ⟨n₁, hn₁⟩ := @ENNReal.exists_inv_two_pow_lt (ε/4).toNNReal (by simp [hε])
-    specialize hx n₁
-    use max n₁ (dcidx hseq n₁)
-    intro m hm
+    simp only [dist_comm, ci, ri] at *
+    obtain ⟨n₁, hn₁⟩ := @ENNReal.exists_inv_two_pow_lt (ε / 4).toNNReal (by simp [hε])
+    refine ⟨max n₁ (dcidx hseq n₁), fun m hm ↦ ?_⟩
     have := dcidx_controlled_converge hseq n₁ m (by omega)
     rw [dist_comm] at this
     refine lt_of_le_of_lt (dist_triangle _ (seq (dcidx hseq n₁)) _) ?_
-    refine lt_trans (add_lt_add_of_le_of_lt hx this) ?_
+    refine lt_trans (add_lt_add_of_le_of_lt (hx n₁) this) ?_
     simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, zpow_natCast_sub_one₀, one_div,
       inv_div, NNReal.coe_mk]
-    field_simp
-    rw [(by norm_num : (2 : ℝ) + 1 = 3)]
-
-    sorry
+    rw [(by norm_num : (2 : ENNReal)⁻¹ ^ n₁ = 2⁻¹ ^ (n₁ : ℤ)),
+        ENNReal.inv_zpow', ENNReal.zpow_neg] at hn₁
+    simp only [zpow_natCast, Real.toNNReal, (by simp; linarith : max (ε / 4) 0 = ε / 4)] at hn₁
+    rw [(by norm_num : (2 : ENNReal) ^ n₁ = ((2 : NNReal) ^ n₁ : NNReal)),
+        ← ENNReal.coe_inv (by norm_num)] at hn₁
+    unfold ENNReal.ofNNReal at hn₁
+    rw [WithTop.coe_lt_coe] at hn₁
+    field_simp at *
+    simp only [← NNReal.coe_lt_coe, NNReal.coe_one, NNReal.coe_mul,
+        NNReal.coe_pow, NNReal.coe_ofNat,
+        NNReal.coe_mk] at hn₁
+    rw [mul_div_assoc',lt_div_iff₀ four_pos] at hn₁
+    linarith
 
 class SphericallyCompleteSpace (α : Type*) [PseudoMetricSpace α] : Prop where
   isSphericallyComplete : ∀ ⦃ci : ℕ → α⦄, ∀ ⦃ri : ℕ → NNReal⦄,
     Antitone (fun i => closedBall (ci i) (ri i)) → (⋂ i, closedBall (ci i) (ri i)).Nonempty
 
-open Classical in
 instance instCompleteOfSphericallyComplete (α : Type*)
   [PseudoMetricSpace α] [sc : SphericallyCompleteSpace α] : CompleteSpace α := by
   rw [completeSpace_iff_nested_ball_with_radius_tendsto_zero_has_nonempty_inter]
