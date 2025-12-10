@@ -182,21 +182,43 @@ lemma closedBall_prod_eq {E F : Type*}
 theorem direct_sum_spherically_complete {E F : Type*}
 [SeminormedAddCommGroup E] [NormedSpace K E]
 [SeminormedAddCommGroup F] [NormedSpace K F]
-[SphericallyCompleteSpace E] [SphericallyCompleteSpace F] :
+[hse : SphericallyCompleteSpace E] [hsf : SphericallyCompleteSpace F] :
     SphericallyCompleteSpace (E × F) where
   isSphericallyComplete := by
     intro ci ri hanti
     have hE : Antitone (fun i => closedBall (ci i).1 (ri i)) := by
       intro m n hmn
-      simp
+      simp only [Set.le_eq_subset]
       specialize hanti hmn
-      simp at hanti
-      have hprod:=
-        closedBall_prod_eq (K := K) (E := E) (F := F) (c := ci n) (r := ri n)
-      rw [hprod] at hanti
-      replace hprod:=
-        closedBall_prod_eq (K := K) (E := E) (F := F) (c := ci m) (r := ri m)
-      rw [hprod] at hanti
+      simp only [Set.le_eq_subset] at hanti
+      rw [closedBall_prod_eq (K := K) (E := E) (F := F) (c := ci n) (r := ri n),
+          closedBall_prod_eq (K := K) (E := E) (F := F) (c := ci m) (r := ri m)] at hanti
+      intro z hz
+      have : (z , (ci n).2) ∈ closedBall (ci n).1 ↑(ri n) ×ˢ closedBall (ci n).2 ↑(ri n) := by
+        simp only [Set.mem_prod, mem_closedBall, dist_self, NNReal.zero_le_coe,and_true]
+        simpa only [mem_closedBall] using hz
+      exact (Set.mem_prod.1 <| hanti this).1
+    have hF : Antitone (fun i => closedBall (ci i).2 (ri i)) := by
+      intro m n hmn
+      simp only [Set.le_eq_subset]
+      specialize hanti hmn
+      simp only [Set.le_eq_subset] at hanti
+      rw [closedBall_prod_eq (K := K) (E := E) (F := F) (c := ci n) (r := ri n),
+          closedBall_prod_eq (K := K) (E := E) (F := F) (c := ci m) (r := ri m)] at hanti
+      intro z hz
+      have : ((ci n).1 , z) ∈ closedBall (ci n).1 ↑(ri n) ×ˢ closedBall (ci n).2 ↑(ri n) := by
+        simpa only [Set.mem_prod, mem_closedBall, dist_self, NNReal.zero_le_coe, dist_le_coe,
+          true_and] using hz
+      exact (Set.mem_prod.1 <| hanti this).2
+    replace hE := hse.isSphericallyComplete hE
+    replace hF := hsf.isSphericallyComplete hF
+    simp at *
+    obtain ⟨xE, hxE⟩ := hE
+    obtain ⟨xF, hxF⟩ := hF
+    use xE, xF
+    intro n
+    specialize hxE n
+    specialize hxF n
 
-      sorry
+
     sorry
