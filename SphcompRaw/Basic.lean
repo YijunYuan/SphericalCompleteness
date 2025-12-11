@@ -168,12 +168,12 @@ instance instCompleteOfSphericallyComplete (α : Type*)
 #check NormedField.toValued
 
 #check NormedSpace
+#check Prod.normedSpace
+variable {K : Type*} [hK : NormedField K]
 
-variable {K : Type*} [hK : NormedField K] [IsUltrametricDist K]
-
-theorem direct_sum_spherically_complete {E F : Type*}
-[SeminormedAddCommGroup E] [NormedSpace K E]
-[SeminormedAddCommGroup F] [NormedSpace K F]
+instance Prod.sphericallyCompleteSpace {E F : Type*}
+[SeminormedAddCommGroup E]
+[SeminormedAddCommGroup F]
 [hse : SphericallyCompleteSpace E] [hsf : SphericallyCompleteSpace F] :
     SphericallyCompleteSpace (E × F) where
   isSphericallyComplete := by
@@ -210,3 +210,22 @@ theorem direct_sum_spherically_complete {E F : Type*}
     use xE, xF
     intro n
     simpa only [Prod.dist_eq, sup_le_iff] using ⟨hxE n, hxF n⟩
+
+#check Pi.normedSpace
+
+instance Pi.sphericallyCompleteSpace {ι : Type*} [Fintype ι] {E : ι → Type*}
+  [∀ i, SeminormedAddCommGroup (E i)]
+  [∀ i, SphericallyCompleteSpace (E i)] :
+    SphericallyCompleteSpace (∀ i, E i) where
+  isSphericallyComplete := by
+    intro ci ri hanti
+    have hE : ∀ i, Antitone (fun n => closedBall (ci n i) (ri n)) := by
+      intro i m n hmn
+      simp only [Set.le_eq_subset]
+      specialize hanti hmn
+      simp only [Set.le_eq_subset] at hanti
+      rw [closedBall_pi] at hanti
+      ·
+        sorry
+      · exact (ri n).prop
+    sorry
