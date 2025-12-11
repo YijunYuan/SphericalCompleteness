@@ -4,6 +4,7 @@ import Mathlib.Topology.MetricSpace.Cauchy
 import Mathlib.Tactic
 import Mathlib.Topology.Algebra.Valued.NormedValued
 import Mathlib.Analysis.Normed.Module.Basic
+import Mathlib.NumberTheory.Padics.ProperSpace
 open Metric
 open Filter
 
@@ -165,6 +166,17 @@ instance instCompleteOfSphericallyComplete (α : Type*)
   rw [completeSpace_iff_nested_ball_with_radius_tendsto_zero_has_nonempty_inter]
   exact fun _ _ hanti _ ↦ sc.isSphericallyComplete hanti
 
+instance instSpericallyComplete_of_properSpace (α : Type*)
+  [PseudoMetricSpace α] [ProperSpace α] : SphericallyCompleteSpace α where
+  isSphericallyComplete := by
+    intro ci ri hanti
+    apply IsCompact.nonempty_iInter_of_sequence_nonempty_isCompact_isClosed
+    <| fun i ↦ closedBall (ci i) ↑(ri i)
+    · exact fun _ ↦  hanti (by linarith)
+    · exact fun h ↦ nonempty_closedBall.mpr (ri h).prop
+    · exact isCompact_closedBall (ci 0) ↑(ri 0)
+    · exact fun i ↦ isClosed_closedBall
+
 theorem sphericallyCompleteSpace_of_isometryEquiv {E F : Type*}
   [PseudoMetricSpace E] [PseudoMetricSpace F]
   [he : SphericallyCompleteSpace E]
@@ -189,7 +201,6 @@ theorem sphericallyCompleteSpace_of_isometryEquiv {E F : Type*}
     rw [← IsometryEquiv.apply_symm_apply f (ci i), Isometry.dist_eq]
     · exact hz'
     · exact IsometryEquiv.isometry f
-
 
 instance Prod.sphericallyCompleteSpace {E F : Type*}
 [PseudoMetricSpace E] [PseudoMetricSpace F]
@@ -270,3 +281,10 @@ instance Pi.sphericallyCompleteSpace {ι : Type*} [Fintype ι] {E : ι → Type*
       intro j
       exact Set.mem_iInter.1 ((hh j).isSphericallyComplete (hE j)).choose_spec i
     · exact (ri i).prop
+
+instance instSphericallyCompleteSpaceComplex : SphericallyCompleteSpace ℂ  := inferInstance
+
+instance instSphericallyCompleteSpaceReal : SphericallyCompleteSpace ℝ  := inferInstance
+
+instance instSphericallyCompleteSpacePadic {p : ℕ} [Fact (Nat.Prime p)] :
+  SphericallyCompleteSpace (ℚ_[p]) := inferInstance
