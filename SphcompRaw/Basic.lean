@@ -165,15 +165,37 @@ instance instCompleteOfSphericallyComplete (α : Type*)
   rw [completeSpace_iff_nested_ball_with_radius_tendsto_zero_has_nonempty_inter]
   exact fun _ _ hanti _ ↦ sc.isSphericallyComplete hanti
 
-#check NormedField.toValued
+theorem sphericallyCompleteSpace_of_isometryEquiv {E F : Type*}
+  [PseudoMetricSpace E]
+  [PseudoMetricSpace F]
+  [he : SphericallyCompleteSpace E]
+  (f : E ≃ᵢ F) : SphericallyCompleteSpace F where
+  isSphericallyComplete := by
+    intro ci ri hanti
+    let ci' := fun n => f.symm (ci n)
+    have hanti' : Antitone (fun i => closedBall (ci' i) (ri i)) := by
+      intro m n hmn
+      unfold ci'
+      simp only [Set.le_eq_subset]
+      rw [← IsometryEquiv.preimage_closedBall f (ci m) ↑(ri m),
+          ← IsometryEquiv.preimage_closedBall f (ci n) ↑(ri n)]
+      specialize hanti hmn
+      simp only [Set.le_eq_subset] at hanti
+      grind
+    rcases he.isSphericallyComplete hanti' with ⟨z',hz'⟩
+    simp only [Set.mem_iInter, mem_closedBall, Set.nonempty_iInter] at *
+    refine ⟨f z', fun i ↦ ?_⟩
+    specialize hz' i
+    unfold ci' at hz'
+    rw [← IsometryEquiv.apply_symm_apply f (ci i), Isometry.dist_eq]
+    · exact hz'
+    · exact IsometryEquiv.isometry f
 
-#check NormedSpace
-#check Prod.normedSpace
+
 variable {K : Type*} [hK : NormedField K]
 
 instance Prod.sphericallyCompleteSpace {E F : Type*}
-[SeminormedAddCommGroup E]
-[SeminormedAddCommGroup F]
+[SeminormedAddCommGroup E] [SeminormedAddCommGroup F]
 [hse : SphericallyCompleteSpace E] [hsf : SphericallyCompleteSpace F] :
     SphericallyCompleteSpace (E × F) where
   isSphericallyComplete := by
@@ -211,11 +233,10 @@ instance Prod.sphericallyCompleteSpace {E F : Type*}
     intro n
     simpa only [Prod.dist_eq, sup_le_iff] using ⟨hxE n, hxF n⟩
 
-#check Pi.normedSpace
-
+open Classical in
 instance Pi.sphericallyCompleteSpace {ι : Type*} [Fintype ι] {E : ι → Type*}
   [∀ i, SeminormedAddCommGroup (E i)]
-  [∀ i, SphericallyCompleteSpace (E i)] :
+  [hh : ∀ i, SphericallyCompleteSpace (E i)] :
     SphericallyCompleteSpace (∀ i, E i) where
   isSphericallyComplete := by
     intro ci ri hanti
@@ -224,8 +245,35 @@ instance Pi.sphericallyCompleteSpace {ι : Type*} [Fintype ι] {E : ι → Type*
       simp only [Set.le_eq_subset]
       specialize hanti hmn
       simp only [Set.le_eq_subset] at hanti
-      rw [closedBall_pi] at hanti
-      ·
-        sorry
+      rw [closedBall_pi, closedBall_pi] at hanti
+      · intro z hz
+        let Z : ((i : ι) → E i) := fun (j : ι) =>
+          if hij : j = i then
+            hij ▸ z
+          else
+            (ci n j)
+        have : Z ∈ (Set.univ.pi fun b ↦ closedBall (ci n b) ↑(ri n)) := by
+          unfold Z
+          simp only [Set.mem_pi, Set.mem_univ]
+          intro j _
+          if hij : j = i then
+            simp only [hij, ↓reduceDIte]
+            cases hij
+            simpa using hz
+          else
+            simp only [hij, ↓reduceDIte, mem_closedBall, dist_self, NNReal.zero_le_coe]
+        specialize hanti this
+        simp only [Set.mem_pi, Set.mem_univ, forall_const] at hanti
+        specialize hanti i
+        unfold Z at hanti
+        simpa only [↓reduceDIte] using hanti
+      · exact (ri m).prop
       · exact (ri n).prop
-    sorry
+    use fun i ↦ ((hh i).isSphericallyComplete (hE i)).choose
+    simp only [Set.mem_iInter]
+    intro i
+    rw [closedBall_pi]
+    · simp only [Set.mem_pi, Set.mem_univ, forall_const]
+      intro j
+      exact Set.mem_iInter.1 ((hh j).isSphericallyComplete (hE j)).choose_spec i
+    · exact (ri i).prop
