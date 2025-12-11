@@ -166,8 +166,7 @@ instance instCompleteOfSphericallyComplete (α : Type*)
   exact fun _ _ hanti _ ↦ sc.isSphericallyComplete hanti
 
 theorem sphericallyCompleteSpace_of_isometryEquiv {E F : Type*}
-  [PseudoMetricSpace E]
-  [PseudoMetricSpace F]
+  [PseudoMetricSpace E] [PseudoMetricSpace F]
   [he : SphericallyCompleteSpace E]
   (f : E ≃ᵢ F) : SphericallyCompleteSpace F where
   isSphericallyComplete := by
@@ -192,10 +191,8 @@ theorem sphericallyCompleteSpace_of_isometryEquiv {E F : Type*}
     · exact IsometryEquiv.isometry f
 
 
-variable {K : Type*} [hK : NormedField K]
-
 instance Prod.sphericallyCompleteSpace {E F : Type*}
-[SeminormedAddCommGroup E] [SeminormedAddCommGroup F]
+[PseudoMetricSpace E] [PseudoMetricSpace F]
 [hse : SphericallyCompleteSpace E] [hsf : SphericallyCompleteSpace F] :
     SphericallyCompleteSpace (E × F) where
   isSphericallyComplete := by
@@ -235,7 +232,7 @@ instance Prod.sphericallyCompleteSpace {E F : Type*}
 
 open Classical in
 instance Pi.sphericallyCompleteSpace {ι : Type*} [Fintype ι] {E : ι → Type*}
-  [∀ i, SeminormedAddCommGroup (E i)]
+  [∀ i, PseudoMetricSpace (E i)]
   [hh : ∀ i, SphericallyCompleteSpace (E i)] :
     SphericallyCompleteSpace (∀ i, E i) where
   isSphericallyComplete := by
@@ -247,11 +244,7 @@ instance Pi.sphericallyCompleteSpace {ι : Type*} [Fintype ι] {E : ι → Type*
       simp only [Set.le_eq_subset] at hanti
       rw [closedBall_pi, closedBall_pi] at hanti
       · intro z hz
-        let Z : ((i : ι) → E i) := fun (j : ι) =>
-          if hij : j = i then
-            hij ▸ z
-          else
-            (ci n j)
+        let Z : ((i : ι) → E i) := fun (j : ι) => if hij : j = i then hij ▸ z else (ci n j)
         have : Z ∈ (Set.univ.pi fun b ↦ closedBall (ci n b) ↑(ri n)) := by
           unfold Z
           simp only [Set.mem_pi, Set.mem_univ]
@@ -259,7 +252,7 @@ instance Pi.sphericallyCompleteSpace {ι : Type*} [Fintype ι] {E : ι → Type*
           if hij : j = i then
             simp only [hij, ↓reduceDIte]
             cases hij
-            simpa using hz
+            simpa only [mem_closedBall, dist_le_coe] using hz
           else
             simp only [hij, ↓reduceDIte, mem_closedBall, dist_self, NNReal.zero_le_coe]
         specialize hanti this
