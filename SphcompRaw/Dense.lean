@@ -72,10 +72,6 @@ lemma icc_subset_closure_iff {a b : ℝ} (hab : a < b) (S : Set ℝ) :
     rw [sub_lt_iff_lt_add',← sub_lt_iff_lt_add] at hw2
     exact ⟨lt_trans hw2.1 <| lt_of_le_of_lt (min_le_left _ _) <| div_two_lt_of_pos hε, by linarith⟩
 
-class DensePseudoMetricSpace (α : Type*) extends PseudoMetricSpace α where
-  is_dense : ∀ z : α, ∀ ε : ℝ≥0,
-  closure (Set.image2 dist (closedBall z ε) (closedBall z ε)) = Set.Icc 0 (diam (closedBall z ε))
-
 theorem diam_le_radius_of_ultrametric {α : Type*}
 [PseudoMetricSpace α] [hiud : IsUltrametricDist α]
 {z : α} {r : ℝ≥0} :
@@ -105,30 +101,47 @@ diam (closedBall z r) = r := by
   linarith
 
 lemma test {α : Type*}
-[dnf : DenselyNormedField α] [hiud : IsUltrametricDist α]
-{z : α} {r : ℝ≥0} (r' : ℝ≥0) (hr : r' < r) :
+[dnf : DenselyNormedField α]
+(z : α) {r : ℝ≥0} {r' : ℝ≥0} (hr : r' < r) :
 ∃ x y : α, x ∈ closedBall z r ∧ y ∈ closedBall z r ∧  nndist x y ∈ Set.Ioo r' r := by
   rcases dnf.lt_norm_lt r' r r'.prop hr with ⟨δ, hδ1, hδ2⟩
   use z + δ, z
-  refine ⟨?_,⟨?_,?_⟩⟩
+  refine ⟨?_, ⟨?_, ?_⟩⟩
   · simp only [mem_closedBall, dist_self_add_left, le_of_lt hδ2]
   · simp only [mem_closedBall, dist_self, zero_le_coe]
-  · unfold nndist PseudoMetricSpace.toNNDist
-    simp only [dist_self_add_left, Set.mem_Ioo]
+  · simp only [nndist, dist_self_add_left, Set.mem_Ioo]
     exact ⟨hδ1, hδ2⟩
 
 lemma noname {α : Type*} [dnf : DenselyNormedField α] [hiud : IsUltrametricDist α]
 -- Ball B(c,r) with positive diameter d
 (c₀ : α) (r₀ : ℝ≥0)
 --
-(r₁ : ℝ≥0) (hr : r₁ ∈ Set.Ioc 0 r₀)
+(r₁ : ℝ≥0) (hr : r₁ ∈ Set.Ioo 0 r₀)
 --
 (z : α) :
 ∃ c₁ : α,
   closedBall c₁ r₁ ⊆ closedBall c₀ r₀ ∧
   z ∉ closedBall c₁ r₁
   := by
-
-  sorry
+  rcases test c₀ hr.out.2 with ⟨x, y, hx, hy, hxy⟩
+  have : Disjoint (closedBall x r₁) (closedBall y r₁) := by
+    refine (IsUltrametricDist.closedBall_eq_or_disjoint x y ↑r₁).resolve_left ?_
+    by_contra hc
+    have : x ∈ closedBall x ↑r₁ := by simp only [mem_closedBall, dist_self, zero_le_coe]
+    simp only [hc, mem_closedBall, dist_le_coe] at this
+    exact (lt_self_iff_false (nndist x y)).mp <| lt_of_le_of_lt this hxy.out.1
+  if hzx : z ∈ closedBall x r₁ then
+    use y
+    constructor
+    · simp only [closedBall,  Set.setOf_subset_setOf]
+      intro a ha
+      have := hiud.dist_triangle_max a y c₀
+      refine le_trans this ?_
+      simp only [sup_le_iff]
+      sorry
+    · exact Disjoint.notMem_of_mem_left this hzx
+  else
+    use x
+    sorry
 
 #check PadicComplex
