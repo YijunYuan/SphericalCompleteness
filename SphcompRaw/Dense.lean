@@ -6,6 +6,7 @@ import Mathlib.Topology.Algebra.Valued.NormedValued
 import Mathlib.Analysis.Normed.Module.Basic
 import Mathlib.NumberTheory.Padics.ProperSpace
 import Mathlib.NumberTheory.Padics.Complex
+import SphcompRaw.Basic
 open Metric
 open Filter
 open TopologicalSpace
@@ -142,5 +143,11 @@ lemma noname {α : Type*} [dnf : DenselyNormedField α] [hiud : IsUltrametricDis
     refine le_trans (hiud.dist_triangle_max a x c₀) ?_
     simp only [sup_le_iff]
     exact ⟨le_of_lt <| lt_of_le_of_lt ha hr.2, hx⟩
+
+instance not_spherically_complete_of_dense_separable_ultrametric
+{α : Type*} [dnf : DenselyNormedField α] [hiud : IsUltrametricDist α] [hs' : SeparableSpace α] :
+IsEmpty (SphericallyCompleteSpace α) := by
+
+  sorry
 
 #check PadicComplex
