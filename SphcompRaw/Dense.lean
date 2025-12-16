@@ -85,11 +85,13 @@ diam (closedBall z r) ≤ r := by
     have := hiud.dist_triangle_max x z y
     grind only [= max_def]
 
-theorem diam_eq_radius_of_dense_ultrametric {α : Type*}
-[dnf : DenselyNormedField α] [hiud : IsUltrametricDist α]
-{z : α} {r : ℝ≥0} :
-diam (closedBall z r) = r := by
-  refine eq_of_le_of_ge diam_le_radius_of_ultrametric ?_
+def IsSphericallyDense (α : Type*) [PseudoMetricSpace α] :=
+  ∀ (c : α) (r : ℝ≥0) , diam (closedBall c r) = r
+
+theorem diam_eq_radius_of_dense_ultrametric (α : Type*)
+[dnf : DenselyNormedField α] [hiud : IsUltrametricDist α] :
+IsSphericallyDense α := by
+  refine fun z r ↦ eq_of_le_of_ge diam_le_radius_of_ultrametric ?_
   by_contra hc
   simp only [not_le] at hc
   rcases dnf.lt_norm_lt (diam (closedBall z ↑r)) ↑r diam_nonneg hc with ⟨δ, _, hδ2⟩
@@ -101,30 +103,40 @@ diam (closedBall z r) = r := by
   simp only [dist_self_add_left] at this
   linarith
 
-lemma test {α : Type*}
-[dnf : DenselyNormedField α]
-(z : α) {r : ℝ≥0} {r' : ℝ≥0} (hr : r' < r) :
-∃ x y : α, x ∈ closedBall z r ∧ y ∈ closedBall z r ∧  nndist x y ∈ Set.Ioo r' r := by
-  rcases dnf.lt_norm_lt r' r r'.prop hr with ⟨δ, hδ1, hδ2⟩
-  use z + δ, z
-  refine ⟨?_, ⟨?_, ?_⟩⟩
-  · simp only [mem_closedBall, dist_self_add_left, le_of_lt hδ2]
-  · simp only [mem_closedBall, dist_self, zero_le_coe]
-  · simp only [nndist, dist_self_add_left, Set.mem_Ioo]
-    exact ⟨hδ1, hδ2⟩
+lemma test {α : Type*} [PseudoMetricSpace α]
+: IsSphericallyDense α →
+∀ (z : α), ∀ (r r' : ℝ≥0), r' < r →
+∃ x y : α, x ∈ closedBall z r ∧ y ∈ closedBall z r ∧  nndist x y ∈ Set.Ioc r' r := by
+  intro isd z r r' hr
+  specialize isd z r
+  replace hr : (↑r' : ℝ) < ↑r := hr
+  rw [← isd] at hr
+  by_contra hc
+  push_neg at hc
+  refine LT.lt.not_ge hr <| Metric.diam_le_of_forall_dist_le r'.prop ?_
+  intro x hx y hy
+  specialize hc x y hx hy
+  simp only [Set.mem_Ioc, not_and_or] at hc
+  simpa only [dist_le_coe, not_lt] using
+    hc.resolve_right
+      (by
+        simp only [not_le, not_lt]
+        suffices h : dist x y ≤ ↑r by exact h
+        rw [← isd]
+        exact dist_le_diam_of_mem isBounded_closedBall hx hy)
 
 lemma noname {α : Type*} [dnf : DenselyNormedField α] [hiud : IsUltrametricDist α]
 -- Ball B(c,r) with positive diameter d
 (c₀ : α) (r₀ : ℝ≥0)
 --
-(r₁ : ℝ≥0) (hr : r₁ ∈ Set.Ioo 0 r₀)
+(r₁ : ℝ≥0) (hr : r₁ < r₀)
 --
 (z : α) :
 ∃ c₁ : α,
   closedBall c₁ r₁ ⊆ closedBall c₀ r₀ ∧
   z ∉ closedBall c₁ r₁
   := by
-  rcases test c₀ hr.out.2 with ⟨x, y, hx, hy, hxy⟩
+  rcases test c₀ hr with ⟨x, y, hx, hy, hxy⟩
   have : Disjoint (closedBall x r₁) (closedBall y r₁) := by
     refine (IsUltrametricDist.closedBall_eq_or_disjoint x y ↑r₁).resolve_left ?_
     by_contra hc
@@ -136,13 +148,13 @@ lemma noname {α : Type*} [dnf : DenselyNormedField α] [hiud : IsUltrametricDis
     simp only [closedBall,  Set.setOf_subset_setOf]
     refine fun a ha ↦ le_trans (hiud.dist_triangle_max a y c₀) ?_
     simp only [sup_le_iff]
-    exact ⟨le_of_lt <| lt_of_le_of_lt ha hr.out.2, hy⟩
+    exact ⟨le_of_lt <| lt_of_le_of_lt ha hr, hy⟩
   else
     refine ⟨x, ⟨fun a ha ↦ ?_, hzx⟩⟩
-    simp only [Set.mem_Ioo, mem_closedBall, not_le] at *
+    simp only [mem_closedBall, not_le] at *
     refine le_trans (hiud.dist_triangle_max a x c₀) ?_
     simp only [sup_le_iff]
-    exact ⟨le_of_lt <| lt_of_le_of_lt ha hr.2, hx⟩
+    exact ⟨le_of_lt <| lt_of_le_of_lt ha hr, hx⟩
 
 instance not_spherically_complete_of_dense_separable_ultrametric
 {α : Type*} [dnf : DenselyNormedField α] [hiud : IsUltrametricDist α] [hs' : SeparableSpace α] :
