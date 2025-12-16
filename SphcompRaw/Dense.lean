@@ -131,17 +131,16 @@ lemma noname {α : Type*} [dnf : DenselyNormedField α] [hiud : IsUltrametricDis
     simp only [hc, mem_closedBall, dist_le_coe] at this
     exact (lt_self_iff_false (nndist x y)).mp <| lt_of_le_of_lt this hxy.out.1
   if hzx : z ∈ closedBall x r₁ then
-    use y
-    constructor
-    · simp only [closedBall,  Set.setOf_subset_setOf]
-      intro a ha
-      have := hiud.dist_triangle_max a y c₀
-      refine le_trans this ?_
-      simp only [sup_le_iff]
-      sorry
-    · exact Disjoint.notMem_of_mem_left this hzx
+    refine ⟨y, ⟨?_, Disjoint.notMem_of_mem_left this hzx⟩⟩
+    simp only [closedBall,  Set.setOf_subset_setOf]
+    refine fun a ha ↦ le_trans (hiud.dist_triangle_max a y c₀) ?_
+    simp only [sup_le_iff]
+    exact ⟨le_of_lt <| lt_of_le_of_lt ha hr.out.2, hy⟩
   else
-    use x
-    sorry
+    refine ⟨x, ⟨fun a ha ↦ ?_, hzx⟩⟩
+    simp only [Set.mem_Ioo, mem_closedBall, not_le] at *
+    refine le_trans (hiud.dist_triangle_max a x c₀) ?_
+    simp only [sup_le_iff]
+    exact ⟨le_of_lt <| lt_of_le_of_lt ha hr.2, hx⟩
 
 #check PadicComplex
