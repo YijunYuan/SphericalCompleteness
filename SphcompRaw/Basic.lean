@@ -5,6 +5,7 @@ import Mathlib.Tactic
 import Mathlib.Topology.Algebra.Valued.NormedValued
 import Mathlib.Analysis.Normed.Module.Basic
 import Mathlib.NumberTheory.Padics.ProperSpace
+import Mathlib.NumberTheory.LocalField.Basic
 open Metric
 open Filter
 
@@ -286,5 +287,18 @@ instance instSphericallyCompleteSpaceComplex : SphericallyCompleteSpace ℂ  := 
 
 instance instSphericallyCompleteSpaceReal : SphericallyCompleteSpace ℝ  := inferInstance
 
+instance instSphericallyCompleteSpaceOfWeaklyLocallyCompactSpace
+{α : Type*} [NontriviallyNormedField α] [WeaklyLocallyCompactSpace α] :
+SphericallyCompleteSpace α := by
+  haveI := ProperSpace.of_nontriviallyNormedField_of_weaklyLocallyCompactSpace α
+  infer_instance
+
 instance instSphericallyCompleteSpacePadic {p : ℕ} [Fact (Nat.Prime p)] :
   SphericallyCompleteSpace (ℚ_[p]) := inferInstance
+
+theorem SphericallyComplete.of_nontriviallyNormedField_of_weaklyLocallyCompactSpace
+(𝕜 : Type u_1) [NontriviallyNormedField 𝕜]
+{E : Type u_2} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [LocallyCompactSpace E] :
+SphericallyCompleteSpace E := by
+  haveI : ProperSpace E := ProperSpace.of_locallyCompactSpace 𝕜
+  infer_instance
