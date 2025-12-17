@@ -12,67 +12,6 @@ open Filter
 open TopologicalSpace
 open NNReal
 
-lemma icc_subset_closure_iff {a b : ℝ} (hab : a < b) (S : Set ℝ) :
-  Set.Icc a b ⊆ closure S  ↔
-    ∀ a' b' : ℝ, a' < b' → Set.Icc a' b' ⊆ Set.Icc a b → ∃ s ∈ S, s ∈ Set.Ioo a' b' := by
-  constructor
-  · intro h a' b' ha'b' hi
-    by_contra hc
-    push_neg at hc
-    let c := (a' + b') / 2
-    have hc' : c ∈ Set.Icc a' b' := by
-      simp only [c, Set.mem_Icc]
-      exact ⟨by linarith, by linarith⟩
-    have hi' := Real.mem_closure_iff.1 <| h <| hi hc'
-    rcases (hi' ((b' - c) / 2) (by unfold c; linarith)) with ⟨s, hs, hs'⟩
-    rw [← abs_neg,neg_sub] at hs'
-    have : Set.Icc (c - (b' - c) / 2) (c + (b' - c) / 2) ⊆ Set.Icc a' b' := by
-      simp only [c]
-      rw [Set.Icc_subset_Icc_iff]
-      · exact ⟨by linarith, by linarith⟩
-      · linarith
-    simp only [abs_lt, neg_lt_sub_iff_lt_add, c] at hs'
-    obtain ⟨hs'1, hs'2⟩ := hs'
-    exact False.elim <| hc s hs <| Set.mem_Ioo.1 ⟨by linarith, by linarith⟩
-  · intro h z hz
-    rw [Real.mem_closure_iff]
-    intro ε hε
-    if hh : z = a then
-      specialize h a (a + min (ε / 2) (b - a)) (by
-        simp only [lt_add_iff_pos_right, lt_inf_iff, sub_pos]
-        exact ⟨by linarith,hab⟩
-      ) (by
-        refine Set.Icc_subset_Icc_right ?_
-        rw [add_comm, ← le_sub_iff_add_le]
-        exact min_le_right (ε / 2) (b - a)
-      )
-      rcases h with ⟨w, hw1, hw2⟩
-      use w
-      rw [Set.mem_Ioo, ←hh] at hw2
-      refine ⟨hw1, abs_sub_lt_iff.mpr ⟨?_, by linarith⟩⟩
-      replace hw2 := hw2.2
-      rw [add_comm, ← sub_lt_iff_lt_add] at hw2
-      exact lt_trans hw2 <|
-        lt_of_le_of_lt (min_le_left (ε / 2) (b - z)) (div_two_lt_of_pos hε)
-    else
-    specialize h (z - min (ε / 2) ((z - a) / 2)) z (by
-      simp only [sub_lt_self_iff, lt_inf_iff, hε, div_pos_iff_of_pos_left, Nat.ofNat_pos, sub_pos,
-        lt_of_le_of_ne hz.out.1 (Ne.symm hh), and_self]
-      ) (by
-      refine Set.Icc_subset_Icc ?_ hz.out.2
-      rw [le_sub_iff_add_le, add_comm, ← le_sub_iff_add_le]
-      refine le_of_lt <| lt_of_le_of_lt (min_le_right (ε / 2) ((z - a) / 2)) ?_
-      simp only [half_lt_self_iff, sub_pos, lt_of_le_of_ne hz.out.1 (Ne.symm hh)]
-      )
-    rcases h with ⟨w, hw1, hw2⟩
-    use w
-    refine ⟨hw1, ?_⟩
-    rw [abs_sub_comm]
-    refine abs_sub_lt_iff.mpr ?_
-    simp only [Set.mem_Ioo] at hw2
-    rw [sub_lt_iff_lt_add',← sub_lt_iff_lt_add] at hw2
-    exact ⟨lt_trans hw2.1 <| lt_of_le_of_lt (min_le_left _ _) <| div_two_lt_of_pos hε, by linarith⟩
-
 theorem diam_le_radius_of_ultrametric {α : Type*}
 [PseudoMetricSpace α] [hiud : IsUltrametricDist α]
 {z : α} {r : ℝ≥0} :
@@ -257,13 +196,12 @@ lemma fuck_chain_radius_eq (α : Type*) [PseudoMetricSpace α]
   · simp only
   · simp only
 
-instance not_spherically_complete_of_dense_separable_ultrametric
-{α : Type*} [PseudoMetricSpace α]
+theorem not_spherically_complete_of_dense_separable_ultrametric
+{α : Type*} [MetricSpace α]
 [hiud : IsUltrametricDist α] [hα : IsSphericallyDense α]
 [nemp : Nonempty α] [hsep : SeparableSpace α] :
-IsEmpty (SphericallyCompleteSpace α) := by
+¬ SphericallyCompleteSpace α := by
   by_contra hc
-  simp only [isEmpty_Prop, not_not] at hc
   replace hc := hc.isSphericallyComplete
   if hinf : Nonempty (Denumerable hsep.exists_countable_dense.choose) then
     specialize hc <| fuck_chain_of_ball_decreasing α hinf.some
@@ -281,8 +219,71 @@ IsEmpty (SphericallyCompleteSpace α) := by
       intro i
       by_contra hc
       exact (not_in_fuck_chain_of_ball α hinf.some i) <| (this (i + 1) hc)
-    sorry
+    have : Disjoint hsep.exists_countable_dense.choose (ball z ((fuck_radius α 0) / 2)) := by
+      refine Set.disjoint_iff_forall_ne.mpr ?_
+      intro a ha b hb
+      by_contra hc
+      rw [← hc] at hb
+      specialize this (hinf.some.encode (⟨a, ha⟩ : hsep.exists_countable_dense.choose))
+      simp only [Denumerable.ofNat_encode] at this
+      exact this hb
+    have := hsep.exists_countable_dense.choose_spec.2.closure_eq ▸
+      Disjoint.closure_left this isOpen_ball
+    simp only [fuck_radius, gt_iff_lt, CharP.cast_eq_zero, zero_add, ne_eq, one_ne_zero,
+      not_false_eq_true, div_self, one_add_one_eq_two, NNReal.coe_mul, NNReal.coe_ofNat,
+      OfNat.ofNat_ne_zero, mul_div_cancel_right₀, Set.univ_disjoint, ball_eq_empty] at this
+    exact (not_lt.2 this) (exists_pos_dist α).choose_spec
   else
-    sorry
+    have : ¬ Infinite hsep.exists_countable_dense.choose := by
+      by_contra hc
+      exact hinf <| nonempty_denumerable_iff.2 ⟨hsep.exists_countable_dense.choose_spec.1,hc⟩
+    simp only [not_infinite_iff_finite, Set.finite_coe_iff] at this
+    have hcl := Set.Finite.isClosed this
+    rw [← closure_eq_iff_isClosed, hsep.exists_countable_dense.choose_spec.2.closure_eq] at hcl
+    rw [← hcl, Set.finite_univ_iff] at this
+    let S := Set.image (fun (x : α × α) => (nndist x.1 x.2)) {x : α × α | x.1 ≠ x.2}
+    have hfin := Set.toFinite ((fun (x : α × α) ↦ nndist x.1 x.2) '' {x | x.1 ≠ x.2})
+    have hnemp : S.Nonempty := by
+      use nndist (exists_pos_dist α).choose.1 (exists_pos_dist α).choose.2
+      simp only [ne_eq, gt_iff_lt, Set.mem_image, Set.mem_setOf_eq, Prod.exists, S]
+      use (exists_pos_dist α).choose.1, (exists_pos_dist α).choose.2
+      simp only [gt_iff_lt, and_true]
+      by_contra hc
+      have := hc ▸ (exists_pos_dist α).choose_spec
+      simp only [gt_iff_lt, nndist_self, lt_self_iff_false] at this
+    let r₀ := sInf S / 2
+    have r₀pos : r₀ > 0 := by
+      simp only [gt_iff_lt, Nat.ofNat_pos, div_pos_iff_of_pos_right, r₀]
+      have := (Set.Nonempty.csInf_mem hnemp hfin).out
+      simp only [ne_eq, Set.mem_setOf_eq, Prod.exists] at this
+      rcases this with ⟨a,b,hneq,dis⟩
+      rw [← dis]
+      contrapose hneq
+      simpa only [gt_iff_lt, not_lt, nonpos_iff_eq_zero, nndist_eq_zero] using hneq
+    have : diam (closedBall nemp.some r₀) = 0 :=by
+      refine diam_subsingleton ?_
+      rw [Set.subsingleton_iff_singleton (by
+      refine mem_closedBall.mpr ?_
+      simp only [dist_self, zero_le_coe]
+      : nemp.some ∈ closedBall nemp.some r₀)]
+      ext x
+      refine ⟨fun h ↦ ?_, fun h ↦ ?_⟩
+      · simp only [mem_closedBall, dist_le_coe] at h
+        simp only [Set.mem_singleton_iff]
+        by_contra hc
+        have : (nndist x nemp.some) ∈ S := by
+          unfold S
+          simp only [ne_eq, Set.mem_image, Set.mem_setOf_eq, Prod.exists]
+          use x, nemp.some
+        unfold r₀ at *
+        field_simp at *
+        replace h := le_trans h <| csInf_le' this
+        simp only [mul_zero] at r₀pos
+        rw [mul_le_iff_le_one_right <| Std.lt_of_lt_of_le r₀pos <| csInf_le' this] at h
+        simp only [Nat.not_ofNat_le_one] at h
+      · simp only [Set.mem_singleton_iff] at h
+        simp only [h, mem_closedBall, dist_self, zero_le_coe]
+    simp only [hα.spherically_dense, coe_eq_zero] at this
+    simp only [this, gt_iff_lt, lt_self_iff_false] at r₀pos
 
 #check PadicComplex
