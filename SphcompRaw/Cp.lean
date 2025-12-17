@@ -16,11 +16,19 @@ open NNReal
 open PadicAlgCl
 open PadicComplex
 
+variable {p : ℕ} [hp : Fact (Nat.Prime p)]
+
 instance {p : ℕ} [hp : Fact (Nat.Prime p)] : SeparableSpace (PadicAlgCl p) := sorry
 
 instance {p : ℕ} [hp : Fact (Nat.Prime p)] : SeparableSpace (ℂ_[p]) := sorry
 
-instance {p : ℕ} [hp : Fact (Nat.Prime p)] : IsUltrametricDist (PadicComplex p) := sorry
+noncomputable instance : SeminormedAddGroup ℂ_[p] where
+  __ := PadicComplex.instNormedField p
+
+#synth Norm (PadicComplex p)
+instance {p : ℕ} [hp : Fact (Nat.Prime p)] : IsUltrametricDist (PadicComplex p) := IsUltrametricDist.isUltrametricDist_of_isNonarchimedean_norm (PadicComplex.isNonarchimedean p)
+
+
 
 instance {p : ℕ} [hp : Fact (Nat.Prime p)] : DenselyNormedField (PadicComplex p) := sorry
 
