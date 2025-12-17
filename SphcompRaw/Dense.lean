@@ -197,7 +197,7 @@ lemma fuck_chain_radius_eq (α : Type*) [PseudoMetricSpace α]
   · simp only
 
 theorem not_spherically_complete_of_dense_separable_ultrametric
-{α : Type*} [MetricSpace α]
+(α : Type*) [MetricSpace α]
 [hiud : IsUltrametricDist α] [hα : IsSphericallyDense α]
 [nemp : Nonempty α] [hsep : SeparableSpace α] :
 ¬ SphericallyCompleteSpace α := by
