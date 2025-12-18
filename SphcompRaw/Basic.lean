@@ -6,6 +6,7 @@ import Mathlib.Topology.Algebra.Valued.NormedValued
 import Mathlib.Analysis.Normed.Module.Basic
 import Mathlib.NumberTheory.Padics.ProperSpace
 import Mathlib.NumberTheory.LocalField.Basic
+import Mathlib.LinearAlgebra.Dimension.Finrank
 open Metric
 open Filter
 
@@ -302,3 +303,32 @@ theorem SphericallyComplete.of_nontriviallyNormedField_of_weaklyLocallyCompactSp
 SphericallyCompleteSpace E := by
   haveI : ProperSpace E := ProperSpace.of_locallyCompactSpace 𝕜
   infer_instance
+
+lemma test_ind (𝕜 : Type u_1) [NontriviallyNormedField 𝕜] [SphericallyCompleteSpace 𝕜]
+{E : Type u_2} [SeminormedAddCommGroup E]
+[NormedSpace 𝕜 E] [FiniteDimensional 𝕜 E] :
+∀ n < Module.finrank 𝕜 E,
+  (∃ M : Subspace 𝕜 E, Module.finrank 𝕜 M = n ∧ SphericallyCompleteSpace M)
+→ (∃ M' : Subspace 𝕜 E, Module.finrank 𝕜 M' = (n + 1) ∧ SphericallyCompleteSpace M')
+:= by
+  intro n hn h
+  rcases h with ⟨M, hM⟩
+  haveI : NormedSpace 𝕜 M := Submodule.normedSpace M
+
+  sorry
+
+theorem test
+(𝕜 : Type u_1) [NontriviallyNormedField 𝕜] [SphericallyCompleteSpace 𝕜]
+{E : Type u_2} [SeminormedAddCommGroup E]
+[NormedSpace 𝕜 E] [FiniteDimensional 𝕜 E] :
+SphericallyCompleteSpace E := by
+  suffices h : ∀ n ≤ Module.finrank 𝕜 E,
+    (∃ M : Subspace 𝕜 E, Module.finrank 𝕜 M = n ∧ SphericallyCompleteSpace M) by
+    rcases h (Module.finrank 𝕜 E) le_rfl with ⟨M, hM1, hM2⟩
+    have : M = ⊤ := Submodule.eq_top_of_finrank_eq hM1
+    rw [this] at hM2
+    refine { isSphericallyComplete := ?_ }
+    intro ci ri h
+
+    sorry
+  sorry
