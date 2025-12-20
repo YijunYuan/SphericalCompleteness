@@ -33,19 +33,17 @@ lemma dcidx_controlled_converge {α : Type*} [PseudoMetricSpace α] {seq : ℕ �
   (hseq : CauchySeq seq) (k : ℕ) :
   ∀ n > (dcidx hseq k), dist (seq n) (seq (dcidx hseq k)) < 1 / (2 : ℝ) ^ k := by
   intro n hn
-  if hk : k = 0 then
-    simp only [hk, dcidx, ge_iff_le, pow_zero, ne_eq, one_ne_zero, not_false_eq_true, div_self]
+  cases k
+  · simp only [dcidx, ge_iff_le, pow_zero, ne_eq, one_ne_zero, not_false_eq_true, div_self]
     rw [Metric.cauchySeq_iff] at hseq
     apply (hseq 1 zero_lt_one).choose_spec
-    · rw [hk, dcidx] at hn
+    · rw [dcidx] at hn
       linarith
     · exact Nat.le_refl _
-  else
-    have : k = (k - 1) + 1 := by omega
-    rw [this, dcidx]
-    simp only [Nat.sub_one_add_one hk]
-    apply ((Metric.cauchySeq_iff.1 hseq) (1 / (2 : ℝ) ^ k) (by positivity)).choose_spec
-    · rw [this, dcidx] at hn
+  · rw [dcidx]
+    expose_names
+    apply ((Metric.cauchySeq_iff.1 hseq) (1 / (2 : ℝ) ^ (n_1 + 1)) (by positivity)).choose_spec
+    · rw [dcidx] at hn
       simp only [ge_iff_le, one_div, gt_iff_lt, sup_lt_iff] at hn
       apply le_of_lt
       convert hn.2
@@ -81,9 +79,8 @@ theorem completeSpace_iff_nested_ball_with_radius_tendsto_zero_has_nonempty_inte
       intro ε hε
       specialize htd (ε / 2) (by linarith)
       use htd.choose
-      replace htd := htd.choose_spec
       intro n hn
-      specialize htd n hn
+      replace htd := htd.choose_spec n hn
       simp only [dist_zero_right, Real.norm_eq_abs]
       rw [abs_eq_self.2]
       · refine lt_of_le_of_lt (diam_closedBall (ri n).prop) ?_
@@ -188,13 +185,12 @@ theorem sphericallyCompleteSpace_of_isometryEquiv {E F : Type*}
     let ci' := fun n => f.symm (ci n)
     have hanti' : Antitone (fun i => closedBall (ci' i) (ri i)) := by
       intro m n hmn
-      unfold ci'
       simp only [Set.le_eq_subset]
       rw [← IsometryEquiv.preimage_closedBall f (ci m) ↑(ri m),
           ← IsometryEquiv.preimage_closedBall f (ci n) ↑(ri n)]
       specialize hanti hmn
       simp only [Set.le_eq_subset] at hanti
-      grind
+      grind only [= Set.subset_def, = Set.mem_preimage]
     rcases he.isSphericallyComplete hanti' with ⟨z',hz'⟩
     simp only [Set.mem_iInter, mem_closedBall, Set.nonempty_iInter] at *
     refine ⟨f z', fun i ↦ ?_⟩
@@ -259,8 +255,7 @@ instance Pi.sphericallyCompleteSpace {ι : Type*} [Fintype ι] {E : ι → Type*
       · intro z hz
         let Z : ((i : ι) → E i) := fun (j : ι) => if hij : j = i then hij ▸ z else (ci n j)
         have : Z ∈ (Set.univ.pi fun b ↦ closedBall (ci n b) ↑(ri n)) := by
-          unfold Z
-          simp only [Set.mem_pi, Set.mem_univ]
+          simp only [Z, Set.mem_pi, Set.mem_univ]
           intro j _
           if hij : j = i then
             simp only [hij, ↓reduceDIte]
@@ -305,7 +300,7 @@ SphericallyCompleteSpace E := by
   infer_instance
 
 lemma test_ind (𝕜 : Type u_1) [NontriviallyNormedField 𝕜] [SphericallyCompleteSpace 𝕜]
-{E : Type u_2} [SeminormedAddCommGroup E]
+(E : Type u_2) [SeminormedAddCommGroup E]
 [NormedSpace 𝕜 E] [FiniteDimensional 𝕜 E] :
 ∀ n < Module.finrank 𝕜 E,
   (∃ M : Subspace 𝕜 E, Module.finrank 𝕜 M = n ∧ SphericallyCompleteSpace M)
@@ -325,10 +320,16 @@ SphericallyCompleteSpace E := by
   suffices h : ∀ n ≤ Module.finrank 𝕜 E,
     (∃ M : Subspace 𝕜 E, Module.finrank 𝕜 M = n ∧ SphericallyCompleteSpace M) by
     rcases h (Module.finrank 𝕜 E) le_rfl with ⟨M, hM1, hM2⟩
-    have : M = ⊤ := Submodule.eq_top_of_finrank_eq hM1
-    rw [this] at hM2
-    refine { isSphericallyComplete := ?_ }
-    intro ci ri h
+    rw [Submodule.eq_top_of_finrank_eq hM1] at hM2
+    refine { isSphericallyComplete := fun ci ri h => ?_ }
+    rcases @hM2.isSphericallyComplete (fun i => ⟨ci i,trivial⟩) ri (
+      fun _ _ hab _ hz => (h hab) hz
+    ) with ⟨x, hx⟩
+    use x.val
+    simpa only [Set.mem_iInter, mem_closedBall, dist_le_coe] using hx
+  intro n hn
+  induction n
+  · case zero => exact ⟨⊥, ⟨finrank_bot 𝕜 E, by infer_instance⟩⟩
+  · case succ n hn' => exact test_ind 𝕜 E n hn <| hn' <| Nat.le_of_succ_le hn
 
-    sorry
-  sorry
+--instance (α : Type*) [Field α] [ValuativeRel α] [TopologicalSpace α] [IsNonarchimedeanLocalField α] : MetricSpace α := inferInstance
