@@ -9,6 +9,7 @@ import Mathlib.NumberTheory.LocalField.Basic
 import Mathlib.LinearAlgebra.Dimension.Finrank
 import Mathlib.LinearAlgebra.FiniteDimensional.Defs
 import Mathlib.Analysis.Normed.Operator.LinearIsometry
+import Mathlib.Analysis.Normed.Field.Ultra
 open Metric
 open Filter
 
@@ -61,13 +62,37 @@ lemma orth'_iff (𝕜 : Type*) [NontriviallyNormedField 𝕜]
       replace hy := hy.2
       linarith
 
+theorem orth'_scale (𝕜 : Type*) [inst : NontriviallyNormedField 𝕜] {E : Type u_2}
+  [NormedAddCommGroup E] [NormedSpace 𝕜 E] (x : E) (F : Subspace 𝕜 E)
+  (hxF : orth' 𝕜 x F) (a : E) (ha : a ∈ Submodule.span 𝕜 {x}) : orth' 𝕜 a F := by
+  unfold orth' at *
+  refine eq_of_le_of_not_lt ?_ ?_
+  · have := @Metric.infDist_le_dist_of_mem E _ ↑F a 0 (zero_mem _)
+    simpa only [ge_iff_le, dist_zero_right] using this
+  · by_contra hc
+    rcases (@Metric.infDist_lt_iff E _
+      ↑F a ‖a‖ (Submodule.nonempty F)).1 hc with ⟨z,hz⟩
+    rcases Submodule.mem_span_singleton.1 ha with ⟨s, hs⟩
+    rw [← hs] at hz
+    have hnz : s ≠ 0 := by
+      intro hs'
+      simp only [SetLike.mem_coe, hs', zero_smul, dist_zero, norm_zero] at hz
+      replace hz := hz.2
+      have := norm_nonneg z
+      linarith
+    nth_rw 2 [((inv_smul_eq_iff₀ hnz).mp rfl : z = s • (s⁻¹ • z))] at hz
+    simp only [SetLike.mem_coe, dist_eq_norm, ← smul_sub, norm_smul] at hz
+    rw [mul_lt_mul_iff_right₀ (norm_pos_iff.mpr hnz), ←dist_eq_norm, ← hxF] at hz
+    exact (Metric.notMem_of_dist_lt_infDist hz.2) <| Submodule.smul_mem F s⁻¹ hz.1
+
+
 noncomputable def test (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 {E : Type u_2} [NormedAddCommGroup E]
-[NormedSpace 𝕜 E] (x : E) (F : Subspace 𝕜 E) (hxF : orth' 𝕜 x F) :
+[NormedSpace 𝕜 E] [IsUltrametricDist E] (x : E) (F : Subspace 𝕜 E) (hxF : orth' 𝕜 x F) :
 (Submodule.span 𝕜 {x}) × F≃ₛₗᵢ[RingHom.id 𝕜] (Submodule.span 𝕜 {x}) + F where
   toFun z := ⟨z.1.val + z.2.val, by
     simp only [Submodule.add_eq_sup]
-    refine Submodule.add_mem_sup z.1.prop z.2.prop
+    exact Submodule.add_mem_sup z.1.prop z.2.prop
     ⟩
   map_add' := by
     simp only [Submodule.add_eq_sup, Prod.fst_add, Submodule.coe_add, Prod.snd_add,
@@ -83,34 +108,69 @@ noncomputable def test (𝕜 : Type*) [NontriviallyNormedField 𝕜]
       AddSubgroupClass.coe_norm, Prod.forall, Prod.norm_mk, Subtype.forall]
     intro a ha b hab
     if hh : a = 0 ∨ b = 0 then
-      cases' hh with hh hh
-      · simp only [hh, zero_add, norm_zero, norm_nonneg, sup_of_le_right]
-      · simp only [hh, add_zero, norm_zero, norm_nonneg, sup_of_le_left]
+      cases hh with
+      |inl hh => simp only [hh, zero_add, norm_zero, norm_nonneg, sup_of_le_right]
+      |inr hh => simp only [hh, add_zero, norm_zero, norm_nonneg, sup_of_le_left]
     else
-      replace hh : a ≠ b := by
-        by_contra h
+      refine eq_of_le_of_not_lt (IsUltrametricDist.norm_add_le_max _ _) ?_
+      by_contra hc
+      if h : ‖b‖ ≤ ‖a‖ then
+        simp only [h, sup_of_le_left] at hc
+        have : dist a (-b) = ‖a + b‖ := by simp only [dist_eq_norm, sub_neg_eq_add]
+        rw [← this, ← orth'_scale 𝕜 x F hxF a ha] at hc
+        exact (notMem_of_dist_lt_infDist hc) <| neg_mem hab
+      else
+        simp only [not_le] at h
+        simp only [sup_of_le_right <| le_of_lt h] at hc
+        have := IsUltrametricDist.norm_add_le_max (a + b) (-a)
+        simp only [add_neg_cancel_comm, norm_neg, le_sup_iff] at this
+        replace this := this.resolve_right <| not_le_of_gt h
+        linarith
+  invFun := by
+    rw [Submodule.add_eq_sup]
+    intro z
+    exact (⟨(Submodule.mem_sup.mp z.prop).choose,
+            (Submodule.mem_sup.mp z.prop).choose_spec.1⟩,
+           ⟨(Submodule.mem_sup.mp z.prop).choose_spec.2.choose,
+            (Submodule.mem_sup.mp z.prop).choose_spec.2.choose_spec.1⟩)
+  left_inv := by
+    intro t
+    simp only [Submodule.add_eq_sup, eq_mpr_eq_cast, cast_eq]
+    have := (Submodule.mem_sup.mp (Subtype.prop ⟨↑t.1 + (↑t.2 : E),
+      id (Submodule.add_mem_sup (Subtype.prop t.1) (Subtype.prop t.2))⟩))
+    have this' := this.choose_spec.2.choose_spec.2
+    simp only at this'
+    refine Prod.ext_iff.mpr ?_
+    have h1 : this.choose - t.1 ∈ Submodule.span 𝕜 {x} :=
+      (Submodule.sub_mem_iff_left (Submodule.span 𝕜 {x}) t.1.prop).mpr this.choose_spec.1
+    have h2 : this.choose_spec.2.choose - t.2 ∈ F :=
+      (Submodule.sub_mem_iff_left F t.2.prop).mpr this.choose_spec.2.choose_spec.1
+    have h3 : this.choose - t.1 = - (this.choose_spec.2.choose - t.2) := by
+      rw [neg_sub, sub_eq_sub_iff_add_eq_add, this', add_comm]
+    have h1' : this.choose - t.1 ∈ (↑(Submodule.span 𝕜 {x}) : Set E) ∩ ↑F := by
+      simp only [Set.mem_inter_iff, SetLike.mem_coe, h1, true_and]
+      simp only [h3, neg_sub]
+      exact sub_mem_comm_iff.mp h2
+    have h2' : this.choose_spec.2.choose - t.2 ∈ (↑(Submodule.span 𝕜 {x}) : Set E) ∩ ↑F := by
+      simp only [Set.mem_inter_iff, SetLike.mem_coe, h2, and_true]
+      rw [← neg_eq_iff_eq_neg] at h3
+      rw [← h3]
+      exact Submodule.neg_mem (Submodule.span 𝕜 {x}) h1
+    have hh : (↑(Submodule.span 𝕜 {x}) : Set E) ∩ ↑F = {0} := by
+      ext w
+      simp only [Set.mem_inter_iff, SetLike.mem_coe, Set.mem_singleton_iff]
+      constructor
+      · rintro ⟨hw1, hw2⟩
+        replace hxF : orth' 𝕜 w F := orth'_scale 𝕜 x F hxF w hw1
         unfold orth' at hxF
-        subst h
-        simp only [or_self] at hh
-        rcases (Submodule.mem_span_singleton.1 ha) with ⟨c,hc⟩
-        rw [← hc] at hab
-        have : c ≠ 0 := by
-          by_contra hcc
-          simp only [hcc, zero_smul] at hc
-          exact hh hc.symm
-        replace hab : x ∈ F := by
-          have : c⁻¹ • c • x ∈ F := Submodule.smul_mem F c⁻¹ hab
-          simp only [smul_smul] at this
-          simp_all only [ne_eq, not_false_eq_true,
-            inv_mul_cancel₀, one_smul]
-        have := hxF ▸ @Metric.infDist_le_dist_of_mem E _ F x x hab
-        simp only [dist_self] at this
-        replace : ‖x‖ = 0 := eq_of_le_of_ge this (norm_nonneg x)
-        simp only [norm_eq_zero] at this
-        simp only [this, Submodule.span_zero_singleton, Submodule.mem_bot] at ha
-        exact hh ha
-
-      sorry
-  invFun := sorry
-  left_inv := sorry
-  right_inv := sorry
+        simpa only [hxF, dist_self, norm_le_zero_iff] using
+          @Metric.infDist_le_dist_of_mem E _ F w w hw2
+      · intro h
+        simp only [h, zero_mem, and_self]
+    simp only [hh, Set.mem_singleton_iff, sub_eq_zero] at h1' h2'
+    simp only [h2', and_true]
+    exact SetLike.coe_eq_coe.mp h1'
+  right_inv := by
+    intro t
+    simp only [Submodule.add_eq_sup, eq_mpr_eq_cast, cast_eq,
+      (Submodule.mem_sup.mp t.prop).choose_spec.2.choose_spec.2, Subtype.coe_eta]
