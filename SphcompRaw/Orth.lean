@@ -10,6 +10,9 @@ import Mathlib.LinearAlgebra.Dimension.Finrank
 import Mathlib.LinearAlgebra.FiniteDimensional.Defs
 import Mathlib.Analysis.Normed.Operator.LinearIsometry
 import Mathlib.Analysis.Normed.Field.Ultra
+
+import SphcompRaw.Basic
+
 open Metric
 open Filter
 
@@ -82,11 +85,11 @@ theorem orth'_scale (𝕜 : Type*) [inst : NontriviallyNormedField 𝕜] {E : Ty
       linarith
     nth_rw 2 [((inv_smul_eq_iff₀ hnz).mp rfl : z = s • (s⁻¹ • z))] at hz
     simp only [SetLike.mem_coe, dist_eq_norm, ← smul_sub, norm_smul] at hz
-    rw [mul_lt_mul_iff_right₀ (norm_pos_iff.mpr hnz), ←dist_eq_norm, ← hxF] at hz
+    rw [mul_lt_mul_iff_right₀ (norm_pos_iff.mpr hnz), ← dist_eq_norm, ← hxF] at hz
     exact (Metric.notMem_of_dist_lt_infDist hz.2) <| Submodule.smul_mem F s⁻¹ hz.1
 
 
-noncomputable def test (𝕜 : Type*) [NontriviallyNormedField 𝕜]
+noncomputable def bsngsndg (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 {E : Type u_2} [NormedAddCommGroup E]
 [NormedSpace 𝕜 E] [IsUltrametricDist E] (x : E) (F : Subspace 𝕜 E) (hxF : orth' 𝕜 x F) :
 (Submodule.span 𝕜 {x}) × F≃ₛₗᵢ[RingHom.id 𝕜] (Submodule.span 𝕜 {x}) + F where
@@ -174,3 +177,35 @@ noncomputable def test (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     intro t
     simp only [Submodule.add_eq_sup, eq_mpr_eq_cast, cast_eq,
       (Submodule.mem_sup.mp t.prop).choose_spec.2.choose_spec.2, Subtype.coe_eta]
+
+theorem exists_orth_vec (𝕜 : Type*) [NontriviallyNormedField 𝕜]
+{E : Type*} [NormedAddCommGroup E]
+[NormedSpace 𝕜 E] [IsUltrametricDist E]
+(F : Subspace 𝕜 E) [SphericallyCompleteSpace F]
+[FiniteDimensional 𝕜 E]
+(hF : Module.finrank 𝕜 F < Module.finrank 𝕜 E) :
+∃ x : E, orth' 𝕜 x F := by
+  replace hF : (↑(Module.finrank 𝕜 ↥F) : Cardinal.{u_2}) < ↑(Module.finrank 𝕜 E) :=
+    Nat.cast_lt.mpr hF
+  repeat rw [Module.finrank_eq_rank'] at hF
+  rcases Submodule.exists_smul_notMem_of_rank_lt hF with ⟨a, ha⟩
+  specialize ha 1 one_ne_zero
+  simp only [one_smul] at ha
+  suffices h : ∃ z : E, z ∈ F ∧ ‖a - z‖ = infDist a F by
+    rcases h with ⟨z, hz⟩
+    use a - z
+    unfold orth'
+    rw [hz.2]
+    refine eq_of_le_of_ge ?_ ?_
+    · rw [Metric.le_infDist <| Submodule.nonempty F]
+      intro w hw
+      rw [dist_eq_norm, (by simp only [sub_sub_sub_cancel_right] : a - w = (a - z) - (w - z)),
+        ← dist_eq_norm]
+      exact infDist_le_dist_of_mem <| sub_mem hw hz.1
+    · rw [Metric.le_infDist <| Submodule.nonempty F]
+      intro w hw
+      rw [dist_eq_norm, (sub_sub a z w : a - z - w = a - (z + w)),
+        ← dist_eq_norm]
+      exact infDist_le_dist_of_mem <| add_mem hz.1 hw
+
+  sorry
