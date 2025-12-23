@@ -21,7 +21,13 @@ theorem foo {α : Type*} [PseudoMetricSpace α] {u : ℕ → α}
     (_h : φ n ≤ m),  dist (u (φ n)) (u m) < 1 / (2 : ℝ) ^ n :=
   CauchySeq.subseq_mem' (fun n ↦ Metric.dist_mem_uniformity (by positivity)) hu
 
-noncomputable def dcidx {α : Type*} [PseudoMetricSpace α] {seq : ℕ → α}
+class SphericallyCompleteSpace (α : Type*) [PseudoMetricSpace α] : Prop where
+  isSphericallyComplete : ∀ ⦃ci : ℕ → α⦄, ∀ ⦃ri : ℕ → NNReal⦄,
+    Antitone (fun i => closedBall (ci i) (ri i)) → (⋂ i, closedBall (ci i) (ri i)).Nonempty
+
+namespace SphericallyCompleteSpace
+
+private noncomputable def dcidx {α : Type*} [PseudoMetricSpace α] {seq : ℕ → α}
   (hseq : CauchySeq seq) (n : ℕ) : ℕ :=
   match n with
   | 0 =>
@@ -29,7 +35,7 @@ noncomputable def dcidx {α : Type*} [PseudoMetricSpace α] {seq : ℕ → α}
   | n + 1 => max (1 + dcidx hseq n) ((Metric.cauchySeq_iff.1 hseq)
       (1 / (2 : ℝ) ^ (n + 1)) (by positivity)).choose
 
-lemma dcidx_controlled_converge {α : Type*} [PseudoMetricSpace α] {seq : ℕ → α}
+private lemma dcidx_controlled_converge {α : Type*} [PseudoMetricSpace α] {seq : ℕ → α}
   (hseq : CauchySeq seq) (k : ℕ) :
   ∀ n > (dcidx hseq k), dist (seq n) (seq (dcidx hseq k)) < 1 / (2 : ℝ) ^ k := by
   intro n hn
@@ -51,7 +57,7 @@ lemma dcidx_controlled_converge {α : Type*} [PseudoMetricSpace α] {seq : ℕ �
       simp only [one_mul]
     · exact Nat.le_max_right _ _
 
-lemma dcidx_strict_mono {α : Type*} [PseudoMetricSpace α] {seq : ℕ → α}
+private lemma dcidx_strict_mono {α : Type*} [PseudoMetricSpace α] {seq : ℕ → α}
   (hseq : CauchySeq seq) : StrictMono (dcidx hseq) := by
   refine strictMono_nat_of_lt_succ ?_
   intro n
@@ -155,10 +161,6 @@ theorem completeSpace_iff_nested_ball_with_radius_tendsto_zero_has_nonempty_inte
         NNReal.coe_mk] at hn₁
     rw [mul_div_assoc',lt_div_iff₀ four_pos] at hn₁
     linarith
-
-class SphericallyCompleteSpace (α : Type*) [PseudoMetricSpace α] : Prop where
-  isSphericallyComplete : ∀ ⦃ci : ℕ → α⦄, ∀ ⦃ri : ℕ → NNReal⦄,
-    Antitone (fun i => closedBall (ci i) (ri i)) → (⋂ i, closedBall (ci i) (ri i)).Nonempty
 
 instance instCompleteOfSphericallyComplete (α : Type*)
   [PseudoMetricSpace α] [sc : SphericallyCompleteSpace α] : CompleteSpace α := by
@@ -283,13 +285,13 @@ instance instSphericallyCompleteSpaceComplex : SphericallyCompleteSpace ℂ  := 
 
 instance instSphericallyCompleteSpaceReal : SphericallyCompleteSpace ℝ  := inferInstance
 
-instance instSphericallyCompleteSpaceOfWeaklyLocallyCompactSpace
+instance instSphericallyCompleteOfWeaklyLocallyCompactNormedField
 {α : Type*} [NontriviallyNormedField α] [WeaklyLocallyCompactSpace α] :
 SphericallyCompleteSpace α := by
   haveI := ProperSpace.of_nontriviallyNormedField_of_weaklyLocallyCompactSpace α
   infer_instance
 
-instance instSphericallyCompleteSpacePadic {p : ℕ} [Fact (Nat.Prime p)] :
+instance instSphericallyCompletePadic {p : ℕ} [Fact (Nat.Prime p)] :
   SphericallyCompleteSpace (ℚ_[p]) := inferInstance
 
 theorem SphericallyComplete.of_nontriviallyNormedField_of_weaklyLocallyCompactSpace
@@ -333,3 +335,5 @@ SphericallyCompleteSpace E := by
   · case succ n hn' => exact test_ind 𝕜 E n hn <| hn' <| Nat.le_of_succ_le hn
 
 --instance (α : Type*) [Field α] [ValuativeRel α] [TopologicalSpace α] [IsNonarchimedeanLocalField α] : MetricSpace α := inferInstance
+
+end SphericallyCompleteSpace

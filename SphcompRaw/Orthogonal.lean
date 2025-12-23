@@ -16,6 +16,7 @@ import SphcompRaw.Basic
 open Metric
 open Filter
 
+namespace SphericallyCompleteSpace
 
 noncomputable def ndist (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 {E : Type u_2} [SeminormedAddCommGroup E]
@@ -89,7 +90,7 @@ theorem orth'_scale (𝕜 : Type*) [inst : NontriviallyNormedField 𝕜] {E : Ty
     exact (Metric.notMem_of_dist_lt_infDist hz.2) <| Submodule.smul_mem F s⁻¹ hz.1
 
 
-noncomputable def bsngsndg (𝕜 : Type*) [NontriviallyNormedField 𝕜]
+noncomputable def direct_prod_iso_sum_of_orth (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 {E : Type u_2} [NormedAddCommGroup E]
 [NormedSpace 𝕜 E] [IsUltrametricDist E] (x : E) (F : Subspace 𝕜 E) (hxF : orth' 𝕜 x F) :
 (Submodule.span 𝕜 {x}) × F≃ₛₗᵢ[RingHom.id 𝕜] (Submodule.span 𝕜 {x}) + F where
@@ -180,10 +181,28 @@ noncomputable def bsngsndg (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 
 private lemma res_ball (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 {E : Type*} [NormedAddCommGroup E]
-[NormedSpace 𝕜 E] [IsUltrametricDist E]
+[NormedSpace 𝕜 E] [iud : IsUltrametricDist E]
 (F : Subspace 𝕜 E) [SphericallyCompleteSpace F]
-[FiniteDimensional 𝕜 E] (a : E) (ha : a ∉ F) :
-∀ s > infDist a F, ∃ z : F, (closedBall a s) ∩ ↑F = ((fun x : F => (x : E)) '' closedBall z s) := sorry
+[FiniteDimensional 𝕜 E] (a : E) :
+∀ s > infDist a F, ∃ z : F, (closedBall a s) ∩ ↑F = ((fun x : F => (x : E)) '' closedBall z s) := by
+  intro s hs
+  rcases (Metric.infDist_lt_iff (Submodule.nonempty F)).1 hs with ⟨y, hy⟩
+  use ⟨y, hy.1⟩
+  ext x
+  simp only [Set.mem_inter_iff, mem_closedBall, SetLike.mem_coe, Set.mem_image, Subtype.exists,
+    exists_and_right, exists_eq_right]
+  constructor
+  · intro h
+    use h.2
+    rcases (le_sup_iff.1 <| iud.dist_triangle_max x a y) with hxy | hay
+    · exact le_trans hxy h.1
+    · exact le_of_lt <| lt_of_le_of_lt hay hy.2
+  · rintro ⟨w, hw⟩
+    simp only [w, and_true]
+    rw [dist_comm] at hy
+    rcases (le_sup_iff.1 <| iud.dist_triangle_max x y a) with hxy | hay
+    · exact le_trans hxy hw
+    · exact le_of_lt <| lt_of_le_of_lt hay hy.2
 
 theorem exists_orth_vec (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 {E : Type*} [NormedAddCommGroup E]
@@ -214,11 +233,17 @@ theorem exists_orth_vec (𝕜 : Type*) [NontriviallyNormedField 𝕜]
       rw [dist_eq_norm, (sub_sub a z w : a - z - w = a - (z + w)),
         ← dist_eq_norm]
       exact infDist_le_dist_of_mem <| add_mem hz.1 hw
-  have := @sF.isSphericallyComplete (fun i => (res_ball 𝕜 F a ha (infDist a F + 1 / (i + 1)) (by simp [Nat.cast_add_one_pos])).choose) (fun i => ⟨infDist a F + 1 / (i + 1), sorry⟩) (by
+  have := @sF.isSphericallyComplete (fun i => (res_ball 𝕜 F a (infDist a F + 1 / (i + 1))
+    (by simp only [one_div, gt_iff_lt, lt_add_iff_pos_right, inv_pos, Nat.cast_add_one_pos]
+      )).choose) (fun i => ⟨infDist a F + 1 / (i + 1), by
+    refine add_nonneg infDist_nonneg ?_
+    simp only [one_div, inv_nonneg]
+    linarith
+    ⟩) (by
     refine antitone_nat_of_succ_le <| fun n => ?_
     simp only [Nat.cast_add, Nat.cast_one, one_div, NNReal.coe_mk, Set.le_eq_subset]
     intro x hx
-    have := (res_ball 𝕜 F a ha (infDist a F + 1 / (n + 1 + 1)) (by simp; linarith)).choose_spec
+    have := (res_ball 𝕜 F a (infDist a F + 1 / (n + 1 + 1)) (by simp; linarith)).choose_spec
     simp only [one_div] at this
     have h1 : ↑x ∈ closedBall a (infDist a ↑F + (↑n + 1 + 1 : ℝ)⁻¹) ∩ ↑F := by
       rw [this]
@@ -231,14 +256,42 @@ theorem exists_orth_vec (𝕜 : Type*) [NontriviallyNormedField 𝕜]
         refine le_trans h1 ?_
         simp only [add_le_add_iff_left]; field_simp; linarith
       · exact x.prop
-    replace := (res_ball 𝕜 F a ha (infDist a F + 1 / (n + 1)) (by simp; linarith)).choose_spec
+    replace := (res_ball 𝕜 F a (infDist a F + 1 / (n + 1)) (by simp; linarith)).choose_spec
     simp only [one_div] at this
     rw [this] at h1
     simpa only [mem_closedBall, ge_iff_le, Set.mem_image, SetLike.coe_eq_coe, exists_eq_right] using
       h1
     )
-  simp only [one_div, NNReal.coe_mk, Set.nonempty_iInter, mem_closedBall, Subtype.exists] at this
+  simp only [one_div, NNReal.coe_mk, Set.nonempty_iInter, Subtype.exists] at this
   rcases this with ⟨z, hz, hfin⟩
   use z
+  simp only [hz, true_and]
+  replace hfin : ∀ i : ℕ, z ∈ closedBall a (infDist a ↑F + 1 / (↑i + 1)) := by
+    intro i
+    specialize hfin i
+    have : z ∈ ((fun x : F => (x : E)) '' closedBall ((res_ball 𝕜 F a (infDist a F + 1 / (i + 1))
+    (by simp only [one_div, gt_iff_lt, lt_add_iff_pos_right, inv_pos,
+      Nat.cast_add_one_pos])).choose) (infDist a ↑F + 1 / (i + 1))) := by
+      simp only [mem_closedBall, one_div, Set.mem_image, Subtype.exists, exists_and_right,
+        exists_eq_right] at *
+      use hz
+    rw [← (res_ball 𝕜 F a (infDist a F + 1 / (i + 1))
+      (by simp only [one_div, gt_iff_lt, lt_add_iff_pos_right,
+        inv_pos, Nat.cast_add_one_pos])).choose_spec] at this
+    exact Set.mem_of_mem_inter_left this
+  refine eq_of_le_of_ge ?_ ?_
+  · simp only [one_div, mem_closedBall, dist_comm, dist_eq_norm] at hfin
+    apply le_of_forall_pos_le_add
+    intro ε hε
+    specialize hfin (⌈1 / ε⌉₊ + 1)
+    refine le_trans hfin ?_
+    simp only [one_div, Nat.cast_add, Nat.cast_one, add_le_add_iff_left]
+    field_simp
+    rw [mul_add,mul_add,add_assoc,mul_one]
+    have : ε * ↑⌈1 / ε⌉₊ ≥ 1 := by
+      simpa only [one_div, ge_iff_le] using (inv_le_iff_one_le_mul₀' hε).mp <| Nat.le_ceil (ε⁻¹)
+    linarith
+  · rw [← dist_eq_norm]
+    exact infDist_le_dist_of_mem hz
 
-  sorry
+end SphericallyCompleteSpace

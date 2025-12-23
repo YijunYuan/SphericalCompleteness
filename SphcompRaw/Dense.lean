@@ -12,6 +12,8 @@ open Filter
 open TopologicalSpace
 open NNReal
 
+namespace SphericallyCompleteSpace
+
 theorem diam_le_radius_of_ultrametric {α : Type*}
 [PseudoMetricSpace α] [hiud : IsUltrametricDist α]
 {z : α} {r : ℝ≥0} :
@@ -287,3 +289,5 @@ theorem not_spherically_complete_of_dense_separable_ultrametric
     simp only [this, gt_iff_lt, lt_self_iff_false] at r₀pos
 
 #check PadicComplex
+
+end SphericallyCompleteSpace
