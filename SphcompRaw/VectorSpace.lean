@@ -52,9 +52,14 @@ instance instSubtypeMemSubmoduleSpanSingletonSet (𝕜 : Type*) [NontriviallyNor
         rw [dist_eq_norm, NNReal.coe_mk] at hx
         exact mul_le_of_le_div₀ NNReal.zero_le_coe (norm_nonneg z) hx
       replace this' := Set.mem_of_mem_of_subset this' this
-      simp only [SetLike.mk_smul_mk, mem_closedBall] at this'
-      simp only [Subtype.dist_eq] at this'
-      sorry)
+      simp only [SetLike.mk_smul_mk, mem_closedBall, Subtype.dist_eq] at this'
+      simp
+      rw [← (Submodule.mem_span_singleton.1 (ci n).prop).choose_spec,
+        dist_eq_norm, ← sub_smul, norm_smul, ← dist_eq_norm] at this'
+      rw [le_div_iff₀]
+      · exact this'
+      ·
+        sorry)
     sorry
 
 lemma test_ind (𝕜 : Type u_1) [NontriviallyNormedField 𝕜] [SphericallyCompleteSpace 𝕜]
@@ -77,10 +82,10 @@ lemma test_ind (𝕜 : Type u_1) [NontriviallyNormedField 𝕜] [SphericallyComp
     exact finrank_span_singleton hz'
   · exact sphericallyCompleteSpace_of_isometryEquiv φ.toIsometryEquiv
 
-theorem test
-(𝕜 : Type u_1) [NontriviallyNormedField 𝕜] [SphericallyCompleteSpace 𝕜]
-{E : Type u_2} [NormedAddCommGroup E]
-[NormedSpace 𝕜 E] [IsUltrametricDist E] [FiniteDimensional 𝕜 E] :
+theorem sphericallyCompleteSpace_of_finiteDimensional
+(𝕜 : Type*) [NontriviallyNormedField 𝕜] [SphericallyCompleteSpace 𝕜]
+(E : Type*) [NormedAddCommGroup E] [NormedSpace 𝕜 E]
+[IsUltrametricDist E] [FiniteDimensional 𝕜 E] :
 SphericallyCompleteSpace E := by
   suffices h : ∀ n ≤ Module.finrank 𝕜 E,
     (∃ M : Subspace 𝕜 E, Module.finrank 𝕜 M = n ∧ SphericallyCompleteSpace M) by
