@@ -18,11 +18,6 @@ open Filter
 
 namespace SphericallyCompleteSpace
 
-noncomputable def ndist (𝕜 : Type*) [NontriviallyNormedField 𝕜]
-{E : Type u_2} [SeminormedAddCommGroup E]
-[NormedSpace 𝕜 E] (x y : {z : E // z ≠ 0}) :=
-(Metric.infDist x.val (𝕜 ∙ y.val)) / ‖x.val‖
-
 def orth (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 {E : Type u_2} [SeminormedAddCommGroup E]
 [NormedSpace 𝕜 E] (x y : E) := Metric.infDist x (𝕜 ∙ y) = ‖x‖
@@ -210,18 +205,23 @@ theorem exists_orth_vec (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 (F : Subspace 𝕜 E) [sF : SphericallyCompleteSpace F]
 [FiniteDimensional 𝕜 E]
 (hF : Module.finrank 𝕜 F < Module.finrank 𝕜 E) :
-∃ x : E, orth' 𝕜 x F := by
+∃ (x : E), x ≠ 0 ∧ orth' 𝕜 x F := by
   replace hF : (↑(Module.finrank 𝕜 ↥F) : Cardinal.{u_2}) < ↑(Module.finrank 𝕜 E) :=
     Nat.cast_lt.mpr hF
   repeat rw [Module.finrank_eq_rank'] at hF
   rcases Submodule.exists_smul_notMem_of_rank_lt hF with ⟨a, ha⟩
   specialize ha 1 one_ne_zero
   simp only [one_smul] at ha
-  suffices h : ∃ z : E, z ∈ F ∧ ‖a - z‖ = infDist a F by
+  suffices h : ∃ z : E, z ∈ F ∧ ‖a - z‖ = infDist a F ∧ (a - z) ≠ 0 by
     rcases h with ⟨z, hz⟩
     use a - z
     unfold orth'
-    rw [hz.2]
+    rw [hz.2.1]
+    constructor
+    · by_contra hc
+      rw [sub_eq_zero] at hc
+      subst hc
+      simp only [sub_self, norm_zero, ne_eq, not_true_eq_false, and_false] at hz
     refine eq_of_le_of_ge ?_ ?_
     · rw [Metric.le_infDist <| Submodule.nonempty F]
       intro w hw
@@ -279,19 +279,24 @@ theorem exists_orth_vec (𝕜 : Type*) [NontriviallyNormedField 𝕜]
       (by simp only [one_div, gt_iff_lt, lt_add_iff_pos_right,
         inv_pos, Nat.cast_add_one_pos])).choose_spec] at this
     exact Set.mem_of_mem_inter_left this
-  refine eq_of_le_of_ge ?_ ?_
-  · simp only [one_div, mem_closedBall, dist_comm, dist_eq_norm] at hfin
-    apply le_of_forall_pos_le_add
-    intro ε hε
-    specialize hfin (⌈1 / ε⌉₊ + 1)
-    refine le_trans hfin ?_
-    simp only [one_div, Nat.cast_add, Nat.cast_one, add_le_add_iff_left]
-    field_simp
-    rw [mul_add,mul_add,add_assoc,mul_one]
-    have : ε * ↑⌈1 / ε⌉₊ ≥ 1 := by
-      simpa only [one_div, ge_iff_le] using (inv_le_iff_one_le_mul₀' hε).mp <| Nat.le_ceil (ε⁻¹)
-    linarith
-  · rw [← dist_eq_norm]
-    exact infDist_le_dist_of_mem hz
+  constructor
+  · refine eq_of_le_of_ge ?_ ?_
+    · simp only [one_div, mem_closedBall, dist_comm, dist_eq_norm] at hfin
+      apply le_of_forall_pos_le_add
+      intro ε hε
+      specialize hfin (⌈1 / ε⌉₊ + 1)
+      refine le_trans hfin ?_
+      simp only [one_div, Nat.cast_add, Nat.cast_one, add_le_add_iff_left]
+      field_simp
+      rw [mul_add,mul_add,add_assoc,mul_one]
+      have : ε * ↑⌈1 / ε⌉₊ ≥ 1 := by
+        simpa only [one_div, ge_iff_le] using (inv_le_iff_one_le_mul₀' hε).mp <| Nat.le_ceil (ε⁻¹)
+      linarith
+    · rw [← dist_eq_norm]
+      exact infDist_le_dist_of_mem hz
+  · by_contra hc
+    simp only [sub_eq_zero] at hc
+    subst hc
+    exact ha hz
 
 end SphericallyCompleteSpace
