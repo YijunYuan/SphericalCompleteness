@@ -42,10 +42,8 @@ lemma orth'_iff (𝕜 : Type*) [NontriviallyNormedField 𝕜]
       rcases (@Metric.infDist_lt_iff E _
         (↑(Submodule.span 𝕜 {y}) : Set E) x ‖x‖
         (Submodule.nonempty (Submodule.span 𝕜 {y}))).1 hc with ⟨y',hy'⟩
-      have := (@Metric.le_infDist E _ ↑F x ‖x‖ (Submodule.nonempty F)).1 (by simp only [h,
-        le_refl]) (by aesop : y' ∈ F)
-      replace hy' := hy'.2
-      linarith
+      refine lt_iff_not_ge.1 hy'.2 <| (@Metric.le_infDist E _ ↑F x ‖x‖ (Submodule.nonempty F)).1
+        (by simp only [h, le_refl]) (by aesop : y' ∈ F)
   · intro h
     refine eq_of_le_of_not_lt ?_ ?_
     · have := @Metric.infDist_le_dist_of_mem E _ ↑F x 0 (zero_mem _)
@@ -53,13 +51,11 @@ lemma orth'_iff (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     · by_contra hc
       rcases (@Metric.infDist_lt_iff E _
         ↑F x ‖x‖ (Submodule.nonempty F)).1 hc with ⟨y,hy⟩
-      specialize h y hy.1
-      have := h ▸ (@Metric.le_infDist E _ ↑(Submodule.span 𝕜 {y})
+      refine lt_iff_not_ge.1 hy.2 ?_
+      exact (h y hy.1) ▸ (@Metric.le_infDist E _ ↑(Submodule.span 𝕜 {y})
         x (infDist x ↑(Submodule.span 𝕜 {y}))
         (Submodule.nonempty (Submodule.span 𝕜 {y}))).1
         (le_refl _) (Submodule.mem_span_singleton_self y)
-      replace hy := hy.2
-      linarith
 
 theorem orth'_scale (𝕜 : Type*) [inst : NontriviallyNormedField 𝕜] {E : Type u_2}
   [NormedAddCommGroup E] [NormedSpace 𝕜 E] (x : E) (F : Subspace 𝕜 E)
@@ -76,9 +72,7 @@ theorem orth'_scale (𝕜 : Type*) [inst : NontriviallyNormedField 𝕜] {E : Ty
     have hnz : s ≠ 0 := by
       intro hs'
       simp only [SetLike.mem_coe, hs', zero_smul, dist_zero, norm_zero] at hz
-      replace hz := hz.2
-      have := norm_nonneg z
-      linarith
+      exact lt_iff_not_ge.1 hz.2 <| norm_nonneg z
     nth_rw 2 [((inv_smul_eq_iff₀ hnz).mp rfl : z = s • (s⁻¹ • z))] at hz
     simp only [SetLike.mem_coe, dist_eq_norm, ← smul_sub, norm_smul] at hz
     rw [mul_lt_mul_iff_right₀ (norm_pos_iff.mpr hnz), ← dist_eq_norm, ← hxF] at hz
@@ -140,20 +134,16 @@ noncomputable def direct_prod_iso_sum_of_orth (𝕜 : Type*) [NontriviallyNormed
     have this' := this.choose_spec.2.choose_spec.2
     simp only at this'
     refine Prod.ext_iff.mpr ?_
-    have h1 : this.choose - t.1 ∈ Submodule.span 𝕜 {x} :=
-      (Submodule.sub_mem_iff_left (Submodule.span 𝕜 {x}) t.1.prop).mpr this.choose_spec.1
-    have h2 : this.choose_spec.2.choose - t.2 ∈ F :=
-      (Submodule.sub_mem_iff_left F t.2.prop).mpr this.choose_spec.2.choose_spec.1
+    have h1 := (Submodule.sub_mem_iff_left (Submodule.span 𝕜 {x}) t.1.prop).mpr this.choose_spec.1
+    have h2 := (Submodule.sub_mem_iff_left F t.2.prop).mpr this.choose_spec.2.choose_spec.1
     have h3 : this.choose - t.1 = - (this.choose_spec.2.choose - t.2) := by
       rw [neg_sub, sub_eq_sub_iff_add_eq_add, this', add_comm]
     have h1' : this.choose - t.1 ∈ (↑(Submodule.span 𝕜 {x}) : Set E) ∩ ↑F := by
       simp only [Set.mem_inter_iff, SetLike.mem_coe, h1, true_and]
-      simp only [h3, neg_sub]
-      exact sub_mem_comm_iff.mp h2
+      simpa only [h3, neg_sub] using sub_mem_comm_iff.mp h2
     have h2' : this.choose_spec.2.choose - t.2 ∈ (↑(Submodule.span 𝕜 {x}) : Set E) ∩ ↑F := by
       simp only [Set.mem_inter_iff, SetLike.mem_coe, h2, and_true]
-      rw [← neg_eq_iff_eq_neg] at h3
-      rw [← h3]
+      rw [← neg_eq_iff_eq_neg.2 h3]
       exact Submodule.neg_mem (Submodule.span 𝕜 {x}) h1
     have hh : (↑(Submodule.span 𝕜 {x}) : Set E) ∩ ↑F = {0} := by
       ext w
@@ -167,8 +157,7 @@ noncomputable def direct_prod_iso_sum_of_orth (𝕜 : Type*) [NontriviallyNormed
       · intro h
         simp only [h, zero_mem, and_self]
     simp only [hh, Set.mem_singleton_iff, sub_eq_zero] at h1' h2'
-    simp only [h2', and_true]
-    exact SetLike.coe_eq_coe.mp h1'
+    simpa only [h2', and_true] using SetLike.coe_eq_coe.mp h1'
   right_inv := by
     intro t
     simp only [Submodule.add_eq_sup, eq_mpr_eq_cast, cast_eq,
@@ -187,8 +176,7 @@ private lemma res_ball (𝕜 : Type*) [NontriviallyNormedField 𝕜]
   simp only [Set.mem_inter_iff, mem_closedBall, SetLike.mem_coe, Set.mem_image, Subtype.exists,
     exists_and_right, exists_eq_right]
   constructor
-  · intro h
-    use h.2
+  · refine fun h => ⟨h.2, ?_⟩
     rcases (le_sup_iff.1 <| iud.dist_triangle_max x a y) with hxy | hay
     · exact le_trans hxy h.1
     · exact le_of_lt <| lt_of_le_of_lt hay hy.2
@@ -215,14 +203,8 @@ theorem exists_orth_vec (𝕜 : Type*) [NontriviallyNormedField 𝕜]
   suffices h : ∃ z : E, z ∈ F ∧ ‖a - z‖ = infDist a F ∧ (a - z) ≠ 0 by
     rcases h with ⟨z, hz⟩
     use a - z
-    unfold orth'
-    rw [hz.2.1]
-    constructor
-    · by_contra hc
-      rw [sub_eq_zero] at hc
-      subst hc
-      simp only [sub_self, norm_zero, ne_eq, not_true_eq_false, and_false] at hz
-    refine eq_of_le_of_ge ?_ ?_
+    simp only [orth', hz.2.1]
+    refine ⟨fun hc => ((sub_eq_zero.1 hc) ▸ ha) hz.1, eq_of_le_of_ge ?_ ?_⟩
     · rw [Metric.le_infDist <| Submodule.nonempty F]
       intro w hw
       rw [dist_eq_norm, (by simp only [sub_sub_sub_cancel_right] : a - w = (a - z) - (w - z)),
@@ -246,16 +228,14 @@ theorem exists_orth_vec (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     have := (res_ball 𝕜 F a (infDist a F + 1 / (n + 1 + 1)) (by simp; linarith)).choose_spec
     simp only [one_div] at this
     have h1 : ↑x ∈ closedBall a (infDist a ↑F + (↑n + 1 + 1 : ℝ)⁻¹) ∩ ↑F := by
-      rw [this]
-      simp only [Set.mem_image]
+      rw [this, Set.mem_image]
       use x
     replace h1 : ↑x ∈ closedBall a (infDist a ↑F + (↑n + 1 : ℝ)⁻¹) ∩ ↑F := by
-      constructor
-      · simp only [Set.mem_inter_iff, mem_closedBall, Subtype.coe_prop, and_true] at h1
-        simp only [mem_closedBall] at *
-        refine le_trans h1 ?_
-        simp only [add_le_add_iff_left]; field_simp; linarith
-      · exact x.prop
+      refine ⟨?_ , x.prop⟩
+      simp only [Set.mem_inter_iff, mem_closedBall, Subtype.coe_prop, and_true] at h1
+      simp only [mem_closedBall] at *
+      refine le_trans h1 ?_
+      simp only [add_le_add_iff_left]; field_simp; linarith
     replace := (res_ball 𝕜 F a (infDist a F + 1 / (n + 1)) (by simp; linarith)).choose_spec
     simp only [one_div] at this
     rw [this] at h1
@@ -279,24 +259,18 @@ theorem exists_orth_vec (𝕜 : Type*) [NontriviallyNormedField 𝕜]
       (by simp only [one_div, gt_iff_lt, lt_add_iff_pos_right,
         inv_pos, Nat.cast_add_one_pos])).choose_spec] at this
     exact Set.mem_of_mem_inter_left this
-  constructor
-  · refine eq_of_le_of_ge ?_ ?_
-    · simp only [one_div, mem_closedBall, dist_comm, dist_eq_norm] at hfin
-      apply le_of_forall_pos_le_add
-      intro ε hε
-      specialize hfin (⌈1 / ε⌉₊ + 1)
-      refine le_trans hfin ?_
-      simp only [one_div, Nat.cast_add, Nat.cast_one, add_le_add_iff_left]
-      field_simp
-      rw [mul_add,mul_add,add_assoc,mul_one]
-      have : ε * ↑⌈1 / ε⌉₊ ≥ 1 := by
-        simpa only [one_div, ge_iff_le] using (inv_le_iff_one_le_mul₀' hε).mp <| Nat.le_ceil (ε⁻¹)
-      linarith
-    · rw [← dist_eq_norm]
-      exact infDist_le_dist_of_mem hz
-  · by_contra hc
-    simp only [sub_eq_zero] at hc
-    subst hc
-    exact ha hz
+  refine ⟨eq_of_le_of_ge ?_ ?_ , fun hc => ha <| (sub_eq_zero.1 hc) ▸ hz⟩
+  · simp only [one_div, mem_closedBall, dist_comm, dist_eq_norm] at hfin
+    refine le_of_forall_pos_le_add (fun ε hε => ?_)
+    specialize hfin (⌈1 / ε⌉₊ + 1)
+    refine le_trans hfin ?_
+    simp only [one_div, Nat.cast_add, Nat.cast_one, add_le_add_iff_left]
+    field_simp
+    rw [mul_add,mul_add, add_assoc]
+    have : ε * ↑⌈1 / ε⌉₊ ≥ 1 := by
+      simpa only [one_div, ge_iff_le] using (inv_le_iff_one_le_mul₀' hε).mp <| Nat.le_ceil (ε⁻¹)
+    linarith
+  · rw [← dist_eq_norm]
+    exact infDist_le_dist_of_mem hz
 
 end SphericallyCompleteSpace

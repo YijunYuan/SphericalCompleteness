@@ -162,6 +162,4 @@ SphericallyCompleteSpace α := by
 instance instSphericallyCompletePadic {p : ℕ} [Fact (Nat.Prime p)] :
   SphericallyCompleteSpace (ℚ_[p]) := inferInstance
 
---instance (α : Type*) [Field α] [ValuativeRel α] [TopologicalSpace α] [IsNonarchimedeanLocalField α] : MetricSpace α := inferInstance
-
 end SphericallyCompleteSpace

@@ -29,7 +29,7 @@ instance instSubtypeMemSubmoduleSpanSingletonSet (𝕜 : Type*) [NontriviallyNor
  (z : E) : SphericallyCompleteSpace (Submodule.span 𝕜 {z}) where
   isSphericallyComplete := by
     if h: z = 0 then
-      rw [h,Submodule.span_zero_singleton]
+      rw [h, Submodule.span_zero_singleton]
       intro ci ri hanti
       use 0
       simp only [Set.mem_iInter, mem_closedBall, dist_zero, AddSubgroupClass.coe_norm]
@@ -45,7 +45,7 @@ instance instSubtypeMemSubmoduleSpanSingletonSet (𝕜 : Type*) [NontriviallyNor
       intro n x hx
       simp only [mem_closedBall] at *
       have := hanti (by linarith : n ≤ n + 1)
-      simp at this
+      simp only [Set.le_eq_subset] at this
       have this' : x • ⟨z, Submodule.mem_span_singleton_self z⟩
         ∈ closedBall (ci (n + 1)) ↑(ri (n + 1)) := by
         simp only [SetLike.mk_smul_mk, mem_closedBall, Subtype.dist_eq]
@@ -55,14 +55,10 @@ instance instSubtypeMemSubmoduleSpanSingletonSet (𝕜 : Type*) [NontriviallyNor
         exact mul_le_of_le_div₀ NNReal.zero_le_coe (norm_nonneg z) hx
       replace this' := Set.mem_of_mem_of_subset this' this
       simp only [SetLike.mk_smul_mk, mem_closedBall, Subtype.dist_eq] at this'
-      simp
+      simp only [NNReal.coe_mk, ge_iff_le]
       rw [← (Submodule.mem_span_singleton.1 (ci n).prop).choose_spec,
         dist_eq_norm, ← sub_smul, norm_smul, ← dist_eq_norm] at this'
-      rw [le_div_iff₀]
-      · exact this'
-      · refine lt_of_le_of_ne (norm_nonneg _) ?_
-        contrapose h
-        exact norm_eq_zero.mp h.symm
+      rwa [le_div_iff₀ (norm_pos_iff.mpr h)]
       )
     simp only [NNReal.coe_mk, Set.nonempty_iInter, mem_closedBall] at this
     rcases this with ⟨x, hx⟩
@@ -70,13 +66,8 @@ instance instSubtypeMemSubmoduleSpanSingletonSet (𝕜 : Type*) [NontriviallyNor
     simp only [SetLike.mk_smul_mk, Set.mem_iInter, mem_closedBall]
     intro i
     specialize hx i
-    rw [Subtype.dist_eq, dist_eq_norm, ← (Submodule.mem_span_singleton.1 (ci i).prop).choose_spec,
-      ← sub_smul, norm_smul, ← dist_eq_norm]
-    rw [← le_div_iff₀]
-    · exact hx
-    · refine lt_of_le_of_ne (norm_nonneg _) ?_
-      contrapose h
-      exact norm_eq_zero.mp h.symm
+    rwa [Subtype.dist_eq, dist_eq_norm, ← (Submodule.mem_span_singleton.1 (ci i).prop).choose_spec,
+      ← sub_smul, norm_smul, ← dist_eq_norm, ← le_div_iff₀ (norm_pos_iff.mpr h)]
 
 lemma test_ind (𝕜 : Type u_1) [NontriviallyNormedField 𝕜] [SphericallyCompleteSpace 𝕜]
 (E : Type u_2) [NormedAddCommGroup E]
@@ -85,9 +76,7 @@ lemma test_ind (𝕜 : Type u_1) [NontriviallyNormedField 𝕜] [SphericallyComp
   (∃ M : Subspace 𝕜 E, Module.finrank 𝕜 M = n ∧ SphericallyCompleteSpace M)
 → (∃ M' : Subspace 𝕜 E, Module.finrank 𝕜 M' = (n + 1) ∧ SphericallyCompleteSpace M')
 := by
-  intro n hn h
-  rcases h with ⟨M, hM1, hM2⟩
-  haveI : NormedSpace 𝕜 M := Submodule.normedSpace M
+  rintro n hn ⟨M, hM1, _⟩
   rcases exists_orth_vec 𝕜 M (by linarith) with ⟨z, hz', hz⟩
   use ((Submodule.span 𝕜 {z}) + M)
   let φ := direct_prod_iso_sum_of_orth 𝕜 z M hz
@@ -115,7 +104,7 @@ SphericallyCompleteSpace E := by
     simpa only [Set.mem_iInter, mem_closedBall, dist_le_coe] using hx
   intro n hn
   induction n
-  · case zero => exact ⟨⊥, ⟨finrank_bot 𝕜 E, by infer_instance⟩⟩
+  · case zero => exact ⟨⊥, ⟨finrank_bot 𝕜 E, inferInstance⟩⟩
   · case succ n hn' => exact test_ind 𝕜 E n hn <| hn' <| Nat.le_of_succ_le hn
 
 end SphericallyCompleteSpace
