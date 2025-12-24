@@ -18,19 +18,26 @@ open Filter
 
 namespace SphericallyCompleteSpace
 
-def orth (𝕜 : Type*) [NontriviallyNormedField 𝕜]
+abbrev Orthogonal (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 {E : Type u_2} [SeminormedAddCommGroup E]
-[NormedSpace 𝕜 E] (x y : E) := Metric.infDist x (𝕜 ∙ y) = ‖x‖
+[NormedSpace 𝕜 E] [IsUltrametricDist E]
+(x y : E) := Metric.infDist x (𝕜 ∙ y) = ‖x‖
 
-noncomputable def orth' (𝕜 : Type*) [NontriviallyNormedField 𝕜]
-{E : Type u_2} [SeminormedAddCommGroup E]
-[NormedSpace 𝕜 E] (x : E) (F : Subspace 𝕜 E) := Metric.infDist x F = ‖x‖
+abbrev 𝒪rthogonal (𝕜 : Type*) [NontriviallyNormedField 𝕜]
+{E : Type*} [SeminormedAddCommGroup E]
+[NormedSpace 𝕜 E] [IsUltrametricDist E]
+(x : E) (F : Subspace 𝕜 E) := Metric.infDist x F = ‖x‖
 
-lemma orth'_iff (𝕜 : Type*) [NontriviallyNormedField 𝕜]
+abbrev 𝕆rthogonal (𝕜 : Type*) [NontriviallyNormedField 𝕜]
+{E : Type*} [SeminormedAddCommGroup E]
+[NormedSpace 𝕜 E] [IsUltrametricDist E]
+(F1 : Subspace 𝕜 E) (F2 : Subspace 𝕜 E) := ∀ x ∈ F1, 𝒪rthogonal 𝕜 x F2
+
+lemma 𝒪rthogonal_iff (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 {E : Type u_2} [SeminormedAddCommGroup E]
-[NormedSpace 𝕜 E] (x : E) (F : Subspace 𝕜 E) :
-  orth' 𝕜 x F ↔ ∀ y ∈ F, orth 𝕜 x y := by
-  unfold orth orth'
+[NormedSpace 𝕜 E] [IsUltrametricDist E]
+(x : E) (F : Subspace 𝕜 E) :
+  𝒪rthogonal 𝕜 x F ↔ ∀ y ∈ F, Orthogonal 𝕜 x y := by
   constructor
   · intro h y hy
     refine eq_of_le_of_not_lt ?_ ?_
@@ -57,10 +64,11 @@ lemma orth'_iff (𝕜 : Type*) [NontriviallyNormedField 𝕜]
         (Submodule.nonempty (Submodule.span 𝕜 {y}))).1
         (le_refl _) (Submodule.mem_span_singleton_self y)
 
-theorem orth'_scale (𝕜 : Type*) [inst : NontriviallyNormedField 𝕜] {E : Type u_2}
-  [NormedAddCommGroup E] [NormedSpace 𝕜 E] (x : E) (F : Subspace 𝕜 E)
-  (hxF : orth' 𝕜 x F) (a : E) (ha : a ∈ Submodule.span 𝕜 {x}) : orth' 𝕜 a F := by
-  unfold orth' at *
+theorem 𝒪rthogonal_scale (𝕜 : Type*) [inst : NontriviallyNormedField 𝕜]
+{E : Type u_2} [NormedAddCommGroup E]
+[NormedSpace 𝕜 E] [IsUltrametricDist E]
+(x : E) (F : Subspace 𝕜 E)
+  (hxF : 𝒪rthogonal 𝕜 x F) (a : E) (ha : a ∈ Submodule.span 𝕜 {x}) : 𝒪rthogonal 𝕜 a F := by
   refine eq_of_le_of_not_lt ?_ ?_
   · have := @Metric.infDist_le_dist_of_mem E _ ↑F a 0 (zero_mem _)
     simpa only [ge_iff_le, dist_zero_right] using this
@@ -81,7 +89,7 @@ theorem orth'_scale (𝕜 : Type*) [inst : NontriviallyNormedField 𝕜] {E : Ty
 
 noncomputable def direct_prod_iso_sum_of_orth (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 {E : Type u_2} [NormedAddCommGroup E]
-[NormedSpace 𝕜 E] [IsUltrametricDist E] (x : E) (F : Subspace 𝕜 E) (hxF : orth' 𝕜 x F) :
+[NormedSpace 𝕜 E] [IsUltrametricDist E] (x : E) (F : Subspace 𝕜 E) (hxF : 𝒪rthogonal 𝕜 x F) :
 (Submodule.span 𝕜 {x}) × F≃ₛₗᵢ[RingHom.id 𝕜] (Submodule.span 𝕜 {x}) + F where
   toFun z := ⟨z.1.val + z.2.val, by
     simp only [Submodule.add_eq_sup]
@@ -110,7 +118,7 @@ noncomputable def direct_prod_iso_sum_of_orth (𝕜 : Type*) [NontriviallyNormed
       if h : ‖b‖ ≤ ‖a‖ then
         simp only [h, sup_of_le_left] at hc
         have : dist a (-b) = ‖a + b‖ := by simp only [dist_eq_norm, sub_neg_eq_add]
-        rw [← this, ← orth'_scale 𝕜 x F hxF a ha] at hc
+        rw [← this, ← 𝒪rthogonal_scale 𝕜 x F hxF a ha] at hc
         exact (notMem_of_dist_lt_infDist hc) <| neg_mem hab
       else
         simp only [not_le] at h
@@ -150,8 +158,7 @@ noncomputable def direct_prod_iso_sum_of_orth (𝕜 : Type*) [NontriviallyNormed
       simp only [Set.mem_inter_iff, SetLike.mem_coe, Set.mem_singleton_iff]
       constructor
       · rintro ⟨hw1, hw2⟩
-        replace hxF : orth' 𝕜 w F := orth'_scale 𝕜 x F hxF w hw1
-        unfold orth' at hxF
+        replace hxF : 𝒪rthogonal 𝕜 w F := 𝒪rthogonal_scale 𝕜 x F hxF w hw1
         simpa only [hxF, dist_self, norm_le_zero_iff] using
           @Metric.infDist_le_dist_of_mem E _ F w w hw2
       · intro h
@@ -193,7 +200,7 @@ theorem exists_orth_vec (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 (F : Subspace 𝕜 E) [sF : SphericallyCompleteSpace F]
 [FiniteDimensional 𝕜 E]
 (hF : Module.finrank 𝕜 F < Module.finrank 𝕜 E) :
-∃ (x : E), x ≠ 0 ∧ orth' 𝕜 x F := by
+∃ (x : E), x ≠ 0 ∧ 𝒪rthogonal 𝕜 x F := by
   replace hF : (↑(Module.finrank 𝕜 ↥F) : Cardinal.{u_2}) < ↑(Module.finrank 𝕜 E) :=
     Nat.cast_lt.mpr hF
   repeat rw [Module.finrank_eq_rank'] at hF
@@ -203,7 +210,7 @@ theorem exists_orth_vec (𝕜 : Type*) [NontriviallyNormedField 𝕜]
   suffices h : ∃ z : E, z ∈ F ∧ ‖a - z‖ = infDist a F ∧ (a - z) ≠ 0 by
     rcases h with ⟨z, hz⟩
     use a - z
-    simp only [orth', hz.2.1]
+    simp only [𝒪rthogonal, hz.2.1]
     refine ⟨fun hc => ((sub_eq_zero.1 hc) ▸ ha) hz.1, eq_of_le_of_ge ?_ ?_⟩
     · rw [Metric.le_infDist <| Submodule.nonempty F]
       intro w hw
