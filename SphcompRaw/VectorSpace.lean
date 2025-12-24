@@ -25,7 +25,7 @@ SphericallyCompleteSpace E := by
 
 instance instSubtypeMemSubmoduleSpanSingletonSet (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 [scsk : SphericallyCompleteSpace 𝕜]
-{E : Type u_2} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E]
+{E : Type u_2} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
  (z : E) : SphericallyCompleteSpace (Submodule.span 𝕜 {z}) where
   isSphericallyComplete := by
     if h: z = 0 then
@@ -38,7 +38,9 @@ instance instSubtypeMemSubmoduleSpanSingletonSet (𝕜 : Type*) [NontriviallyNor
         norm_zero, NNReal.zero_le_coe]
     else
     intro ci ri hanti
-    have := @scsk.isSphericallyComplete (fun n => (Submodule.mem_span_singleton.1 (ci n).prop).choose) (fun n => ⟨ri n / ‖z‖, div_nonneg NNReal.zero_le_coe <| norm_nonneg z⟩) (by
+    have := @scsk.isSphericallyComplete
+      (fun n => (Submodule.mem_span_singleton.1 (ci n).prop).choose)
+      (fun n => ⟨ri n / ‖z‖, div_nonneg NNReal.zero_le_coe <| norm_nonneg z⟩) (by
       refine antitone_nat_of_succ_le ?_
       intro n x hx
       simp only [mem_closedBall] at *
@@ -58,9 +60,23 @@ instance instSubtypeMemSubmoduleSpanSingletonSet (𝕜 : Type*) [NontriviallyNor
         dist_eq_norm, ← sub_smul, norm_smul, ← dist_eq_norm] at this'
       rw [le_div_iff₀]
       · exact this'
-      ·
-        sorry)
-    sorry
+      · refine lt_of_le_of_ne (norm_nonneg _) ?_
+        contrapose h
+        exact norm_eq_zero.mp h.symm
+      )
+    simp only [NNReal.coe_mk, Set.nonempty_iInter, mem_closedBall] at this
+    rcases this with ⟨x, hx⟩
+    use x • ⟨z, Submodule.mem_span_singleton_self z⟩
+    simp only [SetLike.mk_smul_mk, Set.mem_iInter, mem_closedBall]
+    intro i
+    specialize hx i
+    rw [Subtype.dist_eq, dist_eq_norm, ← (Submodule.mem_span_singleton.1 (ci i).prop).choose_spec,
+      ← sub_smul, norm_smul, ← dist_eq_norm]
+    rw [← le_div_iff₀]
+    · exact hx
+    · refine lt_of_le_of_ne (norm_nonneg _) ?_
+      contrapose h
+      exact norm_eq_zero.mp h.symm
 
 lemma test_ind (𝕜 : Type u_1) [NontriviallyNormedField 𝕜] [SphericallyCompleteSpace 𝕜]
 (E : Type u_2) [NormedAddCommGroup E]
@@ -101,7 +117,5 @@ SphericallyCompleteSpace E := by
   induction n
   · case zero => exact ⟨⊥, ⟨finrank_bot 𝕜 E, by infer_instance⟩⟩
   · case succ n hn' => exact test_ind 𝕜 E n hn <| hn' <| Nat.le_of_succ_le hn
-
---instance (α : Type*) [Field α] [ValuativeRel α] [TopologicalSpace α] [IsNonarchimedeanLocalField α] : MetricSpace α := inferInstance
 
 end SphericallyCompleteSpace
