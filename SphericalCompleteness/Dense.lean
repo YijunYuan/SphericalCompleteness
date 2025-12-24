@@ -6,7 +6,7 @@ import Mathlib.Topology.Algebra.Valued.NormedValued
 import Mathlib.Analysis.Normed.Module.Basic
 import Mathlib.NumberTheory.Padics.ProperSpace
 import Mathlib.NumberTheory.Padics.Complex
-import SphcompRaw.Basic
+import SphericalCompleteness.Basic
 open Metric
 open Filter
 open TopologicalSpace

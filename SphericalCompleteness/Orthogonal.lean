@@ -11,7 +11,7 @@ import Mathlib.LinearAlgebra.FiniteDimensional.Defs
 import Mathlib.Analysis.Normed.Operator.LinearIsometry
 import Mathlib.Analysis.Normed.Field.Ultra
 
-import SphcompRaw.Basic
+import SphericalCompleteness.Basic
 
 open Metric
 open Filter

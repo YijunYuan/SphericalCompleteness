@@ -8,7 +8,7 @@ import Mathlib.NumberTheory.Padics.ProperSpace
 import Mathlib.NumberTheory.Padics.Complex
 import Mathlib.RingTheory.Algebraic.Cardinality
 import Mathlib.Analysis.Normed.Algebra.Ultra
-import SphcompRaw.Dense
+import SphericalCompleteness.Dense
 open Metric
 open Filter
 open TopologicalSpace
