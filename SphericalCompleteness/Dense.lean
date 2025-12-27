@@ -6,25 +6,16 @@ import Mathlib.Topology.Algebra.Valued.NormedValued
 import Mathlib.Analysis.Normed.Module.Basic
 import Mathlib.NumberTheory.Padics.ProperSpace
 import Mathlib.NumberTheory.Padics.Complex
+
 import SphericalCompleteness.Basic
+import SphericalCompleteness.UltrametricDiam
+
 open Metric
 open Filter
 open TopologicalSpace
 open NNReal
 
 namespace SphericallyCompleteSpace
-
-theorem diam_le_radius_of_ultrametric {α : Type*}
-[PseudoMetricSpace α] [hiud : IsUltrametricDist α]
-{z : α} {r : ℝ≥0} :
-diam (closedBall z r) ≤ r := by
-  apply diam_le_of_forall_dist_le
-  · exact r.prop
-  · intro x hx y hy
-    simp only [closedBall, Set.mem_setOf_eq] at hx hy
-    rw [dist_comm] at hy
-    have := hiud.dist_triangle_max x z y
-    grind only [= max_def]
 
 class IsSphericallyDense (α : Type*) [PseudoMetricSpace α] : Prop where
   spherically_dense :
@@ -34,7 +25,7 @@ instance diam_eq_radius_of_dense_ultrametric (α : Type*)
 [dnf : DenselyNormedField α] [hiud : IsUltrametricDist α] :
 IsSphericallyDense α where
 spherically_dense := by
-  refine fun z r ↦ eq_of_le_of_ge diam_le_radius_of_ultrametric ?_
+  refine fun z r ↦ eq_of_le_of_ge (diam_le_radius_of_ultrametric _ _) ?_
   by_contra hc
   simp only [not_le] at hc
   rcases dnf.lt_norm_lt (diam (closedBall z ↑r)) ↑r diam_nonneg hc with ⟨δ, _, hδ2⟩
@@ -75,7 +66,7 @@ lemma exists_dist_lt_diam_iff_spherically_dense {α : Type*}
 ∃ x y : α, x ∈ closedBall z r ∧ y ∈ closedBall z r ∧  nndist x y ∈ Set.Ioc r' r := by
   refine ⟨exists_dist_lt_diam_of_spherically_dense, ?_⟩
   intro h
-  refine {spherically_dense := fun z r ↦ eq_of_le_of_ge diam_le_radius_of_ultrametric ?_}
+  refine {spherically_dense := fun z r ↦ eq_of_le_of_ge (diam_le_radius_of_ultrametric _ _) ?_}
   by_contra hc
   simp only [not_le] at hc
   rcases h z hc with ⟨x, y, hx, hy, hxy⟩

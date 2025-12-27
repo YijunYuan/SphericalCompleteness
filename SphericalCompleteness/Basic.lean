@@ -9,6 +9,7 @@ import Mathlib.NumberTheory.LocalField.Basic
 import Mathlib.LinearAlgebra.Dimension.Finrank
 
 import SphericalCompleteness.Complete
+import SphericalCompleteness.UltrametricDiam
 
 open Metric
 open Filter
@@ -28,7 +29,124 @@ class SphericallyCompleteSpace (α : Type*) [PseudoMetricSpace α] : Prop where
   isSphericallyComplete : ∀ ⦃ci : ℕ → α⦄, ∀ ⦃ri : ℕ → NNReal⦄,
     Antitone (fun i => closedBall (ci i) (ri i)) → (⋂ i, closedBall (ci i) (ri i)).Nonempty
 
+noncomputable def esoesoa {α : Type u_1} [inst : PartialOrder α]
+  {f : ℕ → α} (hanti : Antitone f) (h : ∀ (N : ℕ), ∃ n ≥ N, f n ≠ f N) : ℕ → ℕ := fun n =>
+  match n with
+  | 0 => 0
+  | Nat.succ m => (h (esoesoa hanti h m)).choose
+
+theorem eventually_stable_or_exists_strictanti_of_antitone {α : Type*} [PartialOrder α]
+  {f : ℕ → α} (hanti : Antitone f) :
+  (∃ N : ℕ, ∀ n ≥ N, f n = f N) ∨ (∃ φ : ℕ → ℕ, StrictMono φ ∧ StrictAnti (f ∘ φ)) := by
+  if h : ∃ N, ∀ n ≥ N, f n = f N then
+    exact Or.inl h
+  else
+    right
+    push_neg at h
+    use esoesoa hanti h
+    constructor
+    · refine strictMono_nat_of_lt_succ <| fun n => ?_
+      simp only [esoesoa]
+      have := (esoesoa._proof_2 hanti h n).choose_spec
+      refine lt_of_le_of_ne this.1 ?_
+      by_contra hc
+      rw [← hc] at this
+      simp only [ge_iff_le, le_refl, ne_eq, not_true_eq_false, and_false] at this
+    · refine strictAnti_nat_of_succ_lt <| fun n => lt_of_le_of_ne ?_ ?_
+      · refine hanti ?_
+        simp only [esoesoa]
+        exact (esoesoa._proof_2 hanti h n).choose_spec.1
+      · by_contra hc
+        simp only [Function.comp_apply, esoesoa, ge_iff_le, ne_eq] at hc
+        exact (esoesoa._proof_2 hanti h n).choose_spec.2 hc
+
+
 namespace SphericallyCompleteSpace
+
+theorem sphericallyComplete_iff (α : Type*) [PseudoMetricSpace α] [iud : IsUltrametricDist α] :
+  SphericallyCompleteSpace α ↔
+  ∀ ⦃ci : ℕ → α⦄, ∀ ⦃ri : ℕ → NNReal⦄,
+    Antitone ri →
+    Antitone (fun i => closedBall (ci i) (ri i)) → (⋂ i, closedBall (ci i) (ri i)).Nonempty := by
+  constructor
+  · exact fun h ci ri hri hanti => h.isSphericallyComplete hanti
+  · intro h
+    refine { isSphericallyComplete := ?_ }
+    intro c r hanti
+    let r' : ℕ → NNReal := fun n => sInf {r k | k ≤ n}
+    have hr'_Antitone : Antitone r' := by
+      refine antitone_nat_of_succ_le fun n => ?_
+      unfold r'
+      refine csInf_le_csInf' ?_ ?_
+      · use r n, n
+      · simp only [Set.setOf_subset_setOf, forall_exists_index, and_imp, forall_apply_eq_imp_iff₂]
+        intro a ha
+        use a
+        simp only [and_true]
+        linarith
+    have : Antitone fun i ↦ closedBall (c i) ↑(r' i) := by
+      refine antitone_nat_of_succ_le fun n => ?_
+      intro x hx
+      simp only [mem_closedBall, dist_le_coe, r']  at *
+      rw [le_csInf_iff''] at *
+      · intro b hb
+        rcases hb with ⟨k, hk1, hk2⟩
+        rw [← hk2]
+        specialize hx (r k) ⟨k, ⟨by linarith, rfl⟩⟩
+        rw [← dist_le_coe] at *
+        refine le_trans (iud.dist_triangle_max x (c (n + 1)) (c n)) <| max_le_iff.2 ⟨hx, ?_⟩
+        refine le_trans ?_ <| diam_le_radius_of_ultrametric (c k) (r k)
+        apply dist_le_diam_of_mem isBounded_closedBall
+        · refine (hanti (by linarith : k ≤ n + 1)) ?_
+          simp only [mem_closedBall, dist_self, NNReal.zero_le_coe]
+        · refine (hanti hk1) ?_
+          simp only [mem_closedBall, dist_self, NNReal.zero_le_coe]
+      · use r (n + 1), n + 1
+      · use r n, n
+    specialize h hr'_Antitone this
+    simp only [Set.nonempty_iInter, mem_closedBall] at h
+    rcases h with ⟨z, hz⟩
+    use z
+    simp only [Set.mem_iInter, mem_closedBall]
+    refine fun i => le_trans (hz i) ?_
+    simp only [NNReal.coe_le_coe, r']
+    exact csInf_le (OrderBot.bddBelow _) (by use i)
+
+theorem sphericallyComplete_iff' (α : Type*) [PseudoMetricSpace α] [iud : IsUltrametricDist α] :
+  SphericallyCompleteSpace α ↔
+  ∀ ⦃ci : ℕ → α⦄, ∀ ⦃ri : ℕ → NNReal⦄,
+    StrictAnti ri →
+    Antitone (fun i => closedBall (ci i) (ri i)) → (⋂ i, closedBall (ci i) (ri i)).Nonempty := by
+  constructor
+  · exact fun h ci ri hri hanti => h.isSphericallyComplete hanti
+  · rw [sphericallyComplete_iff α]
+    intro h ci ri hri hanti
+    rcases eventually_stable_or_exists_strictanti_of_antitone hri with hc | hc
+    · rcases hc with ⟨N, hN⟩
+      use (ci N)
+      simp only [Set.mem_iInter]
+      intro i
+      if hiN : i ≤ N then
+        refine (hanti hiN) ?_
+        simp only [mem_closedBall, dist_self, NNReal.zero_le_coe]
+      else
+        simp at hiN
+        rw [mem_closedBall, dist_comm,← mem_closedBall, hN i (by linarith)]
+        refine (hanti (by linarith : N ≤ i)) ?_
+        simp only [mem_closedBall, dist_self, NNReal.zero_le_coe]
+    · rcases hc with ⟨φ, hφ1, hφ2⟩
+      have := @h (ci ∘ φ) (ri ∘ φ) hφ2
+        (antitone_nat_of_succ_le fun n => hanti <| le_of_lt <| hφ1 (by linarith : n < n + 1)
+      )
+      simp only [Function.comp_apply, Set.nonempty_iInter] at this
+      rcases this with ⟨z, hz⟩
+      use z
+      simp only [Set.mem_iInter]
+      intro i
+      have := StrictMono.tendsto_atTop hφ1
+      rw [Filter.tendsto_atTop_atTop_iff_of_monotone <| StrictMono.monotone hφ1] at this
+      rcases this i with ⟨N, hN⟩
+      exact (hanti hN) <| hz N
 
 instance instCompleteOfSphericallyComplete (α : Type*)
   [PseudoMetricSpace α] [sc : SphericallyCompleteSpace α] : CompleteSpace α := by
