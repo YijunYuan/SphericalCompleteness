@@ -94,6 +94,7 @@ lemma lemma_4_4
     ) (by
     intro P hP hhP
     let Mmax := Submodule.span 𝕜 (⋃ (p : P), (p.val.M : Set E))
+    #check @IsLinearMap.mk' 𝕜 Mmax F _ _ _ _ _
     use {M := Mmax
          hDM := by
           unfold Mmax
@@ -101,7 +102,7 @@ lemma lemma_4_4
           exact Submodule.mem_span_of_mem <| Set.mem_iUnion_of_mem
             (Classical.indefiniteDescription (Membership.mem P) hhP) <| hhP.some.hDM hz
          T := by
-
+          #check @ContinuousLinearMap.mk 𝕜 𝕜 _ _ (RingHom.id 𝕜) ↥Mmax _ _ F _ _ _ _
           sorry
          hT := sorry
          hU := sorry, }
