@@ -75,7 +75,7 @@ instance (𝕜 : Type*) [NontriviallyNormedField 𝕜]
       ext z
       rw [← habT]
 
-
+set_option maxHeartbeats 0 in
 lemma lemma_4_4
 (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 {E : Type*} [NormedAddCommGroup E] [IsUltrametricDist E] [NormedSpace 𝕜 E]
@@ -93,16 +93,34 @@ lemma lemma_4_4
   have := @zorn_le_nonempty (PartialExtension 𝕜 E F S 𝒰 h𝒰 ε) _ (pene 𝕜 E F S 𝒰 h𝒰 ε hε3
     ) (by
     intro P hP hhP
-    let Mmax := Submodule.span 𝕜 (⋃ (p : P), (p.val.M : Set E))
-    #check @IsLinearMap.mk' 𝕜 Mmax F _ _ _ _ _
+    let Mmax := iSup (fun p : P ↦ p.val.M)
+    let fmax : Mmax → F := fun x => by
+      haveI : Nonempty ↑P := Set.Nonempty.to_subtype hhP
+      have : Directed (fun x1 x2 ↦ x1 ≤ x2) (fun p : P ↦ p.val.M) := by
+        intro a b
+        rcases hP.directed a b with ⟨c, hc1, hc2⟩
+        use c
+        constructor
+        · cases hc1; assumption
+        · cases hc2; assumption
+      have := (Submodule.mem_iSup_of_directed (fun p : P ↦ p.val.M) this).1 x.2
+      exact this.choose.val.T ⟨x.val,this.choose_spec⟩
+    have ilfmax : IsLinearMap 𝕜 fmax := by
+      refine { map_add := ?_, map_smul := ?_ }
+      · intro x y
+        unfold fmax
+        simp only
+        sorry
+      · sorry
     use {M := Mmax
          hDM := by
           unfold Mmax
           intro z hz
-          exact Submodule.mem_span_of_mem <| Set.mem_iUnion_of_mem
-            (Classical.indefiniteDescription (Membership.mem P) hhP) <| hhP.some.hDM hz
+          rw [Submodule.mem_iSup]
+          intro N hN
+          exact (le_trans hhP.some.hDM <| hN ⟨hhP.some, hhP.some_mem⟩) hz
          T := by
-          #check @ContinuousLinearMap.mk 𝕜 𝕜 _ _ (RingHom.id 𝕜) ↥Mmax _ _ F _ _ _ _
+
           sorry
          hT := sorry
          hU := sorry, }
@@ -122,4 +140,4 @@ lemma lemma_4_4
 
 end SphericalCompleteness
 
-#check StrongDual
+#check Submodule.mem_iSup_of_directed
