@@ -6,7 +6,8 @@ lemma lemma_4_4_codim_1
 (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 (E : Type*) [NormedAddCommGroup E] [IsUltrametricDist E] [NormedSpace 𝕜 E]
 (D : Submodule 𝕜 E)
-(a : E) (ha1 : a ∉ D) (ha2 : D + Submodule.span 𝕜 {a} = ⊤)
+(a : E) (ha1 : a ∉ D)
+--(ha2 : D + Submodule.span 𝕜 {a} = ⊤)
 (F : Type*) [NormedAddCommGroup F] [IsUltrametricDist F]
 [NormedSpace 𝕜 F] [SphericallyCompleteSpace F]
 (S : D →L[𝕜] F) (𝒰 : Set (E →L[𝕜] F)) (h𝒰 : 𝒰.Nonempty)
@@ -15,7 +16,13 @@ lemma lemma_4_4_codim_1
 (hε2 : ∀ U V : ↑𝒰, ‖U.val - V.val‖ ≤ max (ε U) (ε V))
 (hε3 : ∀ U : ↑𝒰, ∀ x : D, ‖S x - U.val x‖ ≤ ε U * ‖x‖)
 :
-∃ (T : E →L[𝕜] F), (∀ x : D, T x = S x) ∧ (∀ U : ↑𝒰, ‖T - U.val‖ ≤ ε U)
+∃ (T : (D + Submodule.span 𝕜 {a}) →L[𝕜] F),
+  (∀ x : D, T ⟨x.val, by
+    rw [Submodule.add_eq_sup, Submodule.mem_sup]
+    use x
+    simp only [x.prop, add_eq_left, exists_eq_right, zero_mem, and_self]
+    ⟩ = S x) ∧
+  (∀ U : ↑𝒰, ∀ x : E, (hx : x ∈ (D + Submodule.span 𝕜 {a})) → ‖T ⟨x, hx⟩ - U.val x‖ ≤ ε U * ‖x‖)
  := sorry
 
 
@@ -258,22 +265,66 @@ lemma lemma_4_4
 :
 ∃ (T : E →L[𝕜] F), (∀ x : D, T x = S x) ∧ (∀ U : ↑𝒰, ‖T - U.val‖ ≤ ε U)
  := by
-  have := @zorn_le_nonempty (PartialExtension 𝕜 E F S 𝒰 h𝒰 ε) _ (pene 𝕜 E F S 𝒰 h𝒰 ε hε3
+  rcases @zorn_le_nonempty (PartialExtension 𝕜 E F S 𝒰 h𝒰 ε) _ (pene 𝕜 E F S 𝒰 h𝒰 ε hε3
     ) (by
     intro P hP hhP
     apply bddAbove_of_chain_of_partial_extension
     repeat assumption
-  )
-  rcases this with ⟨T, hT⟩
-  have : T.M = ⊤ := by
+  ) with ⟨W, hW⟩
+  have : W.M = ⊤ := by
     by_contra hc
-    have : T.M < ⊤ := by exact Ne.lt_top' fun a ↦ hc (id (Eq.symm a))
+    have : W.M < ⊤ := Ne.lt_top' fun a ↦ hc (id (Eq.symm a))
     rcases Set.exists_of_ssubset this with ⟨a, ha⟩
-    --have := lemma_4_4_codim_1 𝕜 E T.M a ha.2
-    sorry
-  let f := this ▸ T.T
-
-  sorry
+    rcases lemma_4_4_codim_1 𝕜 E W.M a ha.2 F W.T 𝒰 h𝒰 ε hε1 hε2 W.hU with ⟨L, hL1, hL2⟩
+    let W' : PartialExtension 𝕜 E F S 𝒰 h𝒰 ε :=
+      { M := W.M + Submodule.span 𝕜 {a}
+        T := L
+        hDM := by
+          refine le_trans W.hDM ?_
+          simp only [Submodule.add_eq_sup, le_sup_left]
+        hT := by
+          intro x
+          specialize hL1 ⟨x, W.hDM x.prop⟩
+          rwa [← W.hT x]
+        hU := fun U x => hL2 U x.val x.prop
+      }
+    have : W' > W := by
+      apply lt_of_le_of_ne ?_ ?_
+      · unfold LE.le instPartialOrderPartialExtension
+        use (by
+          have : W'.M = W.M + Submodule.span 𝕜 {a} := rfl
+          rw [this]
+          simp only [Submodule.add_eq_sup, le_sup_left]
+        )
+      · by_contra hc
+        have : W'.M = W.M + Submodule.span 𝕜 {a} := rfl
+        replace := this ▸ congrArg PartialExtension.M hc
+        simp only [Submodule.add_eq_sup, left_eq_sup, Submodule.span_singleton_le_iff_mem] at this
+        exact ha.2 this
+    exact (not_le_of_gt this) <| hW <| le_of_lt this
+  let f := W.T ∘ (LinearEquiv.ofTop _ this).symm
+  have fiblm : IsBoundedLinearMap 𝕜 f := by
+    unfold f
+    apply IsBoundedLinearMap.comp (ContinuousLinearMap.isBoundedLinearMap W.T)
+    refine { toIsLinearMap :=
+      { map_add := fun x ↦ congrFun rfl, map_smul := fun c ↦ congrFun rfl }, bound := ⟨1, ?_⟩ }
+    simp only [zero_lt_one, AddSubgroupClass.coe_norm, LinearEquiv.coe_ofTop_symm_apply, one_mul,
+      le_refl, implies_true, and_self]
+  use IsBoundedLinearMap.toContinuousLinearMap fiblm
+  constructor
+  · intro D
+    simpa only [IsBoundedLinearMap.toContinuousLinearMap, IsBoundedLinearMap.toLinearMap,
+      IsLinearMap.mk', LinearEquiv.ofTop, LinearEquiv.coe_symm_mk', ContinuousLinearMap.coe_mk',
+      LinearMap.coe_mk, AddHom.coe_mk, Function.comp_apply] using W.hT D
+  · intro U
+    have tt : ∀ x : E, ‖(fiblm.toContinuousLinearMap - ↑U) x‖
+      = ‖W.T ⟨x, this ▸ Submodule.mem_top⟩ - U.val x‖ := by
+      intro x
+      simp only [IsBoundedLinearMap.toContinuousLinearMap, IsBoundedLinearMap.toLinearMap,
+        ContinuousLinearMap.coe_sub', ContinuousLinearMap.coe_mk', Pi.sub_apply,
+        IsLinearMap.mk'_apply, Function.comp_apply, LinearEquiv.ofTop_symm_apply, f]
+    rw [ContinuousLinearMap.opNorm_le_iff <| le_of_lt <| hε1 U]
+    exact fun x => tt x ▸ W.hU U ⟨x, this ▸ Submodule.mem_top⟩
 
 
 end SphericalCompleteness
