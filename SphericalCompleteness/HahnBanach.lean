@@ -102,7 +102,7 @@ noncomputable def glued_map (𝕜 : Type*) [NontriviallyNormedField 𝕜]
       (by apply directed_chain; repeat assumption)).1 x.2
     exact this.choose.val.T ⟨x.val,this.choose_spec⟩
 
-noncomputable def islinearmap_of_glued_map (𝕜 : Type*) [NontriviallyNormedField 𝕜]
+def islinearmap_of_glued_map (𝕜 : Type*) [NontriviallyNormedField 𝕜]
   {E : Type u_2} [NormedAddCommGroup E] [IsUltrametricDist E] [NormedSpace 𝕜 E]
   {D : Submodule 𝕜 E} {F : Type u_3} [NormedAddCommGroup F] [IsUltrametricDist F]
   [NormedSpace 𝕜 F] [SphericallyCompleteSpace F] {S : ↥D →L[𝕜] F} {𝒰 : Set (E →L[𝕜] F)}
@@ -156,7 +156,7 @@ noncomputable def islinearmap_of_glued_map (𝕜 : Type*) [NontriviallyNormedFie
       simp only [SetLike.val_smul]
       rw [t1, t2, ← Mfinal.val.T.map_smul, SetLike.mk_smul_mk]
 
-noncomputable def isboundedlinearmap_of_glued_map (𝕜 : Type*) [NontriviallyNormedField 𝕜]
+def isboundedlinearmap_of_glued_map (𝕜 : Type*) [NontriviallyNormedField 𝕜]
   {E : Type u_2} [NormedAddCommGroup E] [IsUltrametricDist E] [NormedSpace 𝕜 E]
   {D : Submodule 𝕜 E} {F : Type u_3} [NormedAddCommGroup F] [iudf : IsUltrametricDist F]
   [NormedSpace 𝕜 F] [SphericallyCompleteSpace F] {S : ↥D →L[𝕜] F}
@@ -194,40 +194,56 @@ noncomputable def isboundedlinearmap_of_glued_map (𝕜 : Type*) [NontriviallyNo
 theorem bddAbove_of_chain_of_partial_extension (𝕜 : Type*) [NontriviallyNormedField 𝕜]
   {E : Type u_2} [NormedAddCommGroup E] [IsUltrametricDist E] [NormedSpace 𝕜 E]
   {D : Submodule 𝕜 E} {F : Type u_3} [NormedAddCommGroup F] [IsUltrametricDist F]
-  [NormedSpace 𝕜 F] [SphericallyCompleteSpace F] {S : ↥D →L[𝕜] F} {𝒰 : Set (E →L[𝕜] F)}
-  (h𝒰 : 𝒰.Nonempty) (ε : ↑𝒰 → ℝ)
-  (hε1 : ∀ (T : ↑𝒰), 0 < ε T) (hε2 : ∀ (U V : ↑𝒰), ‖U.val - V.val‖ ≤ max (ε U) (ε V))
-  (hε3 : ∀ (U : ↑𝒰) (x : ↥D), ‖S x - U.val ↑x‖ ≤ ε U * ‖x‖)
+  [NormedSpace 𝕜 F] [SphericallyCompleteSpace F] {S : ↥D →L[𝕜] F}
+  {𝒰 : Set (E →L[𝕜] F)} (h𝒰 : 𝒰.Nonempty)
+  (ε : ↑𝒰 → ℝ) (hε1 : ∀ (T : ↑𝒰), 0 < ε T)
   (P : Set (PartialExtension 𝕜 E F S 𝒰 h𝒰 ε))
   (hP : IsChain (fun x1 x2 ↦ x1 ≤ x2) P) (hhP : P.Nonempty) : BddAbove P := by
-  let Mmax := iSup (fun p : P ↦ p.val.M)
-  let fmax : Mmax → F := fun x => by
-    haveI : Nonempty ↑P := Set.Nonempty.to_subtype hhP
-    have : Directed (fun x1 x2 ↦ x1 ≤ x2) (fun p : P ↦ p.val.M) := by
-      intro a b
-      rcases hP.directed a b with ⟨c, hc1, hc2⟩
-      use c
-      constructor
-      · cases hc1; assumption
-      · cases hc2; assumption
-    have := (Submodule.mem_iSup_of_directed (fun p : P ↦ p.val.M) this).1 x.2
-    exact this.choose.val.T ⟨x.val,this.choose_spec⟩
-  use { M := Mmax
-        hDM := by
-          unfold Mmax
-          intro z hz
-          rw [Submodule.mem_iSup]
-          intro N hN
-          exact (le_trans hhP.some.hDM <| hN ⟨hhP.some, hhP.some_mem⟩) hz
-        T := by
+  use { M := iSup (fun p : P ↦ p.val.M)
+        hDM := fun z hz => (Submodule.mem_iSup _).2 <|
+          fun N hN => (le_trans hhP.some.hDM <| hN ⟨hhP.some, hhP.some_mem⟩) hz
+        T := IsBoundedLinearMap.toContinuousLinearMap
+          (isboundedlinearmap_of_glued_map 𝕜 h𝒰 ε hε1 P hP hhP)
+        hT := by
+          intro d
+          simp only [IsBoundedLinearMap.toContinuousLinearMap, IsBoundedLinearMap.toLinearMap,
+            ContinuousLinearMap.coe_mk', IsLinearMap.mk'_apply, glued_map]
+          haveI : Nonempty ↑P := Set.Nonempty.to_subtype hhP
+          have : D ≤ iSup (fun p : P ↦ p.val.M) := fun z hz => (Submodule.mem_iSup _).2 <|
+            fun N hN => (le_trans hhP.some.hDM <| hN ⟨hhP.some, hhP.some_mem⟩) hz
+          rw [((Submodule.mem_iSup_of_directed (fun p : P ↦ p.val.M)
+            (by apply directed_chain; repeat assumption)).1 <| this d.prop).choose.val.hT]
+        hU := by
+          intro U x
+          simp only [IsBoundedLinearMap.toContinuousLinearMap, IsBoundedLinearMap.toLinearMap,
+            ContinuousLinearMap.coe_mk', IsLinearMap.mk'_apply, glued_map,
+            AddSubgroupClass.coe_norm]
+          haveI : Nonempty ↑P := Set.Nonempty.to_subtype hhP
+          let Mx := ((Submodule.mem_iSup_of_directed (fun p : P ↦ p.val.M)
+            (by apply directed_chain; repeat assumption)).1 x.prop).choose
+          let hMx := ((Submodule.mem_iSup_of_directed (fun p : P ↦ p.val.M)
+            (by apply directed_chain; repeat assumption)).1 x.prop).choose_spec
+          simpa only [ge_iff_le, AddSubgroupClass.coe_norm] using Mx.val.hU U ⟨x.val, hMx⟩
+      }
+  simp only [upperBounds, Set.mem_setOf_eq]
+  intro M hM
+  unfold LE.le instPartialOrderPartialExtension
+  simp only [Subtype.forall, not_exists, not_forall]
+  have hM' : M.M ≤ ⨆ (p : ↑P), (↑p : PartialExtension 𝕜 E F S 𝒰 h𝒰 ε).M :=
+    fun z hz => Submodule.mem_iSup_of_mem ⟨M,hM⟩ hz
+  use hM'
+  intro a ha
+  simp only [IsBoundedLinearMap.toContinuousLinearMap, IsBoundedLinearMap.toLinearMap,
+    ContinuousLinearMap.coe_mk', IsLinearMap.mk'_apply, glued_map]
+  haveI : Nonempty ↑P := Set.Nonempty.to_subtype hhP
+  let Ma := ((Submodule.mem_iSup_of_directed (fun p : P ↦ p.val.M)
+    (by apply directed_chain; repeat assumption)).1 (hM' ha)).choose
+  let hMa := ((Submodule.mem_iSup_of_directed (fun p : P ↦ p.val.M)
+    (by apply directed_chain; repeat assumption)).1 (hM' ha)).choose_spec
+  rcases hP.directed Ma ⟨M,hM⟩ with ⟨Mfinal, hMfinal1, hMfinal2⟩
+  rw [← hMfinal1.choose_spec ⟨a, hMa⟩, ← hMfinal2.choose_spec ⟨a, ha⟩]
 
-          sorry
-        hT := sorry
-        hU := sorry, }
-  sorry
 
-
-set_option maxHeartbeats 0 in
 lemma lemma_4_4
 (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 {E : Type*} [NormedAddCommGroup E] [IsUltrametricDist E] [NormedSpace 𝕜 E]
@@ -261,5 +277,3 @@ lemma lemma_4_4
 
 
 end SphericalCompleteness
-
-#check Submodule.mem_iSup_of_directed
