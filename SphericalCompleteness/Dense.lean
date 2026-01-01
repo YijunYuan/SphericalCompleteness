@@ -8,7 +8,7 @@ import Mathlib.NumberTheory.Padics.ProperSpace
 import Mathlib.NumberTheory.Padics.Complex
 
 import SphericalCompleteness.Basic
-import SphericalCompleteness.UltrametricDiam
+import SphericalCompleteness.External.Ultrametric
 
 open Metric
 open Filter
