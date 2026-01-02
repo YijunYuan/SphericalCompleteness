@@ -6,11 +6,11 @@ import Mathlib.Topology.Algebra.Valued.NormedValued
 import Mathlib.Analysis.Normed.Module.Basic
 import Mathlib.NumberTheory.Padics.ProperSpace
 import Mathlib.NumberTheory.LocalField.Basic
-import Mathlib.LinearAlgebra.Dimension.Finrank
 
 import SphericalCompleteness.External.Complete
 import SphericalCompleteness.External.Ultrametric
 import SphericalCompleteness.External.Sequence
+import SphericalCompleteness.External.NNReal
 
 open Metric
 open Filter
@@ -106,8 +106,7 @@ theorem sphericallyComplete_iff' (α : Type*) [PseudoMetricSpace α] [iud : IsUl
       rcases this i with ⟨N, hN⟩
       exact (hanti hN) <| hz N
 
-theorem smaller_radius {α : Type*}
-  [PseudoMetricSpace α] [SphericallyCompleteSpace α]
+lemma smaller_radius {α : Type*} [PseudoMetricSpace α]
   {S : Set (α × NNReal)} [hS : Nonempty ↑S]
   (hw : (∀ w ∈ S, sInf {x | ∃ w ∈ S, w.2 = x} < w.2)) :
   ∀ (n : ℕ) (s : ↑S), ∃ b ∈ {x | ∃ w ∈ S, w.2 = x},
@@ -128,8 +127,7 @@ theorem smaller_radius {α : Type*}
         s.val.2))
 
 noncomputable def countable_chain_of_ball {α : Type*}
-  [PseudoMetricSpace α] [iud : IsUltrametricDist α]
-  [SphericallyCompleteSpace α]
+  [PseudoMetricSpace α]
   {S : Set (α × NNReal)} [hS : Nonempty S]
   (hw : ∀ w ∈ S, sInf {x | ∃ w ∈ S, w.2 = x} < w.2) : ℕ → ↑S := fun n =>
   match n with
@@ -157,32 +155,6 @@ lemma antitone_of_countable_chain_of_ball {α : Type*}
       (countable_chain_of_ball hw n))).choose_spec.2) ?_
     simp only [inf_le_right]
   · apply hS'
-
-lemma exists_add_one_div_pow_two_lt (a b : NNReal) (h : a < b) : ∃ n : ℕ, a + 1 / 2 ^ n < b := by
-  let c : NNReal := ⟨b - a, by
-    simpa only [sub_nonneg, NNReal.coe_le_coe] using le_of_lt h
-    ⟩
-  have hc : c > 0 := by
-    unfold c
-    refine NNReal.coe_pos.mp ?_
-    simpa only [NNReal.coe_mk, sub_pos, NNReal.coe_lt_coe]
-  rcases NNReal.exists_nat_pos_inv_lt hc with ⟨N, hN1, hN2⟩
-  use N
-  simp only [gt_iff_lt, one_div, c] at *
-  field_simp at hN2
-  replace hN2 : 1 < N * (b.val - a.val) := hN2
-  field_simp
-  suffices hh : 1 < 2 ^ N * (b.val - a.val) by
-    nth_rw 1 [mul_sub, lt_sub_iff_add_lt, add_comm] at hh
-    have : 2 ^ N * a.val + 1 = ↑(2 ^ N * a + 1) := rfl
-    rw [this] at hh
-    have : 2 ^ N * b.val = ↑(2 ^ N * b) := rfl
-    nth_rw 1 [this, mul_comm] at hh
-    exact NNReal.coe_lt_coe.mp hh
-  refine lt_trans hN2 ?_
-  refine mul_lt_mul_of_lt_of_le_of_pos_of_nonneg ?_ (le_refl _) hc <| pow_nonneg zero_le_two N
-  suffices _ : N < 2 ^ N by norm_cast
-  exact Nat.lt_two_pow_self
 
 lemma cofinal_of_countable_chain_of_ball {α : Type*}
   [PseudoMetricSpace α] [IsUltrametricDist α]
@@ -261,6 +233,25 @@ theorem sphericallyComplete_iff'' (α : Type*) [PseudoMetricSpace α] [iud : IsU
     simp only [Set.coe_setOf, Set.mem_setOf_eq, Set.nonempty_iInter] at h
     rcases h with ⟨z, hz⟩
     exact ⟨z, Set.mem_iInter.2 <| fun i => hz ⟨(c i, r i), Exists.intro i (Eq.refl (c i, r i))⟩⟩
+
+open List in
+theorem sphericallyComplete_equiv (α : Type*) [PseudoMetricSpace α] [iud : IsUltrametricDist α] :
+TFAE [
+  SphericallyCompleteSpace α,
+  ∀ ⦃ci : ℕ → α⦄, ∀ ⦃ri : ℕ → NNReal⦄,
+    Antitone ri →
+    Antitone (fun i => closedBall (ci i) (ri i)) → (⋂ i, closedBall (ci i) (ri i)).Nonempty,
+  ∀ ⦃ci : ℕ → α⦄, ∀ ⦃ri : ℕ → NNReal⦄,
+    StrictAnti ri →
+    Antitone (fun i => closedBall (ci i) (ri i)) → (⋂ i, closedBall (ci i) (ri i)).Nonempty,
+  ∀ S : Set (α × NNReal), S.Nonempty →
+    (∀ w1 w2 : ↑S, (closedBall w1.val.1 w1.val.2 ∩ closedBall w2.val.1 w2.val.2).Nonempty) →
+    (⋂ w : ↑S, closedBall w.val.1 w.val.2).Nonempty
+] := by
+  tfae_have 1 ↔ 2 := sphericallyComplete_iff α
+  tfae_have 1 ↔ 3 := sphericallyComplete_iff' α
+  tfae_have 1 ↔ 4 := sphericallyComplete_iff'' α
+  tfae_finish
 
 instance instCompleteOfSphericallyComplete (α : Type*)
   [PseudoMetricSpace α] [sc : SphericallyCompleteSpace α] : CompleteSpace α := by

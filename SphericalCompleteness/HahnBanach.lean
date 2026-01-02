@@ -1,15 +1,243 @@
 import SphericalCompleteness.VectorSpace
+import SphericalCompleteness.Basic
 
-namespace SphericalCompleteness
+open Metric
+
+namespace SphericallyCompleteSpace
+
+lemma lemma_4_4_z0 {𝕜 : Type*}
+  [NontriviallyNormedField 𝕜] {E : Type u_2} [NormedAddCommGroup E] [iude : IsUltrametricDist E]
+  [NormedSpace 𝕜 E] {D : Submodule 𝕜 E}
+  {a : E} (ha1 : a ∉ D)
+  {F : Type u_3} [NormedAddCommGroup F]
+  [iud : IsUltrametricDist F] [NormedSpace 𝕜 F] [hsc : SphericallyCompleteSpace F]
+  (S : ↥D →L[𝕜] F) {𝒰 : Set (E →L[𝕜] F)} (h𝒰 : 𝒰.Nonempty)
+  {ε : ↑𝒰 → ℝ} (hε1 : ∀ (T : ↑𝒰), 0 < ε T) (hε2 : ∀ (U V : ↑𝒰), ‖U.val - V.val‖ ≤ max (ε U) (ε V))
+  (hε3 : ∀ (U : ↑𝒰) (x : ↥D), ‖S x - U.val ↑x‖ ≤ ε U * ‖x‖) :
+  ∃ z0 : F, ∀ (x : ↥D) (U : ↑𝒰), ‖S x + z0 - U.val (↑x + a)‖ ≤ ε U * ‖↑x + a‖ := by
+  rw [sphericallyComplete_iff''] at hsc
+  let 𝒮 : Set (F × NNReal) := {(U.val x + U.val a - S x,
+    ⟨(ε U) * ‖x + a‖, mul_nonneg (le_of_lt (hε1 _)) (norm_nonneg _)⟩) | (x : ↑D) (U : ↑𝒰)}
+  have : 𝒮.Nonempty := by
+    use (h𝒰.some 0 + h𝒰.some a - S 0, ⟨(ε ⟨h𝒰.some, h𝒰.some_mem⟩)
+      * ‖0 + a‖, mul_nonneg (le_of_lt (hε1 _)) (norm_nonneg _)⟩)
+    unfold 𝒮
+    use 0, ⟨h𝒰.some, h𝒰.some_mem⟩
+    simp only [ZeroMemClass.coe_zero, map_zero, zero_add, sub_zero]
+  specialize hsc 𝒮 this
+  have h𝒮 : ∀ (w1 w2 : ↑𝒮), (closedBall w1.val.1 w1.val.2 ∩
+    closedBall w2.val.1 ↑w2.val.2).Nonempty := by
+    intro s1 s2
+    wlog h : ε s1.2.out.choose_spec.choose ≤ ε s2.2.out.choose_spec.choose
+    · specialize this ha1 S h𝒰 hε1 hε2 hε3 (by assumption)
+        hsc s2 s1 (le_of_lt <| lt_of_not_ge h)
+      rwa [Set.inter_comm]
+    · let x := s1.2.out.choose
+      let U := s1.2.out.choose_spec.choose
+      let hxU := s1.2.out.choose_spec.choose_spec
+      let y := s2.2.out.choose
+      let V := s2.2.out.choose_spec.choose
+      let hyV := s2.2.out.choose_spec.choose_spec
+      have : ‖(U.val ↑x + U.val a - S x) - (V.val ↑y + V.val a - S y)‖ ≤
+        max ((ε V) * ‖y + a‖) ((ε U) * ‖x + a‖) := by
+        have : (U.val ↑x + U.val a - S x) - (V.val ↑y + V.val a - S y) =
+          (U.val - V.val) (y + a) - (S (x - y) - U.val (x - y)) := by
+          simp
+          abel
+        rw [this, sub_eq_add_neg]
+        refine le_trans (iud.norm_add_le_max _ _) ?_
+        rw [norm_neg]
+        specialize hε3 U ⟨x.val - y.val, (Submodule.sub_mem_iff_left D y.prop).mpr x.prop⟩
+        have : ⟨↑x - ↑y, (Submodule.sub_mem_iff_left D y.prop).mpr x.prop⟩ = x - y:= rfl
+        rw [this] at hε3
+        have : (x - y).val = x.val - y.val := rfl
+        rw [this] at hε3
+        specialize hε2 U V
+        replace hε2 := mul_le_mul_of_nonneg_right hε2 (norm_nonneg (y + a))
+        replace hε2 := le_trans (ContinuousLinearMap.le_opNorm (U.val - V.val) (y + a)) hε2
+        refine le_trans (max_le_max hε2 hε3) ?_
+        have : max (max (ε U) (ε V) * ‖↑y + a‖) (ε U * ‖x - y‖) ≤
+          max ((ε V) * ‖↑y + a‖) (ε U * ‖x - y‖) := by
+          refine sup_le_sup_right ?_ (ε U * ‖x - y‖)
+          exact mul_le_mul_of_nonneg_right (max_le h <| le_refl (ε V)) (norm_nonneg _)
+        refine le_trans this ?_
+        have : ‖x - y‖ = ‖(x.val + a) + -(y.val + a)‖ := by
+          rw [← sub_eq_add_neg]
+          simp only [AddSubgroupClass.coe_norm, AddSubgroupClass.coe_sub, add_sub_add_right_eq_sub]
+        replace this : ‖x - y‖ ≤ max ‖x.val + a‖ ‖y.val + a‖:= by
+          rw [this]
+          refine le_trans (iude.norm_add_le_max _ _) ?_
+          rw [norm_neg]
+        replace := mul_le_mul_of_nonneg_left this <| le_of_lt (hε1 U)
+        rw [mul_max_of_nonneg _ _ (le_of_lt (hε1 U))] at this
+        refine le_trans (max_le_max_left _ this) ?_
+        nth_rw 2 [max_comm]
+        rw [← max_assoc]
+        nth_rw 2 [max_eq_left]
+        exact mul_le_mul_of_nonneg_right h (norm_nonneg _)
+      rcases le_sup_iff.1 this with hc | hc
+      · use U.val ↑x + U.val a - S x
+        simp only [Set.mem_inter_iff]
+        constructor
+        · rw [← hxU]
+          unfold U x
+          simp only [Subtype.exists, NNReal.coe_mk, mem_closedBall, dist_self]
+          exact Left.mul_nonneg (le_of_lt (hε1 _)) <| norm_nonneg _
+        · rw [← dist_eq_norm, ← mem_closedBall] at hc
+          rwa [← hyV]
+      · use V.val ↑y + V.val a - S y
+        simp only [Set.mem_inter_iff]
+        constructor
+        · rw [← dist_eq_norm, dist_comm, ← mem_closedBall] at hc
+          rwa [← hxU]
+        · rw [← hyV]
+          unfold V y
+          simp only [Subtype.exists, NNReal.coe_mk, mem_closedBall, dist_self]
+          exact Left.mul_nonneg (le_of_lt (hε1 _)) <| norm_nonneg _
+  specialize hsc h𝒮
+  simp only [Set.iInter_coe_set, Set.nonempty_iInter, Set.mem_iInter, mem_closedBall] at hsc
+  rcases hsc with ⟨z0, hz0⟩
+  use z0
+  intro x U
+  have : (U.val x + U.val a - S x,
+    ⟨ε U * ‖x.val + a‖, mul_nonneg (le_of_lt (hε1 _)) (norm_nonneg _) ⟩) ∈ 𝒮 := by
+    use x, U
+  specialize hz0 _ this
+  simp only at hz0
+  rw [dist_eq_norm] at hz0
+  have : z0 - (U.val ↑x + U.val a - S x) = S x + z0 - U.val (↑x + a) := by
+    simp only [map_add]; abel
+  rwa [this] at hz0
+
+noncomputable def lemma_4_4_T {𝕜 : Type*}
+  [NontriviallyNormedField 𝕜] {E : Type u_2} [NormedAddCommGroup E] [iude : IsUltrametricDist E]
+  [NormedSpace 𝕜 E] {D : Submodule 𝕜 E}
+  {a : E} (ha1 : a ∉ D)
+  {F : Type u_3} [NormedAddCommGroup F]
+  [iud : IsUltrametricDist F] [NormedSpace 𝕜 F] [hsc : SphericallyCompleteSpace F]
+  (S : ↥D →L[𝕜] F) {𝒰 : Set (E →L[𝕜] F)} (h𝒰 : 𝒰.Nonempty)
+  {ε : ↑𝒰 → ℝ} (hε1 : ∀ (T : ↑𝒰), 0 < ε T) (hε2 : ∀ (U V : ↑𝒰), ‖U.val - V.val‖ ≤ max (ε U) (ε V))
+  (hε3 : ∀ (U : ↑𝒰) (x : ↥D), ‖S x - U.val ↑x‖ ≤ ε U * ‖x‖) :
+  (D + Submodule.span 𝕜 {a}) → F := fun M => by
+    have := Submodule.mem_sup.1 M.prop
+    let lambda := (Submodule.mem_span_singleton.1 this.choose_spec.2.choose_spec.1).choose
+    use S ⟨this.choose, this.choose_spec.1⟩ + lambda • (lemma_4_4_z0 ha1 S h𝒰 hε1 hε2 hε3).choose
+
+lemma unique_sum_of_disjoint_submodule {𝕜 : Type*} [Field 𝕜]
+{V : Type*} [AddCommGroup V] [Module 𝕜 V]
+{D : Submodule 𝕜 V} {a : V} (ha : a ∉ D) :
+∀ d1 ∈ D, ∀ la1 ∈ Submodule.span 𝕜 {a}, ∀ d2 ∈ D, ∀ la2 ∈ Submodule.span 𝕜 {a},
+  d1 + la1 = d2 + la2 → d1 = d2 ∧ la1 = la2 := by
+  intro d1 hd1 la1 hla1 d2 hd2 la2 hla2 heq
+  rw [add_comm, ← sub_eq_sub_iff_add_eq_add] at heq
+  have : d2 - d1 ∈ Submodule.span 𝕜 {a} := by
+    rw [← heq]
+    exact (Submodule.sub_mem_iff_left (Submodule.span 𝕜 {a}) hla2).mpr hla1
+  rcases Submodule.mem_span_singleton.1 this with ⟨r, hr⟩
+  if hr' : r = 0 then
+    simp only [hr', zero_smul] at hr
+    rw [← hr] at heq
+    constructor
+    · exact Eq.symm <| sub_eq_zero.1 <| hr.symm
+    · rwa [sub_eq_zero] at heq
+  else
+  replace hr : a = r⁻¹ • (d2 - d1) := by
+    rw [← hr]
+    exact (eq_inv_smul_iff₀ hr').mpr rfl
+  simp only [hr] at ha
+  exfalso
+  exact ha <| Submodule.smul_mem D r⁻¹ <| (Submodule.sub_mem_iff_left D hd1).mpr hd2
+
+noncomputable def lemma_4_4_T_linear {𝕜 : Type*}
+  [NontriviallyNormedField 𝕜] {E : Type u_2} [NormedAddCommGroup E] [iude : IsUltrametricDist E]
+  [NormedSpace 𝕜 E] {D : Submodule 𝕜 E}
+  {a : E} (ha1 : a ∉ D)
+  {F : Type u_3} [NormedAddCommGroup F]
+  [iud : IsUltrametricDist F] [NormedSpace 𝕜 F] [hsc : SphericallyCompleteSpace F]
+  (S : ↥D →L[𝕜] F) {𝒰 : Set (E →L[𝕜] F)} (h𝒰 : 𝒰.Nonempty)
+  {ε : ↑𝒰 → ℝ} (hε1 : ∀ (T : ↑𝒰), 0 < ε T) (hε2 : ∀ (U V : ↑𝒰), ‖U.val - V.val‖ ≤ max (ε U) (ε V))
+  (hε3 : ∀ (U : ↑𝒰) (x : ↥D), ‖S x - U.val ↑x‖ ≤ ε U * ‖x‖) :
+  IsLinearMap 𝕜 (lemma_4_4_T ha1 S h𝒰 hε1 hε2 hε3) where
+  map_add x1 x2 := by
+    have hadd := (Submodule.mem_sup.1 (x1 + x2).prop).choose_spec.2.choose_spec.2
+    unfold lemma_4_4_T
+    simp only
+    have := unique_sum_of_disjoint_submodule ha1
+      (Submodule.mem_sup.1 (x1 + x2).prop).choose
+      (Submodule.mem_sup.1 (x1 + x2).prop).choose_spec.1
+      (Submodule.mem_sup.1 (x1 + x2).prop).choose_spec.2.choose
+      (Submodule.mem_sup.1 (x1 + x2).prop).choose_spec.2.choose_spec.1
+      ((Submodule.mem_sup.1 x1.prop).choose + (Submodule.mem_sup.1 x2.prop).choose) (by
+      refine Submodule.add_mem D ?_ ?_
+      · exact (Submodule.mem_sup.1 x1.prop).choose_spec.1
+      · exact (Submodule.mem_sup.1 x2.prop).choose_spec.1)
+      ((Submodule.mem_sup.1 x1.prop).choose_spec.2.choose +
+        (Submodule.mem_sup.1 x2.prop).choose_spec.2.choose) (by
+        refine Submodule.add_mem _ ?_ ?_
+        · exact (Submodule.mem_sup.1 x1.prop).choose_spec.2.choose_spec.1
+        · exact (Submodule.mem_sup.1 x2.prop).choose_spec.2.choose_spec.1
+          ) (by
+        rw [add_add_add_comm]
+        rw [(Submodule.mem_sup.1 (x1 + x2).prop).choose_spec.2.choose_spec.2]
+        rw [(Submodule.mem_sup.1 x1.prop).choose_spec.2.choose_spec.2]
+        rw [(Submodule.mem_sup.1 x2.prop).choose_spec.2.choose_spec.2]
+        exact rfl
+        )
+    simp only [Submodule.add_eq_sup, Submodule.coe_add, this.1, map_add, Subtype.forall]
+    rw [add_assoc]
+    nth_rw 2 [← add_assoc]
+    have stupid : ∀ a b c d : F, a + (b + c + d) = (a + c) + (b + d) := by
+      intro a b c d
+      abel
+    rw [stupid]
+    have stupid : ∀ a b c d : F, a = b → c = d → a + c = b + d := by
+      intro a b c d hab hcd
+      rw [hab, hcd]
+    apply stupid
+    · rw [← S.map_add]
+      congr
+    · rw [← add_smul]
+      congr
+      replace := this.2
+      rw [← (Submodule.mem_span_singleton.1
+            (Submodule.mem_sup.1 x1.prop).choose_spec.2.choose_spec.1).choose_spec,
+          ← (Submodule.mem_span_singleton.1
+            (Submodule.mem_sup.1 x2.prop).choose_spec.2.choose_spec.1).choose_spec,
+          ← (Submodule.mem_span_singleton.1
+            (Submodule.mem_sup.1 (x1 + x2).prop).choose_spec.2.choose_spec.1).choose_spec,
+          ← add_smul] at this
+      have ha : a ≠ 0 := by
+        by_contra hc
+        contrapose ha1
+        simp only [hc, zero_mem]
+      have := smul_left_injective _ ha this
+      rw [← this]
+      simp_all only [Subtype.forall, le_sup_iff, AddSubgroupClass.coe_norm,
+      Submodule.add_eq_sup, Submodule.coe_add, implies_true, ne_eq]
+  map_smul k m := by
+    unfold lemma_4_4_T
+    simp only
+    have stupid : ∀ a b c d : F, a = b → c = d → a + c = b + d := by
+      intro a b c d hab hcd
+      rw [hab, hcd]
+    rw [smul_add, ← S.map_smul]
+    apply stupid
+    · congr
+      --have := (Submodule.mem_span_singleton.1 (Submodule.mem_sup.1 (k • m).prop).choose_spec.2.choose_spec.1).choose_spec
+      sorry
+    · rw [smul_smul]
+      congr
+
+      sorry
 
 lemma lemma_4_4_codim_1
 (𝕜 : Type*) [NontriviallyNormedField 𝕜]
-(E : Type*) [NormedAddCommGroup E] [IsUltrametricDist E] [NormedSpace 𝕜 E]
+(E : Type*) [NormedAddCommGroup E] [iude : IsUltrametricDist E] [NormedSpace 𝕜 E]
 (D : Submodule 𝕜 E)
 (a : E) (ha1 : a ∉ D)
 --(ha2 : D + Submodule.span 𝕜 {a} = ⊤)
-(F : Type*) [NormedAddCommGroup F] [IsUltrametricDist F]
-[NormedSpace 𝕜 F] [SphericallyCompleteSpace F]
+(F : Type*) [NormedAddCommGroup F] [iud : IsUltrametricDist F]
+[NormedSpace 𝕜 F] [hsc : SphericallyCompleteSpace F]
 (S : D →L[𝕜] F) (𝒰 : Set (E →L[𝕜] F)) (h𝒰 : 𝒰.Nonempty)
 (ε : ↑𝒰 → ℝ)
 (hε1 : ∀ T : ↑𝒰, 0 < ε T)
@@ -23,7 +251,9 @@ lemma lemma_4_4_codim_1
     simp only [x.prop, add_eq_left, exists_eq_right, zero_mem, and_self]
     ⟩ = S x) ∧
   (∀ U : ↑𝒰, ∀ x : E, (hx : x ∈ (D + Submodule.span 𝕜 {a})) → ‖T ⟨x, hx⟩ - U.val x‖ ≤ ε U * ‖x‖)
- := sorry
+ := by
+
+  sorry
 
 
 @[ext]
@@ -327,4 +557,4 @@ lemma lemma_4_4
     exact fun x => tt x ▸ W.hU U ⟨x, this ▸ Submodule.mem_top⟩
 
 
-end SphericalCompleteness
+end SphericallyCompleteSpace
