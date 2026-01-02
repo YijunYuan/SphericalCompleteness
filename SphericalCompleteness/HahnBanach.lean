@@ -220,15 +220,39 @@ noncomputable def lemma_4_4_T_linear {𝕜 : Type*}
     have stupid : ∀ a b c d : F, a = b → c = d → a + c = b + d := by
       intro a b c d hab hcd
       rw [hab, hcd]
+    have := unique_sum_of_disjoint_submodule ha1
+        (Submodule.mem_sup.1 (k • m).prop).choose
+        (Submodule.mem_sup.1 (k • m).prop).choose_spec.1
+        (Submodule.mem_sup.1 (k • m).prop).choose_spec.2.choose
+        (Submodule.mem_sup.1 (k • m).prop).choose_spec.2.choose_spec.1
+        (k • (Submodule.mem_sup.1 m.prop).choose) (by
+        refine Submodule.smul_mem D k ?_
+        exact (Submodule.mem_sup.1 m.prop).choose_spec.1)
+        (k • (Submodule.mem_sup.1 m.prop).choose_spec.2.choose) (by
+        refine Submodule.smul_mem _ k ?_
+        exact (Submodule.mem_sup.1 m.prop).choose_spec.2.choose_spec.1
+        ) (by
+        rw [← smul_add]
+        rw [(Submodule.mem_sup.1 (k • m).prop).choose_spec.2.choose_spec.2]
+        rw [(Submodule.mem_sup.1 m.prop).choose_spec.2.choose_spec.2]
+        rfl
+        )
     rw [smul_add, ← S.map_smul]
     apply stupid
     · congr
-      --have := (Submodule.mem_span_singleton.1 (Submodule.mem_sup.1 (k • m).prop).choose_spec.2.choose_spec.1).choose_spec
-      sorry
+      rw [this.1]
     · rw [smul_smul]
       congr
-
-      sorry
+      rw [← (Submodule.mem_span_singleton.1 (Submodule.mem_sup.1
+            (k • m).prop).choose_spec.2.choose_spec.1).choose_spec,
+          ← (Submodule.mem_span_singleton.1 (Submodule.mem_sup.1
+             m.prop).choose_spec.2.choose_spec.1).choose_spec,
+          smul_smul] at this
+      have ha : a ≠ 0 := by
+        by_contra hc
+        contrapose ha1
+        simp only [hc, zero_mem]
+      exact smul_left_injective _ ha this.2
 
 lemma lemma_4_4_codim_1
 (𝕜 : Type*) [NontriviallyNormedField 𝕜]
