@@ -352,9 +352,43 @@ lemma lemma_4_4_codim_1
   (∀ U : ↑𝒰, ∀ x : E, (hx : x ∈ (D + Submodule.span 𝕜 {a})) → ‖T ⟨x, hx⟩ - U.val x‖ ≤ ε U * ‖x‖)
  := by
   use (lemma_4_4_T_boundedlinear ha1 S h𝒰 hε1 hε2 hε3).toContinuousLinearMap
-
-  sorry
-
+  constructor
+  · intro x
+    unfold IsBoundedLinearMap.toContinuousLinearMap IsBoundedLinearMap.toLinearMap
+      IsLinearMap.mk' lemma_4_4_T
+    simp only [Submodule.add_eq_sup, map_add, Subtype.forall, ContinuousLinearMap.coe_mk',
+      LinearMap.coe_mk, AddHom.coe_mk]
+    have : x.val ∈ D + Submodule.span 𝕜 {a} := Submodule.mem_sup_left x.prop
+    have t := unique_sum_of_disjoint_submodule ha1
+      (Submodule.mem_sup.1 this).choose (Submodule.mem_sup.1 this).choose_spec.1
+      ((Submodule.mem_span_singleton.1
+        (Submodule.mem_sup.1 this).choose_spec.2.choose_spec.1).choose • a)
+      ((Submodule.mem_span_singleton.1
+        (Submodule.mem_sup.1 this).choose_spec.2.choose_spec.1).choose_spec.symm ▸
+        (Submodule.mem_sup.1 this).choose_spec.2.choose_spec.1)
+      x.val x.prop 0 (Submodule.zero_mem _)
+    specialize t (by
+      have := (Submodule.mem_span_singleton.1
+        (Submodule.mem_sup.1 this).choose_spec.2.choose_spec.1).choose_spec.symm ▸
+        (Submodule.mem_sup.1 this).choose_spec.2.choose_spec.2
+      rw [this, add_zero]
+      )
+    have := (smul_eq_zero_iff_left (by
+      contrapose ha1
+      simp only [ha1, zero_mem])).1 t.2
+    simp only [this, zero_smul, add_zero]
+    congr
+    exact t.1
+  · intro U x hx
+    unfold IsBoundedLinearMap.toContinuousLinearMap IsBoundedLinearMap.toLinearMap
+      IsLinearMap.mk' lemma_4_4_T
+    have := (lemma_4_4_z0_prop ha1 S h𝒰 hε1 hε2 hε3) ⟨(Submodule.mem_sup.1 hx).choose,
+      (Submodule.mem_sup.1 hx).choose_spec.1⟩ ((Submodule.mem_span_singleton.1
+      (Submodule.mem_sup.1 hx).choose_spec.2.choose_spec.1).choose) U
+    have t := (Submodule.mem_span_singleton.1
+      (Submodule.mem_sup.1 hx).choose_spec.2.choose_spec.1).choose_spec ▸
+      (Submodule.mem_sup.1 hx).choose_spec.2.choose_spec.2
+    rwa [t] at this
 
 @[ext]
 structure PartialExtension (𝕜 : Type*) [NontriviallyNormedField 𝕜]
