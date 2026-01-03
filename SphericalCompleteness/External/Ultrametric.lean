@@ -2,6 +2,7 @@ import Mathlib.Topology.MetricSpace.Ultra.Basic
 import Mathlib.Tactic
 import Mathlib.Topology.MetricSpace.Pseudo.Defs
 import Mathlib.Analysis.Normed.Group.Ultra
+import Mathlib.Analysis.Normed.Operator.Basic
 
 open Metric
 open NNReal
@@ -153,3 +154,21 @@ instance (𝕜 : Type u_1) [NontriviallyNormedField 𝕜]
       simp only [le_sup_iff, norm_nonneg, or_self]
     · use (x0, y0)
       simp only [Set.mem_prod, hox0, hoy0, and_self, hox0', hoy0']
+
+instance {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+{E : Type*} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E]
+{F : Type*} [SeminormedAddCommGroup F] [iud : IsUltrametricDist F]
+[NormedSpace 𝕜 F] :
+IsUltrametricDist (E →L[𝕜] F) where
+  dist_triangle_max := by
+    intro f g h
+    repeat rw [dist_eq_norm]
+    rw [ContinuousLinearMap.opNorm_le_iff]
+    · intro x
+      have : ‖(f - h) x‖ = ‖(f - g) x + (g - h) x‖ := by
+        simp only [ContinuousLinearMap.coe_sub', Pi.sub_apply, sub_add_sub_cancel]
+      rw [this, max_mul_of_nonneg _ _ (norm_nonneg _)]
+      refine le_trans (iud.norm_add_le_max ((f - g) x) ((g - h) x)) <| max_le_max ?_ ?_
+      · exact ContinuousLinearMap.le_opNorm (f - g) x
+      · exact ContinuousLinearMap.le_opNorm (g - h) x
+    · simp only [le_sup_iff, norm_nonneg, or_self]

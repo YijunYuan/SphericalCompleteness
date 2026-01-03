@@ -1,0 +1,74 @@
+import SphericalCompleteness.NormedVectorSpace.ContinuousLinearMap.SupportingResults
+
+namespace SphericallyCompleteSpace
+
+instance {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+{E : Type*} [NormedAddCommGroup E] [IsUltrametricDist E]
+[NormedSpace 𝕜 E]
+{F : Type*} [NormedAddCommGroup F] [IsUltrametricDist F]
+[NormedSpace 𝕜 F] [SphericallyCompleteSpace F] :
+SphericallyCompleteSpace (E →L[𝕜] F) := by
+  rw [sphericallyComplete_iff']
+  intro c r hsar hanti
+  have hrnneg : ∀ i, 0 < r i := by
+    intro i
+    exact lt_of_le_of_lt (r i.succ).prop <| hsar (Nat.lt_succ_self i)
+  let 𝒰 := c '' Set.univ
+  have h𝒰 : 𝒰.Nonempty := by
+    use c 0, 0
+    simp only [Set.mem_univ, and_self]
+  let htriv : ↥(⊥ : Submodule 𝕜 E) →L[𝕜] F := by
+    refine { toLinearMap := IsLinearMap.mk' (fun _ => 0) ?_, cont := ?_ }
+    · refine { map_add := ?_, map_smul := ?_ }
+      · simp only [Submodule.mem_bot, add_zero, implies_true]
+      · simp only [Submodule.mem_bot, smul_zero, implies_true]
+    · exact continuous_of_const fun x ↦ congrFun rfl
+  have := @exists_extension_opNorm_le 𝕜 _ E _ _ _ ⊥ F _ _ _ _
+    htriv 𝒰 h𝒰 (fun U => r U.prop.out.choose) (fun _ => hrnneg _) (by
+    intro U V
+    simp only
+    let nu := U.prop.out.choose
+    let nv := V.prop.out.choose
+    conv => arg 1; rw [← U.prop.out.choose_spec.2, ← V.prop.out.choose_spec.2]
+    rcases @trichotomous ℕ (fun a b => a < b) inferInstance nu nv with hlt | heq | hgt
+    · specialize hsar hlt
+      unfold nu nv at hsar
+      have : max (↑(r U.prop.out.choose) : ℝ) ↑(r V.prop.out.choose) =
+        ↑(max (r U.prop.out.choose) (r V.prop.out.choose)) := rfl
+      rw [this, max_eq_left <| le_of_lt hsar, ← dist_eq_norm, dist_comm, ← Metric.mem_closedBall]
+      specialize hanti <| le_of_lt hlt
+      unfold nu nv at hanti
+      refine hanti ?_
+      simp only [Set.mem_univ, true_and, Metric.mem_closedBall, dist_self, NNReal.zero_le_coe]
+    · unfold nu nv at heq
+      rw [heq]
+      simp only [Set.mem_univ, true_and, sub_self, norm_zero, max_self, NNReal.zero_le_coe]
+    · specialize hsar hgt
+      unfold nu nv at hsar
+      have : max (↑(r U.prop.out.choose) : ℝ) ↑(r V.prop.out.choose) =
+        ↑(max (r U.prop.out.choose) (r V.prop.out.choose)) := rfl
+      rw [this, max_eq_right <| le_of_lt hsar, ← dist_eq_norm, ← Metric.mem_closedBall]
+      specialize hanti <| le_of_lt hgt
+      unfold nu nv at hanti
+      refine hanti ?_
+      simp only [Set.mem_univ, true_and, Metric.mem_closedBall, dist_self, NNReal.zero_le_coe]) (by
+      intro U x
+      simp only [Lean.Elab.WF.paramLet, ContinuousLinearMap.coe_mk', IsLinearMap.mk'_apply,
+        (Submodule.mem_bot _).1 x.prop, map_zero, sub_self, norm_zero, Set.mem_univ, true_and,
+        AddSubgroupClass.coe_norm, mul_zero, le_refl, htriv]
+      )
+  rcases this with ⟨T, _, hT2⟩
+  use T
+  simp only [Set.mem_iInter, Metric.mem_closedBall]
+  intro i
+  have : c i ∈ 𝒰 := by
+    use i
+    simp only [Set.mem_univ, and_self]
+  specialize hT2 ⟨c i,this⟩
+  simp only [← dist_eq_norm, Set.mem_univ, true_and] at hT2
+  convert hT2
+  have := this.out.choose_spec.2
+  sorry
+  --sorry
+
+end SphericallyCompleteSpace

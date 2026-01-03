@@ -12,18 +12,12 @@ import Mathlib.Analysis.Normed.Operator.LinearIsometry
 import Mathlib.Analysis.Normed.Field.Ultra
 import Mathlib.LinearAlgebra.Basis.VectorSpace
 
-import SphericalCompleteness.Orthogonal
+import SphericalCompleteness.NormedVectorSpace.Orthogonal
 
 open Metric
 open Filter
 
 namespace SphericallyCompleteSpace
-
-theorem Quotient.sphericallyCompleteSpace
-(𝕜 : Type*) [NontriviallyNormedField 𝕜] [scsk : SphericallyCompleteSpace 𝕜]
-{E : Type u_2} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
-{F : Submodule 𝕜 E} [IsClosed (F : Set E)] :
-SphericallyCompleteSpace (E ⧸ F) := sorry
 
 theorem sphericallyComplete_ContinuousLinearMap
 (𝕜 : Type*) [NontriviallyNormedField 𝕜]

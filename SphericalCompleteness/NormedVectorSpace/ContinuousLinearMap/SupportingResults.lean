@@ -1,5 +1,6 @@
 import SphericalCompleteness.NormedVectorSpace.Basic
 import SphericalCompleteness.Basic
+import SphericalCompleteness.External.Submodule
 
 open Metric
 
@@ -151,31 +152,6 @@ noncomputable def lemma_4_4_T {𝕜 : Type*}
     let lambda := (Submodule.mem_span_singleton.1 this.choose_spec.2.choose_spec.1).choose
     use S ⟨this.choose, this.choose_spec.1⟩ + lambda • (lemma_4_4_z0 ha1 S h𝒰 hε1 hε2 hε3).choose
 
-lemma unique_sum_of_disjoint_submodule {𝕜 : Type*} [Field 𝕜]
-{V : Type*} [AddCommGroup V] [Module 𝕜 V]
-{D : Submodule 𝕜 V} {a : V} (ha : a ∉ D) :
-∀ d1 ∈ D, ∀ la1 ∈ Submodule.span 𝕜 {a}, ∀ d2 ∈ D, ∀ la2 ∈ Submodule.span 𝕜 {a},
-  d1 + la1 = d2 + la2 → d1 = d2 ∧ la1 = la2 := by
-  intro d1 hd1 la1 hla1 d2 hd2 la2 hla2 heq
-  rw [add_comm, ← sub_eq_sub_iff_add_eq_add] at heq
-  have : d2 - d1 ∈ Submodule.span 𝕜 {a} := by
-    rw [← heq]
-    exact (Submodule.sub_mem_iff_left (Submodule.span 𝕜 {a}) hla2).mpr hla1
-  rcases Submodule.mem_span_singleton.1 this with ⟨r, hr⟩
-  if hr' : r = 0 then
-    simp only [hr', zero_smul] at hr
-    rw [← hr] at heq
-    constructor
-    · exact Eq.symm <| sub_eq_zero.1 <| hr.symm
-    · rwa [sub_eq_zero] at heq
-  else
-  replace hr : a = r⁻¹ • (d2 - d1) := by
-    rw [← hr]
-    exact (eq_inv_smul_iff₀ hr').mpr rfl
-  simp only [hr] at ha
-  exfalso
-  exact ha <| Submodule.smul_mem D r⁻¹ <| (Submodule.sub_mem_iff_left D hd1).mpr hd2
-
 noncomputable def lemma_4_4_T_linear {𝕜 : Type*}
   [NontriviallyNormedField 𝕜] {E : Type u_2} [NormedAddCommGroup E] [iude : IsUltrametricDist E]
   [NormedSpace 𝕜 E] {D : Submodule 𝕜 E}
@@ -190,7 +166,7 @@ noncomputable def lemma_4_4_T_linear {𝕜 : Type*}
     have hadd := (Submodule.mem_sup.1 (x1 + x2).prop).choose_spec.2.choose_spec.2
     unfold lemma_4_4_T
     simp only
-    have := unique_sum_of_disjoint_submodule ha1
+    have := eq_and_eq_of_add_eq_add_of_not_mem_submodule_span_singleton ha1
       (Submodule.mem_sup.1 (x1 + x2).prop).choose
       (Submodule.mem_sup.1 (x1 + x2).prop).choose_spec.1
       (Submodule.mem_sup.1 (x1 + x2).prop).choose_spec.2.choose
@@ -248,7 +224,7 @@ noncomputable def lemma_4_4_T_linear {𝕜 : Type*}
     have stupid : ∀ a b c d : F, a = b → c = d → a + c = b + d := by
       intro a b c d hab hcd
       rw [hab, hcd]
-    have := unique_sum_of_disjoint_submodule ha1
+    have := eq_and_eq_of_add_eq_add_of_not_mem_submodule_span_singleton ha1
         (Submodule.mem_sup.1 (k • m).prop).choose
         (Submodule.mem_sup.1 (k • m).prop).choose_spec.1
         (Submodule.mem_sup.1 (k • m).prop).choose_spec.2.choose
@@ -359,7 +335,7 @@ lemma lemma_4_4_codim_1
     simp only [Submodule.add_eq_sup, map_add, Subtype.forall, ContinuousLinearMap.coe_mk',
       LinearMap.coe_mk, AddHom.coe_mk]
     have : x.val ∈ D + Submodule.span 𝕜 {a} := Submodule.mem_sup_left x.prop
-    have t := unique_sum_of_disjoint_submodule ha1
+    have t := eq_and_eq_of_add_eq_add_of_not_mem_submodule_span_singleton ha1
       (Submodule.mem_sup.1 this).choose (Submodule.mem_sup.1 this).choose_spec.1
       ((Submodule.mem_span_singleton.1
         (Submodule.mem_sup.1 this).choose_spec.2.choose_spec.1).choose • a)
@@ -615,13 +591,13 @@ theorem bddAbove_of_chain_of_partial_extension (𝕜 : Type*) [NontriviallyNorme
   rw [← hMfinal1.choose_spec ⟨a, hMa⟩, ← hMfinal2.choose_spec ⟨a, ha⟩]
 
 
-lemma lemma_4_4
+lemma exists_extension_opNorm_le
 (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 {E : Type*} [NormedAddCommGroup E] [IsUltrametricDist E] [NormedSpace 𝕜 E]
-{D : Submodule 𝕜 E}
+(D : Submodule 𝕜 E)
 {F : Type*} [NormedAddCommGroup F] [IsUltrametricDist F]
 [NormedSpace 𝕜 F] [SphericallyCompleteSpace F]
-{S : D →L[𝕜] F} {𝒰 : Set (E →L[𝕜] F)} (h𝒰 : 𝒰.Nonempty)
+(S : D →L[𝕜] F) {𝒰 : Set (E →L[𝕜] F)} (h𝒰 : 𝒰.Nonempty)
 (ε : ↑𝒰 → ℝ)
 (hε1 : ∀ T : ↑𝒰, 0 < ε T)
 (hε2 : ∀ U V : ↑𝒰, ‖U.val - V.val‖ ≤ max (ε U) (ε V))
