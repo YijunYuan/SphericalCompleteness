@@ -8,7 +8,7 @@ import Mathlib.NumberTheory.Padics.ProperSpace
 import Mathlib.NumberTheory.LocalField.Basic
 import Mathlib.LinearAlgebra.Dimension.Finrank
 
-import SphericalCompleteness.Orthogonal
+import SphericalCompleteness.NormedVectorSpace.Orthogonal
 
 open Metric
 open Filter

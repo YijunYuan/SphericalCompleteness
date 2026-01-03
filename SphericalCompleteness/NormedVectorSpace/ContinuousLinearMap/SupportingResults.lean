@@ -1,4 +1,4 @@
-import SphericalCompleteness.VectorSpace
+import SphericalCompleteness.NormedVectorSpace.Basic
 import SphericalCompleteness.Basic
 
 open Metric
