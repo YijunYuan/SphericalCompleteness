@@ -109,6 +109,34 @@ lemma lemma_4_4_z0 {𝕜 : Type*}
     simp only [map_add]; abel
   rwa [this] at hz0
 
+lemma lemma_4_4_z0_prop {𝕜 : Type*}
+  [NontriviallyNormedField 𝕜] {E : Type u_2} [NormedAddCommGroup E] [iude : IsUltrametricDist E]
+  [NormedSpace 𝕜 E] {D : Submodule 𝕜 E}
+  {a : E} (ha1 : a ∉ D)
+  {F : Type u_3} [NormedAddCommGroup F]
+  [iud : IsUltrametricDist F] [NormedSpace 𝕜 F] [hsc : SphericallyCompleteSpace F]
+  (S : ↥D →L[𝕜] F) {𝒰 : Set (E →L[𝕜] F)} (h𝒰 : 𝒰.Nonempty)
+  {ε : ↑𝒰 → ℝ} (hε1 : ∀ (T : ↑𝒰), 0 < ε T) (hε2 : ∀ (U V : ↑𝒰), ‖U.val - V.val‖ ≤ max (ε U) (ε V))
+  (hε3 : ∀ (U : ↑𝒰) (x : ↥D), ‖S x - U.val ↑x‖ ≤ ε U * ‖x‖) :
+  ∀ (x : ↥D) (l : 𝕜) (U : ↑𝒰),
+  ‖S x + l • (lemma_4_4_z0 ha1 S h𝒰 hε1 hε2 hε3).choose - U.val (↑x + l • a)‖ ≤
+    ε U * ‖↑x + l • a‖ := by
+  intro x l U
+  if hl : l = 0 then
+    simp only [hl, map_add, Subtype.forall, zero_smul, add_zero]
+    exact hε3 U x
+  else
+  have : x = l • (l⁻¹ • x) := by
+    rw [smul_smul, mul_inv_cancel₀ hl]
+    exact Eq.symm (MulAction.one_smul x)
+  rw [this, S.map_smul]
+  have : ↑(l • l⁻¹ • x) + l • a = l • ((l⁻¹ • x) + a) := by
+    simp only [SetLike.val_smul, smul_add]
+  rw [this, U.val.map_smul, ← smul_add, ← smul_sub, norm_smul, norm_smul, ← mul_assoc]
+  nth_rw 3 [mul_comm]
+  rw [mul_assoc, mul_le_mul_iff_of_pos_left <| norm_pos_iff.mpr hl]
+  exact (lemma_4_4_z0 ha1 S h𝒰 hε1 hε2 hε3).choose_spec (l⁻¹ • x) U
+
 noncomputable def lemma_4_4_T {𝕜 : Type*}
   [NontriviallyNormedField 𝕜] {E : Type u_2} [NormedAddCommGroup E] [iude : IsUltrametricDist E]
   [NormedSpace 𝕜 E] {D : Submodule 𝕜 E}
@@ -254,6 +282,53 @@ noncomputable def lemma_4_4_T_linear {𝕜 : Type*}
         simp only [hc, zero_mem]
       exact smul_left_injective _ ha this.2
 
+noncomputable def lemma_4_4_T_boundedlinear {𝕜 : Type*}
+  [NontriviallyNormedField 𝕜] {E : Type u_2} [NormedAddCommGroup E] [iude : IsUltrametricDist E]
+  [NormedSpace 𝕜 E] {D : Submodule 𝕜 E}
+  {a : E} (ha1 : a ∉ D)
+  {F : Type u_3} [NormedAddCommGroup F]
+  [iud : IsUltrametricDist F] [NormedSpace 𝕜 F] [hsc : SphericallyCompleteSpace F]
+  (S : ↥D →L[𝕜] F) {𝒰 : Set (E →L[𝕜] F)} (h𝒰 : 𝒰.Nonempty)
+  {ε : ↑𝒰 → ℝ} (hε1 : ∀ (T : ↑𝒰), 0 < ε T) (hε2 : ∀ (U V : ↑𝒰), ‖U.val - V.val‖ ≤ max (ε U) (ε V))
+  (hε3 : ∀ (U : ↑𝒰) (x : ↥D), ‖S x - U.val ↑x‖ ≤ ε U * ‖x‖) :
+  IsBoundedLinearMap 𝕜 (lemma_4_4_T ha1 S h𝒰 hε1 hε2 hε3) where
+  map_add := (lemma_4_4_T_linear ha1 S h𝒰 hε1 hε2 hε3).map_add
+  map_smul := (lemma_4_4_T_linear ha1 S h𝒰 hε1 hε2 hε3).map_smul
+  bound := by
+    use max (ε ⟨h𝒰.some,h𝒰.some_mem⟩) ‖h𝒰.some‖
+    refine ⟨lt_max_of_lt_left <| hε1 _, fun x => ?_⟩
+    unfold lemma_4_4_T
+    simp only
+    have tt := (lemma_4_4_z0_prop ha1 S h𝒰 hε1 hε2 hε3)
+      ⟨(Submodule.mem_sup.1 x.prop).choose, (Submodule.mem_sup.1 x.prop).choose_spec.1⟩
+      ((Submodule.mem_span_singleton.1
+      (Submodule.mem_sup.1 x.prop).choose_spec.2.choose_spec.1).choose) ⟨h𝒰.some, h𝒰.some_mem⟩
+    have : S ⟨(Submodule.mem_sup.1 x.prop).choose, (Submodule.mem_sup.1 x.prop).choose_spec.1⟩ +
+      ((Submodule.mem_span_singleton.1
+      (Submodule.mem_sup.1 x.prop).choose_spec.2.choose_spec.1).choose) •
+      (lemma_4_4_z0 ha1 S h𝒰 hε1 hε2 hε3).choose =
+      S ⟨(Submodule.mem_sup.1 x.prop).choose, (Submodule.mem_sup.1 x.prop).choose_spec.1⟩ +
+      ((Submodule.mem_span_singleton.1
+      (Submodule.mem_sup.1 x.prop).choose_spec.2.choose_spec.1).choose) •
+      (lemma_4_4_z0 ha1 S h𝒰 hε1 hε2 hε3).choose
+      - h𝒰.some ((Submodule.mem_sup.1 x.prop).choose + ((Submodule.mem_span_singleton.1
+      (Submodule.mem_sup.1 x.prop).choose_spec.2.choose_spec.1).choose) • a)
+      + h𝒰.some ((Submodule.mem_sup.1 x.prop).choose + ((Submodule.mem_span_singleton.1
+      (Submodule.mem_sup.1 x.prop).choose_spec.2.choose_spec.1).choose) • a)
+       := by
+      simp only [sub_add_cancel]
+    rw [this, max_mul_of_nonneg _ _ (norm_nonneg x)]
+    have := (Submodule.mem_sup.1 x.prop).choose_spec.2.choose_spec.2
+    rw [← (Submodule.mem_span_singleton.1
+      (Submodule.mem_sup.1 x.prop).choose_spec.2.choose_spec.1).choose_spec] at this
+    refine le_trans (iud.norm_add_le_max _ _) ?_
+    apply max_le_max
+    · convert tt
+      simp only [Submodule.add_eq_sup, AddSubgroupClass.coe_norm]
+      rw [this]
+    · rw [this]
+      exact ContinuousLinearMap.le_opNorm h𝒰.some ↑x
+
 lemma lemma_4_4_codim_1
 (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 (E : Type*) [NormedAddCommGroup E] [iude : IsUltrametricDist E] [NormedSpace 𝕜 E]
@@ -276,6 +351,7 @@ lemma lemma_4_4_codim_1
     ⟩ = S x) ∧
   (∀ U : ↑𝒰, ∀ x : E, (hx : x ∈ (D + Submodule.span 𝕜 {a})) → ‖T ⟨x, hx⟩ - U.val x‖ ≤ ε U * ‖x‖)
  := by
+  use (lemma_4_4_T_boundedlinear ha1 S h𝒰 hε1 hε2 hε3).toContinuousLinearMap
 
   sorry
 
