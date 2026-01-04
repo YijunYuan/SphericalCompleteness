@@ -1,4 +1,7 @@
 import SphericalCompleteness.NormedVectorSpace.ContinuousLinearMap.SupportingResults
+import SphericalCompleteness.External.Sequence
+
+open Metric
 
 namespace SphericallyCompleteSpace
 
@@ -9,10 +12,20 @@ instance {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 [NormedSpace 𝕜 F] [SphericallyCompleteSpace F] :
 SphericallyCompleteSpace (E →L[𝕜] F) := by
   rw [sphericallyComplete_iff']
-  intro c r hsar hanti
+  intro c' r' hsar' hanti'
+  if hseq : ∀ n : ℕ, ∃ N, ∀ i > N, c' n ≠ c' i then
+  rcases exists_bijective_subseq_of_finite_duplication c' hseq with ⟨φ, hφ⟩
+  let c := c' ∘ φ
+  let r := r' ∘ φ
+  have hsar : StrictAnti r := StrictAnti.comp_strictMono hsar' hφ.1
+  have hanti : Antitone fun i ↦ closedBall (c i) ↑(r i) := by
+    intro m n hmn
+    exact hanti' <| hφ.1.monotone hmn
   have hrnneg : ∀ i, 0 < r i := by
     intro i
-    exact lt_of_le_of_lt (r i.succ).prop <| hsar (Nat.lt_succ_self i)
+    unfold r
+    simp only [Function.comp_apply]
+    exact lt_of_le_of_lt (zero_le _) <| hsar' (Nat.lt_succ_self (φ i))
   let 𝒰 := c '' Set.univ
   have h𝒰 : 𝒰.Nonempty := by
     use c 0, 0
@@ -59,7 +72,15 @@ SphericallyCompleteSpace (E →L[𝕜] F) := by
       )
   rcases this with ⟨T, _, hT2⟩
   use T
-  simp only [Set.mem_iInter, Metric.mem_closedBall]
+  simp only [Set.mem_iInter]
+  suffices hh : ∀ (i : ℕ), T ∈ closedBall (c i) ↑(r i) by
+    intro i
+    have := (Filter.tendsto_atTop_atTop_iff_of_monotone hφ.1.monotone).1
+    rcases this (StrictMono.tendsto_atTop hφ.1) i with ⟨N, hN⟩
+    specialize hh N
+    simp only [c, r, Function.comp_apply] at hh
+    exact (hanti' hN) hh
+  simp only [Metric.mem_closedBall]
   intro i
   have : c i ∈ 𝒰 := by
     use i
@@ -67,8 +88,18 @@ SphericallyCompleteSpace (E →L[𝕜] F) := by
   specialize hT2 ⟨c i,this⟩
   simp only [← dist_eq_norm, Set.mem_univ, true_and] at hT2
   convert hT2
-  have := this.out.choose_spec.2
-  sorry
-  --sorry
+  have := hφ.2 <| this.out.choose_spec.2
+  conv_lhs => rw [← this]
+  simp only [Set.mem_univ, true_and]
+  else
+  push_neg at hseq
+  rcases hseq with ⟨N, hN⟩
+  use c' N
+  simp only [Set.mem_iInter]
+  intro i
+  rcases hN i with ⟨t, ht⟩
+  rw [ht.2]
+  refine (hanti' <| le_of_lt ht.1) ?_
+  simp only [mem_closedBall, dist_self, NNReal.zero_le_coe]
 
 end SphericallyCompleteSpace

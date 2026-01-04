@@ -1,6 +1,6 @@
 import Mathlib.Tactic
 
-noncomputable def esoesoa {α : Type u_1} [inst : PartialOrder α]
+private noncomputable def esoesoa {α : Type u_1} [inst : PartialOrder α]
   {f : ℕ → α} (hanti : Antitone f) (h : ∀ (N : ℕ), ∃ n ≥ N, f n ≠ f N) : ℕ → ℕ := fun n =>
   match n with
   | 0 => 0
@@ -30,3 +30,25 @@ theorem eventually_stable_or_exists_strictanti_of_antitone {α : Type*} [Partial
       · by_contra hc
         simp only [Function.comp_apply, esoesoa, ge_iff_le, ne_eq] at hc
         exact (esoesoa._proof_2 hanti h n).choose_spec.2 hc
+
+private noncomputable def ebsofd {α : Type*} (seq : ℕ → α)
+(hseq : ∀ n : ℕ, ∃ N, ∀ i > N, seq n ≠ seq i) : ℕ → ℕ
+  | 0 => 0
+  | n + 1 =>
+      max (ebsofd seq hseq n + 1)  ((hseq (ebsofd seq hseq n)).choose + 1)
+
+theorem exists_bijective_subseq_of_finite_duplication {α : Type*} (seq : ℕ → α)
+(hseq : ∀ n : ℕ, ∃ N, ∀ i > N, seq n ≠ seq i) :
+∃ φ : ℕ → ℕ, StrictMono φ ∧ Function.Injective (seq ∘ φ) := by
+  use ebsofd seq hseq
+  have hsm : StrictMono (ebsofd seq hseq) := by
+    refine strictMono_nat_of_lt_succ fun n => ?_
+    simp only [ebsofd, gt_iff_lt, ne_eq]
+    grind only [= max_def]
+  refine ⟨hsm, injective_of_lt_imp_ne fun m n hmn => ?_⟩
+  simp only [Function.comp_apply, ne_eq]
+  suffices hh : ebsofd seq hseq n > (hseq (ebsofd seq hseq m)).choose by
+    exact (hseq (ebsofd seq hseq m)).choose_spec _ hh
+  refine lt_of_lt_of_le ?_ (hsm.monotone hmn)
+  simp only [ebsofd]
+  grind only [= max_def]
