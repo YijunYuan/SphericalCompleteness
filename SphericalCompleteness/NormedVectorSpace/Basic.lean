@@ -1,13 +1,3 @@
-import Mathlib.Topology.MetricSpace.Pseudo.Defs
-import Mathlib.Topology.UniformSpace.Cauchy
-import Mathlib.Topology.MetricSpace.Cauchy
-import Mathlib.Tactic
-import Mathlib.Topology.Algebra.Valued.NormedValued
-import Mathlib.Analysis.Normed.Module.Basic
-import Mathlib.NumberTheory.Padics.ProperSpace
-import Mathlib.NumberTheory.LocalField.Basic
-import Mathlib.LinearAlgebra.Dimension.Finrank
-
 import SphericalCompleteness.NormedVectorSpace.Orthogonal
 
 open Metric

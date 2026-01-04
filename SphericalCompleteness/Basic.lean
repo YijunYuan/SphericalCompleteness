@@ -1,16 +1,8 @@
-import Mathlib.Topology.MetricSpace.Pseudo.Defs
-import Mathlib.Topology.UniformSpace.Cauchy
-import Mathlib.Topology.MetricSpace.Cauchy
-import Mathlib.Tactic
-import Mathlib.Topology.Algebra.Valued.NormedValued
-import Mathlib.Analysis.Normed.Module.Basic
 import Mathlib.NumberTheory.Padics.ProperSpace
-import Mathlib.NumberTheory.LocalField.Basic
-
 import SphericalCompleteness.External.Complete
-import SphericalCompleteness.External.Ultrametric
-import SphericalCompleteness.External.Sequence
 import SphericalCompleteness.External.NNReal
+import SphericalCompleteness.External.Sequence
+import SphericalCompleteness.External.Ultrametric
 
 open Metric
 open Filter

@@ -1,5 +1,4 @@
 import SphericalCompleteness.NormedVectorSpace.Basic
-import SphericalCompleteness.Basic
 import SphericalCompleteness.External.Submodule
 
 open Metric

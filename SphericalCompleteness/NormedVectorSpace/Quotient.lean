@@ -1,19 +1,4 @@
-import Mathlib.Topology.MetricSpace.Pseudo.Defs
-import Mathlib.Topology.UniformSpace.Cauchy
-import Mathlib.Topology.MetricSpace.Cauchy
-import Mathlib.Tactic
-import Mathlib.Topology.Algebra.Valued.NormedValued
-import Mathlib.Analysis.Normed.Module.Basic
-import Mathlib.NumberTheory.Padics.ProperSpace
-import Mathlib.NumberTheory.LocalField.Basic
-import Mathlib.LinearAlgebra.Dimension.Finrank
-import Mathlib.LinearAlgebra.FiniteDimensional.Defs
-import Mathlib.Analysis.Normed.Operator.LinearIsometry
-import Mathlib.Analysis.Normed.Field.Ultra
-import Mathlib.LinearAlgebra.Basis.VectorSpace
-
-import SphericalCompleteness.NormedVectorSpace.Orthogonal
-import SphericalCompleteness.External.Ultrametric
+import SphericalCompleteness.Basic
 
 open Metric
 open Filter

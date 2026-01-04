@@ -1,14 +1,4 @@
-import Mathlib.Topology.MetricSpace.Pseudo.Defs
-import Mathlib.Topology.UniformSpace.Cauchy
-import Mathlib.Topology.MetricSpace.Cauchy
-import Mathlib.Tactic
-import Mathlib.Topology.Algebra.Valued.NormedValued
-import Mathlib.Analysis.Normed.Module.Basic
-import Mathlib.NumberTheory.Padics.ProperSpace
-import Mathlib.NumberTheory.Padics.Complex
-
 import SphericalCompleteness.Basic
-import SphericalCompleteness.External.Ultrametric
 
 open Metric
 open Filter
@@ -279,6 +269,5 @@ theorem not_spherically_complete_of_dense_separable_ultrametric
     simp only [hα.spherically_dense, coe_eq_zero] at this
     simp only [this, gt_iff_lt, lt_self_iff_false] at r₀pos
 
-#check PadicComplex
 
 end SphericallyCompleteSpace
