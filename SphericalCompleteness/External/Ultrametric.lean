@@ -34,7 +34,7 @@ closedBall z1 r1 ⊆ closedBall z2 r2 := by
   simpa only [dist_comm] using le_trans hy1 hle
 
 instance (𝕜 : Type u_1) [NontriviallyNormedField 𝕜]
-{E : Type u_2} [inst_1 : NormedAddCommGroup E]
+{E : Type u_2} [inst_1 : SeminormedAddCommGroup E]
 [NormedSpace 𝕜 E] [iud : IsUltrametricDist E]
 {F : Submodule 𝕜 E} : IsUltrametricDist (E ⧸ F) where
   dist_triangle_max := by
@@ -168,7 +168,7 @@ IsUltrametricDist (E →L[𝕜] F) where
       have : ‖(f - h) x‖ = ‖(f - g) x + (g - h) x‖ := by
         simp only [ContinuousLinearMap.coe_sub', Pi.sub_apply, sub_add_sub_cancel]
       rw [this, max_mul_of_nonneg _ _ (norm_nonneg _)]
-      refine le_trans (iud.norm_add_le_max ((f - g) x) ((g - h) x)) <| max_le_max ?_ ?_
+      refine le_trans (iud.norm_add_le_max _ _) <| max_le_max ?_ ?_
       · exact ContinuousLinearMap.le_opNorm (f - g) x
       · exact ContinuousLinearMap.le_opNorm (g - h) x
     · simp only [le_sup_iff, norm_nonneg, or_self]

@@ -65,7 +65,7 @@ lemma 𝒪rthogonal_iff (𝕜 : Type*) [NontriviallyNormedField 𝕜]
         (le_refl _) (Submodule.mem_span_singleton_self y)
 
 theorem 𝒪rthogonal_scale (𝕜 : Type*) [inst : NontriviallyNormedField 𝕜]
-{E : Type u_2} [NormedAddCommGroup E]
+{E : Type u_2} [SeminormedAddCommGroup E]
 [NormedSpace 𝕜 E] [IsUltrametricDist E]
 (x : E) (F : Subspace 𝕜 E)
   (hxF : 𝒪rthogonal 𝕜 x F) (a : E) (ha : a ∈ Submodule.span 𝕜 {x}) : 𝒪rthogonal 𝕜 a F := by
@@ -171,7 +171,7 @@ noncomputable def direct_prod_iso_sum_of_orth (𝕜 : Type*) [NontriviallyNormed
       (Submodule.mem_sup.mp t.prop).choose_spec.2.choose_spec.2, Subtype.coe_eta]
 
 private lemma res_ball (𝕜 : Type*) [NontriviallyNormedField 𝕜]
-{E : Type*} [NormedAddCommGroup E]
+{E : Type*} [SeminormedAddCommGroup E]
 [NormedSpace 𝕜 E] [iud : IsUltrametricDist E]
 (F : Subspace 𝕜 E) [SphericallyCompleteSpace F]
 [FiniteDimensional 𝕜 E] (a : E) :
@@ -195,7 +195,7 @@ private lemma res_ball (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     · exact le_of_lt <| lt_of_le_of_lt hay hy.2
 
 theorem exists_orth_vec (𝕜 : Type*) [NontriviallyNormedField 𝕜]
-{E : Type*} [NormedAddCommGroup E]
+{E : Type*} [SeminormedAddCommGroup E]
 [NormedSpace 𝕜 E] [IsUltrametricDist E]
 (F : Subspace 𝕜 E) [sF : SphericallyCompleteSpace F]
 [FiniteDimensional 𝕜 E]

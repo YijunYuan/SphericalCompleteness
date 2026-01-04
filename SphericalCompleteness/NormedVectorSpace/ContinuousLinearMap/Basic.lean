@@ -6,9 +6,9 @@ open Metric
 namespace SphericallyCompleteSpace
 
 instance {𝕜 : Type*} [NontriviallyNormedField 𝕜]
-{E : Type*} [NormedAddCommGroup E] [IsUltrametricDist E]
+{E : Type*} [SeminormedAddCommGroup E] [IsUltrametricDist E]
 [NormedSpace 𝕜 E]
-{F : Type*} [NormedAddCommGroup F] [IsUltrametricDist F]
+{F : Type*} [SeminormedAddCommGroup F] [IsUltrametricDist F]
 [NormedSpace 𝕜 F] [SphericallyCompleteSpace F] :
 SphericallyCompleteSpace (E →L[𝕜] F) := by
   rw [sphericallyComplete_iff']
@@ -48,11 +48,11 @@ SphericallyCompleteSpace (E →L[𝕜] F) := by
       unfold nu nv at hsar
       have : max (↑(r U.prop.out.choose) : ℝ) ↑(r V.prop.out.choose) =
         ↑(max (r U.prop.out.choose) (r V.prop.out.choose)) := rfl
-      rw [this, max_eq_left <| le_of_lt hsar, ← dist_eq_norm, dist_comm, ← Metric.mem_closedBall]
+      rw [this, max_eq_left <| le_of_lt hsar, ← dist_eq_norm, dist_comm, ← mem_closedBall]
       specialize hanti <| le_of_lt hlt
       unfold nu nv at hanti
       refine hanti ?_
-      simp only [Set.mem_univ, true_and, Metric.mem_closedBall, dist_self, NNReal.zero_le_coe]
+      simp only [Set.mem_univ, true_and, mem_closedBall, dist_self, NNReal.zero_le_coe]
     · unfold nu nv at heq
       rw [heq]
       simp only [Set.mem_univ, true_and, sub_self, norm_zero, max_self, NNReal.zero_le_coe]
@@ -60,11 +60,11 @@ SphericallyCompleteSpace (E →L[𝕜] F) := by
       unfold nu nv at hsar
       have : max (↑(r U.prop.out.choose) : ℝ) ↑(r V.prop.out.choose) =
         ↑(max (r U.prop.out.choose) (r V.prop.out.choose)) := rfl
-      rw [this, max_eq_right <| le_of_lt hsar, ← dist_eq_norm, ← Metric.mem_closedBall]
+      rw [this, max_eq_right <| le_of_lt hsar, ← dist_eq_norm, ← mem_closedBall]
       specialize hanti <| le_of_lt hgt
       unfold nu nv at hanti
       refine hanti ?_
-      simp only [Set.mem_univ, true_and, Metric.mem_closedBall, dist_self, NNReal.zero_le_coe]) (by
+      simp only [Set.mem_univ, true_and, mem_closedBall, dist_self, NNReal.zero_le_coe]) (by
       intro U x
       simp only [Lean.Elab.WF.paramLet, ContinuousLinearMap.coe_mk', IsLinearMap.mk'_apply,
         (Submodule.mem_bot _).1 x.prop, map_zero, sub_self, norm_zero, Set.mem_univ, true_and,
@@ -80,16 +80,15 @@ SphericallyCompleteSpace (E →L[𝕜] F) := by
     specialize hh N
     simp only [c, r, Function.comp_apply] at hh
     exact (hanti' hN) hh
-  simp only [Metric.mem_closedBall]
+  simp only [mem_closedBall]
   intro i
   have : c i ∈ 𝒰 := by
     use i
     simp only [Set.mem_univ, and_self]
-  specialize hT2 ⟨c i,this⟩
+  specialize hT2 ⟨c i, this⟩
   simp only [← dist_eq_norm, Set.mem_univ, true_and] at hT2
   convert hT2
-  have := hφ.2 <| this.out.choose_spec.2
-  conv_lhs => rw [← this]
+  conv_lhs => rw [← hφ.2 <| this.out.choose_spec.2]
   simp only [Set.mem_univ, true_and]
   else
   push_neg at hseq

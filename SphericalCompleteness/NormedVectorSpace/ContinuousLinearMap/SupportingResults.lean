@@ -7,10 +7,10 @@ open Metric
 namespace SphericallyCompleteSpace
 
 lemma lemma_4_4_z0 {𝕜 : Type*}
-  [NontriviallyNormedField 𝕜] {E : Type u_2} [NormedAddCommGroup E] [iude : IsUltrametricDist E]
+  [NontriviallyNormedField 𝕜] {E : Type u_2} [SeminormedAddCommGroup E] [iude : IsUltrametricDist E]
   [NormedSpace 𝕜 E] {D : Submodule 𝕜 E}
   {a : E} (ha1 : a ∉ D)
-  {F : Type u_3} [NormedAddCommGroup F]
+  {F : Type u_3} [SeminormedAddCommGroup F]
   [iud : IsUltrametricDist F] [NormedSpace 𝕜 F] [hsc : SphericallyCompleteSpace F]
   (S : ↥D →L[𝕜] F) {𝒰 : Set (E →L[𝕜] F)} (h𝒰 : 𝒰.Nonempty)
   {ε : ↑𝒰 → ℝ} (hε1 : ∀ (T : ↑𝒰), 0 < ε T) (hε2 : ∀ (U V : ↑𝒰), ‖U.val - V.val‖ ≤ max (ε U) (ε V))
@@ -111,10 +111,10 @@ lemma lemma_4_4_z0 {𝕜 : Type*}
   rwa [this] at hz0
 
 lemma lemma_4_4_z0_prop {𝕜 : Type*}
-  [NontriviallyNormedField 𝕜] {E : Type u_2} [NormedAddCommGroup E] [iude : IsUltrametricDist E]
+  [NontriviallyNormedField 𝕜] {E : Type u_2} [SeminormedAddCommGroup E] [iude : IsUltrametricDist E]
   [NormedSpace 𝕜 E] {D : Submodule 𝕜 E}
   {a : E} (ha1 : a ∉ D)
-  {F : Type u_3} [NormedAddCommGroup F]
+  {F : Type u_3} [SeminormedAddCommGroup F]
   [iud : IsUltrametricDist F] [NormedSpace 𝕜 F] [hsc : SphericallyCompleteSpace F]
   (S : ↥D →L[𝕜] F) {𝒰 : Set (E →L[𝕜] F)} (h𝒰 : 𝒰.Nonempty)
   {ε : ↑𝒰 → ℝ} (hε1 : ∀ (T : ↑𝒰), 0 < ε T) (hε2 : ∀ (U V : ↑𝒰), ‖U.val - V.val‖ ≤ max (ε U) (ε V))
@@ -139,10 +139,10 @@ lemma lemma_4_4_z0_prop {𝕜 : Type*}
   exact (lemma_4_4_z0 ha1 S h𝒰 hε1 hε2 hε3).choose_spec (l⁻¹ • x) U
 
 noncomputable def lemma_4_4_T {𝕜 : Type*}
-  [NontriviallyNormedField 𝕜] {E : Type u_2} [NormedAddCommGroup E] [iude : IsUltrametricDist E]
+  [NontriviallyNormedField 𝕜] {E : Type u_2} [SeminormedAddCommGroup E] [iude : IsUltrametricDist E]
   [NormedSpace 𝕜 E] {D : Submodule 𝕜 E}
   {a : E} (ha1 : a ∉ D)
-  {F : Type u_3} [NormedAddCommGroup F]
+  {F : Type u_3} [SeminormedAddCommGroup F]
   [iud : IsUltrametricDist F] [NormedSpace 𝕜 F] [hsc : SphericallyCompleteSpace F]
   (S : ↥D →L[𝕜] F) {𝒰 : Set (E →L[𝕜] F)} (h𝒰 : 𝒰.Nonempty)
   {ε : ↑𝒰 → ℝ} (hε1 : ∀ (T : ↑𝒰), 0 < ε T) (hε2 : ∀ (U V : ↑𝒰), ‖U.val - V.val‖ ≤ max (ε U) (ε V))
@@ -153,10 +153,10 @@ noncomputable def lemma_4_4_T {𝕜 : Type*}
     use S ⟨this.choose, this.choose_spec.1⟩ + lambda • (lemma_4_4_z0 ha1 S h𝒰 hε1 hε2 hε3).choose
 
 noncomputable def lemma_4_4_T_linear {𝕜 : Type*}
-  [NontriviallyNormedField 𝕜] {E : Type u_2} [NormedAddCommGroup E] [iude : IsUltrametricDist E]
+  [NontriviallyNormedField 𝕜] {E : Type u_2} [SeminormedAddCommGroup E] [iude : IsUltrametricDist E]
   [NormedSpace 𝕜 E] {D : Submodule 𝕜 E}
   {a : E} (ha1 : a ∉ D)
-  {F : Type u_3} [NormedAddCommGroup F]
+  {F : Type u_3} [SeminormedAddCommGroup F]
   [iud : IsUltrametricDist F] [NormedSpace 𝕜 F] [hsc : SphericallyCompleteSpace F]
   (S : ↥D →L[𝕜] F) {𝒰 : Set (E →L[𝕜] F)} (h𝒰 : 𝒰.Nonempty)
   {ε : ↑𝒰 → ℝ} (hε1 : ∀ (T : ↑𝒰), 0 < ε T) (hε2 : ∀ (U V : ↑𝒰), ‖U.val - V.val‖ ≤ max (ε U) (ε V))
@@ -259,10 +259,10 @@ noncomputable def lemma_4_4_T_linear {𝕜 : Type*}
       exact smul_left_injective _ ha this.2
 
 noncomputable def lemma_4_4_T_boundedlinear {𝕜 : Type*}
-  [NontriviallyNormedField 𝕜] {E : Type u_2} [NormedAddCommGroup E] [iude : IsUltrametricDist E]
+  [NontriviallyNormedField 𝕜] {E : Type u_2} [SeminormedAddCommGroup E] [iude : IsUltrametricDist E]
   [NormedSpace 𝕜 E] {D : Submodule 𝕜 E}
   {a : E} (ha1 : a ∉ D)
-  {F : Type u_3} [NormedAddCommGroup F]
+  {F : Type u_3} [SeminormedAddCommGroup F]
   [iud : IsUltrametricDist F] [NormedSpace 𝕜 F] [hsc : SphericallyCompleteSpace F]
   (S : ↥D →L[𝕜] F) {𝒰 : Set (E →L[𝕜] F)} (h𝒰 : 𝒰.Nonempty)
   {ε : ↑𝒰 → ℝ} (hε1 : ∀ (T : ↑𝒰), 0 < ε T) (hε2 : ∀ (U V : ↑𝒰), ‖U.val - V.val‖ ≤ max (ε U) (ε V))
@@ -307,11 +307,10 @@ noncomputable def lemma_4_4_T_boundedlinear {𝕜 : Type*}
 
 lemma lemma_4_4_codim_1
 (𝕜 : Type*) [NontriviallyNormedField 𝕜]
-(E : Type*) [NormedAddCommGroup E] [iude : IsUltrametricDist E] [NormedSpace 𝕜 E]
+(E : Type*) [SeminormedAddCommGroup E] [iude : IsUltrametricDist E] [NormedSpace 𝕜 E]
 (D : Submodule 𝕜 E)
 (a : E) (ha1 : a ∉ D)
---(ha2 : D + Submodule.span 𝕜 {a} = ⊤)
-(F : Type*) [NormedAddCommGroup F] [iud : IsUltrametricDist F]
+(F : Type*) [SeminormedAddCommGroup F] [iud : IsUltrametricDist F]
 [NormedSpace 𝕜 F] [hsc : SphericallyCompleteSpace F]
 (S : D →L[𝕜] F) (𝒰 : Set (E →L[𝕜] F)) (h𝒰 : 𝒰.Nonempty)
 (ε : ↑𝒰 → ℝ)
@@ -368,9 +367,9 @@ lemma lemma_4_4_codim_1
 
 @[ext]
 structure PartialExtension (𝕜 : Type*) [NontriviallyNormedField 𝕜]
-(E : Type*) [NormedAddCommGroup E] [IsUltrametricDist E] [NormedSpace 𝕜 E]
+(E : Type*) [SeminormedAddCommGroup E] [IsUltrametricDist E] [NormedSpace 𝕜 E]
 {D : Submodule 𝕜 E}
-(F : Type*) [NormedAddCommGroup F] [IsUltrametricDist F]
+(F : Type*) [SeminormedAddCommGroup F] [IsUltrametricDist F]
 [NormedSpace 𝕜 F] [SphericallyCompleteSpace F]
 (S : D →L[𝕜] F) (𝒰 : Set (E →L[𝕜] F)) (h𝒰 : 𝒰.Nonempty)
 (ε : ↑𝒰 → ℝ) where
@@ -381,9 +380,9 @@ structure PartialExtension (𝕜 : Type*) [NontriviallyNormedField 𝕜]
   hU : ∀ U : ↑𝒰, ∀ x : M, ‖T x- U.val x‖ ≤ (ε U) * ‖x‖
 
 instance pene (𝕜 : Type*) [NontriviallyNormedField 𝕜]
-(E : Type*) [NormedAddCommGroup E] [IsUltrametricDist E] [NormedSpace 𝕜 E]
+(E : Type*) [SeminormedAddCommGroup E] [IsUltrametricDist E] [NormedSpace 𝕜 E]
 {D : Submodule 𝕜 E}
-(F : Type*) [NormedAddCommGroup F] [IsUltrametricDist F]
+(F : Type*) [SeminormedAddCommGroup F] [IsUltrametricDist F]
 [NormedSpace 𝕜 F] [SphericallyCompleteSpace F]
 (S : D →L[𝕜] F) (𝒰 : Set (E →L[𝕜] F)) (h𝒰 : 𝒰.Nonempty)
 (ε : ↑𝒰 → ℝ)
@@ -392,9 +391,9 @@ instance pene (𝕜 : Type*) [NontriviallyNormedField 𝕜]
   Nonempty.intro { M := D, hDM := fun ⦃x⦄ a ↦ a, T := S, hT := by simp, hU := hε3 }
 
 instance (𝕜 : Type*) [NontriviallyNormedField 𝕜]
-(E : Type*) [NormedAddCommGroup E] [IsUltrametricDist E] [NormedSpace 𝕜 E]
+(E : Type*) [SeminormedAddCommGroup E] [IsUltrametricDist E] [NormedSpace 𝕜 E]
 {D : Submodule 𝕜 E}
-(F : Type*) [NormedAddCommGroup F] [IsUltrametricDist F]
+(F : Type*) [SeminormedAddCommGroup F] [IsUltrametricDist F]
 [NormedSpace 𝕜 F] [SphericallyCompleteSpace F]
 (S : D →L[𝕜] F) (𝒰 : Set (E →L[𝕜] F)) (h𝒰 : 𝒰.Nonempty)
 (ε : ↑𝒰 → ℝ)
@@ -423,8 +422,8 @@ instance (𝕜 : Type*) [NontriviallyNormedField 𝕜]
       rw [← habT]
 
 theorem directed_chain (𝕜 : Type*) [NontriviallyNormedField 𝕜]
-  {E : Type u_2} [NormedAddCommGroup E] [IsUltrametricDist E] [NormedSpace 𝕜 E]
-  {D : Submodule 𝕜 E} {F : Type u_3} [NormedAddCommGroup F] [IsUltrametricDist F]
+  {E : Type u_2} [SeminormedAddCommGroup E] [IsUltrametricDist E] [NormedSpace 𝕜 E]
+  {D : Submodule 𝕜 E} {F : Type u_3} [SeminormedAddCommGroup F] [IsUltrametricDist F]
   [NormedSpace 𝕜 F] [SphericallyCompleteSpace F] {S : ↥D →L[𝕜] F} {𝒰 : Set (E →L[𝕜] F)}
   (h𝒰 : 𝒰.Nonempty) (ε : ↑𝒰 → ℝ)
   (P : Set (PartialExtension 𝕜 E F S 𝒰 h𝒰 ε)) (hP : IsChain (fun x1 x2 ↦ x1 ≤ x2) P)
@@ -437,8 +436,8 @@ theorem directed_chain (𝕜 : Type*) [NontriviallyNormedField 𝕜]
   · cases hc2; assumption
 
 noncomputable def glued_map (𝕜 : Type*) [NontriviallyNormedField 𝕜]
-  {E : Type u_2} [NormedAddCommGroup E] [IsUltrametricDist E] [NormedSpace 𝕜 E]
-  {D : Submodule 𝕜 E} {F : Type u_3} [NormedAddCommGroup F] [IsUltrametricDist F]
+  {E : Type u_2} [SeminormedAddCommGroup E] [IsUltrametricDist E] [NormedSpace 𝕜 E]
+  {D : Submodule 𝕜 E} {F : Type u_3} [SeminormedAddCommGroup F] [IsUltrametricDist F]
   [NormedSpace 𝕜 F] [SphericallyCompleteSpace F] {S : ↥D →L[𝕜] F} {𝒰 : Set (E →L[𝕜] F)}
   (h𝒰 : 𝒰.Nonempty) (ε : ↑𝒰 → ℝ)
   (P : Set (PartialExtension 𝕜 E F S 𝒰 h𝒰 ε))
@@ -450,8 +449,8 @@ noncomputable def glued_map (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     exact this.choose.val.T ⟨x.val,this.choose_spec⟩
 
 def islinearmap_of_glued_map (𝕜 : Type*) [NontriviallyNormedField 𝕜]
-  {E : Type u_2} [NormedAddCommGroup E] [IsUltrametricDist E] [NormedSpace 𝕜 E]
-  {D : Submodule 𝕜 E} {F : Type u_3} [NormedAddCommGroup F] [IsUltrametricDist F]
+  {E : Type u_2} [SeminormedAddCommGroup E] [IsUltrametricDist E] [NormedSpace 𝕜 E]
+  {D : Submodule 𝕜 E} {F : Type u_3} [SeminormedAddCommGroup F] [IsUltrametricDist F]
   [NormedSpace 𝕜 F] [SphericallyCompleteSpace F] {S : ↥D →L[𝕜] F} {𝒰 : Set (E →L[𝕜] F)}
   (h𝒰 : 𝒰.Nonempty) (ε : ↑𝒰 → ℝ)
   (P : Set (PartialExtension 𝕜 E F S 𝒰 h𝒰 ε))
@@ -504,8 +503,8 @@ def islinearmap_of_glued_map (𝕜 : Type*) [NontriviallyNormedField 𝕜]
       rw [t1, t2, ← Mfinal.val.T.map_smul, SetLike.mk_smul_mk]
 
 def isboundedlinearmap_of_glued_map (𝕜 : Type*) [NontriviallyNormedField 𝕜]
-  {E : Type u_2} [NormedAddCommGroup E] [IsUltrametricDist E] [NormedSpace 𝕜 E]
-  {D : Submodule 𝕜 E} {F : Type u_3} [NormedAddCommGroup F] [iudf : IsUltrametricDist F]
+  {E : Type u_2} [SeminormedAddCommGroup E] [IsUltrametricDist E] [NormedSpace 𝕜 E]
+  {D : Submodule 𝕜 E} {F : Type u_3} [SeminormedAddCommGroup F] [iudf : IsUltrametricDist F]
   [NormedSpace 𝕜 F] [SphericallyCompleteSpace F] {S : ↥D →L[𝕜] F}
   {𝒰 : Set (E →L[𝕜] F)} (h𝒰 : 𝒰.Nonempty)
   (ε : ↑𝒰 → ℝ) (hε1 : ∀ (T : ↑𝒰), 0 < ε T)
@@ -517,7 +516,7 @@ def isboundedlinearmap_of_glued_map (𝕜 : Type*) [NontriviallyNormedField 𝕜
     bound := by
       use max (ε ⟨h𝒰.some, h𝒰.some_mem⟩) ‖h𝒰.some‖
       constructor
-      · simp only [lt_sup_iff, norm_pos_iff, ne_eq]
+      · simp only [lt_sup_iff]
         exact Or.inl <| by simp only [hε1]
       · intro x
         simp only [glued_map]
@@ -539,8 +538,8 @@ def isboundedlinearmap_of_glued_map (𝕜 : Type*) [NontriviallyNormedField 𝕜
           · exact norm_nonneg x
 
 theorem bddAbove_of_chain_of_partial_extension (𝕜 : Type*) [NontriviallyNormedField 𝕜]
-  {E : Type u_2} [NormedAddCommGroup E] [IsUltrametricDist E] [NormedSpace 𝕜 E]
-  {D : Submodule 𝕜 E} {F : Type u_3} [NormedAddCommGroup F] [IsUltrametricDist F]
+  {E : Type u_2} [SeminormedAddCommGroup E] [IsUltrametricDist E] [NormedSpace 𝕜 E]
+  {D : Submodule 𝕜 E} {F : Type u_3} [SeminormedAddCommGroup F] [IsUltrametricDist F]
   [NormedSpace 𝕜 F] [SphericallyCompleteSpace F] {S : ↥D →L[𝕜] F}
   {𝒰 : Set (E →L[𝕜] F)} (h𝒰 : 𝒰.Nonempty)
   (ε : ↑𝒰 → ℝ) (hε1 : ∀ (T : ↑𝒰), 0 < ε T)
@@ -593,9 +592,9 @@ theorem bddAbove_of_chain_of_partial_extension (𝕜 : Type*) [NontriviallyNorme
 
 lemma exists_extension_opNorm_le
 (𝕜 : Type*) [NontriviallyNormedField 𝕜]
-{E : Type*} [NormedAddCommGroup E] [IsUltrametricDist E] [NormedSpace 𝕜 E]
+{E : Type*} [SeminormedAddCommGroup E] [IsUltrametricDist E] [NormedSpace 𝕜 E]
 (D : Submodule 𝕜 E)
-{F : Type*} [NormedAddCommGroup F] [IsUltrametricDist F]
+{F : Type*} [SeminormedAddCommGroup F] [IsUltrametricDist F]
 [NormedSpace 𝕜 F] [SphericallyCompleteSpace F]
 (S : D →L[𝕜] F) {𝒰 : Set (E →L[𝕜] F)} (h𝒰 : 𝒰.Nonempty)
 (ε : ↑𝒰 → ℝ)

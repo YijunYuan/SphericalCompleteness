@@ -22,7 +22,7 @@ open Filter
 namespace SphericallyCompleteSpace
 
 private lemma hhh (𝕜 : Type u_1) [inst : NontriviallyNormedField 𝕜]
-{E : Type u_2} [NormedAddCommGroup E] [NormedSpace 𝕜 E] {F : Submodule 𝕜 E}
+{E : Type u_2} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] {F : Submodule 𝕜 E}
   (un : E ⧸ F) (en : NNReal) (unp1 : E ⧸ F) (h : unp1 ∈ closedBall un en)
   (lun : E) (hlun : (QuotientAddGroup.mk' F.toAddSubgroup) lun = un)
   (ens1 : NNReal) (hens1 : ens1 > en)
@@ -50,7 +50,7 @@ private lemma hhh (𝕜 : Type u_1) [inst : NontriviallyNormedField 𝕜]
   rw [(by grind only : (unp1.out + x) - lun = unp1.out - lun + x)]
 
 private noncomputable def hhhh (𝕜 : Type u_1) [inst : NontriviallyNormedField 𝕜]
-{E : Type u_2} [NormedAddCommGroup E]
+{E : Type u_2} [SeminormedAddCommGroup E]
   [NormedSpace 𝕜 E] [IsUltrametricDist E]
   {F : Submodule 𝕜 E} ⦃c : ℕ → E ⧸ F⦄
   ⦃r : ℕ → NNReal⦄ (hr : StrictAnti r) (hanti : Antitone fun i ↦ closedBall (c i) ↑(r i)) :
@@ -69,7 +69,7 @@ private noncomputable def hhhh (𝕜 : Type u_1) [inst : NontriviallyNormedField
     exact ⟨this.choose, this.choose_spec.1⟩
 
 private lemma hhhh_prop (𝕜 : Type u_1) [inst : NontriviallyNormedField 𝕜]
-{E : Type u_2} [NormedAddCommGroup E]
+{E : Type u_2} [SeminormedAddCommGroup E]
   [NormedSpace 𝕜 E] [IsUltrametricDist E]
   {F : Submodule 𝕜 E} ⦃c : ℕ → E ⧸ F⦄
   ⦃r : ℕ → NNReal⦄ (hr : StrictAnti r) (hanti : Antitone fun i ↦ closedBall (c i) ↑(r i)) :
@@ -86,7 +86,7 @@ private lemma hhhh_prop (𝕜 : Type u_1) [inst : NontriviallyNormedField 𝕜]
 
 theorem Quotient.sphericallyCompleteSpace
 (𝕜 : Type*) [NontriviallyNormedField 𝕜]
-{E : Type u_2} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
+{E : Type u_2} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E]
 [iud : IsUltrametricDist E] [scsk : SphericallyCompleteSpace E]
 {F : Submodule 𝕜 E} :
 SphericallyCompleteSpace (E ⧸ F) := by
