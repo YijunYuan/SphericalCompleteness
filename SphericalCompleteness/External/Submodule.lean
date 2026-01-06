@@ -25,3 +25,14 @@ lemma eq_and_eq_of_add_eq_add_of_not_mem_submodule_span_singleton {𝕜 : Type*}
   simp only [hr] at ha
   exfalso
   exact ha <| Submodule.smul_mem D r⁻¹ <| (Submodule.sub_mem_iff_left D hd1).mpr hd2
+
+theorem smul_submodule_eq_self {𝕜 : Type*} [Field 𝕜]
+  {E : Type*} [AddCommMonoid E] [Module 𝕜 E] {a : 𝕜} (ha : a ≠ 0) (M : Submodule 𝕜 E) :
+  (@HSMul.hSMul 𝕜 (Set E) (Set E) (@instHSMul 𝕜 (Set E) Set.smulSet) a ↑M)
+    = ↑M := by
+  ext z
+  refine ⟨fun h => ?_, fun h => ?_⟩
+  · rcases Set.mem_smul_set.1 h with ⟨c, hc1, hc2⟩
+    rw [← hc2]
+    exact SMulMemClass.smul_mem a hc1
+  · exact Set.mem_smul_set.mpr ⟨a⁻¹ • z, ⟨SMulMemClass.smul_mem a⁻¹ h, smul_inv_smul₀ ha z⟩⟩

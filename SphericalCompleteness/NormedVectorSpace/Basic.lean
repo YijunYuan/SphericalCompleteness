@@ -1,8 +1,6 @@
-import SphericalCompleteness.NormedVectorSpace.Orthogonal
+import SphericalCompleteness.NormedVectorSpace.Orthogonal.MOrth
 
 open Metric
-open Filter
-
 
 namespace SphericallyCompleteSpace
 
@@ -59,7 +57,8 @@ instance instSubtypeMemSubmoduleSpanSingletonSet (𝕜 : Type*) [NontriviallyNor
     rwa [Subtype.dist_eq, dist_eq_norm, ← (Submodule.mem_span_singleton.1 (ci i).prop).choose_spec,
       ← sub_smul, norm_smul, ← dist_eq_norm, ← le_div_iff₀ (norm_pos_iff.mpr h)]
 
-lemma test_ind (𝕜 : Type u_1) [NontriviallyNormedField 𝕜] [SphericallyCompleteSpace 𝕜]
+private lemma induction_sphericallyCompleteSpace_of_finiteDimensional
+(𝕜 : Type u_1) [NontriviallyNormedField 𝕜] [SphericallyCompleteSpace 𝕜]
 (E : Type u_2) [NormedAddCommGroup E]
 [NormedSpace 𝕜 E] [IsUltrametricDist E] [FiniteDimensional 𝕜 E] :
 ∀ n < Module.finrank 𝕜 E,
@@ -67,7 +66,7 @@ lemma test_ind (𝕜 : Type u_1) [NontriviallyNormedField 𝕜] [SphericallyComp
 → (∃ M' : Subspace 𝕜 E, Module.finrank 𝕜 M' = (n + 1) ∧ SphericallyCompleteSpace M')
 := by
   rintro n hn ⟨M, hM1, _⟩
-  rcases exists_orth_vec 𝕜 M (by linarith) with ⟨z, hz', hz⟩
+  rcases exists_morth_vec_of_not_full_finrank 𝕜 M (by linarith) with ⟨z, hz', hz⟩
   use ((Submodule.span 𝕜 {z}) + M)
   let φ := direct_prod_iso_sum_of_orth 𝕜 z M hz
   constructor
@@ -95,6 +94,7 @@ SphericallyCompleteSpace E := by
   intro n hn
   induction n
   · case zero => exact ⟨⊥, ⟨finrank_bot 𝕜 E, inferInstance⟩⟩
-  · case succ n hn' => exact test_ind 𝕜 E n hn <| hn' <| Nat.le_of_succ_le hn
+  · case succ n hn' => exact
+    induction_sphericallyCompleteSpace_of_finiteDimensional 𝕜 E n hn <| hn' <| Nat.le_of_succ_le hn
 
 end SphericallyCompleteSpace
