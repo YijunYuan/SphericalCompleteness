@@ -65,10 +65,10 @@ def c₀ (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     have : ‖c‖ > 0 := norm_pos_iff.mpr hc
     simp_all only [gt_iff_lt, norm_pos_iff, ne_eq, not_false_eq_true, mul_le_mul_iff_right₀]
 
-theorem sb {𝕜 : Type u_1} [inst : NontriviallyNormedField 𝕜]
+private lemma exists_norm_sub_lt {𝕜 : Type u_1} [inst : NontriviallyNormedField 𝕜]
   (E : ℕ → Type u_2) [(i : ℕ) → NormedAddCommGroup (E i)] [(i : ℕ) → NormedSpace 𝕜 (E i)]
   [∀ (i : ℕ), IsUltrametricDist (E i)]
-  ⦃c : ℕ → ↥(lp E ⊤) ⧸ c₀ 𝕜 E⦄ ⦃r : ℕ → NNReal⦄ (hsr : StrictAnti r)
+  {c : ℕ → ↥(lp E ⊤) ⧸ c₀ 𝕜 E} {r : ℕ → NNReal} (hsr : StrictAnti r)
   (hanti : Antitone fun i ↦ Metric.closedBall (c i) ↑(r i))
   (i : ℕ) (aip1 : ↥(lp E ⊤)) (hai : (QuotientAddGroup.mk' _) aip1 = c (i + 1)) :
   ∃ (aip2 : ↥(lp E ⊤)), (QuotientAddGroup.mk' _) aip2 = c (i + 2) ∧
@@ -109,13 +109,48 @@ theorem sb {𝕜 : Type u_1} [inst : NontriviallyNormedField 𝕜]
     exact lp.norm_nonneg' _
   · exact Set.Nonempty.of_subtype
 
+private noncomputable def sb {𝕜 : Type u_1} [inst : NontriviallyNormedField 𝕜]
+  (E : ℕ → Type u_2) [(i : ℕ) → NormedAddCommGroup (E i)] [(i : ℕ) → NormedSpace 𝕜 (E i)]
+  [∀ (i : ℕ), IsUltrametricDist (E i)]
+  {c : ℕ → ↥(lp E ⊤) ⧸ c₀ 𝕜 E} {r : ℕ → NNReal} (hsr : StrictAnti r)
+  (hanti : Antitone fun i ↦ Metric.closedBall (c i) ↑(r i)) :
+  (k : ℕ) → {z : ↥(lp E ⊤)// (QuotientAddGroup.mk' (c₀ 𝕜 E).toAddSubgroup) z = c k} := fun n =>
+  match n with
+  |0 => ⟨(c 0).out, by simp⟩
+  |1 => ⟨(c 1).out, by simp⟩
+  |m + 2 => ⟨(exists_norm_sub_lt E hsr hanti m
+      (sb E hsr hanti (m + 1)).val (sb E hsr hanti (m + 1)).prop).choose,
+      (exists_norm_sub_lt E hsr hanti m
+      (sb E hsr hanti (m + 1)).val (sb E hsr hanti (m + 1)).prop).choose_spec.1⟩
+
+private lemma sb_prop {𝕜 : Type u_1} [inst : NontriviallyNormedField 𝕜]
+  (E : ℕ → Type u_2) [(i : ℕ) → NormedAddCommGroup (E i)] [(i : ℕ) → NormedSpace 𝕜 (E i)]
+  [∀ (i : ℕ), IsUltrametricDist (E i)]
+  {c : ℕ → ↥(lp E ⊤) ⧸ c₀ 𝕜 E} {r : ℕ → NNReal} (hsr : StrictAnti r)
+  (hanti : Antitone fun i ↦ Metric.closedBall (c i) ↑(r i))
+  : ∀ i : ℕ,
+   (QuotientAddGroup.mk' _) (sb E hsr hanti i).1 = c i ∧
+    ‖(sb E hsr hanti (i + 2)).1 - (sb E hsr hanti (i + 1)).1‖ < ↑(r i) := by
+  intro m
+  constructor
+  · exact (sb E hsr hanti m).prop
+  · simp only [QuotientAddGroup.mk'_apply, sb]
+    exact (exists_norm_sub_lt E hsr hanti m
+      (sb E hsr hanti (m + 1)).val (sb E hsr hanti (m + 1)).prop).choose_spec.2
+
 theorem eeee {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 (E : ℕ → Type*) [∀ i, NormedAddCommGroup (E i)]
 [∀ i, NormedSpace 𝕜 (E i)] [∀ i, IsUltrametricDist (E i)] :
 SphericallyCompleteSpace ((lp E ⊤)⧸ c₀ 𝕜 E) := by
   rw [sphericallyComplete_iff']
   intro c r hsr hanti
+  let f : ∀ i, E i := fun i => (sb E hsr hanti i).val i
+  have hf_mem : ↑(f) ∈ lp E ⊤ := by
+    simp [lp, f]
+    refine memℓp_infty ?_
 
+    sorry
+  use (QuotientAddGroup.mk' (c₀ 𝕜 E).toAddSubgroup) ⟨f, hf_mem⟩
   sorry
 
 end SphericallyCompleteSpace
