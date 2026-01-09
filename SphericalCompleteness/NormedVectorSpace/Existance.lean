@@ -129,9 +129,6 @@ private noncomputable def quotient_mk_section {𝕜 : Type u_1} [inst : Nontrivi
             (quotient_mk_section E hsr hanti (m + 1)).val
             (quotient_mk_section E hsr hanti (m + 1)).prop).choose_spec.1⟩
 
--- keep the old name as an alias, so the rest of the file need not change
---private noncomputable abbrev quotient_mk_section := quotient_mk_section
-
 private lemma mk_eq_and_norm_sub_lt {𝕜 : Type u_1} [inst : NontriviallyNormedField 𝕜]
   (E : ℕ → Type u_2) [(i : ℕ) → NormedAddCommGroup (E i)] [(i : ℕ) → NormedSpace 𝕜 (E i)]
   [∀ (i : ℕ), IsUltrametricDist (E i)]
@@ -184,15 +181,12 @@ private lemma quotient_mk_section_norm_apply_self_le_max {𝕜 : Type*} [Nontriv
     else
     simp only [QuotientAddGroup.mk'_apply, hm, not_false_eq_true, sub_add_cancel,
       forall_const] at ih
-    specialize ih (by
-      apply lp.norm_apply_le_norm ENNReal.top_ne_zero
-    )
+    specialize ih (by apply lp.norm_apply_le_norm ENNReal.top_ne_zero)
     rw [← sub_add_sub_cancel _ (quotient_mk_section E hsr hanti m).val _]
     refine le_trans ((inferInstance : IsUltrametricDist (lp E ⊤)).norm_add_le_max _ _) ?_
     refine max_le (le_trans (le_of_lt ?_) <| hsr.antitone <| Nat.zero_le (m - 1)) ih
     have := (mk_eq_and_norm_sub_lt E hsr hanti (m - 1)).2
     rwa [(by omega : m - 1 + 2 = m + 1), (by omega : m - 1 + 1 = m)] at this
-
 
 lemma quotient_norm_mk_le_of_eventually_norm_le {𝕜 : Type*} [NontriviallyNormedField 𝕜]
   (E : ℕ → Type u_2) [(i : ℕ) → NormedAddCommGroup (E i)] [(i : ℕ) → NormedSpace 𝕜 (E i)]
@@ -244,7 +238,7 @@ lemma quotient_norm_mk_le_of_eventually_norm_le {𝕜 : Type*} [NontriviallyNorm
   else
     simpa only [if_neg hk, add_zero] using hN k <| Nat.le_of_not_lt hk
 
-theorem eeee {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+theorem sphericallyCompleteSpace_lp_quotient_c₀ {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 (E : ℕ → Type*) [∀ i, NormedAddCommGroup (E i)]
 [∀ i, NormedSpace 𝕜 (E i)] [∀ i, IsUltrametricDist (E i)] :
 SphericallyCompleteSpace ((lp E ⊤)⧸ c₀ 𝕜 E) := by
@@ -307,12 +301,15 @@ SphericallyCompleteSpace ((lp E ⊤)⧸ c₀ 𝕜 E) := by
     exact fun i => (hanti <| Nat.le_add_right i 1) <| h (i + 1) (Nat.le_add_left 1 i)
   intro i hi
   specialize this i hi
-  rw [mem_closedBall, dist_eq_norm]
-  rw [← sub_add_sub_cancel _ (c (i + 1)) _]
+  rw [mem_closedBall, dist_eq_norm, ← sub_add_sub_cancel _ (c (i + 1)) _]
   refine le_trans ((inferInstance : IsUltrametricDist (lp E ⊤ ⧸ c₀ 𝕜 E)).norm_add_le_max _ _) ?_
   apply max_le this
   rw [← dist_eq_norm, ← mem_closedBall]
   refine (hanti (Nat.le_succ i)) ?_
   simp only [Nat.succ_eq_add_one, mem_closedBall, dist_self, NNReal.zero_le_coe]
+
+instance {𝕜 : Type*} [NontriviallyNormedField 𝕜] [IsUltrametricDist 𝕜] :
+SphericallyCompleteSpace ((lp (fun _ => 𝕜) ⊤)⧸ c₀ 𝕜 (fun _ => 𝕜))
+:= sphericallyCompleteSpace_lp_quotient_c₀ (fun _ => 𝕜)
 
 end SphericallyCompleteSpace
