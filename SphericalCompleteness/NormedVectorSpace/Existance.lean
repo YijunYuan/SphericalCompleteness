@@ -1,33 +1,11 @@
 import SphericalCompleteness.NormedVectorSpace.Basic
 import SphericalCompleteness.NormedVectorSpace.Quotient
-import Mathlib.Analysis.Normed.Lp.lpSpace
+import SphericalCompleteness.External.Ultrametric
+
 
 open Metric
 
 namespace SphericallyCompleteSpace
-
-noncomputable instance {ι : Type*} {E : ι → Type*}
-[∀ i, NormedAddCommGroup (E i)] :
-NormedAddCommGroup ↥(lp E ⊤) := inferInstance
-
-instance {ι : Type*} {E : ι → Type*} [Nonempty ι] [∀ i, NormedAddCommGroup (E i)]
-[iiud : ∀ i, IsUltrametricDist (E i)] :
-IsUltrametricDist (lp E ⊤) where
-dist_triangle_max a b c := by
-  repeat rw [dist_eq_norm, lp.norm_eq_ciSup]
-  apply ciSup_le
-  intro j
-  have : ‖(↑(a - c): (i : ι) → E i) j‖ = ‖a j - c j‖ := rfl
-  rw [this, ← dist_eq_norm]
-  refine le_trans ((iiud j).dist_triangle_max (a j) (b j) (c j)) ?_
-  repeat rw [dist_eq_norm]
-  apply max_le_max
-  · have : ‖(↑a: (i : ι) → E i) j - (↑b: (i : ι) → E i) j‖ = ‖(↑(a - b) : (i : ι) → E i) j‖ := rfl
-    rw [this]
-    apply lp.norm_apply_le_norm ENNReal.top_ne_zero
-  · have : ‖(↑b: (i : ι) → E i) j - (↑c: (i : ι) → E i) j‖ = ‖(↑(b - c) : (i : ι) → E i) j‖ := rfl
-    rw [this]
-    apply lp.norm_apply_le_norm ENNReal.top_ne_zero
 
 def c₀ (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 (E : ℕ → Type*) [∀ i, NormedAddCommGroup (E i)]
@@ -308,6 +286,7 @@ SphericallyCompleteSpace ((lp E ⊤)⧸ c₀ 𝕜 E) := by
   refine (hanti (Nat.le_succ i)) ?_
   simp only [Nat.succ_eq_add_one, mem_closedBall, dist_self, NNReal.zero_le_coe]
 
+-- Any non-Archimedean normed field 𝕜 has a spherically complete Banach space over it
 instance {𝕜 : Type*} [NontriviallyNormedField 𝕜] [IsUltrametricDist 𝕜] :
 SphericallyCompleteSpace ((lp (fun _ => 𝕜) ⊤)⧸ c₀ 𝕜 (fun _ => 𝕜))
 := sphericallyCompleteSpace_lp_quotient_c₀ (fun _ => 𝕜)
