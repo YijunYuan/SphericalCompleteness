@@ -51,31 +51,16 @@ def sphericallyCompleteExtension {𝕜 : Type*} [NontriviallyNormedField 𝕜]
         rw [← h]
         apply le_of_forall_pos_sub_le
         intro ε hε
-        simp [c₀] at hp'
+        simp only [c₀, gt_iff_lt, ge_iff_le, Submodule.mem_mk, AddSubmonoid.mem_mk,
+          AddSubsemigroup.mem_mk, Set.mem_setOf_eq] at hp'
         rcases hp' ε hε with ⟨N, hN⟩
-        refine le_trans (?_: _ ≤ sSup {‖x + p i‖ | i ≥ N}) ?_
-        · refine le_csSup_of_le ?_ (?_ : ‖x + p N‖ ∈ _) ?_
-          · use b
-            rw [← h]
-            rw [mem_upperBounds]
-            simp only [ge_iff_le, Set.mem_setOf_eq, forall_exists_index, and_imp,
-              forall_apply_eq_imp_iff₂]
-            intro s hs
-            refine le_of_eq_of_le ?_ (lp.norm_apply_le_norm ENNReal.top_ne_zero _ s)
-            rfl
-          · use N
-          · specialize hN N (le_refl N)
-            rw [(by abel : x + p N = x - - (p N))]
-            refine le_trans ?_ (norm_sub_norm_le _ _)
-            rw [norm_neg]
-            linarith
-        · apply csSup_le
-          · use ‖x + p N‖, N
-          · intro b hb
-            simp only [ge_iff_le, Set.mem_setOf_eq] at hb
-            rcases hb with ⟨i, hi, hi'⟩
-            rw [← hi']
-            refine le_of_eq_of_le ?_ (lp.norm_apply_le_norm ENNReal.top_ne_zero _ i)
-            rfl
+        refine le_trans (?_: _ ≤ ‖x + p N‖) ?_
+        · specialize hN N (le_refl N)
+          rw [(by abel : x + p N = x - - (p N))]
+          refine le_trans ?_ (norm_sub_norm_le _ _)
+          rw [norm_neg]
+          linarith
+        · refine le_of_eq_of_le ?_ (lp.norm_apply_le_norm ENNReal.top_ne_zero _ N)
+          rfl
 
 end SphericallyCompleteSpace
