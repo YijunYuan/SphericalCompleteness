@@ -1,5 +1,7 @@
 import SphericalCompleteness.NormedVectorSpace.ContinuousLinearMap.HahnBanach
 
+open Metric
+
 namespace SphericallyCompleteSpace
 
 def IsImmediate {𝕜 : Type*} [NontriviallyNormedField 𝕜]
@@ -82,7 +84,34 @@ theorem noname' {𝕜 : Type*}
     rw [← this]
     simp only [ContinuousLinearMap.coe_comp', LinearIsometry.coe_toContinuousLinearMap,
       Function.comp_apply, LinearIsometry.norm_map, AddSubgroupClass.coe_norm, one_mul, le_refl]
-  · sorry
+  · if hv : v = 0 then
+      simp [hv]
+    else
+    simp [IsImmediate] at hf
+    specialize hf v
+    simp [hv, MOrth] at hf
+    replace hf : infDist v ↑(LinearMap.range f) < ‖v‖ := by
+      refine lt_of_le_of_ne ?_ hf
+      rw [← dist_zero_right v]
+      exact infDist_le_dist_of_mem <| zero_mem (LinearMap.range f)
+    rcases(infDist_lt_iff <| Submodule.nonempty (LinearMap.range f)).1 hf with ⟨x, hx⟩
+    rw [dist_eq_norm] at hx
+    have : ‖h x - h v‖ < ‖v‖ := by
+      rw [(by simp : h x - h v = h (x - v))]
+      refine lt_of_le_of_lt (ContinuousLinearMap.le_opNorm h (x - v)) ?_
+      have : ‖h‖ = 1 := by
+        have : ‖(g.comp (LinearIsometry.weakInv f)).toContinuousLinearMap‖ = ‖ (g.toContinuousLinearMap).comp (LinearIsometry.weakInv f).toContinuousLinearMap‖ := rfl
+        rw [← this] at hf2
+        rw [hf2]
+        have : Nontrivial ↥(LinearMap.range f) := by
+
+          sorry
+        exact LinearIsometry.norm_toContinuousLinearMap _
+      rw [this, one_mul, norm_sub_rev]
+      exact hx.2
+    rw [sub_eq_add_neg] at hx
+    -- IsUltrametricDist.norm_eq_of_add_norm_lt_max
+    sorry
 
 theorem noname {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
@@ -102,9 +131,7 @@ theorem noname {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     toFun := h.toFun,
     map_add' := h.map_add',
     map_smul' := h.map_smul',
-    norm_map' := by
-      intro v
-      exact noname' f hf g h hf2 hf1 this v
+    norm_map' := fun v => noname' f hf g h hf2 hf1 this v
   }
   use h
   ext z
