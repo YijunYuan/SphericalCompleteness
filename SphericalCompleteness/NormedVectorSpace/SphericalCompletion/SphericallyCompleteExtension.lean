@@ -34,9 +34,7 @@ def sphericallyCompleteExtension {𝕜 : Type*} [NontriviallyNormedField 𝕜]
         use 0
         constructor
         · simp only [SetLike.mem_coe, zero_mem]
-        · simp only [add_zero]
-          rw [lp.norm_eq_ciSup]
-          simp only [ciSup_const]
+        · simp only [add_zero, lp.norm_eq_ciSup, ciSup_const]
     · apply le_csInf
       · use ‖x‖
         simp only [Set.mem_image, SetLike.mem_coe, Subtype.exists, AddMemClass.mk_add_mk]
@@ -56,11 +54,10 @@ def sphericallyCompleteExtension {𝕜 : Type*} [NontriviallyNormedField 𝕜]
         rcases hp' ε hε with ⟨N, hN⟩
         refine le_trans (?_: _ ≤ ‖x + p N‖) ?_
         · specialize hN N (le_refl N)
-          rw [(by abel : x + p N = x - - (p N))]
+          rw [← sub_neg_eq_add x (p N)]
           refine le_trans ?_ (norm_sub_norm_le _ _)
           rw [norm_neg]
           linarith
-        · refine le_of_eq_of_le ?_ (lp.norm_apply_le_norm ENNReal.top_ne_zero _ N)
-          rfl
+        · exact le_of_eq_of_le (by rfl) (lp.norm_apply_le_norm ENNReal.top_ne_zero _ N)
 
 end SphericallyCompleteSpace
