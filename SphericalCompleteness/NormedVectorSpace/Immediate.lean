@@ -58,7 +58,7 @@ noncomputable def LinearIsometry.weakInv {𝕜 : Type*} [NontriviallyNormedField
     exact Function.leftInverse_invFun
       (Set.rangeFactorization_injective.mpr <| LinearIsometry.injective f) x
 
-theorem noname' {𝕜 : Type*}
+lemma norm_map_of_isImmediate {𝕜 : Type*}
   [NontriviallyNormedField 𝕜] {E : Type u_2} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
   [IsUltrametricDist E] {F : Type u_3} [NormedAddCommGroup F] [inst_5 : NormedSpace 𝕜 F]
   [IsUltrametricDist F] {H : Type u_4} [NormedAddCommGroup H] [NormedSpace 𝕜 H]
@@ -67,9 +67,6 @@ theorem noname' {𝕜 : Type*}
   (hf2 : ‖h‖ = ‖g.toContinuousLinearMap.comp (LinearIsometry.weakInv f).toContinuousLinearMap‖)
   (hf1 : ∀ (v : F) (x : E) (h_1 : f x = v), h v = g ((LinearIsometry.weakInv f) ⟨v, Exists.intro
     x h_1⟩))
-  (this :
-    ‖(g.comp (LinearIsometry.weakInv f)).toContinuousLinearMap‖ =
-      ‖g.toContinuousLinearMap.comp (LinearIsometry.weakInv f).toContinuousLinearMap‖)
   (v : F) : ‖(↑h : F →ₗ[𝕜] H) v‖ = ‖v‖ := by
   refine eq_of_le_of_ge ?_ ?_
   · suffices hh : ‖h‖ ≤ 1 by
@@ -87,9 +84,9 @@ theorem noname' {𝕜 : Type*}
   · if hv : v = 0 then
       simp [hv]
     else
-    simp [IsImmediate] at hf
+    simp only [IsImmediate] at hf
     specialize hf v
-    simp [hv, MOrth] at hf
+    simp only [MOrth, hv, imp_false] at hf
     replace hf : infDist v ↑(LinearMap.range f) < ‖v‖ := by
       refine lt_of_le_of_ne ?_ hf
       rw [← dist_zero_right v]
@@ -99,21 +96,31 @@ theorem noname' {𝕜 : Type*}
     have : ‖h x - h v‖ < ‖v‖ := by
       rw [(by simp : h x - h v = h (x - v))]
       refine lt_of_le_of_lt (ContinuousLinearMap.le_opNorm h (x - v)) ?_
+      if hrf : ¬ Nontrivial (LinearMap.range f) then
+        rw [Submodule.nontrivial_iff_ne_bot] at hrf
+        push_neg at hrf
+        simp only [hrf, Submodule.bot_coe, Set.mem_singleton_iff] at hx
+        simp only [hx.1, sub_zero, lt_self_iff_false, and_false] at hx
+      else
       have : ‖h‖ = 1 := by
-        have : ‖(g.comp (LinearIsometry.weakInv f)).toContinuousLinearMap‖ = ‖ (g.toContinuousLinearMap).comp (LinearIsometry.weakInv f).toContinuousLinearMap‖ := rfl
+        have : ‖(g.comp (LinearIsometry.weakInv f)).toContinuousLinearMap‖ =
+          ‖ (g.toContinuousLinearMap).comp (LinearIsometry.weakInv f).toContinuousLinearMap‖ := rfl
         rw [← this] at hf2
         rw [hf2]
-        have : Nontrivial ↥(LinearMap.range f) := by
-
-          sorry
+        haveI := not_not.1 hrf
         exact LinearIsometry.norm_toContinuousLinearMap _
       rw [this, one_mul, norm_sub_rev]
       exact hx.2
-    rw [sub_eq_add_neg] at hx
-    -- IsUltrametricDist.norm_eq_of_add_norm_lt_max
-    sorry
+    have hx' := norm_eq_of_norm_sub_lt_left hx.2
+    have t : ‖h x‖ = ‖x‖ := by
+      rcases hx.1 with ⟨z, hz⟩
+      rw [hf1 x z hz]
+      simp only [LinearIsometry.norm_map, AddSubgroupClass.coe_norm]
+    rw [hx', ← t] at this
+    apply norm_eq_of_norm_sub_lt_left at this
+    simp only [hx', ContinuousLinearMap.coe_coe, ← this, t, le_refl]
 
-theorem noname {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+theorem exists_linearIsometry_comp_eq_of_isImmediate {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
 {F : Type*} [NormedAddCommGroup F] [NormedSpace 𝕜 F] [IsUltrametricDist F]
 {H : Type*} [NormedAddCommGroup H] [NormedSpace 𝕜 H] [IsUltrametricDist H]
@@ -124,21 +131,24 @@ theorem noname {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 (RingHom.id _) (RingHom.id _) _ _ _ _ _ _ _ h f = g := by
   rcases hahn_banach' _
     (LinearIsometry.comp g (LinearIsometry.weakInv f)).toContinuousLinearMap with ⟨h, hf1, hf2⟩
-  simp at hf1
-  have : ‖(g.comp (LinearIsometry.weakInv f)).toContinuousLinearMap‖ = ‖ (g.toContinuousLinearMap).comp (LinearIsometry.weakInv f).toContinuousLinearMap‖ := rfl
+  simp only [LinearMap.mem_range, LinearIsometry.coe_toContinuousLinearMap, LinearIsometry.coe_comp,
+    Function.comp_apply, forall_exists_index] at hf1
+  have : ‖(g.comp (LinearIsometry.weakInv f)).toContinuousLinearMap‖ =
+    ‖ (g.toContinuousLinearMap).comp (LinearIsometry.weakInv f).toContinuousLinearMap‖ := rfl
   rw [this] at hf2
   let h : F →ₗᵢ[𝕜] H := {
     toFun := h.toFun,
     map_add' := h.map_add',
     map_smul' := h.map_smul',
-    norm_map' := fun v => noname' f hf g h hf2 hf1 this v
+    norm_map' := fun v => norm_map_of_isImmediate f hf g h hf2 hf1 v
   }
   use h
   ext z
-  simp [h]
+  simp only [LinearIsometry.coe_comp, LinearIsometry.coe_mk, ContinuousLinearMap.coe_coe,
+    Function.comp_apply, h]
   have : (LinearIsometry.weakInv f) ⟨f z, LinearMap.mem_range_self f z⟩ = z := by
     unfold LinearIsometry.weakInv
-    simp
+    simp only [LinearIsometry.coe_mk, LinearMap.coe_mk, AddHom.coe_mk]
     have : f z = Set.rangeFactorization f z := by
       simp only [Set.rangeFactorization_coe]
     conv => arg 1; arg 2; arg 1; rw [this]

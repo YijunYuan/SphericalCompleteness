@@ -192,3 +192,26 @@ dist_triangle_max a b c := by
   · have : ‖(↑b: (i : ι) → E i) j - (↑c: (i : ι) → E i) j‖ = ‖(↑(b - c) : (i : ι) → E i) j‖ := rfl
     rw [this]
     apply lp.norm_apply_le_norm ENNReal.top_ne_zero
+
+theorem norm_eq_of_norm_sub_lt_left {S : Type*} [SeminormedAddGroup S] [IsUltrametricDist S]
+{x y : S} (h : ‖x - y‖ < ‖x‖) : ‖x‖ = ‖y‖ := by
+  rw [sub_eq_add_neg] at h
+  nth_rw 2 [← norm_neg]
+  apply IsUltrametricDist.norm_eq_of_add_norm_lt_max
+  simp_all only [norm_neg, lt_sup_iff, true_or]
+
+theorem norm_eq_of_norm_sub_lt_right {S : Type*} [SeminormedAddGroup S] [IsUltrametricDist S]
+{x y : S} (h : ‖x - y‖ < ‖y‖) : ‖x‖ = ‖y‖ := by
+  rw [← norm_neg] at h
+  simp at h
+  exact Eq.symm (norm_eq_of_norm_sub_lt_left h)
+
+theorem norm_eq_of_norm_add_lt_left {S : Type*} [SeminormedAddGroup S] [IsUltrametricDist S]
+{x y : S} (h : ‖x + y‖ < ‖x‖) : ‖x‖ = ‖y‖ := by
+  apply IsUltrametricDist.norm_eq_of_add_norm_lt_max
+  simp_all only [lt_sup_iff, true_or]
+
+theorem norm_eq_of_norm_add_lt_right {S : Type*} [SeminormedAddGroup S] [IsUltrametricDist S]
+{x y : S} (h : ‖x + y‖ < ‖y‖) : ‖x‖ = ‖y‖ := by
+  apply IsUltrametricDist.norm_eq_of_add_norm_lt_max
+  simp_all only [lt_sup_iff, or_true]
