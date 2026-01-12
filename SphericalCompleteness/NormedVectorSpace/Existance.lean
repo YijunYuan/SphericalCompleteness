@@ -216,7 +216,7 @@ lemma quotient_norm_mk_le_of_eventually_norm_le {𝕜 : Type*} [NontriviallyNorm
   else
     simpa only [if_neg hk, add_zero] using hN k <| Nat.le_of_not_lt hk
 
-theorem sphericallyCompleteSpace_lp_quotient_c₀ {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+instance sphericallyCompleteSpace_lp_quotient_c₀ {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 (E : ℕ → Type*) [∀ i, NormedAddCommGroup (E i)]
 [∀ i, NormedSpace 𝕜 (E i)] [∀ i, IsUltrametricDist (E i)] :
 SphericallyCompleteSpace ((lp E ⊤)⧸ c₀ 𝕜 E) := by

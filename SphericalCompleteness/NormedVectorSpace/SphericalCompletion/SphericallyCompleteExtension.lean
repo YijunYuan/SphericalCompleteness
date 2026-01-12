@@ -3,8 +3,8 @@ import Mathlib.Algebra.Order.Group.DenselyOrdered
 
 namespace SphericallyCompleteSpace
 
-def sphericallyCompleteExtension {𝕜 : Type*} [NontriviallyNormedField 𝕜]
-  [IsUltrametricDist 𝕜] (E : Type*) [NormedAddCommGroup E] [NormedSpace 𝕜 E] :
+def sphericallyCompleteExtension (𝕜 : Type*) [NontriviallyNormedField 𝕜]
+  (E : Type*) [NormedAddCommGroup E] [NormedSpace 𝕜 E] :
   E →ₗᵢ[𝕜] ((lp (fun (_ : ℕ) => E) ⊤)⧸ c₀ 𝕜 (fun (_ : ℕ) => E)) where
   toFun x := by
     have : (fun (_ : ℕ) => x) ∈ (lp (fun (_ : ℕ) => E) ⊤) := by
@@ -59,5 +59,44 @@ def sphericallyCompleteExtension {𝕜 : Type*} [NontriviallyNormedField 𝕜]
           rw [norm_neg]
           linarith
         · exact le_of_eq_of_le (by rfl) (lp.norm_apply_le_norm ENNReal.top_ne_zero _ N)
+
+noncomputable instance (𝕜 : Type*) [NontriviallyNormedField 𝕜]
+  (E : Type*) [NormedAddCommGroup E] [NormedSpace 𝕜 E] :
+   NormedAddCommGroup (↥(lp (fun _ ↦ E) ⊤) ⧸ c₀ 𝕜 fun _ ↦ E):= by
+  have : IsClosed (↑(c₀ 𝕜 fun x ↦ E).carrier) := by
+    apply IsSeqClosed.isClosed
+    simp [IsSeqClosed]
+    intro seq lim hlim hseq htend
+    rw [NormedAddCommGroup.tendsto_atTop] at htend
+    intro ε hε
+    specialize htend (ε / 2) (by linarith)
+    rcases htend with ⟨N, hN⟩
+    specialize hN N (le_refl N)
+    rw [lp.norm_eq_ciSup] at hN
+    specialize hseq N
+    simp [c₀] at hseq
+    specialize hseq (ε / 2) (by linarith)
+    rcases hseq with ⟨M, hM⟩
+    use M.max N
+    intro n hn
+    specialize hM n (by simp_all only
+      [gt_iff_lt, AddSubgroupClass.coe_sub, Pi.sub_apply, ge_iff_le, sup_le_iff])
+    have := (ciSup_le_iff (by
+      use ‖seq N - ⟨lim, hlim⟩‖
+      simp only [upperBounds,  Set.mem_range,
+        forall_exists_index, forall_apply_eq_imp_iff, Set.mem_setOf_eq]
+      intro a
+      refine lp.norm_apply_le_norm ?_ (seq N - ⟨lim, hlim⟩) a
+      exact ENNReal.top_ne_zero
+      )).1 (le_of_lt hN) n
+    simp at this
+    simp
+    replace := add_le_add hM this
+    rw [norm_sub_rev, add_comm] at this
+    simp at this
+    refine le_trans ?_ this
+    exact norm_le_norm_sub_add _ _
+  simp at this
+  infer_instance
 
 end SphericallyCompleteSpace
