@@ -42,8 +42,29 @@ theorem zorn_ayaka (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 [SphericallyCompleteSpace E₀]
 (f : E →ₗᵢ[𝕜] E₀) : ∃ m, Maximal (fun x ↦ x ∈ ayaka E E₀ f) m := by
   apply zorn_le₀
+  intro C hC1 hC2
+  if hC : ¬ C.Nonempty then
 
-  sorry
+
+
+    sorry
+  else
+  use ⨆ i, (fun x => x.val : C → Submodule 𝕜 E₀) i
+  constructor
+  · simp [ayaka]
+    use (by
+      intro z hz
+      rw [Submodule.mem_iSup]
+      intro N hN
+
+
+      sorry)
+    simp [IsImmediate, MOrth]
+    sorry
+  · intro M hM z hz
+    rw [Submodule.mem_iSup]
+    intro N hN
+    exact (hN ⟨M, hM⟩) hz
 
 def SphericalCompletion (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 (E : Type u) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
