@@ -244,6 +244,27 @@ SphericallyCompleteSpace (↥(zorn_ayaka 𝕜 E E₀ f).choose) := by
     rw [add_comm]
     simpa only [add_left_inj] using inv_smul_smul₀ hhs a
   have hb1 := smul_morth_of_morth (s⁻¹) hb'1
+  replace hb1 : MOrth 𝕜 b.val (zorn_ayaka 𝕜 E E₀ f).choose := by
+    unfold MOrth
+    by_contra hc
+    simp at hc
+    replace hc := lt_of_le_of_ne ?_ hc
+    · rcases (infDist_lt_iff (by use 0; simp)).1 hc with ⟨g, hg1, hg2⟩
+      rw [dist_eq_norm] at hg2
+      replace hg2 := norm_eq_of_norm_sub_lt_left hg2
+      have hgg : g ≠ 0 := by
+        by_contra hc
+        simp [hc] at hg2
+        simp [hg2] at *
+        contrapose hc
+        simpa using infDist_nonneg
+      -- need not_morth_iff_exists_dist_lt
+      sorry
+
+    · nth_rw 2 [← sub_zero b.val]
+      rw [← dist_eq_norm]
+      apply infDist_le_dist_of_mem
+      simp only [SetLike.mem_coe, zero_mem]
   have hx : x ∈ (zorn_ayaka 𝕜 E E₀ f).choose :=
     Submodule.smul_mem (zorn_ayaka 𝕜 E E₀ f).choose (-s⁻¹) hx'
   suffices h : ∀ i : ℕ, ⟨x,hx⟩ ∈ closedBall (c i) ↑(r i) by
@@ -252,10 +273,35 @@ SphericallyCompleteSpace (↥(zorn_ayaka 𝕜 E E₀ f).choose) := by
     use ⟨x, hx⟩
     simpa only [Set.mem_iInter]
   intro i
-  simp only [mem_closedBall]
-
-
-  sorry
+  simp only [mem_closedBall, dist_eq_norm]
+  refine le_trans (by simp : ‖⟨x, hx⟩ - c i‖ ≤ max ‖⟨x, hx⟩ - c i‖ ‖b‖) ?_
+  refine le_trans ?_ (ha i)
+  have : a - (c i).val = b - ((c i).val - x) := by
+    simp only [this, sub_sub_sub_cancel_right]
+  rw [dist_eq_norm, this]
+  conv => arg 1; simp only [AddSubgroupClass.coe_norm, AddSubgroupClass.coe_sub]
+  refine le_of_eq <| Eq.symm ?_
+  refine eq_of_le_of_ge ?_ ?_
+  · rw [sub_sub_eq_add_sub, ← add_sub, max_comm]
+    exact iud.norm_add_le_max _ _
+  · if hf : ‖x - ↑(c i)‖ = ‖↑b‖ then
+      simp only [hf, AddSubgroupClass.coe_norm, max_self]
+      rw [← dist_eq_norm]
+      unfold MOrth at hb1
+      unfold b
+      simp only [SetLike.val_smul]
+      simp only [AddSubgroupClass.coe_norm, SetLike.val_smul, b] at hb1
+      rw [← hb1]
+      apply infDist_le_dist_of_mem
+      refine SetLike.mem_coe.mpr <| Submodule.sub_mem (zorn_ayaka 𝕜 E E₀ f).choose ?_ hx
+      simp only [SetLike.coe_mem]
+    else
+    have := iud.norm_add_eq_max_of_norm_ne_norm hf
+    simp only [LinearMap.toAddMonoidHom_coe, Submodule.subtype_apply] at this
+    rw [← this]
+    apply le_of_eq
+    congr
+    abel
 
 abbrev SphericalCompletion (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 (E : Type u) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
