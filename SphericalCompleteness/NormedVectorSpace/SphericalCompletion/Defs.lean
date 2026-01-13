@@ -12,7 +12,7 @@ def IsSphericalComletion (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 SphericallyCompleteSpace F ∧
 ∃ (f : E →ₗᵢ[𝕜] F), ∀ M : Submodule 𝕜 F, LinearMap.range f ≤ M → SphericallyCompleteSpace M → M = ⊤
 
-def LinearIsometry.submodule_subset_submodule (𝕜 : Type*) [NontriviallyNormedField 𝕜]
+abbrev LinearIsometry.submodule_subset_submodule (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
 {F₁ F₂ : Submodule 𝕜 E} (h : F₁ ≤ F₂) :
 ↥F₁ →ₗᵢ[𝕜] ↥F₂ where
@@ -130,7 +130,7 @@ theorem zorn_ayaka (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     intro N hN
     exact (hN ⟨M, hM⟩) hz
 
-noncomputable instance {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+instance {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 (E : Type*) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
 (E₀ : Type*) [NormedAddCommGroup E₀] [NormedSpace 𝕜 E₀] [IsUltrametricDist E₀]
 [SphericallyCompleteSpace E₀]
@@ -144,7 +144,7 @@ noncomputable instance {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 (f : E →ₗᵢ[𝕜] E₀) :
 NormedSpace 𝕜 (↥(zorn_ayaka 𝕜 E E₀ f).choose) := inferInstance
 
-noncomputable instance {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+instance {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 (E : Type*) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
 (E₀ : Type*) [NormedAddCommGroup E₀] [NormedSpace 𝕜 E₀] [IsUltrametricDist E₀]
 [SphericallyCompleteSpace E₀]
@@ -153,10 +153,109 @@ IsUltrametricDist (↥(zorn_ayaka 𝕜 E E₀ f).choose) := inferInstance
 
 noncomputable instance {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 (E : Type*) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
-(E₀ : Type*) [NormedAddCommGroup E₀] [NormedSpace 𝕜 E₀] [IsUltrametricDist E₀]
-[SphericallyCompleteSpace E₀]
+(E₀ : Type*) [NormedAddCommGroup E₀] [NormedSpace 𝕜 E₀] [iud : IsUltrametricDist E₀]
+[hsc : SphericallyCompleteSpace E₀]
 (f : E →ₗᵢ[𝕜] E₀) :
-SphericallyCompleteSpace (↥(zorn_ayaka 𝕜 E E₀ f).choose) := by sorry
+SphericallyCompleteSpace (↥(zorn_ayaka 𝕜 E E₀ f).choose) := by
+  rw [sphericallyComplete_iff']
+  by_contra hc
+  push_neg at hc
+  rcases hc with ⟨c, r, hsr, hanti, hemp⟩
+  have := @hsc.isSphericallyComplete (fun n => (c n).1) r (by
+    intro m n hmn
+    simp
+    specialize hanti hmn
+    simp at hanti
+    intro z hz
+    simp only [mem_closedBall] at *
+    refine le_trans (iud.dist_triangle_max z (c n).val (c m).val) ?_
+    apply max_le
+    · exact le_trans hz <| hsr.antitone hmn
+    · rw [← mem_closedBall]
+      exact hanti <| mem_closedBall_self NNReal.zero_le_coe
+      )
+  simp only [Set.nonempty_iInter, mem_closedBall] at this
+  rcases this with ⟨a, ha⟩
+  if haa : a ∈ (zorn_ayaka 𝕜 E E₀ f).choose then
+    contrapose hemp
+    refine Set.nonempty_iff_ne_empty.mp ?_
+    use ⟨a, haa⟩
+    simp only [Set.mem_iInter, mem_closedBall]
+    intro i
+    specialize ha i
+    simpa only [dist_le_coe]
+  else
+  have : ((zorn_ayaka 𝕜 E E₀ f).choose + Submodule.span 𝕜 {a}) ∉ ayaka E E₀ f := by
+    by_contra hc
+    have : (zorn_ayaka 𝕜 E E₀ f).choose < (zorn_ayaka 𝕜 E E₀ f).choose + Submodule.span 𝕜 {a} := by
+      simpa only [Submodule.add_eq_sup, left_lt_sup, Submodule.span_singleton_le_iff_mem]
+    exact (not_le_of_gt this) <| (zorn_ayaka 𝕜 E E₀ f).choose_spec.2 hc (le_of_lt this)
+  simp [ayaka] at this
+  specialize this <| le_sup_of_le_left (zorn_ayaka 𝕜 E E₀ f).choose_spec.1.out.choose
+  unfold IsImmediate at this
+  push_neg at this
+  rcases this with ⟨b', hb'1, hb'2⟩
+  rcases Submodule.mem_sup.1 b'.prop with ⟨x', hx', v', hv', hx'v'⟩
+  rcases Submodule.mem_span_singleton.1 hv' with ⟨s, hs⟩
+  rw [← hs] at hx'v'
+  have hhs : s ≠ 0 := by
+    by_contra hc
+    simp [hc] at hx'v'
+    subst hx'v'
+    have := (zorn_ayaka 𝕜 E E₀ f).choose_spec.1.out.choose_spec
+    unfold IsImmediate at this
+    specialize this ⟨b', hx'⟩ ?_
+    · unfold MOrth at *
+      simp
+      simp at hb'1
+      rw [← hb'1]
+      refine eq_of_le_of_ge ?_ ?_
+      · apply (le_infDist (by use 0; simp)).2
+        intro y hy
+        simp only [SetLike.mem_coe, LinearMap.mem_range, LinearIsometry.coe_mk, LinearMap.coe_mk,
+          AddHom.coe_mk, Subtype.exists] at hy
+        rcases hy with ⟨z, hm, hz⟩
+        refine le_trans (infDist_le_dist_of_mem (?_ : ⟨y,?_⟩ ∈ _)) (le_of_eq rfl)
+        · simp only [SetLike.mem_coe, LinearMap.mem_range, LinearIsometry.coe_mk, LinearMap.coe_mk,
+          AddHom.coe_mk, Subtype.exists]
+          use z, hm
+          simp only [← hz]
+        · refine (zorn_ayaka 𝕜 E E₀ f).choose_spec.1.out.choose ?_
+          simp only [← hz, LinearMap.mem_range, hm]
+      · apply (le_infDist (by use 0; simp)).2
+        intro y hy
+        simp only [SetLike.mem_coe, LinearMap.mem_range, LinearIsometry.coe_mk, LinearMap.coe_mk,
+          AddHom.coe_mk, Subtype.exists] at hy
+        rcases hy with ⟨z, hm, hz⟩
+        refine le_trans (infDist_le_dist_of_mem (?_ : ⟨y,?_⟩ ∈ _)) (le_of_eq rfl)
+        · simp only [SetLike.mem_coe, LinearMap.mem_range, LinearIsometry.coe_mk, LinearMap.coe_mk,
+          AddHom.coe_mk, Subtype.exists]
+          use z, hm
+          simp only [← hz]
+        · apply Submodule.mem_sup_left
+          refine (zorn_ayaka 𝕜 E E₀ f).choose_spec.1.out.choose ?_
+          simp only [← hz, LinearMap.mem_range, hm]
+    simp only [Submodule.mk_eq_zero, ZeroMemClass.coe_eq_zero] at this
+    exact hb'2 this
+  let b := s⁻¹ • b'
+  let x := - s⁻¹ • x'
+  have : b = a - x := by
+    simp only [SetLike.val_smul, ← hx'v', smul_add, neg_smul, sub_neg_eq_add, b, x]
+    rw [add_comm]
+    simpa only [add_left_inj] using inv_smul_smul₀ hhs a
+  have hb1 := smul_morth_of_morth (s⁻¹) hb'1
+  have hx : x ∈ (zorn_ayaka 𝕜 E E₀ f).choose :=
+    Submodule.smul_mem (zorn_ayaka 𝕜 E E₀ f).choose (-s⁻¹) hx'
+  suffices h : ∀ i : ℕ, ⟨x,hx⟩ ∈ closedBall (c i) ↑(r i) by
+    contrapose hemp
+    refine Set.nonempty_iff_ne_empty.mp ?_
+    use ⟨x, hx⟩
+    simpa only [Set.mem_iInter]
+  intro i
+  simp only [mem_closedBall]
+
+
+  sorry
 
 abbrev SphericalCompletion (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 (E : Type u) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
