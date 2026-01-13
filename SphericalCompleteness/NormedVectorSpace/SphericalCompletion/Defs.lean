@@ -259,6 +259,11 @@ SphericallyCompleteSpace (↥(zorn_ayaka 𝕜 E E₀ f).choose) := by
         contrapose hc
         simpa using infDist_nonneg
       -- need not_morth_iff_exists_dist_lt
+      have := (zorn_ayaka 𝕜 E E₀ f).choose_spec.1.out.choose_spec
+      unfold IsImmediate at this
+      replace this := fun x => mt (this x)
+      specialize this ⟨g,hg1⟩ (by simp [hgg])
+
       sorry
 
     · nth_rw 2 [← sub_zero b.val]
