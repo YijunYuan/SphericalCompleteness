@@ -12,15 +12,6 @@ def IsSphericalComletion (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 SphericallyCompleteSpace F ∧
 ∃ (f : E →ₗᵢ[𝕜] F), ∀ M : Submodule 𝕜 F, LinearMap.range f ≤ M → SphericallyCompleteSpace M → M = ⊤
 
-abbrev LinearIsometry.submodule_subset_submodule (𝕜 : Type*) [NontriviallyNormedField 𝕜]
-{E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
-{F₁ F₂ : Submodule 𝕜 E} (h : F₁ ≤ F₂) :
-↥F₁ →ₗᵢ[𝕜] ↥F₂ where
-  toFun x := ⟨x.1, h x.2⟩
-  map_add' _ _ := rfl
-  map_smul' _ _ := rfl
-  norm_map' _ := rfl
-
 def ayaka {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 (E : Type*) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
 (E₀ : Type*) [NormedAddCommGroup E₀] [NormedSpace 𝕜 E₀] [IsUltrametricDist E₀]
@@ -297,9 +288,13 @@ abbrev SphericalCompletion (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 
 abbrev SphericalCompletionInclusion (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 (E : Type u) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
-: E →ₗᵢ[𝕜] SphericalCompletion 𝕜 E := by
-  have := (zorn_ayaka 𝕜 E (↥(lp (fun _ ↦ E) ⊤) ⧸ c₀ 𝕜 fun _ ↦ E) (sphericallyCompleteExtension 𝕜 E)).choose_spec.1.out.choose
+: E →ₗᵢ[𝕜] SphericalCompletion 𝕜 E := {
+    toFun x := ⟨(sphericallyCompleteExtension 𝕜 E) x, (zorn_ayaka 𝕜 E
+      (↥(lp (fun _ ↦ E) ⊤) ⧸ c₀ 𝕜 fun _ ↦ E) (sphericallyCompleteExtension 𝕜 E)
+      ).choose_spec.1.out.choose <| LinearMap.mem_range_self _ _⟩
+    map_add' _ _:= rfl
+    map_smul' _ _:= rfl
+    norm_map' x := by simp
+  }
 
-
-  sorry
 end SphericallyCompleteSpace
