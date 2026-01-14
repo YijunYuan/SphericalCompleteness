@@ -297,4 +297,21 @@ abbrev SphericalCompletionInclusion (𝕜 : Type*) [NontriviallyNormedField 𝕜
     norm_map' x := by simp
   }
 
+theorem ssss (𝕜 : Type*) [NontriviallyNormedField 𝕜]
+(E : Type u) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E] :
+IsImmediate (SphericalCompletionInclusion 𝕜 E) := by
+  have := (zorn_ayaka 𝕜 E
+      (↥(lp (fun _ ↦ E) ⊤) ⧸ c₀ 𝕜 fun _ ↦ E) (sphericallyCompleteExtension 𝕜 E)
+      ).choose_spec.1.out.choose_spec
+  refine fun v hv => this v ?_
+  convert hv
+  ext z
+  simp only [sphericallyCompleteExtension, QuotientAddGroup.mk'_apply,
+    LinearMap.mem_range, LinearIsometry.coe_mk, LinearMap.coe_mk, AddHom.coe_mk, Subtype.exists]
+  constructor
+  · rintro ⟨_, _, ha2⟩
+    simpa only [← ha2, Subtype.mk.injEq, Subtype.forall, Submodule.mk_eq_zero]
+  · rintro ⟨_, ha⟩
+    simp only [← ha, Subtype.mk.injEq, exists_prop, exists_eq_right, exists_apply_eq_apply]
+
 end SphericallyCompleteSpace
