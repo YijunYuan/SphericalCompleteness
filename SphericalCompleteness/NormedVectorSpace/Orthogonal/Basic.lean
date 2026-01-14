@@ -198,6 +198,26 @@ theorem smul_morth_iff_morth_of_nonzero {𝕜 : Type*} [NontriviallyNormedField 
   apply smul_morth_of_morth a⁻¹ at h
   rwa [inv_smul_smul₀ ha x] at h
 
+theorem not_morth_iff_exists_dist_lt_norm {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+{E : Type u_2} [SeminormedAddCommGroup E]
+[NormedSpace 𝕜 E] [IsUltrametricDist E]
+{x : E} {F : Subspace 𝕜 E} :
+  ¬ (x ⟂ₘ F) ↔ ∃ y ∈ F, dist x y < ‖x‖ := by
+  unfold MOrth
+  constructor
+  · intro h
+    contrapose h
+    push_neg at h
+    refine eq_of_le_of_ge ?_ <| (le_infDist <| Submodule.nonempty F).2 h
+    nth_rw 2 [← sub_zero x]
+    rw [← dist_eq_norm]
+    exact infDist_le_dist_of_mem (by simp)
+  · intro h
+    contrapose h
+    push_neg
+    rw [← h]
+    exact fun z hz => infDist_le_dist_of_mem hz
+
 theorem sorth_iff_forall_orth {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 {E : Type u_2} [SeminormedAddCommGroup E]
 [NormedSpace 𝕜 E] [IsUltrametricDist E]

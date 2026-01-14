@@ -162,35 +162,26 @@ SphericallyCompleteSpace (↥(zorn_ayaka 𝕜 E E₀ f).choose) := by
   push_neg at hc
   rcases hc with ⟨c, r, hsr, hanti, hemp⟩
   have := @hsc.isSphericallyComplete (fun n => (c n).1) r (by
-    intro m n hmn
-    simp
-    specialize hanti hmn
-    simp at hanti
-    intro z hz
+    intro m n hmn z hz
     simp only [mem_closedBall] at *
     refine le_trans (iud.dist_triangle_max z (c n).val (c m).val) ?_
-    apply max_le
-    · exact le_trans hz <| hsr.antitone hmn
-    · rw [← mem_closedBall]
-      exact hanti <| mem_closedBall_self NNReal.zero_le_coe
-      )
+    refine max_le (le_trans hz <| hsr.antitone hmn) ?_
+    simpa only [← mem_closedBall] using hanti hmn <| mem_closedBall_self NNReal.zero_le_coe )
   simp only [Set.nonempty_iInter, mem_closedBall] at this
   rcases this with ⟨a, ha⟩
   if haa : a ∈ (zorn_ayaka 𝕜 E E₀ f).choose then
     contrapose hemp
-    refine Set.nonempty_iff_ne_empty.mp ?_
-    use ⟨a, haa⟩
+    refine Set.nonempty_iff_ne_empty.mp ⟨⟨a, haa⟩, ?_⟩
     simp only [Set.mem_iInter, mem_closedBall]
     intro i
-    specialize ha i
-    simpa only [dist_le_coe]
+    simpa only [dist_le_coe] using ha i
   else
   have : ((zorn_ayaka 𝕜 E E₀ f).choose + Submodule.span 𝕜 {a}) ∉ ayaka E E₀ f := by
     by_contra hc
     have : (zorn_ayaka 𝕜 E E₀ f).choose < (zorn_ayaka 𝕜 E E₀ f).choose + Submodule.span 𝕜 {a} := by
       simpa only [Submodule.add_eq_sup, left_lt_sup, Submodule.span_singleton_le_iff_mem]
     exact (not_le_of_gt this) <| (zorn_ayaka 𝕜 E E₀ f).choose_spec.2 hc (le_of_lt this)
-  simp [ayaka] at this
+  simp only [ayaka, Set.mem_setOf_eq, Submodule.add_eq_sup, not_exists] at this
   specialize this <| le_sup_of_le_left (zorn_ayaka 𝕜 E E₀ f).choose_spec.1.out.choose
   unfold IsImmediate at this
   push_neg at this
@@ -200,14 +191,12 @@ SphericallyCompleteSpace (↥(zorn_ayaka 𝕜 E E₀ f).choose) := by
   rw [← hs] at hx'v'
   have hhs : s ≠ 0 := by
     by_contra hc
-    simp [hc] at hx'v'
+    simp only [hc, zero_smul, add_zero] at hx'v'
     subst hx'v'
     have := (zorn_ayaka 𝕜 E E₀ f).choose_spec.1.out.choose_spec
-    unfold IsImmediate at this
     specialize this ⟨b', hx'⟩ ?_
     · unfold MOrth at *
-      simp
-      simp at hb'1
+      simp only [AddSubgroupClass.coe_norm] at *
       rw [← hb'1]
       refine eq_of_le_of_ge ?_ ?_
       · apply (le_infDist (by use 0; simp)).2
@@ -216,10 +205,8 @@ SphericallyCompleteSpace (↥(zorn_ayaka 𝕜 E E₀ f).choose) := by
           AddHom.coe_mk, Subtype.exists] at hy
         rcases hy with ⟨z, hm, hz⟩
         refine le_trans (infDist_le_dist_of_mem (?_ : ⟨y,?_⟩ ∈ _)) (le_of_eq rfl)
-        · simp only [SetLike.mem_coe, LinearMap.mem_range, LinearIsometry.coe_mk, LinearMap.coe_mk,
-          AddHom.coe_mk, Subtype.exists]
-          use z, hm
-          simp only [← hz]
+        · simpa only [SetLike.mem_coe, LinearMap.mem_range, LinearIsometry.coe_mk, LinearMap.coe_mk,
+          AddHom.coe_mk, Subtype.exists] using ⟨z, hm, by simp only [← hz]⟩
         · refine (zorn_ayaka 𝕜 E E₀ f).choose_spec.1.out.choose ?_
           simp only [← hz, LinearMap.mem_range, hm]
       · apply (le_infDist (by use 0; simp)).2
@@ -227,13 +214,10 @@ SphericallyCompleteSpace (↥(zorn_ayaka 𝕜 E E₀ f).choose) := by
         simp only [SetLike.mem_coe, LinearMap.mem_range, LinearIsometry.coe_mk, LinearMap.coe_mk,
           AddHom.coe_mk, Subtype.exists] at hy
         rcases hy with ⟨z, hm, hz⟩
-        refine le_trans (infDist_le_dist_of_mem (?_ : ⟨y,?_⟩ ∈ _)) (le_of_eq rfl)
-        · simp only [SetLike.mem_coe, LinearMap.mem_range, LinearIsometry.coe_mk, LinearMap.coe_mk,
-          AddHom.coe_mk, Subtype.exists]
-          use z, hm
-          simp only [← hz]
-        · apply Submodule.mem_sup_left
-          refine (zorn_ayaka 𝕜 E E₀ f).choose_spec.1.out.choose ?_
+        refine le_trans (infDist_le_dist_of_mem (?_ : ⟨y, ?_⟩ ∈ _)) (le_of_eq rfl)
+        · simpa only [SetLike.mem_coe, LinearMap.mem_range, LinearIsometry.coe_mk, LinearMap.coe_mk,
+          AddHom.coe_mk, Subtype.exists] using ⟨z, hm, by simp only [← hz]⟩
+        · refine Submodule.mem_sup_left <| (zorn_ayaka 𝕜 E E₀ f).choose_spec.1.out.choose ?_
           simp only [← hz, LinearMap.mem_range, hm]
     simp only [Submodule.mk_eq_zero, ZeroMemClass.coe_eq_zero] at this
     exact hb'2 this
@@ -245,57 +229,55 @@ SphericallyCompleteSpace (↥(zorn_ayaka 𝕜 E E₀ f).choose) := by
     simpa only [add_left_inj] using inv_smul_smul₀ hhs a
   have hb1 := smul_morth_of_morth (s⁻¹) hb'1
   replace hb1 : MOrth 𝕜 b.val (zorn_ayaka 𝕜 E E₀ f).choose := by
-    unfold MOrth
     by_contra hc
-    simp at hc
-    replace hc := lt_of_le_of_ne ?_ hc
-    · rcases (infDist_lt_iff (by use 0; simp)).1 hc with ⟨g, hg1, hg2⟩
-      rw [dist_eq_norm] at hg2
-      replace hg2 := norm_eq_of_norm_sub_lt_left hg2
-      have hgg : g ≠ 0 := by
-        by_contra hc
-        simp [hc] at hg2
-        simp [hg2] at *
-        contrapose hc
-        simpa using infDist_nonneg
-      -- need not_morth_iff_exists_dist_lt
-      have := (zorn_ayaka 𝕜 E E₀ f).choose_spec.1.out.choose_spec
-      unfold IsImmediate at this
-      replace this := fun x => mt (this x)
-      specialize this ⟨g,hg1⟩ (by simp [hgg])
-
-      sorry
-
-    · nth_rw 2 [← sub_zero b.val]
-      rw [← dist_eq_norm]
-      apply infDist_le_dist_of_mem
-      simp only [SetLike.mem_coe, zero_mem]
+    rcases not_morth_iff_exists_dist_lt_norm.1 hc with ⟨g, hg1, hg2⟩
+    rw [dist_eq_norm] at hg2
+    have hg2' := norm_eq_of_norm_sub_lt_left hg2
+    have hgg : g ≠ 0 := by
+      by_contra hc
+      simp only [hc, norm_zero, norm_eq_zero, ZeroMemClass.coe_eq_zero] at hg2'
+      simp only [dist_le_coe, MOrth, AddSubgroupClass.coe_norm, ne_eq, Subtype.forall,
+        Submodule.mk_eq_zero, hg2', ZeroMemClass.coe_zero, SetLike.val_smul, norm_zero] at *
+      contrapose hc
+      exact infDist_zero_of_mem <| by simp only [SetLike.mem_coe, zero_mem]
+    have := (zorn_ayaka 𝕜 E E₀ f).choose_spec.1.out.choose_spec
+    rcases not_morth_iff_exists_dist_lt_norm.1
+      ((fun x => mt (this x)) ⟨g,hg1⟩ (by simp [hgg])) with ⟨e, he1, he2⟩
+    simp only [AddSubgroupClass.coe_norm, ← hg2'] at he2
+    rw [(by rfl : dist ⟨g, hg1⟩ e = dist g e.val), dist_eq_norm] at he2
+    suffices hh : ‖b.val - e.val‖ < ‖b.val‖ by
+      contrapose hb1
+      apply not_morth_iff_exists_dist_lt_norm.2
+      use ⟨e.val, Submodule.mem_sup_left e.prop⟩
+      simp only [LinearMap.mem_range, LinearIsometry.coe_mk, LinearMap.coe_mk, AddHom.coe_mk,
+        Subtype.exists] at he1
+      rcases he1 with ⟨q1,q2,q3⟩
+      replace q3 : q1 = e.val := by simp [← q3]
+      simp only [← q3, LinearMap.mem_range, LinearIsometry.coe_mk, LinearMap.coe_mk, AddHom.coe_mk,
+        Subtype.mk.injEq, Subtype.exists, exists_prop, exists_eq_right, q2,
+        AddSubgroupClass.coe_norm, SetLike.val_smul, true_and, gt_iff_lt]
+      simpa only [q3, dist_eq_norm, AddSubgroupClass.coe_norm, AddSubgroupClass.coe_sub,
+        SetLike.val_smul]
+    rw [(by abel : b.val - e.val = (b.val - g) + (g - e.val))]
+    exact lt_of_le_of_lt (iud.norm_add_le_max _ _) <| max_lt hg2 he2
   have hx : x ∈ (zorn_ayaka 𝕜 E E₀ f).choose :=
     Submodule.smul_mem (zorn_ayaka 𝕜 E E₀ f).choose (-s⁻¹) hx'
   suffices h : ∀ i : ℕ, ⟨x,hx⟩ ∈ closedBall (c i) ↑(r i) by
     contrapose hemp
-    refine Set.nonempty_iff_ne_empty.mp ?_
-    use ⟨x, hx⟩
-    simpa only [Set.mem_iInter]
+    exact Set.nonempty_iff_ne_empty.mp ⟨⟨x, hx⟩, by simpa only [Set.mem_iInter]⟩
   intro i
   simp only [mem_closedBall, dist_eq_norm]
-  refine le_trans (by simp : ‖⟨x, hx⟩ - c i‖ ≤ max ‖⟨x, hx⟩ - c i‖ ‖b‖) ?_
-  refine le_trans ?_ (ha i)
+  refine le_trans (by simp : ‖⟨x, hx⟩ - c i‖ ≤ max ‖⟨x, hx⟩ - c i‖ ‖b‖) <| le_trans ?_ (ha i)
   have : a - (c i).val = b - ((c i).val - x) := by
     simp only [this, sub_sub_sub_cancel_right]
   rw [dist_eq_norm, this]
   conv => arg 1; simp only [AddSubgroupClass.coe_norm, AddSubgroupClass.coe_sub]
-  refine le_of_eq <| Eq.symm ?_
-  refine eq_of_le_of_ge ?_ ?_
+  refine le_of_eq <| Eq.symm <| eq_of_le_of_ge ?_ ?_
   · rw [sub_sub_eq_add_sub, ← add_sub, max_comm]
     exact iud.norm_add_le_max _ _
   · if hf : ‖x - ↑(c i)‖ = ‖↑b‖ then
-      simp only [hf, AddSubgroupClass.coe_norm, max_self]
-      rw [← dist_eq_norm]
-      unfold MOrth at hb1
-      unfold b
-      simp only [SetLike.val_smul]
-      simp only [AddSubgroupClass.coe_norm, SetLike.val_smul, b] at hb1
+      simp only [hf, AddSubgroupClass.coe_norm, max_self, ← dist_eq_norm, b, SetLike.val_smul]
+      simp only [MOrth, AddSubgroupClass.coe_norm, SetLike.val_smul, b] at hb1
       rw [← hb1]
       apply infDist_le_dist_of_mem
       refine SetLike.mem_coe.mpr <| Submodule.sub_mem (zorn_ayaka 𝕜 E E₀ f).choose ?_ hx
