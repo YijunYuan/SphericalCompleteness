@@ -314,4 +314,11 @@ IsImmediate (SphericalCompletionInclusion 𝕜 E) := by
   · rintro ⟨_, ha⟩
     simp only [← ha, Subtype.mk.injEq, exists_prop, exists_eq_right, exists_apply_eq_apply]
 
+theorem spherical_completion_minimal (𝕜 : Type*) [NontriviallyNormedField 𝕜]
+(E : Type u) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E] :
+∀ M : Submodule 𝕜 (SphericalCompletion 𝕜 E),
+LinearMap.range (SphericalCompletionInclusion 𝕜 E) ≤ M →
+SphericallyCompleteSpace M → M = ⊤ := by
+  sorry
+
 end SphericallyCompleteSpace
