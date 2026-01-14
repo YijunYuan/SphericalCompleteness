@@ -92,6 +92,15 @@ theorem sorth_orthcomp (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     refine le_trans (iud.norm_add_le_max _ _) ?_
     simp only [this, sup_of_le_left, le_refl]
 
+lemma morth_of_mem_orthComp (𝕜 : Type*) [NontriviallyNormedField 𝕜]
+{E : Type*} [NormedAddCommGroup E] [iud : IsUltrametricDist E]
+[NormedSpace 𝕜 E]
+(F : Submodule 𝕜 E) [SphericallyCompleteSpace F]
+{x : E} (hx : x ∈ OrthComp 𝕜 F) :
+(x ⟂ₘ F) := by
+
+  sorry
+
 noncomputable def OrthProj (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 {E : Type*} [NormedAddCommGroup E] [iud : IsUltrametricDist E]
 [NormedSpace 𝕜 E]

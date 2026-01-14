@@ -1,6 +1,7 @@
 import SphericalCompleteness.NormedVectorSpace.SphericalCompletion.SphericallyCompleteExtension
 import SphericalCompleteness.NormedVectorSpace.Immediate
 import SphericalCompleteness.NormedVectorSpace.Existance
+import SphericalCompleteness.NormedVectorSpace.Orthogonal.OrthComp
 
 open Metric
 
@@ -319,6 +320,19 @@ theorem spherical_completion_minimal (𝕜 : Type*) [NontriviallyNormedField �
 ∀ M : Submodule 𝕜 (SphericalCompletion 𝕜 E),
 LinearMap.range (SphericalCompletionInclusion 𝕜 E) ≤ M →
 SphericallyCompleteSpace M → M = ⊤ := by
+  intro M hM hsc
+  by_contra hc
+  --simp [← lt_top_iff_ne_top] at hc
+  let Mo := OrthComp 𝕜 M
+  have hMo : OrthComp 𝕜 M ≠ ⊥ := by
+    by_contra hc'
+    have := (isCompl_orthcomp 𝕜 M).sup_eq_top
+    simp only [hc', bot_le, sup_of_le_left] at this
+    exact hc this
+  replace hMo := (Submodule.eq_bot_iff (OrthComp 𝕜 M)).not.1 hMo
+  push_neg at hMo
+  rcases hMo with ⟨b, hb1, hb2⟩
+
   sorry
 
 end SphericallyCompleteSpace
