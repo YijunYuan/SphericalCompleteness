@@ -98,8 +98,9 @@ lemma morth_of_mem_orthComp (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 (F : Submodule 𝕜 E) [SphericallyCompleteSpace F]
 {x : E} (hx : x ∈ OrthComp 𝕜 F) :
 (x ⟂ₘ F) := by
-
-  sorry
+  have := sorth_orthcomp 𝕜 F
+  rw [sorth_symm] at this
+  exact this x hx
 
 noncomputable def OrthProj (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 {E : Type*} [NormedAddCommGroup E] [iud : IsUltrametricDist E]

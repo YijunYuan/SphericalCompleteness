@@ -5,10 +5,15 @@ open Metric
 namespace SphericallyCompleteSpace
 
 def IsImmediate {𝕜 : Type*} [NontriviallyNormedField 𝕜]
-{E : Type*} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
-{F : Type*} [SeminormedAddCommGroup F] [NormedSpace 𝕜 F] [IsUltrametricDist F]
+{E : Type u} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
+{F : Type v} [SeminormedAddCommGroup F] [NormedSpace 𝕜 F] [IsUltrametricDist F]
 (f : E →ₗᵢ[𝕜] F) : Prop :=
 ∀ v : F, (v ⟂ₘ LinearMap.range f) → v = 0
+
+def MaximallyComplete (𝕜 : Type*) [NontriviallyNormedField 𝕜]
+(E : Type u) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E] : Prop :=
+∀ {F : Type u} [NormedAddCommGroup F] [NormedSpace 𝕜 F] [IsUltrametricDist F]
+(f : E →ₗᵢ[𝕜] F), IsImmediate f → Function.Surjective f
 
 noncomputable def LinearIsometry.weakInv {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
