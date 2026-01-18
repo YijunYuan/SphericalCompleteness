@@ -6,6 +6,7 @@ import Mathlib.Algebra.Polynomial.Degree.Operations
 import Mathlib.FieldTheory.IsAlgClosed.AlgebraicClosure
 import Mathlib.Analysis.Normed.Unbundled.SpectralNorm
 import Mathlib.RingTheory.Polynomial.GaussNorm
+import Mathlib.Algebra.Polynomial.Splits
 
 open Polynomial
 
@@ -189,3 +190,27 @@ theorem spectralNorm_eval_le_gaussNorm_sub {𝕜 : Type u_1} [hn : NontriviallyN
       simp only [hp, ↓reduceDIte, le_refl, one_pow, mul_one]
       rw [Finset.le_sup'_iff]
       exact ⟨hp.choose, ⟨hp.choose_spec, norm_nonneg _⟩⟩
+
+open Classical in
+theorem continuity_of_roots {𝕜 : Type u_1} [hn : NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
+  [IsUltrametricDist 𝕜]
+(f g : Polynomial 𝕜) (hf : Monic f) (hg : Monic g) (hfg : f.degree = g.degree)
+(α : AlgebraicClosure 𝕜) (hα : f.toAlgCl.IsRoot α) :
+∃ β : AlgebraicClosure 𝕜,
+  g.toAlgCl.IsRoot β ∧
+  spectralAlgNorm 𝕜 (AlgebraicClosure 𝕜) (α - β)
+    ≤ (f - g).stdGaussNorm ^ (1 / (f.natDegree : ℝ)) * f.stdGaussNorm := by
+  by_contra hc
+  push_neg at hc
+  have : IsAlgClosed (AlgebraicClosure 𝕜) := IsAlgClosure.isAlgClosed 𝕜
+  have := Polynomial.aeval_eq_prod_aroots_sub_of_monic_of_splits hg (this.factors g.toAlgCl) α
+  have t : (aeval α) g = g.toAlgCl.eval α := by
+    simp [aeval, toAlgCl]
+  rw [t, Multiset.prod_eq_prod_toEnumFinset] at this
+  apply_fun (spectralNorm 𝕜 (AlgebraicClosure 𝕜)) at this
+
+
+
+  --rw [← map_multiset_prod] at h𝒮
+
+  sorry
