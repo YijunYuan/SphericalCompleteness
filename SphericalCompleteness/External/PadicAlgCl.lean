@@ -74,7 +74,7 @@ noncomputable instance instDenselyNormedFieldPadicAlgCl : DenselyNormedField (Pa
       simp [← Real.rpow_mul (norm_nonneg _)]
     exact ⟨z, hz' ▸ ⟨hr1, hr2⟩⟩
 
-theorem instSeparableSpacePadicAlgCl_sphericalCompleteness.extracted_1 (p : ℕ) [hp : Fact (Nat.Prime p)] :
+theorem Q_alg_in_QpAlgCl_is_countable (p : ℕ) [hp : Fact (Nat.Prime p)] :
   {z : PadicAlgCl p | IsAlgebraic ℚ z}.Countable := by
   let S := {z : PadicAlgCl p | IsAlgebraic ℚ z}
   have : S ⊆ ⋃ (f : {g : ℚ[X] // g ≠ 0}), {z : PadicAlgCl p | aeval z f.val = 0} := by
@@ -82,20 +82,32 @@ theorem instSeparableSpacePadicAlgCl_sphericalCompleteness.extracted_1 (p : ℕ)
     simp
     rcases hz with ⟨f, hfne, hfz⟩
     use f
-  have : Cardinal.mk S ≤ Cardinal.mk (⋃ (f : {g : ℚ[X] // g ≠ 0}), {z : PadicAlgCl p | aeval z f.val = 0}) := Cardinal.mk_le_mk_of_subset this
-  have := le_trans this <| Cardinal.mk_iUnion_le (fun (f : { g : ℚ[X] // g ≠ 0 }) ↦ {z : PadicAlgCl p | (aeval z) f.val = 0})
-  have : Cardinal.mk { g : ℚ[X] // g ≠ 0 } ≤ Cardinal.aleph0 := by
-    refine le_trans (Cardinal.mk_subtype_le _) ?_
+  have : Cardinal.mk S ≤ Cardinal.mk
+    (⋃ (f : {g : ℚ[X] // g ≠ 0}), {z : PadicAlgCl p | aeval z f.val = 0}) :=
+    Cardinal.mk_le_mk_of_subset this
+  have := le_trans this <| Cardinal.mk_iUnion_le (fun (f : { g : ℚ[X] // g ≠ 0 })
+    ↦ {z : PadicAlgCl p | (aeval z) f.val = 0})
+  suffices hfinal : Cardinal.mk S ≤ Cardinal.aleph0 by
+    exact Cardinal.le_aleph0_iff_subtype_countable.mp hfinal
+  refine le_trans this <| le_trans (Cardinal.mul_le_max _ _) ?_
+  refine max_le ?_ (le_refl _)
+  refine max_le ?_ ?_
+  · refine le_trans (Cardinal.mk_subtype_le _) ?_
     simp
-
-  sorry
+  · refine ciSup_le' ?_
+    intro f
+    simp
+    refine Set.Finite.countable ?_
+    have t : ((Polynomial.map (algebraMap ℚ ℚ_[p])) f.val).toAlgCl ≠ 0 := by
+      simpa using f.prop
+    simpa using Polynomial.finite_setOf_isRoot t
 
 open Classical in
-instance : TopologicalSpace.SeparableSpace (PadicAlgCl p) where
+instance instSeparableSpacePadicAlgCl : TopologicalSpace.SeparableSpace (PadicAlgCl p) where
   exists_countable_dense := by
     use {z : PadicAlgCl p | IsAlgebraic ℚ z}
     constructor
-    · sorry
+    · exact Q_alg_in_QpAlgCl_is_countable p
     · refine Metric.dense_iff.mpr ?_
       intro α ε hε
       rcases (PadicAlgCl.isAlgebraic p).isAlgebraic α with ⟨f', hfne', hfz'⟩
@@ -113,7 +125,9 @@ instance : TopologicalSpace.SeparableSpace (PadicAlgCl p) where
       let g' := Polynomial.ofFn _ fun_g
       let g := (Polynomial.map (algebraMap ℚ ℚ_[p])) g'
       have hgg : ∀ i, (hi : i ≤ f.natDegree) →  g.coeff i = fun_g ⟨i,
-        Order.lt_add_one_iff.mpr hi⟩ := sorry
+        Order.lt_add_one_iff.mpr hi⟩ := by
+        intro i hi
+        simpa [g, g'] using ofFn_coeff_eq_val_of_lt fun_g (Order.lt_add_one_iff.mpr hi)
       have hfg : f.natDegree = g.natDegree := by
         have := Polynomial.ofFn_natDegree_lt (by simp) fun_g
         rw [Nat.lt_add_one_iff] at this

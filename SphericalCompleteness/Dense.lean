@@ -1,4 +1,5 @@
 import SphericalCompleteness.Basic
+import SphericalCompleteness.External.PadicComplex
 
 open Metric
 open Filter
@@ -269,5 +270,8 @@ theorem not_spherically_complete_of_dense_separable_ultrametric
     simp only [hα.spherically_dense, coe_eq_zero] at this
     simp only [this, gt_iff_lt, lt_self_iff_false] at r₀pos
 
+instance (p : ℕ) [hp : Fact (Nat.Prime p)] :
+¬ SphericallyCompleteSpace ℂ_[p] := by
+  apply not_spherically_complete_of_dense_separable_ultrametric ℂ_[p]
 
 end SphericallyCompleteSpace

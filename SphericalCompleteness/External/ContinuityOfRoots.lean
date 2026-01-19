@@ -81,7 +81,7 @@ lemma one_le_stdGaussNorm_of_monic {𝕜 : Type u_1} [hn : NontriviallyNormedFie
     exact Monic.ne_zero hf
   simp [this]
   use f.natDegree
-  simpa [hf] using le_of_eq norm_one.symm
+  simp [hf]
 
 lemma pos_deg_of_monic_of_root {𝕜 : Type u_1} [Field 𝕜]
 (f : 𝕜[X]) (hf : Monic f) (α : AlgebraicClosure 𝕜) (hfz : eval α f.toAlgCl = 0) :
@@ -90,7 +90,7 @@ lemma pos_deg_of_monic_of_root {𝕜 : Type u_1} [Field 𝕜]
   by_contra hc
   simp [hc] at hfz
 
-theorem ttt.extracted_1_4 {𝕜 : Type*} [hn : NontriviallyNormedField 𝕜]
+lemma natDegree_sub_monic_le_natDegree_sub_one {𝕜 : Type*} [hn : NontriviallyNormedField 𝕜]
   (f g : 𝕜[X]) (hf : f.Monic) (hg : g.Monic) (hfg : f.degree = g.degree) (α : AlgebraicClosure 𝕜)
   (hfz : eval α f.toAlgCl = 0) :
   (g - f).natDegree ≤ f.natDegree - 1 := by
@@ -228,7 +228,7 @@ theorem spectralNorm_eval_le_gaussNorm_sub {𝕜 : Type u_1} [hn : NontriviallyN
         · rw [Nat.lt_add_one_iff] at hi
           refine le_trans hi ?_
           rw [toAlgCl_natdeg_eq]
-          exact ttt.extracted_1_4 f g hf hg hfg α hfz
+          exact natDegree_sub_monic_le_natDegree_sub_one f g hf hg hfg α hfz
     · exact stdGaussNorm_nonneg (f - g)
 
 open Classical in
