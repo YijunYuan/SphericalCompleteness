@@ -1,5 +1,9 @@
 import Mathlib.NumberTheory.Padics.Complex
 import Mathlib.Analysis.SpecialFunctions.Log.Base
+import Mathlib.Topology.Bases
+import SphericalCompleteness.External.ContinuityOfRoots
+import Mathlib.Algebra.Polynomial.OfFn
+import Mathlib.Algebra.Polynomial.Cardinal
 
 open PadicAlgCl
 open Polynomial
@@ -69,3 +73,90 @@ noncomputable instance instDenselyNormedFieldPadicAlgCl : DenselyNormedField (Pa
         (Real.rpow_nonneg (norm_nonneg _) _) (by simp)]
       simp [← Real.rpow_mul (norm_nonneg _)]
     exact ⟨z, hz' ▸ ⟨hr1, hr2⟩⟩
+
+theorem instSeparableSpacePadicAlgCl_sphericalCompleteness.extracted_1 (p : ℕ) [hp : Fact (Nat.Prime p)] :
+  {z : PadicAlgCl p | IsAlgebraic ℚ z}.Countable := by
+  let S := {z : PadicAlgCl p | IsAlgebraic ℚ z}
+  have : S ⊆ ⋃ (f : {g : ℚ[X] // g ≠ 0}), {z : PadicAlgCl p | aeval z f.val = 0} := by
+    intro z hz
+    simp
+    rcases hz with ⟨f, hfne, hfz⟩
+    use f
+  have : Cardinal.mk S ≤ Cardinal.mk (⋃ (f : {g : ℚ[X] // g ≠ 0}), {z : PadicAlgCl p | aeval z f.val = 0}) := Cardinal.mk_le_mk_of_subset this
+  have := le_trans this <| Cardinal.mk_iUnion_le (fun (f : { g : ℚ[X] // g ≠ 0 }) ↦ {z : PadicAlgCl p | (aeval z) f.val = 0})
+  have : Cardinal.mk { g : ℚ[X] // g ≠ 0 } ≤ Cardinal.aleph0 := by
+    refine le_trans (Cardinal.mk_subtype_le _) ?_
+    simp
+
+  sorry
+
+open Classical in
+instance : TopologicalSpace.SeparableSpace (PadicAlgCl p) where
+  exists_countable_dense := by
+    use {z : PadicAlgCl p | IsAlgebraic ℚ z}
+    constructor
+    · sorry
+    · refine Metric.dense_iff.mpr ?_
+      intro α ε hε
+      rcases (PadicAlgCl.isAlgebraic p).isAlgebraic α with ⟨f', hfne', hfz'⟩
+      let f := f' * C (f'.leadingCoeff)⁻¹
+      have hf : Monic f := monic_mul_leadingCoeff_inv hfne'
+      have hfz : aeval α f = 0 := by
+        rw [aeval_mul, hfz', aeval_C]
+        simp
+      rcases continuity_of_roots f hf α hfz (by linarith : 0 < ε / 2) with ⟨δ, hδpos, hδ⟩
+      let fun_g : Fin (f.natDegree + 1) → ℚ := fun i =>
+        if hi : i = f.natDegree then
+          1
+        else
+          (Padic.rat_dense p (f.coeff i) hδpos).choose
+      let g' := Polynomial.ofFn _ fun_g
+      let g := (Polynomial.map (algebraMap ℚ ℚ_[p])) g'
+      have hgg : ∀ i, (hi : i ≤ f.natDegree) →  g.coeff i = fun_g ⟨i,
+        Order.lt_add_one_iff.mpr hi⟩ := sorry
+      have hfg : f.natDegree = g.natDegree := by
+        have := Polynomial.ofFn_natDegree_lt (by simp) fun_g
+        rw [Nat.lt_add_one_iff] at this
+        unfold g
+        simp
+        refine Eq.symm <| eq_of_le_of_not_lt this ?_
+        by_contra hc
+        have this' := hgg f.natDegree <| le_refl _
+        simp [g, Polynomial.coeff_eq_zero_of_natDegree_lt hc, fun_g] at this'
+      have hg : Monic g := by
+        unfold Monic leadingCoeff
+        rw [hgg g.natDegree (hfg ▸ (le_refl _))]
+        simp [fun_g, hfg]
+      replace hfg : f.degree = g.degree := by
+        rw [Polynomial.degree_eq_natDegree hf.ne_zero, Polynomial.degree_eq_natDegree hg.ne_zero,
+          hfg]
+      have hfgδ : (f - g).stdGaussNorm ≤ δ := by
+        rw [le_gaussNorm_iff_coeff_le]
+        · intro i
+          simp
+          if hi : i > f.natDegree then
+            rw [coeff_eq_zero_of_natDegree_lt hi]
+            rw [coeff_eq_zero_of_natDegree_lt <| Polynomial.natDegree_eq_of_degree_eq hfg ▸ hi]
+            simpa using le_of_lt hδpos
+          else
+          simp at hi
+          rw [hgg i hi]
+          unfold fun_g
+          if hii : i = f.natDegree then
+            simpa [hii, hf] using le_of_lt hδpos
+          else
+            simpa [hii] using le_of_lt (Padic.rat_dense p (f.coeff i) hδpos).choose_spec
+        · exact le_of_lt hδpos
+      specialize hδ g hg hfg hfgδ
+      rcases hδ with ⟨β, hβg, hβα⟩
+      use β
+      constructor
+      · simp [dist_comm, dist_eq_norm]
+        exact lt_of_le_of_lt hβα <| by linarith
+      · simp
+        use g'
+        constructor
+        · have : g ≠ 0 := Monic.ne_zero hg
+          contrapose this
+          simpa [g]
+        · simpa [g] using hβg

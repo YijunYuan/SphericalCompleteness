@@ -50,6 +50,21 @@ lemma stdGaussNorm_eq_zero_iff {𝕜 : Type u_1} [hn : NontriviallyNormedField �
   · intro h
     simp [h]
 
+lemma le_gaussNorm_iff_coeff_le {𝕜 : Type u_1} [hn : NontriviallyNormedField 𝕜]
+(f : Polynomial 𝕜) {r : ℝ} (hr : 0 ≤ r) :
+  f.stdGaussNorm ≤ r ↔ ∀ i : ℕ, ‖f.coeff i‖ ≤ r := by
+  unfold stdGaussNorm gaussNorm
+  if h : f.support.Nonempty then
+    simp [h]
+    refine ⟨fun hh i => ?_, fun hh i hi ↦ hh i⟩
+    if ht : f.coeff i = 0 then simpa [ht]
+    else exact hh i ht
+  else
+  simp [h, hr]
+  intro i
+  suffices tt : f.coeff i = 0 by simpa [tt]
+  exact notMem_support_iff.mp <| forall_not_of_not_exists h i
+
 lemma gaussNorm_pos_iff {𝕜 : Type u_1} [hn : NontriviallyNormedField 𝕜]
 (f : Polynomial 𝕜) :
   0 < f.stdGaussNorm ↔ f ≠ 0 := by
