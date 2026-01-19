@@ -25,6 +25,42 @@ lemma toAlgCl_natdeg_eq {𝕜 : Type u_1} [Field 𝕜] (f : Polynomial 𝕜) :
 abbrev Polynomial.stdGaussNorm {𝕜 : Type u_1} [hn : NontriviallyNormedField 𝕜] (f : Polynomial 𝕜) :=
 (Polynomial.gaussNorm hn.norm 1) f
 
+lemma stdGaussNorm_nonneg {𝕜 : Type u_1} [hn : NontriviallyNormedField 𝕜]
+(f : Polynomial 𝕜) : 0 ≤ f.stdGaussNorm := by
+  unfold stdGaussNorm gaussNorm
+  by_cases hp : f.support.Nonempty <;>
+  simp only [hp, ↓reduceDIte, le_refl, one_pow, mul_one]
+  rw [Finset.le_sup'_iff]
+  exact ⟨hp.choose, ⟨hp.choose_spec, norm_nonneg _⟩⟩
+
+lemma stdGaussNorm_eq_zero_iff {𝕜 : Type u_1} [hn : NontriviallyNormedField 𝕜]
+(f : Polynomial 𝕜) :
+  f.stdGaussNorm = 0 ↔ f = 0 := by
+  constructor
+  · intro h
+    unfold stdGaussNorm gaussNorm at h
+    if hh : f.support.Nonempty then
+      simp [hh] at h
+      have := (Finset.sup'_le_iff hh _).1 <| le_of_eq h
+      replace : ∀ b ∈ f.support, f.coeff b = 0 :=
+        fun b hb => norm_eq_zero.mp <| eq_of_le_of_ge (this b hb) (norm_nonneg _)
+      refine support_eq_empty.mp ?_
+      by_contra hc
+      have t := Finset.nonempty_iff_ne_empty.2 hc
+      exact Polynomial.mem_support_iff.1 t.choose_spec <| this t.choose t.choose_spec
+    else
+    have := Polynomial.nonempty_support_iff.not.1 hh
+    contrapose this; exact this
+  · intro h
+    simp [h]
+
+lemma gaussNorm_pos_iff {𝕜 : Type u_1} [hn : NontriviallyNormedField 𝕜]
+(f : Polynomial 𝕜) :
+  0 < f.stdGaussNorm ↔ f ≠ 0 := by
+  refine iff_not_comm.mp ?_
+  simpa [← stdGaussNorm_eq_zero_iff] using
+    ⟨fun h => ge_of_eq (id (Eq.symm h)), fun h => eq_of_le_of_ge h (stdGaussNorm_nonneg f)⟩
+
 lemma one_le_stdGaussNorm_of_monic {𝕜 : Type u_1} [hn : NontriviallyNormedField 𝕜]
 (f : Polynomial 𝕜) (hf : Monic f) :
   1 ≤ f.stdGaussNorm := by
@@ -47,27 +83,20 @@ theorem ttt.extracted_1_4 {𝕜 : Type*} [hn : NontriviallyNormedField 𝕜]
   (f g : 𝕜[X]) (hf : f.Monic) (hg : g.Monic) (hfg : f.degree = g.degree) (α : AlgebraicClosure 𝕜)
   (hfz : eval α f.toAlgCl = 0) :
   (g - f).natDegree ≤ f.natDegree - 1 := by
-  rw [Nat.le_sub_one_iff_lt]
-  · refine lt_of_le_of_ne ?_ ?_
-    · rw [sub_eq_add_neg]
-      refine le_trans (natDegree_add_le _ _) ?_
-      simp
-      apply natDegree_le_iff_degree_le.2
-      simp [← hfg]
-    · by_contra hc
-      have hc' := hc
-      apply_fun (g - f).coeff at hc
-      rw [Polynomial.coeff_sub] at hc
-      nth_rw 1 [hc'] at hc
-      rw [hc'] at hc
-      replace hfg := natDegree_eq_of_degree_eq hfg
-      nth_rw 1 [hfg] at hc
-      nth_rw 2 [← hc'] at hc
-      simp [hf, hg] at hc
-      replace hc := leadingCoeff_eq_zero.1 hc.symm
-      simp [hc] at hc'
-      simp [eq_one_of_monic_natDegree_zero hf (id (Eq.symm hc'))] at hfz
-  · exact pos_deg_of_monic_of_root f hf α hfz
+  rw [Nat.le_sub_one_iff_lt <| pos_deg_of_monic_of_root f hf α hfz]
+  refine lt_of_le_of_ne ?_ ?_
+  · rw [sub_eq_add_neg]
+    refine le_trans (natDegree_add_le _ _) ?_
+    simp [natDegree_le_iff_degree_le, ← hfg]
+  · by_contra hc
+    have hc' := hc
+    apply_fun (g - f).coeff at hc
+    rw [Polynomial.coeff_sub, hc'] at hc
+    nth_rw 1 [natDegree_eq_of_degree_eq hfg] at hc
+    nth_rw 2 [← hc'] at hc
+    simp [hf, hg] at hc
+    simp [leadingCoeff_eq_zero.1 hc.symm] at hc'
+    simp [eq_one_of_monic_natDegree_zero hf (id (Eq.symm hc'))] at hfz
 
 theorem spectralNorm_le_gaussNorm {𝕜 : Type u_1} [hn : NontriviallyNormedField 𝕜]
 [IsUltrametricDist 𝕜]
@@ -85,9 +114,8 @@ theorem spectralNorm_le_gaussNorm {𝕜 : Type u_1} [hn : NontriviallyNormedFiel
     if hα : spectralNorm 𝕜 (AlgebraicClosure 𝕜) α = 0 then
       simp [hα]; linarith
     else
-    have : f.natDegree = f.natDegree -1 + 1 := by
-      refine (Nat.sub_eq_iff_eq_add ?_).mp rfl
-      exact pos_deg_of_monic_of_root f hf α hfz
+    have : f.natDegree = f.natDegree - 1 + 1 :=
+      (Nat.sub_eq_iff_eq_add <| pos_deg_of_monic_of_root f hf α hfz).mp rfl
     nth_rw 1 [this, pow_succ'] at hh
     rwa [mul_le_mul_iff_of_pos_right] at hh
     exact pow_pos (lt_of_le_of_ne (spectralNorm_nonneg α)
@@ -107,11 +135,10 @@ theorem spectralNorm_le_gaussNorm {𝕜 : Type u_1} [hn : NontriviallyNormedFiel
   rw [spectralNorm_neg <| Algebra.IsAlgebraic.isAlgebraic _]
   refine le_trans (spectralNorm_mul
     (Algebra.IsAlgebraic.isAlgebraic _) (Algebra.IsAlgebraic.isAlgebraic _)) ?_
-  apply mul_le_mul ?_ ?_ (spectralNorm_nonneg (α ^ i)) ?_
+  apply mul_le_mul ?_ ?_ (spectralNorm_nonneg (α ^ i)) <| stdGaussNorm_nonneg f
   · rw [spectralNorm_extends]
     if hff : f.coeff i = 0 then
-      simp [hff]
-      have := one_le_stdGaussNorm_of_monic f hf; linarith
+      simpa [hff] using stdGaussNorm_nonneg f
     else
     unfold Polynomial.stdGaussNorm Polynomial.gaussNorm
     simp [support_nonempty.mpr <| Monic.ne_zero hf]
@@ -124,7 +151,17 @@ theorem spectralNorm_le_gaussNorm {𝕜 : Type u_1} [hn : NontriviallyNormedFiel
     else
     rw [this α (Nat.one_le_iff_ne_zero.2 hi')]
     exact pow_le_pow_right₀ hx <| (Nat.le_sub_one_iff_lt t).mpr hi
-  · have := one_le_stdGaussNorm_of_monic f hf; linarith
+
+open Classical in
+lemma Finset.prod.multiplicative_mor {ι : Type*}
+{M : Type*} [CommMonoid M] (s : Finset ι) (f : ι → M)
+{β : Type*} [CommMonoid β] (g : M → β)
+(hg1 : g 1 = 1) (hgmul : ∀ x y : M, g (x * y) = g x * g y) :
+  g (∏ i ∈ s, f i) = ∏ i ∈ s, g (f i) := by
+  induction' s using Finset.induction_on with a s ha ih
+  · simpa
+  · nth_rw 2 [Finset.prod_insert ha]
+    rw [← ih, ← hgmul, ← Finset.prod_insert ha]
 
 theorem spectralNorm_eval_le_gaussNorm_sub {𝕜 : Type u_1} [hn : NontriviallyNormedField 𝕜]
 [IsUltrametricDist 𝕜]
@@ -148,7 +185,6 @@ theorem spectralNorm_eval_le_gaussNorm_sub {𝕜 : Type u_1} [hn : NontriviallyN
   · exact IsAlgebraic.pow (Algebra.IsAlgebraic.isAlgebraic α) i
   · apply mul_le_mul ?_ ?_ (spectralNorm_nonneg _) ?_
     · have : (g - f).toAlgCl.coeff i = algebraMap 𝕜 (AlgebraicClosure 𝕜) ((g - f).coeff i) := by
-        unfold toAlgCl
         simp
       rw [this, spectralNorm_extends]
       unfold Polynomial.stdGaussNorm Polynomial.gaussNorm
@@ -185,11 +221,7 @@ theorem spectralNorm_eval_le_gaussNorm_sub {𝕜 : Type u_1} [hn : NontriviallyN
           refine le_trans hi ?_
           rw [toAlgCl_natdeg_eq]
           exact ttt.extracted_1_4 f g hf hg hfg α hfz
-    · unfold stdGaussNorm gaussNorm
-      by_cases hp : (f - g).support.Nonempty <;>
-      simp only [hp, ↓reduceDIte, le_refl, one_pow, mul_one]
-      rw [Finset.le_sup'_iff]
-      exact ⟨hp.choose, ⟨hp.choose_spec, norm_nonneg _⟩⟩
+    · exact stdGaussNorm_nonneg (f - g)
 
 open Classical in
 theorem continuity_of_roots {𝕜 : Type u_1} [hn : NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
@@ -200,6 +232,15 @@ theorem continuity_of_roots {𝕜 : Type u_1} [hn : NontriviallyNormedField 𝕜
   g.toAlgCl.IsRoot β ∧
   spectralAlgNorm 𝕜 (AlgebraicClosure 𝕜) (α - β)
     ≤ (f - g).stdGaussNorm ^ (1 / (f.natDegree : ℝ)) * f.stdGaussNorm := by
+  if hfg' : f = g then
+    use α
+    simp [← hfg']
+    constructor
+    · simpa using hα
+    · apply mul_nonneg
+      · exact Real.zero_rpow_nonneg (↑f.natDegree)⁻¹
+      · exact stdGaussNorm_nonneg f
+  else
   by_contra hc
   push_neg at hc
   have : IsAlgClosed (AlgebraicClosure 𝕜) := IsAlgClosure.isAlgClosed 𝕜
@@ -208,9 +249,58 @@ theorem continuity_of_roots {𝕜 : Type u_1} [hn : NontriviallyNormedField 𝕜
     simp [aeval, toAlgCl]
   rw [t, Multiset.prod_eq_prod_toEnumFinset] at this
   apply_fun (spectralNorm 𝕜 (AlgebraicClosure 𝕜)) at this
-
-
-
-  --rw [← map_multiset_prod] at h𝒮
-
-  sorry
+  rw [Finset.prod.multiplicative_mor _ _ (spectralNorm 𝕜 (AlgebraicClosure 𝕜))] at this
+  · have this' : ∀ s ∈ (Multiset.map (fun a ↦ α - a) (g.aroots (AlgebraicClosure 𝕜))).toEnumFinset,
+      (f - g).stdGaussNorm ^ (1 / (↑f.natDegree : ℝ)) * f.stdGaussNorm <
+      spectralNorm 𝕜 (AlgebraicClosure 𝕜) s.1 := by
+      intro s hs
+      replace hs := Multiset.mem_of_mem_toEnumFinset hs
+      rcases Multiset.mem_map.1 hs with ⟨z, hz⟩
+      rw [← hz.2]
+      exact hc z (isRoot_of_mem_roots hz.1)
+    replace this' := Finset.prod_lt_prod_of_nonempty ?_ this' ?_
+    · rw [← this] at this'
+      simp at this'
+      rw [IsAlgClosed.card_aroots_eq_natDegree, mul_pow] at this'
+      rw [← natDegree_eq_of_degree_eq hfg, ← Real.rpow_natCast, Real.rpow_inv_rpow] at this'
+      · have := spectralNorm_eval_le_gaussNorm_sub f g hf hg hfg α hα
+        simp at this
+        replace := lt_of_lt_of_le this' this
+        have t := (gaussNorm_pos_iff (f - g)).2 <| sub_ne_zero_of_ne hfg'
+        replace := (mul_lt_mul_iff_right₀ t).1 this
+        rw [pow_lt_pow_iff_right₀] at this
+        · omega
+        · have t := one_le_stdGaussNorm_of_monic f hf
+          refine lt_of_le_of_ne t ?_
+          by_contra hc
+          rw [← hc] at this
+          simp only [one_pow, lt_self_iff_false] at this
+      · exact stdGaussNorm_nonneg (f - g)
+      · simp at hα
+        simpa using Nat.ne_zero_of_lt <| Polynomial.natDegree_pos_of_monic_of_aeval_eq_zero hf hα
+    · intro _ _
+      apply mul_pos
+      · apply Real.rpow_pos_of_pos
+        replace hfg' : f - g ≠ 0 := sub_ne_zero_of_ne hfg'
+        exact (gaussNorm_pos_iff (f - g)).mpr hfg'
+      · have := one_le_stdGaussNorm_of_monic f hf; linarith
+    · suffices hw : (g.aroots (AlgebraicClosure 𝕜)).toFinset.Nonempty by
+        rcases hw with ⟨a, ha⟩
+        use (α - a,0)
+        simp
+        refine Multiset.count_pos.mpr ?_
+        refine Multiset.mem_map.mpr ?_
+        use a
+        simp at ha
+        simp [ha]
+      simp at hα
+      have := Polynomial.natDegree_pos_of_monic_of_aeval_eq_zero hf hα
+      rw [natDegree_eq_of_degree_eq hfg] at this
+      replace : g.toAlgCl.degree ≠ 0 := by
+        simpa using ne_of_gt <| natDegree_pos_iff_degree_pos.1 this
+      rcases IsAlgClosed.exists_root _ this with ⟨a, ha⟩
+      use a
+      simp at ha
+      simpa [ha] using Polynomial.Monic.ne_zero_of_ne (zero_ne_one' 𝕜) hg
+  · exact spectralNorm_one
+  · exact fun x y => spectralAlgNorm_mul x y
