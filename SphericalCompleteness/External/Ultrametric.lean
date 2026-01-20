@@ -215,3 +215,40 @@ theorem norm_eq_of_norm_add_lt_right {S : Type*} [SeminormedAddGroup S] [IsUltra
 {x y : S} (h : ‖x + y‖ < ‖y‖) : ‖x‖ = ‖y‖ := by
   apply IsUltrametricDist.norm_eq_of_add_norm_lt_max
   simp_all only [lt_sup_iff, or_true]
+
+instance instIsUltrametricDistCompletion {𝕜 : Type*} [PseudoMetricSpace 𝕜]
+[IsUltrametricDist 𝕜] :
+  @IsUltrametricDist (UniformSpace.Completion 𝕜)
+  UniformSpace.Completion.instMetricSpace.toDist where
+  dist_triangle_max x y z := by
+    have := @UniformSpace.Completion.denseRange_coe 𝕜 _
+    refine le_of_forall_pos_lt_add <| fun ε hε => ?_
+    rcases Metric.mem_closure_iff.1 (this x) (ε / 4) (by linarith) with ⟨x'', hx'1, hx'2⟩
+    rcases hx'1 with ⟨x', hx'⟩; rw [← hx'] at hx'2
+    rcases Metric.mem_closure_iff.1 (this y) (ε / 4) (by linarith) with ⟨y'', hy'1, hy'2⟩
+    rcases hy'1 with ⟨y', hy'⟩; rw [← hy'] at hy'2
+    rcases Metric.mem_closure_iff.1 (this z) (ε / 4) (by linarith) with ⟨z'', hz'1, hz'2⟩
+    rcases hz'1 with ⟨z', hz'⟩; rw [← hz'] at hz'2
+    have : dist x z < dist (↑x' : UniformSpace.Completion 𝕜) ↑z' + ε / 4 + ε / 4 := by
+      have t1 := dist_triangle x ↑x' z
+      have t2 := dist_triangle ↑x' ↑z' z
+      rw [dist_comm] at hz'2
+      linarith
+    refine lt_trans this ?_
+    have t3 := dist_triangle_max x' y' z'
+    have t4 := dist_triangle ↑x' x ↑y'
+    have t5 := dist_triangle x y ↑y'
+    have t6 := dist_triangle ↑y' y ↑z'
+    have t7 := dist_triangle y z ↑z'
+    have t8 : max (dist x y) (dist y z) + (ε / 4 + ε / 4 + ε / 4 + ε / 4) =
+      max (dist x y) (dist y z) + (ε / 4 + ε / 4) + ε / 4 + ε / 4 := by abel
+    nth_rw 1 [← UniformSpace.Completion.dist_eq] at t3
+    nth_rw 2 [← UniformSpace.Completion.dist_eq] at t3
+    nth_rw 3 [← UniformSpace.Completion.dist_eq] at t3
+    nth_rw 2 [dist_comm] at t4
+    nth_rw 2 [dist_comm] at t6
+    nth_rw 3 [(by linarith : ε = ε / 4 + ε / 4 + ε / 4 + ε / 4)]
+    rw [t8, max_add]
+    nth_rw 1 [add_assoc]; nth_rw 1 [add_assoc]
+    simp only [add_lt_add_iff_right]
+    exact lt_of_le_of_lt t3 <| max_lt_max (by linarith) (by linarith)

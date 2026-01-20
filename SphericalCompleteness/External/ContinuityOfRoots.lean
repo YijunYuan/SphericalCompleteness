@@ -32,23 +32,20 @@ lemma stdGaussNorm_nonneg {𝕜 : Type u_1} [hn : NontriviallyNormedField 𝕜]
 lemma stdGaussNorm_eq_zero_iff {𝕜 : Type u_1} [hn : NontriviallyNormedField 𝕜]
 (f : Polynomial 𝕜) :
   f.stdGaussNorm = 0 ↔ f = 0 := by
-  constructor
-  · intro h
-    unfold stdGaussNorm gaussNorm at h
-    if hh : f.support.Nonempty then
-      simp [hh] at h
-      have := (Finset.sup'_le_iff hh _).1 <| le_of_eq h
-      replace : ∀ b ∈ f.support, f.coeff b = 0 :=
-        fun b hb => norm_eq_zero.mp <| eq_of_le_of_ge (this b hb) (norm_nonneg _)
-      refine support_eq_empty.mp ?_
-      by_contra hc
-      have t := Finset.nonempty_iff_ne_empty.2 hc
-      exact Polynomial.mem_support_iff.1 t.choose_spec <| this t.choose t.choose_spec
-    else
-    have := Polynomial.nonempty_support_iff.not.1 hh
-    contrapose this; exact this
-  · intro h
-    simp [h]
+  refine ⟨fun h => ?_, fun h => by simp [h]⟩
+  unfold stdGaussNorm gaussNorm at h
+  if hh : f.support.Nonempty then
+    simp [hh] at h
+    have := (Finset.sup'_le_iff hh _).1 <| le_of_eq h
+    replace : ∀ b ∈ f.support, f.coeff b = 0 :=
+      fun b hb => norm_eq_zero.mp <| eq_of_le_of_ge (this b hb) (norm_nonneg _)
+    refine support_eq_empty.mp ?_
+    by_contra hc
+    have t := Finset.nonempty_iff_ne_empty.2 hc
+    exact Polynomial.mem_support_iff.1 t.choose_spec <| this t.choose t.choose_spec
+  else
+  have := Polynomial.nonempty_support_iff.not.1 hh
+  tauto
 
 lemma le_gaussNorm_iff_coeff_le {𝕜 : Type u_1} [hn : NontriviallyNormedField 𝕜]
 (f : Polynomial 𝕜) {r : ℝ} (hr : 0 ≤ r) :
@@ -167,9 +164,10 @@ lemma Finset.prod.multiplicative_mor {ι : Type*}
 {β : Type*} [CommMonoid β] (g : M → β)
 (hg1 : g 1 = 1) (hgmul : ∀ x y : M, g (x * y) = g x * g y) :
   g (∏ i ∈ s, f i) = ∏ i ∈ s, g (f i) := by
-  induction' s using Finset.induction_on with a s ha ih
-  · simpa
-  · nth_rw 2 [Finset.prod_insert ha]
+  induction s using Finset.induction_on with
+  | empty => simpa
+  | insert a s ha ih =>
+    nth_rw 2 [Finset.prod_insert ha]
     rw [← ih, ← hgmul, ← Finset.prod_insert ha]
 
 theorem spectralNorm_eval_le_gaussNorm_sub {𝕜 : Type u_1} [hn : NontriviallyNormedField 𝕜]
@@ -223,12 +221,10 @@ theorem spectralNorm_eval_le_gaussNorm_sub {𝕜 : Type u_1} [hn : NontriviallyN
       refine le_trans (?_ : spectralNorm 𝕜 (AlgebraicClosure 𝕜) α ^ i ≤ f.stdGaussNorm ^ i) ?_
       · apply pow_le_pow_left₀ (spectralNorm_nonneg α)
         exact spectralNorm_le_gaussNorm f hf α hfz
-      · refine pow_le_pow_right₀ ?_ ?_
-        · exact one_le_stdGaussNorm_of_monic _ hf
-        · rw [Nat.lt_add_one_iff] at hi
-          refine le_trans hi ?_
-          rw [toAlgCl_natdeg_eq]
-          exact natDegree_sub_monic_le_natDegree_sub_one f g hf hg hfg α hfz
+      · refine pow_le_pow_right₀ (one_le_stdGaussNorm_of_monic _ hf) ?_
+        refine le_trans (Nat.lt_add_one_iff.1 hi) ?_
+        rw [toAlgCl_natdeg_eq]
+        exact natDegree_sub_monic_le_natDegree_sub_one f g hf hg hfg α hfz
     · exact stdGaussNorm_nonneg (f - g)
 
 open Classical in
@@ -243,11 +239,7 @@ theorem continuity_of_roots₀ {𝕜 : Type u_1} [hn : NontriviallyNormedField �
   if hfg' : f = g then
     use α
     simp [← hfg']
-    constructor
-    · simpa using hα
-    · apply mul_nonneg
-      · exact Real.zero_rpow_nonneg (↑f.natDegree)⁻¹
-      · exact stdGaussNorm_nonneg f
+    exact ⟨by simpa using hα, mul_nonneg (Real.zero_rpow_nonneg _) (stdGaussNorm_nonneg _)⟩
   else
   by_contra hc
   push_neg at hc
@@ -262,10 +254,8 @@ theorem continuity_of_roots₀ {𝕜 : Type u_1} [hn : NontriviallyNormedField �
       (f - g).stdGaussNorm ^ (1 / (↑f.natDegree : ℝ)) * f.stdGaussNorm <
       spectralNorm 𝕜 (AlgebraicClosure 𝕜) s.1 := by
       intro s hs
-      replace hs := Multiset.mem_of_mem_toEnumFinset hs
-      rcases Multiset.mem_map.1 hs with ⟨z, hz⟩
-      rw [← hz.2]
-      exact hc z (isRoot_of_mem_roots hz.1)
+      rcases Multiset.mem_map.1 (Multiset.mem_of_mem_toEnumFinset hs) with ⟨z, hz⟩
+      simpa [← hz.2] using hc z (isRoot_of_mem_roots hz.1)
     replace this' := Finset.prod_lt_prod_of_nonempty ?_ this' ?_
     · rw [← this] at this'
       simp at this'
@@ -326,21 +316,15 @@ theorem continuity_of_roots {𝕜 : Type u_1} [hn : NontriviallyNormedField 𝕜
   use (ε / f.stdGaussNorm) ^ (f.natDegree : ℝ)
   constructor
   · refine Real.rpow_pos_of_pos (div_pos hε ?_) ↑f.natDegree
-    have := one_le_stdGaussNorm_of_monic f hf
-    linarith
+    have := one_le_stdGaussNorm_of_monic f hf; linarith
   · intro g hg hfg hfgs
     rcases continuity_of_roots₀ f g hf hg hfg α (by simpa using hα) with ⟨β, hβroot, hβnorm⟩
     use β
-    constructor
-    · simpa using hβroot
-    · refine le_trans hβnorm ?_
-      suffices hh : (f - g).stdGaussNorm ^ (1 / (↑f.natDegree : ℝ)) ≤ ε / f.stdGaussNorm by
-        refine (le_div_iff₀ ?_).mp hh
-        have t := one_le_stdGaussNorm_of_monic f hf
-        linarith
-      simp
-      rw [Real.rpow_inv_le_iff_of_pos]
-      · exact hfgs
-      · exact stdGaussNorm_nonneg (f - g)
-      · exact div_nonneg (le_of_lt hε) (stdGaussNorm_nonneg f)
-      · simpa using pos_deg_of_monic_of_root f hf α (by simpa using hα)
+    refine ⟨by simpa using hβroot, le_trans hβnorm ?_⟩
+    suffices hh : (f - g).stdGaussNorm ^ (1 / (↑f.natDegree : ℝ)) ≤ ε / f.stdGaussNorm by
+      refine (le_div_iff₀ ?_).mp hh
+      have := one_le_stdGaussNorm_of_monic f hf; linarith
+    simp
+    rwa [Real.rpow_inv_le_iff_of_pos (stdGaussNorm_nonneg (f - g))]
+    · exact div_nonneg (le_of_lt hε) (stdGaussNorm_nonneg f)
+    · simpa using pos_deg_of_monic_of_root f hf α (by simpa using hα)
