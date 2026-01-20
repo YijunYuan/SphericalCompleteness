@@ -12,8 +12,6 @@ noncomputable instance instDenselyNormedFieldPadicComplex : DenselyNormedField �
 
 instance instSeparableSpacePadicComplex : TopologicalSpace.SeparableSpace ℂ_[p] := inferInstance
 
---theorem cnmd : NonUnitalSeminormedRing.toSeminormedAddCommGroup.toNorm = (instNormedField p).toNorm := by sorry
-
 instance {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 [IsUltrametricDist 𝕜] :
   @IsUltrametricDist (UniformSpace.Completion 𝕜)
@@ -34,7 +32,6 @@ instance {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     simp at hz'1
     rcases hz'1 with ⟨z', hz'⟩
     rw [← hz'] at hz'2
-    clear hx' x'' hy' y'' hz' z''
     have t1 := dist_triangle x ↑x' z
     have t2 := dist_triangle ↑x' ↑z' z
     have : dist x z < dist (↑x' : UniformSpace.Completion 𝕜) ↑z' + ε / 4 + ε / 4 := by
@@ -52,12 +49,12 @@ instance {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     nth_rw 2 [dist_comm] at t6
     have t7 := dist_triangle y z ↑z'
     nth_rw 3 [(by linarith : ε = ε / 4 + ε / 4 + ε / 4 + ε / 4)]
-    have t8 : max (dist x y) (dist y z) + (ε / 4 + ε / 4 + ε / 4 + ε / 4) = max (dist x y) (dist y z) + (ε / 4 + ε / 4) + ε / 4 + ε / 4 := by linarith
+    have t8 : max (dist x y) (dist y z) + (ε / 4 + ε / 4 + ε / 4 + ε / 4) =
+      max (dist x y) (dist y z) + (ε / 4 + ε / 4) + ε / 4 + ε / 4 := by linarith
     rw [t8, max_add]
     nth_rw 1 [add_assoc]
     nth_rw 1 [add_assoc]
     simp only [add_lt_add_iff_right]
-    refine lt_of_le_of_lt t3 ?_
-    sorry
+    exact lt_of_le_of_lt t3 <| max_lt_max (by linarith) (by linarith)
 
 instance : @IsUltrametricDist ℂ_[p] UniformSpace.Completion.instMetricSpace.toDist := inferInstance
