@@ -180,7 +180,7 @@ lemma fuck_chain_radius_eq (α : Type*) [PseudoMetricSpace α]
   · simp only
   · simp only
 
-theorem not_spherically_complete_of_dense_separable_ultrametric
+theorem not_sphericallyCompleteSpace_of_dense_separable_ultrametric
 (α : Type*) [MetricSpace α]
 [hiud : IsUltrametricDist α] [hα : IsSphericallyDense α]
 [nemp : Nonempty α] [hsep : SeparableSpace α] :
@@ -270,8 +270,8 @@ theorem not_spherically_complete_of_dense_separable_ultrametric
     simp only [hα.spherically_dense, coe_eq_zero] at this
     simp only [this, gt_iff_lt, lt_self_iff_false] at r₀pos
 
-instance (p : ℕ) [hp : Fact (Nat.Prime p)] :
+instance instPadicComplex_not_sphercallyCompleteSpace (p : ℕ) [hp : Fact (Nat.Prime p)] :
 ¬ SphericallyCompleteSpace ℂ_[p] :=
-  not_spherically_complete_of_dense_separable_ultrametric ℂ_[p]
+  not_sphericallyCompleteSpace_of_dense_separable_ultrametric ℂ_[p]
 
 end SphericallyCompleteSpace

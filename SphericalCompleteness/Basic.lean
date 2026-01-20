@@ -1,15 +1,8 @@
 import Mathlib.NumberTheory.Padics.ProperSpace
-import SphericalCompleteness.External.Complete
-import SphericalCompleteness.External.NNReal
-import SphericalCompleteness.External.Sequence
-import SphericalCompleteness.External.Ultrametric
+import SphericalCompleteness.Defs
 
 open Metric
 open Filter
-
-class SphericallyCompleteSpace (α : Type*) [PseudoMetricSpace α] : Prop where
-  isSphericallyComplete : ∀ ⦃ci : ℕ → α⦄, ∀ ⦃ri : ℕ → NNReal⦄,
-    Antitone (fun i => closedBall (ci i) (ri i)) → (⋂ i, closedBall (ci i) (ri i)).Nonempty
 
 namespace SphericallyCompleteSpace
 
@@ -98,7 +91,7 @@ theorem sphericallyComplete_iff' (α : Type*) [PseudoMetricSpace α] [iud : IsUl
       rcases this i with ⟨N, hN⟩
       exact (hanti hN) <| hz N
 
-lemma smaller_radius {α : Type*} [PseudoMetricSpace α]
+private lemma smaller_radius {α : Type*} [PseudoMetricSpace α]
   {S : Set (α × NNReal)} [hS : Nonempty ↑S]
   (hw : (∀ w ∈ S, sInf {x | ∃ w ∈ S, w.2 = x} < w.2)) :
   ∀ (n : ℕ) (s : ↑S), ∃ b ∈ {x | ∃ w ∈ S, w.2 = x},
@@ -118,7 +111,7 @@ lemma smaller_radius {α : Type*} [PseudoMetricSpace α]
       min (sInf {x | ∃ w ∈ S, w.2 = x} + 1 / 2 ^ m)
         s.val.2))
 
-noncomputable def countable_chain_of_ball {α : Type*}
+private noncomputable def countable_chain_of_ball {α : Type*}
   [PseudoMetricSpace α]
   {S : Set (α × NNReal)} [hS : Nonempty S]
   (hw : ∀ w ∈ S, sInf {x | ∃ w ∈ S, w.2 = x} < w.2) : ℕ → ↑S := fun n =>
@@ -129,7 +122,7 @@ noncomputable def countable_chain_of_ball {α : Type*}
     ⟨(smaller_radius hw (m + 1) (countable_chain_of_ball hw m)).choose_spec.1.out.choose,
      (smaller_radius hw (m + 1) (countable_chain_of_ball hw m)).choose_spec.1.out.choose_spec.1⟩
 
-lemma antitone_of_countable_chain_of_ball {α : Type*}
+private lemma antitone_of_countable_chain_of_ball {α : Type*}
   [PseudoMetricSpace α] [iud : IsUltrametricDist α]
   [SphericallyCompleteSpace α]
   {S : Set (α × NNReal)} [hS : Nonempty S]
@@ -148,7 +141,7 @@ lemma antitone_of_countable_chain_of_ball {α : Type*}
     simp only [inf_le_right]
   · apply hS'
 
-lemma cofinal_of_countable_chain_of_ball {α : Type*}
+private lemma cofinal_of_countable_chain_of_ball {α : Type*}
   [PseudoMetricSpace α] [IsUltrametricDist α]
   [SphericallyCompleteSpace α]
   {S : Set (α × NNReal)} [hS : Nonempty S]
@@ -245,46 +238,6 @@ TFAE [
   tfae_have 1 ↔ 4 := sphericallyComplete_iff'' α
   tfae_finish
 
-instance instCompleteOfSphericallyComplete (α : Type*)
-  [PseudoMetricSpace α] [sc : SphericallyCompleteSpace α] : CompleteSpace α := by
-  rw [completeSpace_iff_nested_ball_with_radius_tendsto_zero_has_nonempty_inter]
-  exact fun _ _ hanti _ ↦ sc.isSphericallyComplete hanti
-
-instance instSpericallyComplete_of_properSpace (α : Type*)
-  [PseudoMetricSpace α] [ProperSpace α] : SphericallyCompleteSpace α where
-  isSphericallyComplete := by
-    intro ci ri hanti
-    apply IsCompact.nonempty_iInter_of_sequence_nonempty_isCompact_isClosed
-    <| fun i ↦ closedBall (ci i) ↑(ri i)
-    · exact fun _ ↦  hanti (by linarith)
-    · exact fun h ↦ nonempty_closedBall.mpr (ri h).prop
-    · exact isCompact_closedBall (ci 0) ↑(ri 0)
-    · exact fun i ↦ isClosed_closedBall
-
-theorem sphericallyCompleteSpace_of_isometryEquiv {E F : Type*}
-  [PseudoMetricSpace E] [PseudoMetricSpace F]
-  [he : SphericallyCompleteSpace E]
-  (f : E ≃ᵢ F) : SphericallyCompleteSpace F where
-  isSphericallyComplete := by
-    intro ci ri hanti
-    let ci' := fun n => f.symm (ci n)
-    have hanti' : Antitone (fun i => closedBall (ci' i) (ri i)) := by
-      intro m n hmn
-      simp only [Set.le_eq_subset]
-      rw [← IsometryEquiv.preimage_closedBall f (ci m) ↑(ri m),
-          ← IsometryEquiv.preimage_closedBall f (ci n) ↑(ri n)]
-      specialize hanti hmn
-      simp only [Set.le_eq_subset] at hanti
-      grind only [= Set.subset_def, = Set.mem_preimage]
-    rcases he.isSphericallyComplete hanti' with ⟨z',hz'⟩
-    simp only [Set.mem_iInter, mem_closedBall, Set.nonempty_iInter] at *
-    refine ⟨f z', fun i ↦ ?_⟩
-    specialize hz' i
-    unfold ci' at hz'
-    rw [← IsometryEquiv.apply_symm_apply f (ci i), Isometry.dist_eq]
-    · exact hz'
-    · exact IsometryEquiv.isometry f
-
 instance Prod.sphericallyCompleteSpace {E F : Type*}
 [PseudoMetricSpace E] [PseudoMetricSpace F]
 [hse : SphericallyCompleteSpace E] [hsf : SphericallyCompleteSpace F] :
@@ -367,12 +320,6 @@ instance Pi.sphericallyCompleteSpace {ι : Type*} [Fintype ι] {E : ι → Type*
 instance instSphericallyCompleteSpaceComplex : SphericallyCompleteSpace ℂ  := inferInstance
 
 instance instSphericallyCompleteSpaceReal : SphericallyCompleteSpace ℝ  := inferInstance
-
-instance instSphericallyCompleteOfWeaklyLocallyCompactNormedField
-{α : Type*} [NontriviallyNormedField α] [WeaklyLocallyCompactSpace α] :
-SphericallyCompleteSpace α := by
-  haveI := ProperSpace.of_nontriviallyNormedField_of_weaklyLocallyCompactSpace α
-  infer_instance
 
 instance instSphericallyCompletePadic {p : ℕ} [Fact (Nat.Prime p)] :
   SphericallyCompleteSpace (ℚ_[p]) := inferInstance
