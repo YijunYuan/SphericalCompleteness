@@ -1,6 +1,7 @@
 import Mathlib.Data.NNReal.Defs
 
-lemma exists_add_one_div_pow_two_lt (a b : NNReal) (h : a < b) : ∃ n : ℕ, a + 1 / 2 ^ n < b := by
+lemma NNReal.exists_add_one_div_pow_two_lt
+(a b : NNReal) (h : a < b) : ∃ n : ℕ, a + 1 / 2 ^ n < b := by
   let c : NNReal := ⟨b - a, by
     simpa only [sub_nonneg, NNReal.coe_le_coe] using le_of_lt h
     ⟩

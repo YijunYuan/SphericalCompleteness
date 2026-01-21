@@ -12,7 +12,7 @@ class IsSphericallyDense (α : Type*) [PseudoMetricSpace α] : Prop where
   spherically_dense :
   ∀ (c : α) (r : ℝ≥0) , diam (closedBall c r) = r
 
-instance diam_eq_radius_of_dense_ultrametric (α : Type*)
+instance instIsSphericallyDenseOfDenselyNormedField (α : Type*)
 [dnf : DenselyNormedField α] [hiud : IsUltrametricDist α] :
 IsSphericallyDense α where
 spherically_dense := by
@@ -28,7 +28,7 @@ spherically_dense := by
   simp only [dist_self_add_left] at this
   linarith
 
-lemma exists_dist_lt_diam_of_spherically_dense {α : Type*} [PseudoMetricSpace α]
+lemma exists_dist_lt_diam_of_isSphericallyDense {α : Type*} [PseudoMetricSpace α]
 : IsSphericallyDense α →
 ∀ (z : α), ∀ ⦃r r' : ℝ≥0⦄, r' < r →
 ∃ x y : α, x ∈ closedBall z r ∧ y ∈ closedBall z r ∧  nndist x y ∈ Set.Ioc r' r := by
@@ -50,12 +50,12 @@ lemma exists_dist_lt_diam_of_spherically_dense {α : Type*} [PseudoMetricSpace �
         rw [← isd]
         exact dist_le_diam_of_mem isBounded_closedBall hx hy)
 
-lemma exists_dist_lt_diam_iff_spherically_dense {α : Type*}
-[PseudoMetricSpace α] [hiud : IsUltrametricDist α]
+theorem exists_dist_lt_diam_iff_isSphericallyDense
+{α : Type*} [PseudoMetricSpace α] [hiud : IsUltrametricDist α]
 : IsSphericallyDense α ↔
 ∀ (z : α), ∀ ⦃r r' : ℝ≥0⦄, r' < r →
 ∃ x y : α, x ∈ closedBall z r ∧ y ∈ closedBall z r ∧  nndist x y ∈ Set.Ioc r' r := by
-  refine ⟨exists_dist_lt_diam_of_spherically_dense, ?_⟩
+  refine ⟨exists_dist_lt_diam_of_isSphericallyDense, ?_⟩
   intro h
   refine {spherically_dense := fun z r ↦ eq_of_le_of_ge (diam_le_radius_of_ultrametric _ _) ?_}
   by_contra hc
@@ -65,19 +65,14 @@ lemma exists_dist_lt_diam_iff_spherically_dense {α : Type*}
   have := dist_le_diam_of_mem isBounded_closedBall hx hy
   linarith
 
-lemma exists_sub_closedball_not_belong {α : Type*}
+private lemma exists_sub_closedball_not_belong {α : Type*}
 [PseudoMetricSpace α] [hiud : IsUltrametricDist α] [hα : IsSphericallyDense α]
--- Ball B(c,r) with positive diameter d
-(c₀ : α) (r₀ : ℝ≥0)
---
-(r₁ : ℝ≥0) (hr : r₁ < r₀)
---
-(z : α) :
+(c₀ : α) (r₀ : ℝ≥0) (r₁ : ℝ≥0) (hr : r₁ < r₀) (z : α) :
 ∃ c₁ : α,
   closedBall c₁ r₁ ⊆ closedBall c₀ r₀ ∧
   z ∉ closedBall c₁ r₁
   := by
-  apply exists_dist_lt_diam_of_spherically_dense at hα
+  apply exists_dist_lt_diam_of_isSphericallyDense at hα
   rcases hα c₀ hr with ⟨x, y, hx, hy, hxy⟩
   have : Disjoint (closedBall x r₁) (closedBall y r₁) := by
     refine (IsUltrametricDist.closedBall_eq_or_disjoint x y ↑r₁).resolve_left ?_
@@ -98,20 +93,20 @@ lemma exists_sub_closedball_not_belong {α : Type*}
     simp only [sup_le_iff]
     exact ⟨le_of_lt <| lt_of_le_of_lt ha hr, hx⟩
 
-lemma exists_pos_dist (α : Type*)
+private lemma exists_pos_dist (α : Type*)
 [PseudoMetricSpace α] [hα : IsSphericallyDense α] [nemp : Nonempty α] :
 ∃ z : α × α, nndist z.1 z.2 > 0 := by
-  use ((exists_dist_lt_diam_of_spherically_dense hα nemp.some one_lt_two).choose,
-  (exists_dist_lt_diam_of_spherically_dense hα nemp.some one_lt_two).choose_spec.choose)
-  exact lt_trans zero_lt_one (exists_dist_lt_diam_of_spherically_dense
+  use ((exists_dist_lt_diam_of_isSphericallyDense hα nemp.some one_lt_two).choose,
+  (exists_dist_lt_diam_of_isSphericallyDense hα nemp.some one_lt_two).choose_spec.choose)
+  exact lt_trans zero_lt_one (exists_dist_lt_diam_of_isSphericallyDense
     hα nemp.some one_lt_two).choose_spec.choose_spec.2.2.out.1
 
-noncomputable def fuck_radius (α : Type*)
+private noncomputable def fuck_radius (α : Type*)
 [PseudoMetricSpace α] [hα : IsSphericallyDense α] [nemp : Nonempty α] (n : ℕ) : ℝ≥0 :=
 (nndist (exists_pos_dist α).choose.1 (exists_pos_dist α).choose.2)
   * (1 + 1 / (n + 1))
 
-lemma fuck_radius_strictanti (α : Type*)
+private lemma fuck_radius_strictanti (α : Type*)
 [PseudoMetricSpace α] [hα : IsSphericallyDense α] [nemp : Nonempty α] :
 StrictAnti (fun n => fuck_radius α n) := by
   refine strictAnti_nat_of_succ_lt fun n↦ ?_
@@ -123,7 +118,7 @@ StrictAnti (fun n => fuck_radius α n) := by
   field_simp
   norm_num
 
-lemma fuck_radius_range (α : Type*)
+private lemma fuck_radius_range (α : Type*)
 [PseudoMetricSpace α] [hα : IsSphericallyDense α] [nemp : Nonempty α] (n : ℕ) :
 (fuck_radius α n) > (fuck_radius α 0) / 2 := by
   unfold fuck_radius
@@ -133,7 +128,7 @@ lemma fuck_radius_range (α : Type*)
     add_self_div_two, one_div, lt_add_iff_pos_right, inv_pos, add_pos_iff, Nat.cast_pos,
     zero_lt_one, or_true]
 
-noncomputable def fuck_chain_of_ball {α : Type*} [PseudoMetricSpace α]
+private noncomputable def fuck_chain_of_ball {α : Type*} [PseudoMetricSpace α]
 [hiud : IsUltrametricDist α] [hα : IsSphericallyDense α]
 [nemp : Nonempty α] [hsep : SeparableSpace α]
 (hα' : Denumerable hsep.exists_countable_dense.choose) (n : ℕ) : α × ℝ≥0 :=
@@ -143,7 +138,7 @@ noncomputable def fuck_chain_of_ball {α : Type*} [PseudoMetricSpace α]
       (fuck_radius α (n + 1)) <| fuck_radius_strictanti α (lt_add_one n))
         (hα'.ofNat hsep.exists_countable_dense.choose n)).choose, fuck_radius α (n+1)⟩
 
-lemma fuck_chain_of_ball_decreasing (α : Type*) [PseudoMetricSpace α]
+private lemma fuck_chain_of_ball_decreasing (α : Type*) [PseudoMetricSpace α]
 [hiud : IsUltrametricDist α] [hα : IsSphericallyDense α]
 [nemp : Nonempty α] [hsep : SeparableSpace α]
 (hα' : Denumerable hsep.exists_countable_dense.choose) :
@@ -160,7 +155,7 @@ Antitone (fun n => closedBall (fuck_chain_of_ball hα' n).1 (fuck_chain_of_ball 
   · simp only [mem_closedBall, dist_le_coe, not_le] at *
     exact this
 
-lemma not_in_fuck_chain_of_ball (α : Type*) [PseudoMetricSpace α]
+private lemma not_in_fuck_chain_of_ball (α : Type*) [PseudoMetricSpace α]
 [hiud : IsUltrametricDist α] [hα : IsSphericallyDense α]
 [nemp : Nonempty α] [hsep : SeparableSpace α]
 (hα' : Denumerable hsep.exists_countable_dense.choose) (n : ℕ) :
@@ -170,7 +165,7 @@ closedBall (fuck_chain_of_ball hα' (n + 1)).1 (fuck_chain_of_ball hα' (n + 1))
       (fuck_radius α (n + 1)) <| fuck_radius_strictanti α (lt_add_one n))
         (hα'.ofNat hsep.exists_countable_dense.choose n)).choose_spec.2
 
-lemma fuck_chain_radius_eq (α : Type*) [PseudoMetricSpace α]
+private lemma fuck_chain_radius_eq (α : Type*) [PseudoMetricSpace α]
 [hiud : IsUltrametricDist α] [hα : IsSphericallyDense α]
 [nemp : Nonempty α] [hsep : SeparableSpace α]
 (hα' : Denumerable hsep.exists_countable_dense.choose) (n : ℕ) :
@@ -180,7 +175,7 @@ lemma fuck_chain_radius_eq (α : Type*) [PseudoMetricSpace α]
   · simp only
   · simp only
 
-theorem not_sphericallyCompleteSpace_of_dense_separable_ultrametric
+theorem not_sphericallyCompleteSpace_of_isSphericallyDense_separable_ultrametric
 (α : Type*) [MetricSpace α]
 [hiud : IsUltrametricDist α] [hα : IsSphericallyDense α]
 [nemp : Nonempty α] [hsep : SeparableSpace α] :
@@ -272,6 +267,6 @@ theorem not_sphericallyCompleteSpace_of_dense_separable_ultrametric
 
 instance instPadicComplex_not_sphercallyCompleteSpace (p : ℕ) [hp : Fact (Nat.Prime p)] :
 ¬ SphericallyCompleteSpace ℂ_[p] :=
-  not_sphericallyCompleteSpace_of_dense_separable_ultrametric ℂ_[p]
+  not_sphericallyCompleteSpace_of_isSphericallyDense_separable_ultrametric ℂ_[p]
 
 end SphericallyCompleteSpace

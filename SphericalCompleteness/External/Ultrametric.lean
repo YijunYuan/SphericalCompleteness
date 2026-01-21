@@ -34,7 +34,8 @@ closedBall z1 r1 ⊆ closedBall z2 r2 := by
   refine le_trans (hiud.dist_triangle_max x z1 y) <| sup_le_iff.2 ⟨le_trans hx hle, ?_⟩
   simpa only [dist_comm] using le_trans hy1 hle
 
-instance (𝕜 : Type u_1) [NontriviallyNormedField 𝕜]
+instance instIsUltrametricDistQuotient
+(𝕜 : Type u_1) [NontriviallyNormedField 𝕜]
 {E : Type u_2} [inst_1 : SeminormedAddCommGroup E]
 [NormedSpace 𝕜 E] [iud : IsUltrametricDist E]
 {F : Submodule 𝕜 E} : IsUltrametricDist (E ⧸ F) where
@@ -156,7 +157,8 @@ instance (𝕜 : Type u_1) [NontriviallyNormedField 𝕜]
     · use (x0, y0)
       simp only [Set.mem_prod, hox0, hoy0, and_self, hox0', hoy0']
 
-instance {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+instance instIsUltrametricDistContinuousLinearMap
+{𝕜 : Type*} [NontriviallyNormedField 𝕜]
 {E : Type*} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E]
 {F : Type*} [SeminormedAddCommGroup F] [iud : IsUltrametricDist F]
 [NormedSpace 𝕜 F] :
@@ -174,7 +176,8 @@ IsUltrametricDist (E →L[𝕜] F) where
       · exact ContinuousLinearMap.le_opNorm (g - h) x
     · simp only [le_sup_iff, norm_nonneg, or_self]
 
-instance {ι : Type*} {E : ι → Type*} [Nonempty ι] [∀ i, NormedAddCommGroup (E i)]
+instance instIsUltrametricDistLp
+{ι : Type*} {E : ι → Type*} [Nonempty ι] [∀ i, NormedAddCommGroup (E i)]
 [iiud : ∀ i, IsUltrametricDist (E i)] :
 IsUltrametricDist (lp E ⊤) where
 dist_triangle_max a b c := by

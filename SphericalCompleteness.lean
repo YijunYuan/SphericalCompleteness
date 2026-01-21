@@ -5,7 +5,6 @@ import SphericalCompleteness.External.NNReal
 import SphericalCompleteness.External.PadicAlgCl
 import SphericalCompleteness.External.PadicComplex
 import SphericalCompleteness.External.Sequence
-import SphericalCompleteness.External.SpectralNorm
 import SphericalCompleteness.External.Submodule
 import SphericalCompleteness.External.Ultrametric
 

@@ -72,7 +72,7 @@ noncomputable instance instDenselyNormedFieldPadicAlgCl : DenselyNormedField (Pa
       simp [← Real.rpow_mul (norm_nonneg _)]
     exact ⟨z, hz' ▸ ⟨hr1, hr2⟩⟩
 
-theorem Q_alg_in_QpAlgCl_is_countable (p : ℕ) [hp : Fact (Nat.Prime p)] :
+theorem QAlg_in_QpAlgCl_is_countable (p : ℕ) [hp : Fact (Nat.Prime p)] :
   {z : PadicAlgCl p | IsAlgebraic ℚ z}.Countable := by
   let S := {z : PadicAlgCl p | IsAlgebraic ℚ z}
   have : S ⊆ ⋃ (f : {g : ℚ[X] // g ≠ 0}), {z : PadicAlgCl p | aeval z f.val = 0} := by
@@ -97,7 +97,7 @@ open Classical in
 instance instSeparableSpacePadicAlgCl : TopologicalSpace.SeparableSpace (PadicAlgCl p) where
   exists_countable_dense := by
     use {z : PadicAlgCl p | IsAlgebraic ℚ z}
-    refine ⟨Q_alg_in_QpAlgCl_is_countable p, Metric.dense_iff.mpr <| fun α ε hε => ?_⟩
+    refine ⟨QAlg_in_QpAlgCl_is_countable p, Metric.dense_iff.mpr <| fun α ε hε => ?_⟩
     rcases (PadicAlgCl.isAlgebraic p).isAlgebraic α with ⟨f', hfne', hfz'⟩
     let f := f' * C (f'.leadingCoeff)⁻¹
     have hf : Monic f := monic_mul_leadingCoeff_inv hfne'
