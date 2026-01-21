@@ -38,6 +38,18 @@ lemma orth_symm {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 (x ⟂[𝕜] y) ↔ (y ⟂[𝕜] x) :=
   ⟨fun h => orth_of_orth h, fun h => orth_of_orth h⟩
 
+/--
+Birkhoff–James orthogonality in an ultrametric normed space.
+
+Over a nontrivially normed field `𝕜`, in a seminormed `𝕜`-vector space `E` whose distance is
+ultrametric (`IsUltrametricDist E`), this lemma characterizes the orthogonality relation
+`x ⟂[𝕜] y` by the strong “Pythagorean” ultrametric identity: for all scalars `α β : 𝕜`,
+the norm of the linear combination `α • x + β • y` is exactly the maximum of the norms
+of the two summands.
+
+In symbols:
+`(x ⟂[𝕜] y) ↔ ∀ α β, ‖α • x + β • y‖ = max ‖α • x‖ ‖β • y‖`.
+-/
 -- Birkhoff-James orthogonality
 lemma orth_iff {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 {E : Type*} [SeminormedAddCommGroup E]

@@ -4,12 +4,33 @@ open Metric
 
 namespace SphericallyCompleteSpace
 
+/--
+`IsImmediate f` means that the linear isometry `f : E →ₗᵢ[𝕜] F` has *immediate* image in `F`
+(in the ultrametric sense): the only vector in `F` that is metrically orthogonal to the range
+of `f` is `0`.
+
+More precisely, it asserts:
+`∀ v : F, (v ⟂ₘ LinearMap.range f) → v = 0`,
+where `v ⟂ₘ S` is the predicate expressing metric orthogonality of `v` to the subspace `S`.
+This rules out nontrivial orthogonal complements to `LinearMap.range f`.
+-/
 def IsImmediate {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 {E : Type u} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
 {F : Type v} [SeminormedAddCommGroup F] [NormedSpace 𝕜 F] [IsUltrametricDist F]
 (f : E →ₗᵢ[𝕜] F) : Prop :=
 ∀ v : F, (v ⟂ₘ LinearMap.range f) → v = 0
 
+/--
+`MaximallyComplete 𝕜 E` expresses a maximal completeness (a spherical-completeness–style)
+property of the ultrametric normed `𝕜`-vector space `E`.
+
+It requires that for every ultrametric normed `𝕜`-vector space `F` and every continuous
+`𝕜`-linear map `f : E →ₗᵢ[𝕜] F`, if `f` is *immediate* (in the sense of `IsImmediate f`),
+then `f` is surjective.
+
+In other words, `E` admits no proper immediate continuous linear extensions: any immediate
+continuous linear map out of `E` must hit all of its codomain.
+-/
 def MaximallyComplete (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 (E : Type u) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E] : Prop :=
 ∀ {F : Type u} [NormedAddCommGroup F] [NormedSpace 𝕜 F] [IsUltrametricDist F]
@@ -125,6 +146,16 @@ private lemma norm_map_of_isImmediate {𝕜 : Type*}
     apply norm_eq_of_norm_sub_lt_left at this
     simp only [hx', ContinuousLinearMap.coe_coe, ← this, t, le_refl]
 
+/--
+Given an immediate linear isometry `f : E →ₗᵢ[𝕜] F` and a linear isometry `g : E →ₗᵢ[𝕜] H` into a
+spherically complete ultrametric normed space `H`, there exists a linear isometry
+`h : F →ₗᵢ[𝕜] H` such that `h.comp f = g`.
+
+This is an extension property: along an immediate embedding `f`, any isometric map out of `E`
+into a spherically complete target extends uniquely-existentially to an isometric map out of `F`.
+
+The conclusion is stated using an explicit `@LinearIsometry.comp` to avoid elaboration issues.
+-/
 theorem exists_linearIsometry_comp_eq_of_isImmediate {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
 {F : Type*} [NormedAddCommGroup F] [NormedSpace 𝕜 F] [IsUltrametricDist F]

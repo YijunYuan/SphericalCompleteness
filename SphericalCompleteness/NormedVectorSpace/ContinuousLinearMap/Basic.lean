@@ -5,6 +5,21 @@ open Metric
 
 namespace SphericallyCompleteSpace
 
+/--
+`SphericallyCompleteSpace` instance for the space of continuous linear maps `E →L[𝕜] F`
+over a nontrivially normed field `𝕜`.
+
+Assumptions:
+* `E` and `F` are seminormed additive commutative groups equipped with an ultrametric distance
+  (`[IsUltrametricDist E]`, `[IsUltrametricDist F]`) and are normed spaces over `𝕜`.
+* The codomain `F` is spherically complete.
+
+Conclusion:
+* The space of continuous linear maps `E →L[𝕜] F` is spherically complete.
+
+This is useful for transferring spherical completeness to function-like spaces of operators,
+enabling fixed point / completeness arguments in non-Archimedean functional analysis.
+-/
 instance instSphericallyCompleteSpaceContinuousLinearMap
 {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 {E : Type*} [SeminormedAddCommGroup E] [IsUltrametricDist E]

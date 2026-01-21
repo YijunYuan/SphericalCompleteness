@@ -69,6 +69,20 @@ private lemma hhhh_prop (𝕜 : Type u_1) [inst : NontriviallyNormedField 𝕜]
       simp only [QuotientAddGroup.mk'_apply, (hhhh 𝕜 hr hanti (i' + 1)).prop]
     ) (r i') (hr <| lt_add_one i')).choose_spec.2
 
+/--
+Establishes spherical completeness of the quotient `E ⧸ F`.
+
+Assumptions:
+- `𝕜` is a nontrivially normed field.
+- `E` is a seminormed `𝕜`-normed space equipped with an ultrametric distance
+  (`IsUltrametricDist E`).
+- `E` is spherically complete (`SphericallyCompleteSpace E`).
+- `F` is a `𝕜`-submodule of `E`.
+
+Conclusion:
+- The quotient space `E ⧸ F`, endowed with the induced seminorm/normed space structure,
+  is spherically complete.
+-/
 theorem Quotient.sphericallyCompleteSpace
 (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 {E : Type u_2} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E]

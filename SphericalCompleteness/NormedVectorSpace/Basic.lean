@@ -4,6 +4,13 @@ open Metric
 
 namespace SphericallyCompleteSpace
 
+/--
+Constructs a `SphericallyCompleteSpace` instance for a normed vector space `E` over a
+nontrivially normed field `𝕜`, assuming `E` is locally compact as a topological space.
+
+In this setting, local compactness (together with the nontriviality of the norm on `𝕜`)
+is used to deduce spherical completeness of `E`.
+-/
 theorem SphericallyComplete.of_nontriviallyNormedField_of_weaklyLocallyCompactSpace
 (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 {E : Type u_2} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [LocallyCompactSpace E] :
@@ -11,6 +18,15 @@ SphericallyCompleteSpace E := by
   haveI : ProperSpace E := ProperSpace.of_locallyCompactSpace 𝕜
   infer_instance
 
+/--
+Constructs a `SphericallyCompleteSpace` instance on the one-dimensional subspace
+`Submodule.span 𝕜 {z}` (viewed as a subtype of `E`), assuming the scalar field `𝕜`
+is nontrivially normed and spherically complete.
+
+This is a convenience instance allowing downstream results to use spherical
+completeness on the span of a single vector without explicitly transporting the
+structure from `𝕜`.
+-/
 instance instSubtypeMemSubmoduleSpanSingletonSet (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 [scsk : SphericallyCompleteSpace 𝕜]
 {E : Type u_2} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
@@ -76,6 +92,13 @@ private lemma induction_sphericallyCompleteSpace_of_finiteDimensional
     exact finrank_span_singleton hz'
   · exact sphericallyCompleteSpace_of_isometryEquiv φ.toIsometryEquiv
 
+/--
+If `E` is a finite-dimensional normed vector space over a spherically complete, nontrivially normed field `𝕜`,
+and the metric on `E` is ultrametric, then `E` is spherically complete.
+
+This is the standard permanence result: spherical completeness descends from the base field to any
+finite-dimensional ultrametric normed `𝕜`-vector space.
+-/
 theorem sphericallyCompleteSpace_of_finiteDimensional
 (𝕜 : Type*) [NontriviallyNormedField 𝕜] [SphericallyCompleteSpace 𝕜]
 (E : Type*) [NormedAddCommGroup E] [NormedSpace 𝕜 E]

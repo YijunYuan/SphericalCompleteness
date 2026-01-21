@@ -6,6 +6,18 @@ open Metric
 
 namespace SphericallyCompleteSpace
 
+/--
+Shows that `F` is a complementary submodule to the kernel of a continuous linear projection `T : E →L[𝕜] F`
+which acts as the identity on `F`.
+
+More precisely, assuming `T a = ⟨a, b⟩` whenever `a ∈ F` (so `T` restricts to `LinearMap.id` on `F`),
+the theorem concludes `IsCompl F (LinearMap.ker T)`, i.e. every `x : E` decomposes uniquely as
+`x = f + k` with `f ∈ F` and `k ∈ ker T`, and `F ⊓ ker T = ⊥`.
+
+The additional hypotheses (`IsUltrametricDist E` and `[SphericallyCompleteSpace F]`) provide the
+ambient setting used elsewhere in the development; the complement statement itself is driven by the
+projection property of `T`.
+-/
 theorem orth_of_orthcomp
   (𝕜 : Type*) [NontriviallyNormedField 𝕜] {E : Type u_2} [NormedAddCommGroup E]
   [IsUltrametricDist E] [NormedSpace 𝕜 E] (F : Submodule 𝕜 E) [SphericallyCompleteSpace ↥F]
@@ -28,6 +40,20 @@ theorem orth_of_orthcomp
     refine Submodule.add_mem_sup (T x).prop <| LinearMap.sub_mem_ker_iff.mpr ?_
     simp only [SetLike.coe_mem, hT1, Subtype.coe_eta]
 
+/--
+Existence of a norm-nonincreasing continuous linear projection onto a spherically complete subspace.
+
+Let `𝕜` be a nontrivially normed field and `E` a normed `𝕜`-vector space whose distance is
+ultrametric (`IsUltrametricDist E`). For a submodule `F : Submodule 𝕜 E` that is spherically
+complete (as a normed space), this theorem produces a continuous linear map
+`T : E →L[𝕜] F` such that:
+
+* `T` restricts to the identity on `F` (i.e. `∀ a ∈ F, T a = a`), hence `T` is a retraction onto `F`;
+* `‖T‖ ≤ 1`, so `T` is 1-Lipschitz / nonexpanding with respect to the norm.
+
+In other words, in the ultrametric setting, spherical completeness of `F` ensures the existence of
+a bounded linear projection of operator norm at most `1` from `E` onto `F`.
+-/
 theorem exists_orthproj_of_spherically_complete_space
 (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 {E : Type*} [NormedAddCommGroup E] [iud : IsUltrametricDist E]
@@ -42,6 +68,18 @@ theorem exists_orthproj_of_spherically_complete_space
   refine ⟨T, ⟨fun a ha => ?_, hT2⟩⟩
   simp only [hT1 a ha]
 
+/--
+`OrthComp 𝕜 F` is the *orthogonal complement* of a submodule `F : Submodule 𝕜 E` in a
+normed space over a nontrivially normed field, assuming `E` carries an ultrametric
+distance and that `F` is spherically complete.
+
+It is defined as the kernel of an orthogonal projection onto `F` whose existence is
+guaranteed by spherical completeness (`exists_orthproj_of_spherically_complete_space`).
+
+In particular, `x ∈ OrthComp 𝕜 F` iff the chosen orthogonal projection sends `x` to `0`,
+so elements of `OrthComp 𝕜 F` are exactly those “orthogonal to `F`” with respect to that
+projection.
+-/
 noncomputable def OrthComp (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 {E : Type*} [NormedAddCommGroup E] [iud : IsUltrametricDist E]
 [NormedSpace 𝕜 E]
@@ -49,6 +87,18 @@ noncomputable def OrthComp (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 : Submodule 𝕜 E :=
 LinearMap.ker (exists_orthproj_of_spherically_complete_space 𝕜 F).choose
 
+/--
+`isCompl_orthcomp` shows that, over a nontrivially normed field `𝕜`, in a normed `𝕜`-vector space `E`
+whose distance is ultrametric, any submodule `F` that is spherically complete is complemented by its
+orthogonal complement `OrthComp 𝕜 F`.
+
+More precisely, it produces an `IsCompl` decomposition:
+* every `x : E` can be written as `x = f + g` with `f ∈ F` and `g ∈ OrthComp 𝕜 F`, and
+* the intersection `F ⊓ OrthComp 𝕜 F` is trivial.
+
+This is the ultrametric analogue of the standard orthogonal decomposition result, with spherical
+completeness providing the completeness hypothesis needed to construct the complement.
+-/
 theorem isCompl_orthcomp (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 {E : Type*} [NormedAddCommGroup E] [iud : IsUltrametricDist E]
 [NormedSpace 𝕜 E]
@@ -61,6 +111,13 @@ IsCompl F (OrthComp 𝕜 F) := by
   specialize this a ha
   exact SetLike.coe_eq_coe.mp this
 
+/--
+`F` is *sphere-orthogonal* to its orthogonal complement `OrthComp 𝕜 F`.
+
+In a nontrivially normed field `𝕜`, for an ultrametric normed space `E` over `𝕜`,
+assuming `F : Submodule 𝕜 E` is spherically complete, this theorem asserts the
+orthogonality relation `F ⟂ₛ OrthComp 𝕜 F`.
+-/
 theorem sorth_orthcomp (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 {E : Type*} [NormedAddCommGroup E] [iud : IsUltrametricDist E]
 [NormedSpace 𝕜 E]
@@ -92,6 +149,14 @@ theorem sorth_orthcomp (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     refine le_trans (iud.norm_add_le_max _ _) ?_
     simp only [this, sup_of_le_left, le_refl]
 
+/--
+If `x` lies in the orthogonal complement `OrthComp 𝕜 F`, then `x` is metrically orthogonal to `F`
+(i.e. `x ⟂ₘ F`).
+
+This lemma provides the forward direction from membership in `OrthComp` to metric orthogonality,
+under the assumptions that `E` is an ultrametric normed space over a nontrivially normed field `𝕜`
+and that the submodule `F` is spherically complete.
+-/
 lemma morth_of_mem_orthComp (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 {E : Type*} [NormedAddCommGroup E] [iud : IsUltrametricDist E]
 [NormedSpace 𝕜 E]
@@ -102,6 +167,22 @@ lemma morth_of_mem_orthComp (𝕜 : Type*) [NontriviallyNormedField 𝕜]
   rw [sorth_symm] at this
   exact this x hx
 
+/--
+`OrthProj 𝕜 F` is the (noncomputable) continuous `𝕜`-linear map from `E` to the submodule `F`,
+intended to represent the *orthogonal projection* onto `F` in the ultrametric setting.
+
+This definition assumes:
+- `𝕜` is a `NontriviallyNormedField`,
+- `E` is a normed `𝕜`-vector space equipped with an ultrametric distance (`IsUltrametricDist E`),
+- `F` is a `Submodule 𝕜 E` that is spherically complete (`[SphericallyCompleteSpace F]`).
+
+The spherically complete hypothesis is used to ensure existence of best-approximation/projection
+data in the non-Archimedean context. The resulting map is packaged as a continuous linear map
+`E →L[𝕜] F`.
+
+This definition is marked `noncomputable` because its construction relies on classical choice and
+existence results rather than an algorithm.
+-/
 noncomputable def OrthProj (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 {E : Type*} [NormedAddCommGroup E] [iud : IsUltrametricDist E]
 [NormedSpace 𝕜 E]

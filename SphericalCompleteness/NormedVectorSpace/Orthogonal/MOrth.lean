@@ -14,6 +14,18 @@ private lemma smul_morth_of_morth' (𝕜 : Type*) [inst : NontriviallyNormedFiel
   rw [← hr]
   exact smul_morth_of_morth r hxF
 
+/--
+Constructs a `𝕜`-linear isometric equivalence between the direct product
+`(Submodule.span 𝕜 {x}) × F` and the (internal) sum `(Submodule.span 𝕜 {x}) + F`,
+under the hypothesis that `x` is `M`-orthogonal to the subspace `F` (`hxF : x ⟂ₘ F`).
+
+Intuitively, when `x` is orthogonal to `F` in the ultrametric sense, every element of the sum
+admits a decomposition into a component in the span of `x` and a component in `F` that is
+compatible with the norm, yielding an isometry.
+
+This is stated as an isometric linear equivalence (`≃ₛₗᵢ[RingHom.id 𝕜]`), i.e. a linear
+equivalence that preserves norms.
+-/
 noncomputable def direct_prod_iso_sum_of_orth (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 {E : Type u_2} [NormedAddCommGroup E]
 [NormedSpace 𝕜 E] [IsUltrametricDist E] (x : E) (F : Subspace 𝕜 E) (hxF : x ⟂ₘ F) :
@@ -119,6 +131,14 @@ private lemma res_ball (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     · exact le_trans hxy hw
     · exact le_of_lt <| lt_of_le_of_lt hay hy.2
 
+/--
+Given a finite-dimensional ultrametric normed space `E` over a nontrivially normed field `𝕜`,
+and a subspace `F` which is spherically complete, if `F` has strictly smaller `finrank` than `E`,
+then there exists a nonzero vector `x : E` that is `M`-orthogonal to `F` (notation `x ⟂ₘ F`).
+
+The proof begins by coercing the strict inequality on `Module.finrank` from `Nat` to `Cardinal`
+to leverage cardinality-based dimension arguments in subsequent steps.
+-/
 theorem exists_morth_vec_of_not_full_finrank (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 {E : Type*} [SeminormedAddCommGroup E]
 [NormedSpace 𝕜 E] [IsUltrametricDist E]

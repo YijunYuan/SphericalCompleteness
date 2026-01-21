@@ -591,6 +591,28 @@ private lemma bddAbove_of_chain_of_partial_extension (𝕜 : Type*) [Nontriviall
   rw [← hMfinal1.choose_spec ⟨a, hMa⟩, ← hMfinal2.choose_spec ⟨a, ha⟩]
 
 
+/--
+`exists_extension_opNorm_le` is an extension lemma for continuous linear maps between
+ultrametric normed spaces over a nontrivially normed field.
+
+Given:
+* a submodule `D : Submodule 𝕜 E`,
+* a continuous linear map `S : D →L[𝕜] F`,
+* a nonempty family `𝒰 : Set (E →L[𝕜] F)` of continuous linear maps on `E`,
+* a radius function `ε : 𝒰 → ℝ` with `0 < ε U` for all `U`,
+* a pairwise compatibility bound
+  `‖U - V‖ ≤ max (ε U) (ε V)` for all `U V ∈ 𝒰`,
+* and a pointwise approximation bound on `D`
+  `‖S x - U x‖ ≤ ε U * ‖x‖` for all `U ∈ 𝒰` and `x : D`,
+
+then there exists an extension `T : E →L[𝕜] F` such that:
+* `T` agrees with `S` on `D`, and
+* for every `U ∈ 𝒰`, the operator norm distance is controlled by the given radius:
+  `‖T - U‖ ≤ ε U`.
+
+The spherical completeness assumption on `F` is used to realize the limit/selection
+from the compatible family of operator-norm balls.
+-/
 lemma exists_extension_opNorm_le
 (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 {E : Type*} [SeminormedAddCommGroup E] [IsUltrametricDist E] [NormedSpace 𝕜 E]
