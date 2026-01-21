@@ -1,6 +1,18 @@
 import Mathlib.LinearAlgebra.Span.Defs
 import Mathlib.Algebra.Field.Defs
 
+/--
+If `a ∉ D`, then the sum decomposition of an element of the form `d + l`
+with `d ∈ D` and `l ∈ span 𝕜 {a}` is unique.
+
+More precisely, for any `d₁ d₂ ∈ D` and any `l₁ l₂ ∈ Submodule.span 𝕜 {a}`,
+the equality `d₁ + l₁ = d₂ + l₂` forces `d₁ = d₂` and `l₁ = l₂`.
+
+This expresses that, under the non-membership hypothesis `a ∉ D`, the two
+submodules `D` and `span 𝕜 {a}` intersect trivially and the ambient module
+behaves like a direct sum along these components (at least with respect to
+equality of such decompositions).
+-/
 lemma eq_and_eq_of_add_eq_add_of_not_mem_submodule_span_singleton {𝕜 : Type*} [Field 𝕜]
 {V : Type*} [AddCommGroup V] [Module 𝕜 V]
 {D : Submodule 𝕜 V} {a : V} (ha : a ∉ D) :
@@ -26,6 +38,21 @@ lemma eq_and_eq_of_add_eq_add_of_not_mem_submodule_span_singleton {𝕜 : Type*}
   exfalso
   exact ha <| Submodule.smul_mem D r⁻¹ <| (Submodule.sub_mem_iff_left D hd1).mpr hd2
 
+/--
+If `a : 𝕜` is nonzero, then scalar multiplication by `a` leaves any submodule `M` invariant:
+`a • M = M`.
+
+This is the submodule-level expression of the fact that `a` acts as an invertible linear map
+(with inverse given by multiplication by `a⁻¹`), so the image of `M` under the action equals `M`
+itself.
+
+Parameters:
+- `ha : a ≠ 0` ensures `a` is a unit in the field `𝕜`.
+- `M : Submodule 𝕜 E` is the submodule being scaled.
+
+Result:
+- `a • M = M`.
+-/
 theorem smul_submodule_eq_self {𝕜 : Type*} [Field 𝕜]
   {E : Type*} [AddCommMonoid E] [Module 𝕜 E] {a : 𝕜} (ha : a ≠ 0) (M : Submodule 𝕜 E) :
   (@HSMul.hSMul 𝕜 (Set E) (Set E) (@instHSMul 𝕜 (Set E) Set.smulSet) a ↑M)

@@ -3,6 +3,17 @@ import Mathlib.Topology.UniformSpace.Completion
 import Mathlib.Topology.Algebra.UniformField
 import Mathlib.Analysis.Normed.Module.Completion
 
+/--
+Instantiates `DenselyNormedField` on `UniformSpace.Completion α`.
+
+Assuming `α` is a densely normed field and also a `CompletableTopField`, its uniform
+completion inherits a compatible `DenselyNormedField` structure. This allows one to
+use the standard API for densely normed fields (e.g. density of the norm range, lemmas
+about balls, and approximation arguments) directly on `UniformSpace.Completion α`.
+
+This instance is marked `noncomputable` because the completion and its induced
+structures are not definitional/computational in general.
+-/
 noncomputable instance instDenselyNormedFieldCompletionOfCompletion
 {α : Type*} [hdnf : DenselyNormedField α] [CompletableTopField α] :
 DenselyNormedField (UniformSpace.Completion α) where

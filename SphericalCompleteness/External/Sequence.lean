@@ -6,6 +6,18 @@ private noncomputable def esoesoa {α : Type u_1} [inst : PartialOrder α]
   | 0 => 0
   | Nat.succ m => (h (esoesoa hanti h m)).choose
 
+/--
+For an antitone (monotone decreasing) sequence `f : ℕ → α` in a partial order, this theorem gives a
+dichotomy:
+
+* either `f` is **eventually stable**: there exists an index `N` such that `f n = f N` for all
+  `n ≥ N`;
+* or there exists a **strictly increasing subsequence** `φ : ℕ → ℕ` such that `f ∘ φ` is
+  **strictly decreasing** (`StrictAnti`).
+
+This is useful for extracting a strictly decreasing subsequence from a non-stabilizing antitone
+sequence, a common step in arguments about descending chains and related completeness properties.
+-/
 theorem eventually_stable_or_exists_strictanti_of_antitone {α : Type*} [PartialOrder α]
   {f : ℕ → α} (hanti : Antitone f) :
   (∃ N : ℕ, ∀ n ≥ N, f n = f N) ∨ (∃ φ : ℕ → ℕ, StrictMono φ ∧ StrictAnti (f ∘ φ)) := by
@@ -37,6 +49,20 @@ private noncomputable def ebsofd {α : Type*} (seq : ℕ → α)
   | n + 1 =>
       max (ebsofd seq hseq n + 1)  ((hseq (ebsofd seq hseq n)).choose + 1)
 
+/-!
+Given a sequence `seq : ℕ → α` with *finite duplication*—i.e. for every index `n` there is a
+threshold `N` after which the value `seq n` never appears again—this theorem extracts an injective
+subsequence.
+
+More precisely, assuming
+`hseq : ∀ n, ∃ N, ∀ i > N, seq n ≠ seq i`,
+it constructs a strictly increasing map `φ : ℕ → ℕ` such that the composed subsequence
+`seq ∘ φ` is injective.
+
+This can be viewed as a subsequence selection principle: under the hypothesis that each value in
+the sequence occurs only finitely many times, one can choose indices increasing in `ℕ` so that all
+selected values are pairwise distinct.
+-/
 theorem exists_bijective_subseq_of_finite_duplication {α : Type*} (seq : ℕ → α)
 (hseq : ∀ n : ℕ, ∃ N, ∀ i > N, seq n ≠ seq i) :
 ∃ φ : ℕ → ℕ, StrictMono φ ∧ Function.Injective (seq ∘ φ) := by

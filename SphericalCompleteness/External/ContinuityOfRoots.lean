@@ -10,17 +10,52 @@ import Mathlib.Algebra.Polynomial.Splits
 
 open Polynomial
 
+/--
+`Polynomial.toAlgCl f` is the polynomial obtained from `f : Polynomial 𝕜` by base-changing
+its coefficients to the algebraic closure `AlgebraicClosure 𝕜`.
+
+This is defined as `Polynomial.map (algebraMap 𝕜 (AlgebraicClosure 𝕜)) f`, i.e. it applies
+the canonical map `𝕜 →+* AlgebraicClosure 𝕜` coefficientwise.
+
+This is an abbreviation (not a new definition) and is marked `noncomputable` because
+`AlgebraicClosure 𝕜` is noncomputable in general.
+-/
 noncomputable abbrev Polynomial.toAlgCl {𝕜 : Type u_1} [Field 𝕜] (f : Polynomial 𝕜) :=
   (Polynomial.map (algebraMap 𝕜 (AlgebraicClosure 𝕜))) f
 
+/--
+`toAlgCl` does not change the degree of a polynomial.
+
+For a field `𝕜` and a polynomial `f : Polynomial 𝕜`, coercing `f` to the algebraic closure
+(via `f.toAlgCl`) preserves `natDegree`. This is a common bookkeeping lemma used when
+moving a polynomial to `AlgebraicClosure 𝕜` (e.g. to talk about roots there) while keeping
+degree computations unchanged.
+-/
 lemma toAlgCl_natdeg_eq {𝕜 : Type u_1} [Field 𝕜] (f : Polynomial 𝕜) :
   (f.toAlgCl).natDegree = f.natDegree := by
   unfold toAlgCl
   rw [Polynomial.natDegree_map_eq_of_injective (algebraMap 𝕜 (AlgebraicClosure 𝕜)).injective]
 
+/--
+`Polynomial.stdGaussNorm f` is the Gauss norm of a polynomial `f : Polynomial 𝕜` computed with respect
+to the given norm on `𝕜` and parameter `r = 1`.
+
+Concretely, this is `gaussNorm` specialized to `Polynomial 𝕜` (via the identity coercion) using
+`hn.norm` as the coefficient norm. It is often convenient as the “standard” Gauss norm appearing in
+nonarchimedean/analytic arguments, where taking `r = 1` avoids additional scaling factors.
+-/
 abbrev Polynomial.stdGaussNorm {𝕜 : Type u_1} [hn : NontriviallyNormedField 𝕜] (f : Polynomial 𝕜) :=
 (@gaussNorm _ _ _ {coe := fun f => f, coe_injective' := fun _ _ stupid => stupid} hn.norm 1) f
 
+/--
+`stdGaussNorm_nonneg` states that the *standard Gauss norm* of a polynomial over a
+nontrivially normed field is always nonnegative.
+
+More precisely, for any polynomial `f : Polynomial 𝕜` (with `[NontriviallyNormedField 𝕜]`),
+the value `f.stdGaussNorm` is a nonnegative real number, i.e. `0 ≤ f.stdGaussNorm`.
+This follows from the fact that `stdGaussNorm` is defined via norms (and supremums/maxima)
+which are nonnegative by construction.
+-/
 lemma stdGaussNorm_nonneg {𝕜 : Type u_1} [hn : NontriviallyNormedField 𝕜]
 (f : Polynomial 𝕜) : 0 ≤ f.stdGaussNorm := by
   unfold stdGaussNorm gaussNorm
@@ -29,6 +64,21 @@ lemma stdGaussNorm_nonneg {𝕜 : Type u_1} [hn : NontriviallyNormedField 𝕜]
   rw [Finset.le_sup'_iff]
   exact ⟨hp.choose, ⟨hp.choose_spec, norm_nonneg _⟩⟩
 
+/--
+`stdGaussNorm_eq_zero_iff` characterizes when the (standard) Gauss norm of a polynomial
+over a nontrivially normed field vanishes.
+
+It states that for `f : Polynomial 𝕜`, the value `f.stdGaussNorm` is zero if and only if
+the polynomial itself is the zero polynomial. This provides the basic nondegeneracy of
+`stdGaussNorm` and is typically used to turn norm-vanishing goals into polynomial-vanishing
+goals (and conversely).
+
+**Assumptions:**
+- `𝕜` is a `NontriviallyNormedField`.
+
+**Conclusion:**
+- `f.stdGaussNorm = 0 ↔ f = 0`.
+-/
 lemma stdGaussNorm_eq_zero_iff {𝕜 : Type u_1} [hn : NontriviallyNormedField 𝕜]
 (f : Polynomial 𝕜) :
   f.stdGaussNorm = 0 ↔ f = 0 := by
@@ -47,6 +97,16 @@ lemma stdGaussNorm_eq_zero_iff {𝕜 : Type u_1} [hn : NontriviallyNormedField �
   have := Polynomial.nonempty_support_iff.not.1 hh
   tauto
 
+/--
+Characterization of the (standard) Gauss norm of a polynomial by its coefficients.
+
+For a polynomial `f : Polynomial 𝕜` over a nontrivially normed field and a real bound `r ≥ 0`,
+this lemma states that the standard Gauss norm `f.stdGaussNorm` is bounded above by `r`
+if and only if every coefficient of `f` has norm bounded above by `r`.
+
+In other words, `f.stdGaussNorm ≤ r` exactly expresses the uniform bound
+`∀ i, ‖f.coeff i‖ ≤ r` on all coefficients.
+-/
 lemma le_gaussNorm_iff_coeff_le {𝕜 : Type u_1} [hn : NontriviallyNormedField 𝕜]
 (f : Polynomial 𝕜) {r : ℝ} (hr : 0 ≤ r) :
   f.stdGaussNorm ≤ r ↔ ∀ i : ℕ, ‖f.coeff i‖ ≤ r := by
@@ -62,6 +122,13 @@ lemma le_gaussNorm_iff_coeff_le {𝕜 : Type u_1} [hn : NontriviallyNormedField 
   suffices tt : f.coeff i = 0 by simpa [tt]
   exact notMem_support_iff.mp <| forall_not_of_not_exists h i
 
+/--
+For a polynomial `f` over a nontrivially normed field `𝕜`, the (standard) Gauss norm
+`f.stdGaussNorm` is positive if and only if `f` is nonzero.
+
+This lemma packages the basic nondegeneracy of the Gauss norm: it vanishes exactly on
+the zero polynomial and is strictly positive otherwise.
+-/
 lemma gaussNorm_pos_iff {𝕜 : Type u_1} [hn : NontriviallyNormedField 𝕜]
 (f : Polynomial 𝕜) :
   0 < f.stdGaussNorm ↔ f ≠ 0 := by
@@ -69,6 +136,17 @@ lemma gaussNorm_pos_iff {𝕜 : Type u_1} [hn : NontriviallyNormedField 𝕜]
   simpa [← stdGaussNorm_eq_zero_iff] using
     ⟨fun h => ge_of_eq (id (Eq.symm h)), fun h => eq_of_le_of_ge h (stdGaussNorm_nonneg f)⟩
 
+/--
+If `f` is a monic polynomial over a nontrivially normed field `𝕜`, then its
+`stdGaussNorm` is at least `1`.
+
+Intuition: monicity means the leading coefficient of `f` is `1`, whose norm is `1`,
+and the standard Gauss norm is (by definition/lemmas) bounded below by the norm of
+each coefficient, hence in particular by the leading coefficient.
+
+This lemma is typically used to ensure the Gauss norm is nonzero and to obtain
+basic lower bounds needed in continuity or root estimates.
+-/
 lemma one_le_stdGaussNorm_of_monic {𝕜 : Type u_1} [hn : NontriviallyNormedField 𝕜]
 (f : Polynomial 𝕜) (hf : Monic f) :
   1 ≤ f.stdGaussNorm := by
@@ -80,6 +158,14 @@ lemma one_le_stdGaussNorm_of_monic {𝕜 : Type u_1} [hn : NontriviallyNormedFie
   use f.natDegree
   simp [hf]
 
+/--
+If a polynomial `f : 𝕜[X]` over a field is monic and has a root in the algebraic closure
+(via `eval` after mapping coefficients to `AlgebraicClosure 𝕜`), then `f` is nonconstant.
+Equivalently, its `natDegree` is strictly positive.
+
+This lemma is typically used to rule out the constant-monic case (`f = 1`), since a monic
+constant polynomial cannot vanish at any point in any extension field.
+-/
 lemma pos_deg_of_monic_of_root {𝕜 : Type u_1} [Field 𝕜]
 (f : 𝕜[X]) (hf : Monic f) (α : AlgebraicClosure 𝕜) (hfz : eval α f.toAlgCl = 0) :
   0 < f.natDegree := by
@@ -87,6 +173,14 @@ lemma pos_deg_of_monic_of_root {𝕜 : Type u_1} [Field 𝕜]
   by_contra hc
   simp [hc] at hfz
 
+/--
+Given monic polynomials `f` and `g` of the same (polynomial) degree, and assuming `f` has a root
+`α` in an algebraic closure (expressed as `eval α f.toAlgCl = 0`), this lemma bounds the degree of
+their difference: the polynomial `g - f` has `natDegree` at most `f.natDegree - 1`.
+
+Intuitively, since `f` and `g` are monic with equal degree, their leading terms cancel in `g - f`,
+so the resulting polynomial must drop in degree by at least one.
+-/
 lemma natDegree_sub_monic_le_natDegree_sub_one {𝕜 : Type*} [hn : NontriviallyNormedField 𝕜]
   (f g : 𝕜[X]) (hf : f.Monic) (hg : g.Monic) (hfg : f.degree = g.degree) (α : AlgebraicClosure 𝕜)
   (hfz : eval α f.toAlgCl = 0) :
@@ -106,6 +200,20 @@ lemma natDegree_sub_monic_le_natDegree_sub_one {𝕜 : Type*} [hn : Nontrivially
     simp [leadingCoeff_eq_zero.1 hc.symm] at hc'
     simp [eq_one_of_monic_natDegree_zero hf (id (Eq.symm hc'))] at hfz
 
+/--
+Bounds the spectral norm of a root `α` of a monic polynomial `f` over a nontrivially normed
+ultrametric field `𝕜` by the standard Gauss norm of `f`.
+
+More precisely, assuming:
+* `f : 𝕜[X]` is monic (`hf : f.Monic`),
+* `α : AlgebraicClosure 𝕜` is a root of `f` in the algebraic closure (`hfz : eval α f.toAlgCl = 0`),
+
+the theorem shows:
+` spectralNorm 𝕜 (AlgebraicClosure 𝕜) α ≤ f.stdGaussNorm `.
+
+This is an ultrametric analogue of a Cauchy-type bound, relating the size of an algebraic element
+to the sizes of the coefficients of its minimal polynomial (here expressed via `stdGaussNorm`).
+-/
 theorem spectralNorm_le_gaussNorm {𝕜 : Type u_1} [hn : NontriviallyNormedField 𝕜]
 [IsUltrametricDist 𝕜]
   (f : 𝕜[X]) (hf : f.Monic) (α : AlgebraicClosure 𝕜)
@@ -159,6 +267,20 @@ theorem spectralNorm_le_gaussNorm {𝕜 : Type u_1} [hn : NontriviallyNormedFiel
     exact pow_le_pow_right₀ hx <| (Nat.le_sub_one_iff_lt t).mpr hi
 
 open Classical in
+/--
+`Finset.prod.multiplicative_mor` states that a function `g : M → β` which is a multiplicative
+monoid morphism (in the sense that it maps `1 ↦ 1` and preserves multiplication) commutes with
+finite products over a `Finset`.
+
+More precisely, for a finset `s : Finset ι` and a function `f : ι → M`, if
+* `hg1 : g 1 = 1`, and
+* `hgmul : ∀ x y, g (x * y) = g x * g y`,
+then applying `g` to the (double) finset product `∏ i ∈ s, f i` equals the product of the
+images `∏ i ∈ s, g (f i)`.
+
+This is useful when `g` is not bundled as a `MonoidHom`, but one still wants the standard
+"map over product" lemma.
+-/
 lemma Finset.prod.multiplicative_mor {ι : Type*}
 {M : Type*} [CommMonoid M] (s : Finset ι) (f : ι → M)
 {β : Type*} [CommMonoid β] (g : M → β)
@@ -170,6 +292,19 @@ lemma Finset.prod.multiplicative_mor {ι : Type*}
     nth_rw 2 [Finset.prod_insert ha]
     rw [← ih, ← hgmul, ← Finset.prod_insert ha]
 
+/--
+Bounds the spectral algebra norm of `g(α)` in terms of the Gauss norm of `f - g` and the
+Gauss norm of `f`, assuming `α` is a root of `f`.
+
+More precisely, over a nontrivially normed ultrametric field `𝕜`, for monic polynomials
+`f g : Polynomial 𝕜` of the same degree, and `α : AlgebraicClosure 𝕜` with `f.toAlgCl.IsRoot α`,
+one has
+`‖g.toAlgCl.eval α‖ₛₚ ≤ ‖f - g‖₍Gauss₎ * ‖f‖₍Gauss₎^(f.natDegree - 1)`,
+where the left-hand side is the `spectralAlgNorm` on `AlgebraicClosure 𝕜`.
+
+This inequality is a continuity-type estimate for evaluating a polynomial at a root of a nearby
+monic polynomial, measured using (standard) Gauss norms.
+-/
 theorem spectralNorm_eval_le_gaussNorm_sub {𝕜 : Type u_1} [hn : NontriviallyNormedField 𝕜]
 [IsUltrametricDist 𝕜]
 (f g : Polynomial 𝕜) (hf : Monic f) (hg : Monic g) (hfg : f.degree = g.degree)
@@ -228,6 +363,22 @@ theorem spectralNorm_eval_le_gaussNorm_sub {𝕜 : Type u_1} [hn : NontriviallyN
     · exact stdGaussNorm_nonneg (f - g)
 
 open Classical in
+/--
+`continuity_of_roots₀` is a quantitative continuity statement for roots of monic polynomials over a
+complete nontrivially normed ultrametric field.
+
+Given monic polynomials `f` and `g` of the same degree over `𝕜`, and a root `α` of `f` in the
+algebraic closure `AlgebraicClosure 𝕜`, the theorem produces a root `β` of `g` such that the
+distance between `α` and `β` (measured by `spectralAlgNorm` on the algebraic closure) is controlled
+by the size of the perturbation `(f - g)` (measured by `stdGaussNorm`), with an exponent
+`1 / f.natDegree` and scaled by `f.stdGaussNorm`.
+
+More precisely, it asserts the existence of `β` with `g.toAlgCl.IsRoot β` and
+`‖α - β‖ ≤ ‖f - g‖^(1 / natDegree f) * ‖f‖`, using the specific norms `spectralAlgNorm` and
+`stdGaussNorm` in this development.
+
+This lemma is intended as a “root stability” bound in the non-archimedean/ultrametric setting.
+-/
 theorem continuity_of_roots₀ {𝕜 : Type u_1} [hn : NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
   [IsUltrametricDist 𝕜]
 (f g : Polynomial 𝕜) (hf : Monic f) (hg : Monic g) (hfg : f.degree = g.degree)
@@ -302,6 +453,27 @@ theorem continuity_of_roots₀ {𝕜 : Type u_1} [hn : NontriviallyNormedField �
   · exact spectralNorm_one
   · exact fun x y => spectralAlgNorm_mul x y
 
+/--
+`continuity_of_roots` (informal): roots of a monic polynomial over a complete nontrivially normed
+ultrametric field vary continuously with the coefficients, measured in `stdGaussNorm`, and the
+distance between roots is controlled by `spectralAlgNorm`.
+
+More precisely, given:
+* a nontrivially normed field `𝕜` which is complete and ultrametric (`[IsUltrametricDist 𝕜]`),
+* a polynomial `f : Polynomial 𝕜` which is monic (`hf : Monic f`),
+* a chosen root `α : AlgebraicClosure 𝕜` of `f` (`hα : aeval α f = 0`),
+* an error tolerance `ε > 0`,
+
+the theorem produces `δ > 0` such that for every monic polynomial `g` of the same degree as `f`,
+if `g` is `δ`-close to `f` in `stdGaussNorm` (i.e. `(f - g).stdGaussNorm ≤ δ`), then `g` admits
+a root `β : AlgebraicClosure 𝕜` with:
+* `aeval β g = 0`, and
+* `spectralAlgNorm 𝕜 (AlgebraicClosure 𝕜) (α - β) ≤ ε`.
+
+This is a quantitative continuity statement for roots in an algebraic closure, with the size of
+perturbations measured by the Gauss norm on coefficients and the root displacement measured by the
+spectral algebra norm.
+-/
 theorem continuity_of_roots {𝕜 : Type u_1} [hn : NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
   [IsUltrametricDist 𝕜]
   (f : Polynomial 𝕜) (hf : Monic f) (α : AlgebraicClosure 𝕜) (hα : aeval α f = 0)

@@ -11,7 +11,7 @@ open Polynomial
 
 variable (p : ℕ) [hp : Fact (Nat.Prime p)]
 
-lemma exists_rat_pow_p_norm_between (a b : ℝ) (ha : 0 ≤ a) (hab : a < b) : ∃ c : ℚ,
+private lemma exists_rat_pow_p_norm_between (a b : ℝ) (ha : 0 ≤ a) (hab : a < b) : ∃ c : ℚ,
   a < ‖(p : (PadicAlgCl p))‖ ^ (c : ℝ) ∧
   ‖(p : (PadicAlgCl p))‖ ^ (c : ℝ) < b := by
   let a' := a + (b - a) / 2
@@ -41,6 +41,17 @@ lemma exists_rat_pow_p_norm_between (a b : ℝ) (ha : 0 ≤ a) (hab : a < b) : �
       (by simpa only [Nat.one_lt_cast] using hp.out.one_lt) (lt_trans ha' ha'b)] at hc1
     rwa [Real.rpow_neg_eq_inv_rpow] at hc1
 
+/--
+`PadicAlgCl p` is a densely normed field.
+
+This instance supplies `DenselyNormedField (PadicAlgCl p)`, i.e. it asserts that the norm on
+`PadicAlgCl p` is nontrivial and that for any `r : ℝ` and any `x : PadicAlgCl p` with `r < ‖x‖`,
+there exists `y : PadicAlgCl p` with `r < ‖y‖` and `‖y‖ < ‖x‖`. Equivalently, the values of the
+norm are order-dense in `ℝ≥0`.
+
+The instance is marked `noncomputable` because it relies on classical choice/analysis facts rather
+than an algorithm.
+-/
 noncomputable instance instDenselyNormedFieldPadicAlgCl : DenselyNormedField (PadicAlgCl p) where
   lt_norm_lt a b ha hab := by
     rcases exists_rat_pow_p_norm_between p a b ha hab with ⟨r, hr1, hr2⟩
@@ -72,6 +83,17 @@ noncomputable instance instDenselyNormedFieldPadicAlgCl : DenselyNormedField (Pa
       simp [← Real.rpow_mul (norm_nonneg _)]
     exact ⟨z, hz' ▸ ⟨hr1, hr2⟩⟩
 
+/--
+`QAlg_in_QpAlgCl_is_countable` states that, for a natural number `p` equipped with a proof
+that `p` is prime, the subset of the `p`-adic algebraic closure `PadicAlgCl p` consisting
+of elements that are algebraic over `ℚ` is a countable set.
+
+More precisely, it proves `Countable` for the set
+`{z : PadicAlgCl p | IsAlgebraic ℚ z}`.
+
+This is a basic cardinality fact used to control the size of the algebraic elements inside
+a (typically uncountable) ambient extension field.
+-/
 theorem QAlg_in_QpAlgCl_is_countable (p : ℕ) [hp : Fact (Nat.Prime p)] :
   {z : PadicAlgCl p | IsAlgebraic ℚ z}.Countable := by
   let S := {z : PadicAlgCl p | IsAlgebraic ℚ z}
@@ -94,6 +116,14 @@ theorem QAlg_in_QpAlgCl_is_countable (p : ℕ) [hp : Fact (Nat.Prime p)] :
     simpa using Polynomial.finite_setOf_isRoot t
 
 open Classical in
+/--
+`PadicAlgCl p` is a separable topological space.
+
+This instance provides `TopologicalSpace.SeparableSpace (PadicAlgCl p)`, i.e. it asserts the
+existence of a countable dense subset of `PadicAlgCl p` with respect to its given topology.
+Such an instance is often used to enable results and constructions that require separability
+(e.g. working with dense sequences or applying theorems stated for separable spaces).
+-/
 instance instSeparableSpacePadicAlgCl : TopologicalSpace.SeparableSpace (PadicAlgCl p) where
   exists_countable_dense := by
     use {z : PadicAlgCl p | IsAlgebraic ℚ z}

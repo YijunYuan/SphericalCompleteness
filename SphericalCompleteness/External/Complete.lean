@@ -54,6 +54,25 @@ private lemma dcidx_strict_mono {α : Type*} [PseudoMetricSpace α] {seq : ℕ �
   conv => arg 2; unfold dcidx
   simp only [ge_iff_le, one_div, lt_sup_iff, lt_add_iff_pos_left, zero_lt_one, true_or]
 
+/--
+Characterization of completeness in a (pseudo)metric space via nested closed balls
+with radii tending to `0`.
+
+This theorem states that a `PseudoMetricSpace α` is complete if and only if
+every *nested* (antitone) sequence of closed balls `closedBall (ci i) (ri i)`
+whose radii `ri i` converge to `0` (in the filter sense `Filter.Tendsto ri atTop (nhds 0)`)
+has nonempty intersection.
+
+More precisely:
+* `Antitone (fun i => closedBall (ci i) (ri i))` expresses that the balls are nested
+  (`i ≤ j` implies `closedBall (ci j) (ri j) ⊆ closedBall (ci i) (ri i)`).
+* `Filter.Tendsto ri atTop (nhds 0)` means the radii shrink to `0`.
+* The conclusion `(⋂ i, closedBall (ci i) (ri i)).Nonempty` asserts there exists
+  a point lying in every ball.
+
+This is a standard “Cantor intersection / nested balls” criterion for completeness,
+formulated for closed balls and radii in `NNReal`.
+-/
 theorem completeSpace_iff_nested_ball_with_radius_tendsto_zero_has_nonempty_inter
   (α : Type*) [PseudoMetricSpace α] :
     CompleteSpace α ↔
