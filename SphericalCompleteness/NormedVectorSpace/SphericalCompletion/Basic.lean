@@ -10,7 +10,7 @@ instance {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 [hsc : SphericallyCompleteSpace E₀]
 (f : E →ₗᵢ[𝕜] E₀) :
 SphericallyCompleteSpace (↥(exists_max_imm_ext_in_sph_comp 𝕜 E E₀ f).choose) := by
-  rw [sphericallyComplete_iff']
+  rw [sphericallyCompleteSpace_iff_strictAnti_radius]
   by_contra hc
   push_neg at hc
   rcases hc with ⟨c, r, hsr, hanti, hemp⟩

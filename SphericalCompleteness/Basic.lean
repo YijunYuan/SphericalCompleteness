@@ -6,7 +6,8 @@ open Filter
 
 namespace SphericallyCompleteSpace
 
-theorem sphericallyComplete_iff (α : Type*) [PseudoMetricSpace α] [iud : IsUltrametricDist α] :
+theorem sphericallyCompleteSpace_iff_antitone_radius
+(α : Type*) [PseudoMetricSpace α] [iud : IsUltrametricDist α] :
   SphericallyCompleteSpace α ↔
   ∀ ⦃ci : ℕ → α⦄, ∀ ⦃ri : ℕ → NNReal⦄,
     Antitone ri →
@@ -55,14 +56,15 @@ theorem sphericallyComplete_iff (α : Type*) [PseudoMetricSpace α] [iud : IsUlt
     simp only [NNReal.coe_le_coe, r']
     exact csInf_le (OrderBot.bddBelow _) (by use i)
 
-theorem sphericallyComplete_iff' (α : Type*) [PseudoMetricSpace α] [iud : IsUltrametricDist α] :
+theorem sphericallyCompleteSpace_iff_strictAnti_radius
+(α : Type*) [PseudoMetricSpace α] [iud : IsUltrametricDist α] :
   SphericallyCompleteSpace α ↔
   ∀ ⦃ci : ℕ → α⦄, ∀ ⦃ri : ℕ → NNReal⦄,
     StrictAnti ri →
     Antitone (fun i => closedBall (ci i) (ri i)) → (⋂ i, closedBall (ci i) (ri i)).Nonempty := by
   constructor
   · exact fun h ci ri hri hanti => h.isSphericallyComplete hanti
-  · rw [sphericallyComplete_iff α]
+  · rw [sphericallyCompleteSpace_iff_antitone_radius α]
     intro h ci ri hri hanti
     rcases eventually_stable_or_exists_strictanti_of_antitone hri with hc | hc
     · rcases hc with ⟨N, hN⟩
@@ -165,7 +167,8 @@ private lemma cofinal_of_countable_chain_of_ball {α : Type*}
         (countable_chain_of_ball hw n)).choose_spec.2 inf_le_left
   · exact hS' (countable_chain_of_ball hw n) ⟨s, hs⟩
 
-theorem sphericallyComplete_iff_pairwise_inter_nonempty (α : Type*) [PseudoMetricSpace α] [iud : IsUltrametricDist α] :
+theorem sphericallyCompleteSpace_iff_pairwise_inter_nonempty
+(α : Type*) [PseudoMetricSpace α] [iud : IsUltrametricDist α] :
   SphericallyCompleteSpace α ↔ (
   ∀ S : Set (α × NNReal), S.Nonempty →
   (∀ w1 w2 : ↑S, (closedBall w1.val.1 w1.val.2 ∩ closedBall w2.val.1 w2.val.2).Nonempty) →
@@ -220,7 +223,8 @@ theorem sphericallyComplete_iff_pairwise_inter_nonempty (α : Type*) [PseudoMetr
     exact ⟨z, Set.mem_iInter.2 <| fun i => hz ⟨(c i, r i), Exists.intro i (Eq.refl (c i, r i))⟩⟩
 
 open List in
-theorem sphericallyComplete_equiv (α : Type*) [PseudoMetricSpace α] [iud : IsUltrametricDist α] :
+theorem sphericallyCompleteSpace_equiv
+(α : Type*) [PseudoMetricSpace α] [iud : IsUltrametricDist α] :
 TFAE [
   SphericallyCompleteSpace α,
   ∀ ⦃ci : ℕ → α⦄, ∀ ⦃ri : ℕ → NNReal⦄,
@@ -233,9 +237,9 @@ TFAE [
     (∀ w1 w2 : ↑S, (closedBall w1.val.1 w1.val.2 ∩ closedBall w2.val.1 w2.val.2).Nonempty) →
     (⋂ w : ↑S, closedBall w.val.1 w.val.2).Nonempty
 ] := by
-  tfae_have 1 ↔ 2 := sphericallyComplete_iff α
-  tfae_have 1 ↔ 3 := sphericallyComplete_iff' α
-  tfae_have 1 ↔ 4 := sphericallyComplete_iff_pairwise_inter_nonempty α
+  tfae_have 1 ↔ 2 := sphericallyCompleteSpace_iff_antitone_radius α
+  tfae_have 1 ↔ 3 := sphericallyCompleteSpace_iff_strictAnti_radius α
+  tfae_have 1 ↔ 4 := sphericallyCompleteSpace_iff_pairwise_inter_nonempty α
   tfae_finish
 
 instance Prod.sphericallyCompleteSpace {E F : Type*}

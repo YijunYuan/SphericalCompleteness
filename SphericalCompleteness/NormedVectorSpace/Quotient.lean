@@ -75,7 +75,7 @@ theorem Quotient.sphericallyCompleteSpace
 [iud : IsUltrametricDist E] [scsk : SphericallyCompleteSpace E]
 {F : Submodule 𝕜 E} :
 SphericallyCompleteSpace (E ⧸ F) := by
-  rw [sphericallyComplete_iff']
+  rw [sphericallyCompleteSpace_iff_strictAnti_radius]
   intro c r hr hanti
   let lc : ℕ → E := fun n => (hhhh 𝕜 hr hanti (n + 2)).val
   let lr : ℕ → NNReal := fun n => r (n + 1)

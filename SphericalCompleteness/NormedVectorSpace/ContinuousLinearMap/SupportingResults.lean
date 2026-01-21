@@ -15,7 +15,7 @@ lemma lemma_4_4_z0 {𝕜 : Type*}
   {ε : ↑𝒰 → ℝ} (hε1 : ∀ (T : ↑𝒰), 0 < ε T) (hε2 : ∀ (U V : ↑𝒰), ‖U.val - V.val‖ ≤ max (ε U) (ε V))
   (hε3 : ∀ (U : ↑𝒰) (x : ↥D), ‖S x - U.val ↑x‖ ≤ ε U * ‖x‖) :
   ∃ z0 : F, ∀ (x : ↥D) (U : ↑𝒰), ‖S x + z0 - U.val (↑x + a)‖ ≤ ε U * ‖↑x + a‖ := by
-  rw [sphericallyComplete_iff_pairwise_inter_nonempty] at hsc
+  rw [sphericallyCompleteSpace_iff_pairwise_inter_nonempty] at hsc
   let 𝒮 : Set (F × NNReal) := {(U.val x + U.val a - S x,
     ⟨(ε U) * ‖x + a‖, mul_nonneg (le_of_lt (hε1 _)) (norm_nonneg _)⟩) | (x : ↑D) (U : ↑𝒰)}
   have : 𝒮.Nonempty := by
