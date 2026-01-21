@@ -293,6 +293,12 @@ TFAE [
   tfae_have 1 ↔ 4 := sphericallyCompleteSpace_iff_pairwise_inter_nonempty α
   tfae_finish
 
+/--
+`SphericallyCompleteSpace` is stable under binary products.
+
+This instance equips `E × F` with a `SphericallyCompleteSpace` structure assuming both
+factors `E` and `F` are spherically complete pseudo-metric spaces.
+-/
 instance Prod.sphericallyCompleteSpace {E F : Type*}
 [PseudoMetricSpace E] [PseudoMetricSpace F]
 [hse : SphericallyCompleteSpace E] [hsf : SphericallyCompleteSpace F] :
@@ -333,6 +339,17 @@ instance Prod.sphericallyCompleteSpace {E F : Type*}
     simpa only [Prod.dist_eq, sup_le_iff] using ⟨hxE n, hxF n⟩
 
 open Classical in
+/--
+A finite product of spherically complete pseudometric spaces is spherically complete.
+
+More precisely, if `ι` is a finite index type and each component space `E i` is a
+`PseudoMetricSpace` equipped with an instance of `SphericallyCompleteSpace`, then the
+dependent function space `∀ i, E i` inherits a `SphericallyCompleteSpace` structure
+(with the usual `Pi` pseudometric structure coming from the components).
+
+This instance is intended for use with finite products; the `Fintype ι` assumption is
+essential in typical proofs of spherical completeness for `Pi`-types.
+-/
 instance Pi.sphericallyCompleteSpace {ι : Type*} [Fintype ι] {E : ι → Type*}
   [∀ i, PseudoMetricSpace (E i)]
   [hh : ∀ i, SphericallyCompleteSpace (E i)] :
