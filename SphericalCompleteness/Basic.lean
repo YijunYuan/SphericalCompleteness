@@ -165,7 +165,7 @@ private lemma cofinal_of_countable_chain_of_ball {α : Type*}
         (countable_chain_of_ball hw n)).choose_spec.2 inf_le_left
   · exact hS' (countable_chain_of_ball hw n) ⟨s, hs⟩
 
-theorem sphericallyComplete_iff'' (α : Type*) [PseudoMetricSpace α] [iud : IsUltrametricDist α] :
+theorem sphericallyComplete_iff_pairwise_inter_nonempty (α : Type*) [PseudoMetricSpace α] [iud : IsUltrametricDist α] :
   SphericallyCompleteSpace α ↔ (
   ∀ S : Set (α × NNReal), S.Nonempty →
   (∀ w1 w2 : ↑S, (closedBall w1.val.1 w1.val.2 ∩ closedBall w2.val.1 w2.val.2).Nonempty) →
@@ -235,7 +235,7 @@ TFAE [
 ] := by
   tfae_have 1 ↔ 2 := sphericallyComplete_iff α
   tfae_have 1 ↔ 3 := sphericallyComplete_iff' α
-  tfae_have 1 ↔ 4 := sphericallyComplete_iff'' α
+  tfae_have 1 ↔ 4 := sphericallyComplete_iff_pairwise_inter_nonempty α
   tfae_finish
 
 instance Prod.sphericallyCompleteSpace {E F : Type*}
@@ -321,7 +321,7 @@ instance instSphericallyCompleteSpaceComplex : SphericallyCompleteSpace ℂ  := 
 
 instance instSphericallyCompleteSpaceReal : SphericallyCompleteSpace ℝ  := inferInstance
 
-instance instSphericallyCompletePadic {p : ℕ} [Fact (Nat.Prime p)] :
+instance instSphericallyCompleteSpacePadic {p : ℕ} [Fact (Nat.Prime p)] :
   SphericallyCompleteSpace (ℚ_[p]) := inferInstance
 
 end SphericallyCompleteSpace

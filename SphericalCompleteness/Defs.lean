@@ -18,7 +18,7 @@ instance instCompleteOfSphericallyComplete (α : Type*)
   rw [completeSpace_iff_nested_ball_with_radius_tendsto_zero_has_nonempty_inter]
   exact fun _ _ hanti _ ↦ sc.isSphericallyComplete hanti
 
-instance instSpericallyComplete_of_properSpace (α : Type*)
+instance instSphericallyCompleteSpaceOfProperSpace (α : Type*)
   [PseudoMetricSpace α] [ProperSpace α] : SphericallyCompleteSpace α where
   isSphericallyComplete := by
     intro ci ri hanti
@@ -53,7 +53,7 @@ theorem sphericallyCompleteSpace_of_isometryEquiv {E F : Type*}
     · exact hz'
     · exact IsometryEquiv.isometry f
 
-instance instSphericallyCompleteOfWeaklyLocallyCompactNormedField
+instance instSphericallyCompleteSpaceOfWeaklyLocallyCompactNormedField
 {α : Type*} [NontriviallyNormedField α] [WeaklyLocallyCompactSpace α] :
 SphericallyCompleteSpace α := by
   haveI := ProperSpace.of_nontriviallyNormedField_of_weaklyLocallyCompactSpace α
