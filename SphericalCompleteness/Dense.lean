@@ -8,10 +8,29 @@ open NNReal
 
 namespace SphericallyCompleteSpace
 
+/--
+`IsSphericallyDense α` is a predicate on a pseudo-metric space asserting that closed balls
+realize their radius as their diameter.
+
+More precisely, for every center `c : α` and radius `r : ℝ≥0`, the diameter of the closed ball
+`closedBall c r` is exactly `r`:
+`diam (closedBall c r) = r`.
+
+This expresses a form of “spherical density”: points occur in the closed ball at (up to) the
+maximal possible distance allowed by the radius, so the ball is not “degenerate” in diameter.
+-/
 class IsSphericallyDense (α : Type*) [PseudoMetricSpace α] : Prop where
   spherically_dense :
   ∀ (c : α) (r : ℝ≥0) , diam (closedBall c r) = r
 
+/--
+Builds an `IsSphericallyDense` instance on `α` from the assumptions that `α` is a
+`DenselyNormedField` and that its distance is ultrametric (`IsUltrametricDist α`).
+
+Intuitively: in an ultrametric normed field where values (norms) are dense in the
+relevant sense, every (nonempty) nested family of closed balls has a point that is
+arbitrarily close to being in all of them, i.e. `α` is *spherically dense*.
+-/
 instance instIsSphericallyDenseOfDenselyNormedField (α : Type*)
 [dnf : DenselyNormedField α] [hiud : IsUltrametricDist α] :
 IsSphericallyDense α where
@@ -28,6 +47,17 @@ spherically_dense := by
   simp only [dist_self_add_left] at this
   linarith
 
+/--
+From spherical density, any closed ball of positive radius has (at least) two points whose
+distance is strictly larger than any prescribed `r' < r` while still remaining `≤ r`.
+
+More precisely, assuming `IsSphericallyDense α`, for any center `z : α` and radii
+`r' r : ℝ≥0` with `r' < r`, there exist `x y : α` such that `x, y ∈ closedBall z r` and
+`nndist x y ∈ Set.Ioc r' r` (i.e. `r' < nndist x y ≤ r`).
+
+This provides a convenient way to extract "almost diameter-realizing" pairs inside a ball,
+with a quantitative lower bound on their separation.
+-/
 lemma exists_dist_lt_diam_of_isSphericallyDense {α : Type*} [PseudoMetricSpace α]
 : IsSphericallyDense α →
 ∀ (z : α), ∀ ⦃r r' : ℝ≥0⦄, r' < r →
@@ -50,6 +80,21 @@ lemma exists_dist_lt_diam_of_isSphericallyDense {α : Type*} [PseudoMetricSpace 
         rw [← isd]
         exact dist_le_diam_of_mem isBounded_closedBall hx hy)
 
+/--
+Characterization of spherical density via existence of pairs of points with controlled distance.
+
+In a pseudo-metric space `α` equipped with an ultrametric distance (`[IsUltrametricDist α]`),
+the typeclass predicate `IsSphericallyDense α` is equivalent to the following concrete
+“radius-witness” property:
+
+For every center `z : α` and radii `r' < r` in `ℝ≥0`, there exist two points `x y : α`
+both lying in the closed ball `closedBall z r` such that their (nonnegative) distance
+`nndist x y` lies in the half-open interval `Set.Ioc r' r` (i.e. `r' < nndist x y ≤ r`).
+
+This expresses that within any closed ball of radius `r` one can find points separated by
+a distance arbitrarily close to `r` from below (but still bounded by `r`), matching the
+intuition that balls contain “enough” points at all intermediate distance scales.
+-/
 theorem exists_dist_lt_diam_iff_isSphericallyDense
 {α : Type*} [PseudoMetricSpace α] [hiud : IsUltrametricDist α]
 : IsSphericallyDense α ↔
@@ -175,6 +220,19 @@ private lemma fuck_chain_radius_eq (α : Type*) [PseudoMetricSpace α]
   · simp only
   · simp only
 
+/--
+Shows that a separable ultrametric space which is *spherically dense* cannot be spherically complete.
+
+More precisely, assuming:
+* `MetricSpace α`,
+* `IsUltrametricDist α` (the metric satisfies the strong triangle inequality),
+* `IsSphericallyDense α` (every closed ball properly contains a strictly smaller nonempty closed ball),
+* `Nonempty α`,
+* `SeparableSpace α`,
+
+the space fails to be `SphericallyCompleteSpace α`, i.e. there exists a decreasing chain of closed balls
+with empty intersection.
+-/
 theorem not_sphericallyCompleteSpace_of_isSphericallyDense_separable_ultrametric
 (α : Type*) [MetricSpace α]
 [hiud : IsUltrametricDist α] [hα : IsSphericallyDense α]
