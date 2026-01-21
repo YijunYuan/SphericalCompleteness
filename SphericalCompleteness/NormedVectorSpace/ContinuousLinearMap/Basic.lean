@@ -5,7 +5,8 @@ open Metric
 
 namespace SphericallyCompleteSpace
 
-instance {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+instance instSphericallyCompleteSpaceContinuousLinearMap
+{𝕜 : Type*} [NontriviallyNormedField 𝕜]
 {E : Type*} [SeminormedAddCommGroup E] [IsUltrametricDist E]
 [NormedSpace 𝕜 E]
 {F : Type*} [SeminormedAddCommGroup F] [IsUltrametricDist F]

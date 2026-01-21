@@ -5,7 +5,7 @@ open Metric
 
 namespace SphericallyCompleteSpace
 
-lemma lemma_4_4_z0 {𝕜 : Type*}
+lemma rooij_lemma_4_4_z0 {𝕜 : Type*}
   [NontriviallyNormedField 𝕜] {E : Type u_2} [SeminormedAddCommGroup E] [iude : IsUltrametricDist E]
   [NormedSpace 𝕜 E] {D : Submodule 𝕜 E}
   {a : E} (ha1 : a ∉ D)
@@ -109,7 +109,7 @@ lemma lemma_4_4_z0 {𝕜 : Type*}
     simp only [map_add]; abel
   rwa [this] at hz0
 
-lemma lemma_4_4_z0_prop {𝕜 : Type*}
+lemma rooij_lemma_4_4_z0_prop {𝕜 : Type*}
   [NontriviallyNormedField 𝕜] {E : Type u_2} [SeminormedAddCommGroup E] [iude : IsUltrametricDist E]
   [NormedSpace 𝕜 E] {D : Submodule 𝕜 E}
   {a : E} (ha1 : a ∉ D)
@@ -119,7 +119,7 @@ lemma lemma_4_4_z0_prop {𝕜 : Type*}
   {ε : ↑𝒰 → ℝ} (hε1 : ∀ (T : ↑𝒰), 0 < ε T) (hε2 : ∀ (U V : ↑𝒰), ‖U.val - V.val‖ ≤ max (ε U) (ε V))
   (hε3 : ∀ (U : ↑𝒰) (x : ↥D), ‖S x - U.val ↑x‖ ≤ ε U * ‖x‖) :
   ∀ (x : ↥D) (l : 𝕜) (U : ↑𝒰),
-  ‖S x + l • (lemma_4_4_z0 ha1 S h𝒰 hε1 hε2 hε3).choose - U.val (↑x + l • a)‖ ≤
+  ‖S x + l • (rooij_lemma_4_4_z0 ha1 S h𝒰 hε1 hε2 hε3).choose - U.val (↑x + l • a)‖ ≤
     ε U * ‖↑x + l • a‖ := by
   intro x l U
   if hl : l = 0 then
@@ -135,9 +135,9 @@ lemma lemma_4_4_z0_prop {𝕜 : Type*}
   rw [this, U.val.map_smul, ← smul_add, ← smul_sub, norm_smul, norm_smul, ← mul_assoc]
   nth_rw 3 [mul_comm]
   rw [mul_assoc, mul_le_mul_iff_of_pos_left <| norm_pos_iff.mpr hl]
-  exact (lemma_4_4_z0 ha1 S h𝒰 hε1 hε2 hε3).choose_spec (l⁻¹ • x) U
+  exact (rooij_lemma_4_4_z0 ha1 S h𝒰 hε1 hε2 hε3).choose_spec (l⁻¹ • x) U
 
-noncomputable def lemma_4_4_T {𝕜 : Type*}
+noncomputable def rooij_lemma_4_4_T {𝕜 : Type*}
   [NontriviallyNormedField 𝕜] {E : Type u_2} [SeminormedAddCommGroup E] [iude : IsUltrametricDist E]
   [NormedSpace 𝕜 E] {D : Submodule 𝕜 E}
   {a : E} (ha1 : a ∉ D)
@@ -149,9 +149,10 @@ noncomputable def lemma_4_4_T {𝕜 : Type*}
   (D + Submodule.span 𝕜 {a}) → F := fun M => by
     have := Submodule.mem_sup.1 M.prop
     let lambda := (Submodule.mem_span_singleton.1 this.choose_spec.2.choose_spec.1).choose
-    use S ⟨this.choose, this.choose_spec.1⟩ + lambda • (lemma_4_4_z0 ha1 S h𝒰 hε1 hε2 hε3).choose
+    use S ⟨this.choose, this.choose_spec.1⟩ +
+      lambda • (rooij_lemma_4_4_z0 ha1 S h𝒰 hε1 hε2 hε3).choose
 
-noncomputable def lemma_4_4_T_linear {𝕜 : Type*}
+noncomputable def rooij_lemma_4_4_T_linear {𝕜 : Type*}
   [NontriviallyNormedField 𝕜] {E : Type u_2} [SeminormedAddCommGroup E] [iude : IsUltrametricDist E]
   [NormedSpace 𝕜 E] {D : Submodule 𝕜 E}
   {a : E} (ha1 : a ∉ D)
@@ -160,10 +161,10 @@ noncomputable def lemma_4_4_T_linear {𝕜 : Type*}
   (S : ↥D →L[𝕜] F) {𝒰 : Set (E →L[𝕜] F)} (h𝒰 : 𝒰.Nonempty)
   {ε : ↑𝒰 → ℝ} (hε1 : ∀ (T : ↑𝒰), 0 < ε T) (hε2 : ∀ (U V : ↑𝒰), ‖U.val - V.val‖ ≤ max (ε U) (ε V))
   (hε3 : ∀ (U : ↑𝒰) (x : ↥D), ‖S x - U.val ↑x‖ ≤ ε U * ‖x‖) :
-  IsLinearMap 𝕜 (lemma_4_4_T ha1 S h𝒰 hε1 hε2 hε3) where
+  IsLinearMap 𝕜 (rooij_lemma_4_4_T ha1 S h𝒰 hε1 hε2 hε3) where
   map_add x1 x2 := by
     have hadd := (Submodule.mem_sup.1 (x1 + x2).prop).choose_spec.2.choose_spec.2
-    unfold lemma_4_4_T
+    unfold rooij_lemma_4_4_T
     simp only
     have := eq_and_eq_of_add_eq_add_of_not_mem_submodule_span_singleton ha1
       (Submodule.mem_sup.1 (x1 + x2).prop).choose
@@ -218,7 +219,7 @@ noncomputable def lemma_4_4_T_linear {𝕜 : Type*}
       simp_all only [Subtype.forall, le_sup_iff, AddSubgroupClass.coe_norm,
       Submodule.add_eq_sup, Submodule.coe_add, implies_true, ne_eq]
   map_smul k m := by
-    unfold lemma_4_4_T
+    unfold rooij_lemma_4_4_T
     simp only
     have stupid : ∀ a b c d : F, a = b → c = d → a + c = b + d := by
       intro a b c d hab hcd
@@ -257,7 +258,7 @@ noncomputable def lemma_4_4_T_linear {𝕜 : Type*}
         simp only [hc, zero_mem]
       exact smul_left_injective _ ha this.2
 
-noncomputable def lemma_4_4_T_boundedlinear {𝕜 : Type*}
+noncomputable def rooij_lemma_4_4_T_boundedlinear {𝕜 : Type*}
   [NontriviallyNormedField 𝕜] {E : Type u_2} [SeminormedAddCommGroup E] [iude : IsUltrametricDist E]
   [NormedSpace 𝕜 E] {D : Submodule 𝕜 E}
   {a : E} (ha1 : a ∉ D)
@@ -266,26 +267,26 @@ noncomputable def lemma_4_4_T_boundedlinear {𝕜 : Type*}
   (S : ↥D →L[𝕜] F) {𝒰 : Set (E →L[𝕜] F)} (h𝒰 : 𝒰.Nonempty)
   {ε : ↑𝒰 → ℝ} (hε1 : ∀ (T : ↑𝒰), 0 < ε T) (hε2 : ∀ (U V : ↑𝒰), ‖U.val - V.val‖ ≤ max (ε U) (ε V))
   (hε3 : ∀ (U : ↑𝒰) (x : ↥D), ‖S x - U.val ↑x‖ ≤ ε U * ‖x‖) :
-  IsBoundedLinearMap 𝕜 (lemma_4_4_T ha1 S h𝒰 hε1 hε2 hε3) where
-  map_add := (lemma_4_4_T_linear ha1 S h𝒰 hε1 hε2 hε3).map_add
-  map_smul := (lemma_4_4_T_linear ha1 S h𝒰 hε1 hε2 hε3).map_smul
+  IsBoundedLinearMap 𝕜 (rooij_lemma_4_4_T ha1 S h𝒰 hε1 hε2 hε3) where
+  map_add := (rooij_lemma_4_4_T_linear ha1 S h𝒰 hε1 hε2 hε3).map_add
+  map_smul := (rooij_lemma_4_4_T_linear ha1 S h𝒰 hε1 hε2 hε3).map_smul
   bound := by
     use max (ε ⟨h𝒰.some,h𝒰.some_mem⟩) ‖h𝒰.some‖
     refine ⟨lt_max_of_lt_left <| hε1 _, fun x => ?_⟩
-    unfold lemma_4_4_T
+    unfold rooij_lemma_4_4_T
     simp only
-    have tt := (lemma_4_4_z0_prop ha1 S h𝒰 hε1 hε2 hε3)
+    have tt := (rooij_lemma_4_4_z0_prop ha1 S h𝒰 hε1 hε2 hε3)
       ⟨(Submodule.mem_sup.1 x.prop).choose, (Submodule.mem_sup.1 x.prop).choose_spec.1⟩
       ((Submodule.mem_span_singleton.1
       (Submodule.mem_sup.1 x.prop).choose_spec.2.choose_spec.1).choose) ⟨h𝒰.some, h𝒰.some_mem⟩
     have : S ⟨(Submodule.mem_sup.1 x.prop).choose, (Submodule.mem_sup.1 x.prop).choose_spec.1⟩ +
       ((Submodule.mem_span_singleton.1
       (Submodule.mem_sup.1 x.prop).choose_spec.2.choose_spec.1).choose) •
-      (lemma_4_4_z0 ha1 S h𝒰 hε1 hε2 hε3).choose =
+      (rooij_lemma_4_4_z0 ha1 S h𝒰 hε1 hε2 hε3).choose =
       S ⟨(Submodule.mem_sup.1 x.prop).choose, (Submodule.mem_sup.1 x.prop).choose_spec.1⟩ +
       ((Submodule.mem_span_singleton.1
       (Submodule.mem_sup.1 x.prop).choose_spec.2.choose_spec.1).choose) •
-      (lemma_4_4_z0 ha1 S h𝒰 hε1 hε2 hε3).choose
+      (rooij_lemma_4_4_z0 ha1 S h𝒰 hε1 hε2 hε3).choose
       - h𝒰.some ((Submodule.mem_sup.1 x.prop).choose + ((Submodule.mem_span_singleton.1
       (Submodule.mem_sup.1 x.prop).choose_spec.2.choose_spec.1).choose) • a)
       + h𝒰.some ((Submodule.mem_sup.1 x.prop).choose + ((Submodule.mem_span_singleton.1
@@ -304,7 +305,7 @@ noncomputable def lemma_4_4_T_boundedlinear {𝕜 : Type*}
     · rw [this]
       exact ContinuousLinearMap.le_opNorm h𝒰.some ↑x
 
-lemma lemma_4_4_codim_1
+lemma rooij_lemma_4_4_codim_1
 (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 (E : Type*) [SeminormedAddCommGroup E] [iude : IsUltrametricDist E] [NormedSpace 𝕜 E]
 (D : Submodule 𝕜 E)
@@ -325,11 +326,11 @@ lemma lemma_4_4_codim_1
     ⟩ = S x) ∧
   (∀ U : ↑𝒰, ∀ x : E, (hx : x ∈ (D + Submodule.span 𝕜 {a})) → ‖T ⟨x, hx⟩ - U.val x‖ ≤ ε U * ‖x‖)
  := by
-  use (lemma_4_4_T_boundedlinear ha1 S h𝒰 hε1 hε2 hε3).toContinuousLinearMap
+  use (rooij_lemma_4_4_T_boundedlinear ha1 S h𝒰 hε1 hε2 hε3).toContinuousLinearMap
   constructor
   · intro x
     unfold IsBoundedLinearMap.toContinuousLinearMap IsBoundedLinearMap.toLinearMap
-      IsLinearMap.mk' lemma_4_4_T
+      IsLinearMap.mk' rooij_lemma_4_4_T
     simp only [Submodule.add_eq_sup, map_add, Subtype.forall, ContinuousLinearMap.coe_mk',
       LinearMap.coe_mk, AddHom.coe_mk]
     have : x.val ∈ D + Submodule.span 𝕜 {a} := Submodule.mem_sup_left x.prop
@@ -355,8 +356,8 @@ lemma lemma_4_4_codim_1
     exact t.1
   · intro U x hx
     unfold IsBoundedLinearMap.toContinuousLinearMap IsBoundedLinearMap.toLinearMap
-      IsLinearMap.mk' lemma_4_4_T
-    have := (lemma_4_4_z0_prop ha1 S h𝒰 hε1 hε2 hε3) ⟨(Submodule.mem_sup.1 hx).choose,
+      IsLinearMap.mk' rooij_lemma_4_4_T
+    have := (rooij_lemma_4_4_z0_prop ha1 S h𝒰 hε1 hε2 hε3) ⟨(Submodule.mem_sup.1 hx).choose,
       (Submodule.mem_sup.1 hx).choose_spec.1⟩ ((Submodule.mem_span_singleton.1
       (Submodule.mem_sup.1 hx).choose_spec.2.choose_spec.1).choose) U
     have t := (Submodule.mem_span_singleton.1
@@ -365,7 +366,7 @@ lemma lemma_4_4_codim_1
     rwa [t] at this
 
 @[ext]
-structure PartialExtension (𝕜 : Type*) [NontriviallyNormedField 𝕜]
+private structure PartialExtension (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 (E : Type*) [SeminormedAddCommGroup E] [IsUltrametricDist E] [NormedSpace 𝕜 E]
 {D : Submodule 𝕜 E}
 (F : Type*) [SeminormedAddCommGroup F] [IsUltrametricDist F]
@@ -378,7 +379,8 @@ structure PartialExtension (𝕜 : Type*) [NontriviallyNormedField 𝕜]
   hT : ∀ x : D, T ⟨x, hDM x.prop⟩ = S x
   hU : ∀ U : ↑𝒰, ∀ x : M, ‖T x- U.val x‖ ≤ (ε U) * ‖x‖
 
-instance pene (𝕜 : Type*) [NontriviallyNormedField 𝕜]
+private instance instNonemptyPartialExtension
+(𝕜 : Type*) [NontriviallyNormedField 𝕜]
 (E : Type*) [SeminormedAddCommGroup E] [IsUltrametricDist E] [NormedSpace 𝕜 E]
 {D : Submodule 𝕜 E}
 (F : Type*) [SeminormedAddCommGroup F] [IsUltrametricDist F]
@@ -389,7 +391,7 @@ instance pene (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 : Nonempty (PartialExtension 𝕜 E F S 𝒰 h𝒰 ε) :=
   Nonempty.intro { M := D, hDM := fun ⦃x⦄ a ↦ a, T := S, hT := by simp, hU := hε3 }
 
-instance (𝕜 : Type*) [NontriviallyNormedField 𝕜]
+private instance instPartialOrderPartialExtension (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 (E : Type*) [SeminormedAddCommGroup E] [IsUltrametricDist E] [NormedSpace 𝕜 E]
 {D : Submodule 𝕜 E}
 (F : Type*) [SeminormedAddCommGroup F] [IsUltrametricDist F]
@@ -420,7 +422,7 @@ instance (𝕜 : Type*) [NontriviallyNormedField 𝕜]
       ext z
       rw [← habT]
 
-theorem directed_chain (𝕜 : Type*) [NontriviallyNormedField 𝕜]
+private lemma directed_chain (𝕜 : Type*) [NontriviallyNormedField 𝕜]
   {E : Type u_2} [SeminormedAddCommGroup E] [IsUltrametricDist E] [NormedSpace 𝕜 E]
   {D : Submodule 𝕜 E} {F : Type u_3} [SeminormedAddCommGroup F] [IsUltrametricDist F]
   [NormedSpace 𝕜 F] [SphericallyCompleteSpace F] {S : ↥D →L[𝕜] F} {𝒰 : Set (E →L[𝕜] F)}
@@ -434,7 +436,7 @@ theorem directed_chain (𝕜 : Type*) [NontriviallyNormedField 𝕜]
   · cases hc1; assumption
   · cases hc2; assumption
 
-noncomputable def glued_map (𝕜 : Type*) [NontriviallyNormedField 𝕜]
+private noncomputable def glued_map (𝕜 : Type*) [NontriviallyNormedField 𝕜]
   {E : Type u_2} [SeminormedAddCommGroup E] [IsUltrametricDist E] [NormedSpace 𝕜 E]
   {D : Submodule 𝕜 E} {F : Type u_3} [SeminormedAddCommGroup F] [IsUltrametricDist F]
   [NormedSpace 𝕜 F] [SphericallyCompleteSpace F] {S : ↥D →L[𝕜] F} {𝒰 : Set (E →L[𝕜] F)}
@@ -447,7 +449,7 @@ noncomputable def glued_map (𝕜 : Type*) [NontriviallyNormedField 𝕜]
       (by apply directed_chain; repeat assumption)).1 x.2
     exact this.choose.val.T ⟨x.val,this.choose_spec⟩
 
-def islinearmap_of_glued_map (𝕜 : Type*) [NontriviallyNormedField 𝕜]
+private def islinearmap_of_glued_map (𝕜 : Type*) [NontriviallyNormedField 𝕜]
   {E : Type u_2} [SeminormedAddCommGroup E] [IsUltrametricDist E] [NormedSpace 𝕜 E]
   {D : Submodule 𝕜 E} {F : Type u_3} [SeminormedAddCommGroup F] [IsUltrametricDist F]
   [NormedSpace 𝕜 F] [SphericallyCompleteSpace F] {S : ↥D →L[𝕜] F} {𝒰 : Set (E →L[𝕜] F)}
@@ -501,7 +503,7 @@ def islinearmap_of_glued_map (𝕜 : Type*) [NontriviallyNormedField 𝕜]
       simp only [SetLike.val_smul]
       rw [t1, t2, ← Mfinal.val.T.map_smul, SetLike.mk_smul_mk]
 
-def isboundedlinearmap_of_glued_map (𝕜 : Type*) [NontriviallyNormedField 𝕜]
+private def isboundedlinearmap_of_glued_map (𝕜 : Type*) [NontriviallyNormedField 𝕜]
   {E : Type u_2} [SeminormedAddCommGroup E] [IsUltrametricDist E] [NormedSpace 𝕜 E]
   {D : Submodule 𝕜 E} {F : Type u_3} [SeminormedAddCommGroup F] [iudf : IsUltrametricDist F]
   [NormedSpace 𝕜 F] [SphericallyCompleteSpace F] {S : ↥D →L[𝕜] F}
@@ -536,7 +538,7 @@ def isboundedlinearmap_of_glued_map (𝕜 : Type*) [NontriviallyNormedField 𝕜
           · exact le_max_of_le_right <| ContinuousLinearMap.le_opNorm h𝒰.some ↑x
           · exact norm_nonneg x
 
-theorem bddAbove_of_chain_of_partial_extension (𝕜 : Type*) [NontriviallyNormedField 𝕜]
+private lemma bddAbove_of_chain_of_partial_extension (𝕜 : Type*) [NontriviallyNormedField 𝕜]
   {E : Type u_2} [SeminormedAddCommGroup E] [IsUltrametricDist E] [NormedSpace 𝕜 E]
   {D : Submodule 𝕜 E} {F : Type u_3} [SeminormedAddCommGroup F] [IsUltrametricDist F]
   [NormedSpace 𝕜 F] [SphericallyCompleteSpace F] {S : ↥D →L[𝕜] F}
@@ -603,8 +605,8 @@ lemma exists_extension_opNorm_le
 :
 ∃ (T : E →L[𝕜] F), (∀ x : D, T x = S x) ∧ (∀ U : ↑𝒰, ‖T - U.val‖ ≤ ε U)
  := by
-  rcases @zorn_le_nonempty (PartialExtension 𝕜 E F S 𝒰 h𝒰 ε) _ (pene 𝕜 E F S 𝒰 h𝒰 ε hε3
-    ) (by
+  rcases @zorn_le_nonempty (PartialExtension 𝕜 E F S 𝒰 h𝒰 ε) _
+    (instNonemptyPartialExtension 𝕜 E F S 𝒰 h𝒰 ε hε3) (by
     intro P hP hhP
     apply bddAbove_of_chain_of_partial_extension
     repeat assumption
@@ -613,7 +615,7 @@ lemma exists_extension_opNorm_le
     by_contra hc
     have : W.M < ⊤ := Ne.lt_top' fun a ↦ hc (id (Eq.symm a))
     rcases Set.exists_of_ssubset this with ⟨a, ha⟩
-    rcases lemma_4_4_codim_1 𝕜 E W.M a ha.2 F W.T 𝒰 h𝒰 ε hε1 hε2 W.hU with ⟨L, hL1, hL2⟩
+    rcases rooij_lemma_4_4_codim_1 𝕜 E W.M a ha.2 F W.T 𝒰 h𝒰 ε hε1 hε2 W.hU with ⟨L, hL1, hL2⟩
     let W' : PartialExtension 𝕜 E F S 𝒰 h𝒰 ε :=
       { M := W.M + Submodule.span 𝕜 {a}
         T := L

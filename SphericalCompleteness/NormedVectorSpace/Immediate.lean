@@ -15,7 +15,7 @@ def MaximallyComplete (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 ∀ {F : Type u} [NormedAddCommGroup F] [NormedSpace 𝕜 F] [IsUltrametricDist F]
 (f : E →ₗᵢ[𝕜] F), IsImmediate f → Function.Surjective f
 
-noncomputable def LinearIsometry.weakInv {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+private noncomputable def LinearIsometry.weakInv {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
 {F : Type*} [NormedAddCommGroup F] [NormedSpace 𝕜 F]
 (f : E →ₗᵢ[𝕜] F) : LinearMap.range f →ₗᵢ[𝕜] E where
@@ -63,7 +63,7 @@ noncomputable def LinearIsometry.weakInv {𝕜 : Type*} [NontriviallyNormedField
     exact Function.leftInverse_invFun
       (Set.rangeFactorization_injective.mpr <| LinearIsometry.injective f) x
 
-lemma norm_map_of_isImmediate {𝕜 : Type*}
+private lemma norm_map_of_isImmediate {𝕜 : Type*}
   [NontriviallyNormedField 𝕜] {E : Type u_2} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
   [IsUltrametricDist E] {F : Type u_3} [NormedAddCommGroup F] [inst_5 : NormedSpace 𝕜 F]
   [IsUltrametricDist F] {H : Type u_4} [NormedAddCommGroup H] [NormedSpace 𝕜 H]
