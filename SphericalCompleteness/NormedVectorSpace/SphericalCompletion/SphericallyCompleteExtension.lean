@@ -7,6 +7,17 @@ open Metric
 
 namespace SphericallyCompleteSpace
 
+/-!
+## The submodule `c₀`
+
+In the `ℓ∞`-type space `lp E ⊤`, the submodule `c₀ 𝕜 E` consists of those bounded
+sequences `f` with values in `E n` that *tend to `0` in norm*, i.e.
+
+`∀ ε > 0, ∃ N, ∀ n ≥ N, ‖f n‖ ≤ ε`.
+
+This is the natural analogue of the classical Banach space `c₀` of scalar-valued
+sequences, but for a family of normed spaces `E : ℕ → Type*`.
+-/
 def c₀ (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 (E : ℕ → Type*) [∀ i, NormedAddCommGroup (E i)]
 [∀ i, NormedSpace 𝕜 (E i)] : Submodule 𝕜 ↥(lp E ⊤) where
@@ -216,6 +227,16 @@ lemma quotient_norm_mk_le_of_eventually_norm_le {𝕜 : Type*} [NontriviallyNorm
   else
     simpa only [if_neg hk, add_zero] using hN k <| Nat.le_of_not_lt hk
 
+/-
+`lp E ⊤` is the `ℓ∞`-type space of bounded sequences in the family `E : ℕ → Type*`.
+
+This instance shows that the quotient by the submodule `c₀ 𝕜 E` of sequences tending to `0`
+in norm is *spherically complete* (assuming each `E i` carries an ultrametric distance).
+
+The proof follows the standard construction: choose representatives of a nested family of
+closed balls in the quotient, build a diagonal candidate in `lp E ⊤`, and verify it lies in
+all balls using ultrametric estimates and a `c₀`-correction.
+-/
 instance sphericallyCompleteSpace_lp_quotient_c₀ {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 (E : ℕ → Type*) [∀ i, NormedAddCommGroup (E i)]
 [∀ i, NormedSpace 𝕜 (E i)] [∀ i, IsUltrametricDist (E i)] :

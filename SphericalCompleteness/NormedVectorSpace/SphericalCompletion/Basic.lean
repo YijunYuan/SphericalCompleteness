@@ -149,6 +149,13 @@ SphericallyCompleteSpace (↥(exists_max_imm_ext_in_sph_comp 𝕜 E E₀ f).choo
     congr
     abel
 
+/-- The spherical completion of an ultrametric normed space is spherically complete. -/
+instance instSphericallyCompleteSpaceSphericalCompletion
+  (𝕜 : Type*) [NontriviallyNormedField 𝕜]
+  (E : Type u) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E] :
+  SphericallyCompleteSpace (SphericalCompletion 𝕜 E) := inferInstance
+
+/-- The canonical embedding into the spherical completion is an immediate extension. -/
 theorem SphericalCompletionEmbedding_isImmediate (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     (E : Type u) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E] :
     IsImmediate (SphericalCompletionEmbedding 𝕜 E) := by
@@ -166,6 +173,16 @@ theorem SphericalCompletionEmbedding_isImmediate (𝕜 : Type*) [NontriviallyNor
   · rintro ⟨_, ha⟩
     simp only [← ha, Subtype.mk.injEq, exists_prop, exists_eq_right, exists_apply_eq_apply]
 
+/--
+Minimality of the spherical completion.
+
+If `M` is a `𝕜`-submodule of `SphericalCompletion 𝕜 E` that contains the range of the canonical
+embedding `SphericalCompletionEmbedding 𝕜 E` and is itself spherically complete, then `M` must be
+the whole space.
+
+In other words, there is no proper spherically complete intermediate submodule between `E` (via its
+embedding) and its spherical completion.
+-/
 theorem sphericalCompletion_minimal (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 (E : Type u) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E] :
 ∀ M : Submodule 𝕜 (SphericalCompletion 𝕜 E),
@@ -186,6 +203,13 @@ SphericallyCompleteSpace M → M = ⊤ := by
   rw [morth_iff_forall_orth] at *
   exact fun y hy => hb1 y <| hM hy
 
+/--
+Uniqueness of the spherical completion.
+
+If `F` is spherically complete and `f : E →ₗᵢ[𝕜] F` is such that every spherically complete
+`𝕜`-submodule of `F` containing `range f` is the whole space, then `F` is (linearly) isometric to
+`SphericalCompletion 𝕜 E`.
+-/
 theorem sphericalCompletion_unique (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 {E : Type u} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
 {F : Type v} [NormedAddCommGroup F] [NormedSpace 𝕜 F] [IsUltrametricDist F]
@@ -201,6 +225,15 @@ Nonempty (SphericalCompletion 𝕜 E ≃ₗᵢ[𝕜] F) := by
     ) <| sphericallyCompleteSpace_of_isometryEquiv <| Isometry.isometryEquivOnRange T.isometry
   exact Nonempty.intro <| LinearIsometryEquiv.ofSurjective T <| LinearMap.range_eq_top.mp hf
 
+/--
+Uniqueness of the spherical completion (immediate-extension form).
+
+If `F` is spherically complete and `f : E →ₗᵢ[𝕜] F` is an immediate extension, then `F` is
+linearly isometric to `SphericalCompletion 𝕜 E`.
+
+This is a streamlined version of `sphericalCompletion_unique` where the minimality hypothesis is
+replaced by the assumption `IsImmediate f`.
+-/
 theorem sphericalCompletion_unique' (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 {E : Type u} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
 {F : Type v} [NormedAddCommGroup F] [NormedSpace 𝕜 F] [IsUltrametricDist F]
@@ -216,6 +249,13 @@ Nonempty (SphericalCompletion 𝕜 E ≃ₗᵢ[𝕜] F) := by
   exact Nonempty.intro <| (LinearIsometryEquiv.ofSurjective T <|
     LinearMap.range_eq_top.mp this).symm
 
+/-!
+## Universal property
+
+Any linear isometry `f : E →ₗᵢ[𝕜] F` into a spherically complete ultrametric space `F` uniquely
+extends along the canonical embedding `SphericalCompletionEmbedding 𝕜 E` to a linear isometry
+`T : SphericalCompletion 𝕜 E →ₗᵢ[𝕜] F`.
+-/
 theorem sphericalCompletion_universal_property (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 {E : Type u} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
 {F : Type v} [NormedAddCommGroup F] [NormedSpace 𝕜 F] [IsUltrametricDist F]
@@ -225,6 +265,12 @@ theorem sphericalCompletion_universal_property (𝕜 : Type*) [NontriviallyNorme
   exists_linearIsometry_comp_eq_of_isImmediate (SphericalCompletionEmbedding 𝕜 E)
     (SphericalCompletionEmbedding_isImmediate 𝕜 E) f
 
+/--
+`E` is spherically complete if and only if it is maximally complete.
+
+Here `MaximallyComplete 𝕜 E` means that `E` admits no proper immediate extension (as a `𝕜`-normed
+space with ultrametric distance).
+-/
 theorem sphericallyComplete_iff_maximallyComplete (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 (E : Type*) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E] :
 SphericallyCompleteSpace E ↔ MaximallyComplete 𝕜 E := by
@@ -253,6 +299,13 @@ SphericallyCompleteSpace E ↔ MaximallyComplete 𝕜 E := by
     exact sphericallyCompleteSpace_of_isometryEquiv
       (LinearIsometryEquiv.ofSurjective _ h).symm.toIsometryEquiv
 
+/--
+`E` is spherically complete if and only if the canonical embedding
+`SphericalCompletionEmbedding 𝕜 E : E →ₗᵢ[𝕜] SphericalCompletion 𝕜 E` is surjective.
+
+Equivalently, `E` is spherically complete iff it already coincides (up to linear isometry) with
+its spherical completion.
+-/
 theorem sphericallyComplete_iff_eq_sphericalCompletion (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 (E : Type u) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E] :
 SphericallyCompleteSpace E ↔ Function.Surjective

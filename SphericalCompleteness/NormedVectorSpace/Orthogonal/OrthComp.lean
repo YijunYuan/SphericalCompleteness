@@ -190,6 +190,13 @@ noncomputable def OrthProj (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 E →L[𝕜] ↥F :=
 (exists_orthproj_of_spherically_complete_space 𝕜 F).choose
 
+/--
+The orthogonal projection `OrthProj 𝕜 F` has operator norm at most `1`.
+
+This is an immediate consequence of the construction of `OrthProj` via
+`exists_orthproj_of_spherically_complete_space`, which provides a continuous linear
+projection onto `F` satisfying `‖T‖ ≤ 1`.
+-/
 theorem norm_OrthProj_le_one (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 {E : Type*} [NormedAddCommGroup E] [iud : IsUltrametricDist E]
 [NormedSpace 𝕜 E]
@@ -198,6 +205,15 @@ theorem norm_OrthProj_le_one (𝕜 : Type*) [NontriviallyNormedField 𝕜]
   unfold OrthProj
   exact (exists_orthproj_of_spherically_complete_space 𝕜 F).choose_spec.2
 
+/--
+`OrthProj 𝕜 F` restricts to the identity on the submodule `F`.
+
+Concretely, if `a : E` satisfies `a ∈ F`, then applying the orthogonal projection onto `F`
+returns `a`.
+
+This is inherited from the choice of `OrthProj` in
+`exists_orthproj_of_spherically_complete_space`.
+-/
 theorem OrthProj_id (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 {E : Type*} [NormedAddCommGroup E] [iud : IsUltrametricDist E]
 [NormedSpace 𝕜 E]
@@ -206,6 +222,13 @@ theorem OrthProj_id (𝕜 : Type*) [NontriviallyNormedField 𝕜]
   unfold OrthProj
   exact (exists_orthproj_of_spherically_complete_space 𝕜 F).choose_spec.1
 
+/--
+`OrthComp 𝕜 F` is definitionally the kernel of the chosen orthogonal projection `OrthProj 𝕜 F`.
+
+This lemma is just an unfolding of the noncomputable definitions:
+* `OrthComp 𝕜 F := ker (exists_orthproj_of_spherically_complete_space 𝕜 F).choose`,
+* `OrthProj 𝕜 F := (exists_orthproj_of_spherically_complete_space 𝕜 F).choose`.
+-/
 theorem orthcomp_eq_ker_OrthProj (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 {E : Type*} [NormedAddCommGroup E] [iud : IsUltrametricDist E]
 [NormedSpace 𝕜 E]
@@ -214,6 +237,15 @@ OrthComp 𝕜 F = LinearMap.ker (OrthProj 𝕜 F) := by
   unfold OrthComp OrthProj
   rfl
 
+/--
+`OrthProj 𝕜 F` is idempotent.
+
+More precisely, for every `x : E` we have
+`OrthProj 𝕜 F (OrthProj 𝕜 F x) = OrthProj 𝕜 F x`.
+
+This follows from the fact that `OrthProj 𝕜 F` restricts to the identity on `F`, and
+`OrthProj 𝕜 F x` is by definition an element of `F`.
+-/
 theorem orthproj_idempotent (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 {E : Type*} [NormedAddCommGroup E] [iud : IsUltrametricDist E]
 [NormedSpace 𝕜 E]

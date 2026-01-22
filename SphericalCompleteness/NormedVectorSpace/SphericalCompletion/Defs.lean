@@ -6,6 +6,16 @@ open Metric
 
 namespace SphericallyCompleteSpace
 
+/--
+`imm_ext_in_sph_comp E E₀ f` is the set of `𝕜`-submodules `M ≤ E₀` such that:
+
+* the range of the linear isometry `f : E →ₗᵢ[𝕜] E₀` is contained in `M`, and
+* the induced linear isometry `(LinearMap.range f) →ₗᵢ[𝕜] M` is an *immediate* extension
+  (in the sense of `IsImmediate`).
+
+This is the collection of candidate intermediate spaces used to build a maximal immediate
+extension inside a fixed spherically complete ambient space.
+-/
 def imm_ext_in_sph_comp {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 (E : Type*) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
 (E₀ : Type*) [NormedAddCommGroup E₀] [NormedSpace 𝕜 E₀] [IsUltrametricDist E₀]
@@ -19,6 +29,11 @@ def imm_ext_in_sph_comp {𝕜 : Type*} [NontriviallyNormedField 𝕜]
                   norm_map' _ := rfl} : LinearMap.range f →ₗᵢ[𝕜] M)
   }
 
+/--
+The set of candidate intermediate spaces for immediate extensions is nonempty.
+Specifically, the range of `f` itself is always a candidate, with the identity map
+serving as an immediate extension.
+-/
 lemma imm_ext_nonempty {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 (E : Type*) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
 (E₀ : Type*) [NormedAddCommGroup E₀] [NormedSpace 𝕜 E₀] [IsUltrametricDist E₀]
@@ -35,6 +50,17 @@ lemma imm_ext_nonempty {𝕜 : Type*} [NontriviallyNormedField 𝕜]
   simp only [SetLike.mem_coe, LinearMap.mem_range, LinearIsometry.coe_mk, LinearMap.coe_mk,
     AddHom.coe_mk, exists_eq]
 
+/-
+ Existence of a maximal *immediate* intermediate space inside a fixed spherically complete ambient
+ space.
+
+ Concretely, for a linear isometry `f : E →ₗᵢ[𝕜] E₀` into a spherically complete space `E₀`, we
+ consider the set `imm_ext_in_sph_comp E E₀ f` of submodules `M ≤ E₀` that contain the range of `f`
+ and for which the induced inclusion `LinearMap.range f →ₗᵢ[𝕜] M` is an immediate extension.
+
+ This theorem applies Zorn's lemma (on the poset of such submodules ordered by `≤`) to produce a
+ maximal element, which is later used to define the `SphericalCompletion` of `E`.
+ -/
 theorem exists_max_imm_ext_in_sph_comp (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 (E : Type*) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
 (E₀ : Type*) [NormedAddCommGroup E₀] [NormedSpace 𝕜 E₀] [IsUltrametricDist E₀]
@@ -116,12 +142,31 @@ theorem exists_max_imm_ext_in_sph_comp (𝕜 : Type*) [NontriviallyNormedField �
     intro N hN
     exact (hN ⟨M, hM⟩) hz
 
-abbrev SphericalCompletion (𝕜 : Type*) [NontriviallyNormedField 𝕜]
-(E : Type u) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
-: Type u :=
-  ↥(exists_max_imm_ext_in_sph_comp 𝕜 E
-    (↥(lp (fun _ ↦ E) ⊤) ⧸ c₀ 𝕜 fun _ ↦ E) (sphericallyCompleteExtension 𝕜 E)).choose
+/--
+`SphericalCompletion 𝕜 E` is a (non-canonical) choice of a maximal *immediate* extension of `E`
+inside a fixed spherically complete ambient space.
 
+More precisely, we first embed `E` by a linear isometry
+`sphericallyCompleteExtension 𝕜 E : E →ₗᵢ[𝕜] (lp (fun _ ↦ E) ⊤ ⧸ c₀ 𝕜 (fun _ ↦ E))` into a
+spherically complete space. We then apply `exists_max_imm_ext_in_sph_comp` to obtain a submodule
+of the ambient space that contains the range of this embedding and is maximal among those for
+which the induced inclusion is an immediate extension.
+
+The underlying type of this chosen maximal submodule is defined to be `SphericalCompletion 𝕜 E`.
+-/
+abbrev SphericalCompletion (𝕜 : Type*) [NontriviallyNormedField 𝕜]
+    (E : Type u) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E] : Type u :=
+  ↥(exists_max_imm_ext_in_sph_comp 𝕜 E
+      (↥(lp (fun _ ↦ E) ⊤) ⧸ c₀ 𝕜 fun _ ↦ E) (sphericallyCompleteExtension 𝕜 E)).choose
+
+/--
+`SphericalCompletionEmbedding 𝕜 E` is the canonical linear isometric embedding of `E` into the
+chosen spherical completion `SphericalCompletion 𝕜 E`.
+
+It is obtained by composing the fixed linear isometry `sphericallyCompleteExtension 𝕜 E : E →ₗᵢ[𝕜] E₀`
+into a spherically complete ambient space `E₀` with the inclusion of `LinearMap.range` into the
+maximal immediate intermediate submodule selected in the definition of `SphericalCompletion`.
+-/
 abbrev SphericalCompletionEmbedding (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 (E : Type u) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
 : E →ₗᵢ[𝕜] SphericalCompletion 𝕜 E := {
@@ -133,21 +178,23 @@ abbrev SphericalCompletionEmbedding (𝕜 : Type*) [NontriviallyNormedField 𝕜
     norm_map' x := by simp
   }
 
-instance {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+instance instNormedAddCommGroupSphericalCompletion {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 (E : Type*) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
 (E₀ : Type*) [NormedAddCommGroup E₀] [NormedSpace 𝕜 E₀] [IsUltrametricDist E₀]
 [SphericallyCompleteSpace E₀]
 (f : E →ₗᵢ[𝕜] E₀) :
 NormedAddCommGroup (↥(exists_max_imm_ext_in_sph_comp 𝕜 E E₀ f).choose) := inferInstance
 
-noncomputable instance {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+noncomputable instance instNormedSpaceSphericalCompletion
+{𝕜 : Type*} [NontriviallyNormedField 𝕜]
 (E : Type*) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
 (E₀ : Type*) [NormedAddCommGroup E₀] [NormedSpace 𝕜 E₀] [IsUltrametricDist E₀]
 [SphericallyCompleteSpace E₀]
 (f : E →ₗᵢ[𝕜] E₀) :
 NormedSpace 𝕜 (↥(exists_max_imm_ext_in_sph_comp 𝕜 E E₀ f).choose) := inferInstance
 
-instance {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+instance instIsUltrametricDistSphericalCompletion
+{𝕜 : Type*} [NontriviallyNormedField 𝕜]
 (E : Type*) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
 (E₀ : Type*) [NormedAddCommGroup E₀] [NormedSpace 𝕜 E₀] [IsUltrametricDist E₀]
 [SphericallyCompleteSpace E₀]
