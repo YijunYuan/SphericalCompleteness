@@ -1,4 +1,4 @@
-# sphcomp_raw
+# SphericalCompleteness
 
 ## GitHub configuration
 
