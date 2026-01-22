@@ -94,7 +94,8 @@ instance instIsUltrametricDistQuotient
         · rw [← add_assoc, (by grind only : a.out - c.out + ((a - c).out - (a.out - c.out)) + x =
             (a - c).out + x)]
       · intro hz
-        simp at *
+        simp only [QuotientAddGroup.mk'_apply, Submodule.coe_toAddSubgroup, Set.mem_image,
+          SetLike.mem_coe] at *
         rcases hz with ⟨x, hx, hz⟩
         have : (a.out - c.out) - (a - c).out ∈ F := by
           refine (Submodule.Quotient.eq F).mp ?_
@@ -113,8 +114,7 @@ instance instIsUltrametricDistQuotient
           sInf (((fun x : E × E ↦
             ‖(a.out -b.out + x.1) - (c.out - b.out + x.2)‖) '' (↑F ×ˢ ↑F)) : Set ℝ) := by
       apply le_csInf
-      · simp
-        exact Submodule.nonempty F
+      · simpa only [Set.image_nonempty, Set.prod_nonempty_iff, and_self] using Submodule.nonempty F
       · intro b hb
         simp only [Set.mem_image, Set.mem_prod, SetLike.mem_coe, Prod.exists] at hb
         rcases hb with ⟨p, q, hp, hq, hh⟩
@@ -280,7 +280,7 @@ theorem norm_eq_of_norm_sub_lt_left {S : Type*} [SeminormedAddGroup S] [IsUltram
 theorem norm_eq_of_norm_sub_lt_right {S : Type*} [SeminormedAddGroup S] [IsUltrametricDist S]
 {x y : S} (h : ‖x - y‖ < ‖y‖) : ‖x‖ = ‖y‖ := by
   rw [← norm_neg] at h
-  simp at h
+  simp only [neg_sub] at h
   exact Eq.symm (norm_eq_of_norm_sub_lt_left h)
 
 theorem norm_eq_of_norm_add_lt_left {S : Type*} [SeminormedAddGroup S] [IsUltrametricDist S]

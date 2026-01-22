@@ -41,7 +41,9 @@ lemma imm_ext_nonempty {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 (f : E →ₗᵢ[𝕜] E₀)
 : (imm_ext_in_sph_comp E E₀ f).Nonempty := by
   use LinearMap.range f
-  simp [imm_ext_in_sph_comp, IsImmediate, MOrth]
+  simp only [imm_ext_in_sph_comp, IsImmediate, MOrth, AddSubgroupClass.coe_norm, Subtype.forall,
+    Submodule.mk_eq_zero, Set.mem_setOf_eq, LinearMap.mem_range, Subtype.coe_eta,
+    forall_exists_index, le_refl, exists_true_left]
   intro a x hc hh
   suffices hh : ‖a‖ = 0 by
     exact norm_eq_zero.mp hh
@@ -77,7 +79,7 @@ theorem exists_max_imm_ext_in_sph_comp (𝕜 : Type*) [NontriviallyNormedField �
   else
   use ⨆ i, (fun x => x.val : C → Submodule 𝕜 E₀) i
   constructor
-  · simp [imm_ext_in_sph_comp]
+  · simp only [imm_ext_in_sph_comp, Set.mem_setOf_eq]
     use (by
       intro z hz
       rw [Submodule.mem_iSup]
@@ -114,7 +116,9 @@ theorem exists_max_imm_ext_in_sph_comp (𝕜 : Type*) [NontriviallyNormedField �
         simp only [← h, dist_nonneg]
       · rcases Set.mem_range.1 w.prop with ⟨v,hv⟩
         simp only [LinearIsometry.coe_mk, LinearMap.coe_mk, AddHom.coe_mk] at hv
-        simp [← hv]
+        simp only [SetLike.coe_sort_coe, ← hv, Set.mem_range, Subtype.exists, LinearMap.mem_range,
+          LinearIsometry.coe_mk, LinearMap.coe_mk, AddHom.coe_mk, exists_prop, Subtype.mk.injEq,
+          exists_eq_right, exists_and_left, exists_exists_eq_and]
         rcases LinearMap.mem_range.1 v.prop with ⟨u,hu⟩
         use u
         rw [hu]
@@ -131,7 +135,9 @@ theorem exists_max_imm_ext_in_sph_comp (𝕜 : Type*) [NontriviallyNormedField �
         simp only [← h, dist_nonneg]
       · rcases Set.mem_range.1 w.prop with ⟨v,hv⟩
         simp only [LinearIsometry.coe_mk, LinearMap.coe_mk, AddHom.coe_mk] at hv
-        simp [← hv]
+        simp only [SetLike.coe_sort_coe, ← hv, Set.mem_range, Subtype.exists, LinearMap.mem_range,
+          LinearIsometry.coe_mk, LinearMap.coe_mk, AddHom.coe_mk, exists_prop, Subtype.mk.injEq,
+          exists_eq_right, exists_and_left, exists_exists_eq_and]
         rcases LinearMap.mem_range.1 v.prop with ⟨u,hu⟩
         use u
         rw [hu]

@@ -35,19 +35,21 @@ def c₀ (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     refine le_trans (norm_add_le _ _) ?_
     linarith
   zero_mem' := by
-    simp
+    simp only [gt_iff_lt, ge_iff_le, Set.mem_setOf_eq, ZeroMemClass.coe_zero, Pi.zero_apply,
+      norm_zero]
     intro e he
     use 0
-    simpa using le_of_lt he
+    simpa only [zero_le, forall_const] using le_of_lt he
   smul_mem' := by
     intro c x hx
     if hc : c = 0 then
-      simp [hc]
+      simp only [gt_iff_lt, ge_iff_le, hc, zero_smul, Set.mem_setOf_eq, ZeroMemClass.coe_zero,
+        Pi.zero_apply, norm_zero]
       intro e he
       use 0
-      simpa using le_of_lt he
+      simpa only [zero_le, forall_const] using le_of_lt he
     else
-    simp at *
+    simp only [gt_iff_lt, ge_iff_le, Set.mem_setOf_eq, lp.coeFn_smul, Pi.smul_apply] at *
     intro ε hε
     rcases hx (ε / ‖c‖) (by
       simp_all only [norm_pos_iff, ne_eq, not_false_eq_true, div_pos_iff_of_pos_left]
@@ -374,7 +376,7 @@ noncomputable instance (𝕜 : Type*) [NontriviallyNormedField 𝕜]
    NormedAddCommGroup (↥(lp (fun _ ↦ E) ⊤) ⧸ c₀ 𝕜 fun _ ↦ E):= by
   have : IsClosed (↑(c₀ 𝕜 fun x ↦ E).carrier) := by
     apply IsSeqClosed.isClosed
-    simp [IsSeqClosed]
+    simp only [IsSeqClosed, Submodule.carrier_eq_coe, SetLike.mem_coe, Subtype.forall]
     intro seq lim hlim hseq htend
     rw [NormedAddCommGroup.tendsto_atTop] at htend
     intro ε hε
@@ -383,7 +385,8 @@ noncomputable instance (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     specialize hN N (le_refl N)
     rw [lp.norm_eq_ciSup] at hN
     specialize hseq N
-    simp [c₀] at hseq
+    simp only [c₀, gt_iff_lt, ge_iff_le, Submodule.mem_mk, AddSubmonoid.mem_mk,
+      AddSubsemigroup.mem_mk, Set.mem_setOf_eq] at hseq
     specialize hseq (ε / 2) (by linarith)
     rcases hseq with ⟨M, hM⟩
     use M.max N
@@ -398,14 +401,14 @@ noncomputable instance (𝕜 : Type*) [NontriviallyNormedField 𝕜]
       refine lp.norm_apply_le_norm ?_ (seq N - ⟨lim, hlim⟩) a
       exact ENNReal.top_ne_zero
       )).1 (le_of_lt hN) n
-    simp at this
-    simp
+    simp only [AddSubgroupClass.coe_sub, Pi.sub_apply] at this
+    simp only [ge_iff_le]
     replace := add_le_add hM this
     rw [norm_sub_rev, add_comm] at this
-    simp at this
+    simp only [add_halves] at this
     refine le_trans ?_ this
     exact norm_le_norm_sub_add _ _
-  simp at this
+  simp only [Submodule.carrier_eq_coe] at this
   infer_instance
 
 end SphericallyCompleteSpace

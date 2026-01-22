@@ -22,7 +22,7 @@ private lemma exists_rat_pow_p_norm_between (a b : ℝ) (ha : 0 ≤ a) (hab : a 
   repeat rw [this]
   rw [Padic.norm_p]
   have : Real.logb ((↑p)⁻¹) b < Real.logb ((↑p)⁻¹) a' := by
-    simp
+    simp only [Real.logb_inv_base, neg_lt_neg_iff]
     refine Real.logb_lt_logb ?_ ha' ha'b
     simpa only [Nat.one_lt_cast] using hp.out.one_lt
   rcases exists_rat_btwn this with ⟨c, hc1, hc2⟩
@@ -74,7 +74,7 @@ noncomputable instance instDenselyNormedFieldPadicAlgCl : DenselyNormedField (Pa
       simp only [hz', norm_zpow]
     replace hz' : ‖z‖ = ‖(p : PadicAlgCl p)‖ ^ (↑r : ℝ) := by
       rw [← Rat.num_div_den r]
-      simp
+      simp only [Rat.cast_div, Rat.cast_intCast, Rat.cast_natCast]
       apply_fun (fun x => x ^ (r.den : ℝ)⁻¹) at hz'
       repeat rw [← Real.rpow_natCast] at hz'
       rw [Real.rpow_rpow_inv (norm_nonneg z) (by simp)] at hz'
@@ -99,7 +99,7 @@ theorem QAlg_in_QpAlgCl_is_countable (p : ℕ) [hp : Fact (Nat.Prime p)] :
   let S := {z : PadicAlgCl p | IsAlgebraic ℚ z}
   have : S ⊆ ⋃ (f : {g : ℚ[X] // g ≠ 0}), {z : PadicAlgCl p | aeval z f.val = 0} := by
     intro z hz
-    simp
+    simp only [ne_eq, Set.mem_iUnion, Set.mem_setOf_eq, Subtype.exists, exists_prop]
     rcases hz with ⟨f, hfne, hfz⟩
     use f
   replace := le_trans (Cardinal.mk_le_mk_of_subset this) <| Cardinal.mk_iUnion_le
@@ -109,7 +109,7 @@ theorem QAlg_in_QpAlgCl_is_countable (p : ℕ) [hp : Fact (Nat.Prime p)] :
   refine le_trans this <| le_trans (Cardinal.mul_le_max _ _) <| max_le (max_le ?_ ?_) (le_refl _)
   · exact le_trans (Cardinal.mk_subtype_le _) <| by simp
   · refine ciSup_le' <| fun f => ?_
-    simp
+    simp only [ne_eq, Set.coe_setOf, Cardinal.le_aleph0_iff_subtype_countable]
     refine Set.Finite.countable ?_
     have t : ((Polynomial.map (algebraMap ℚ ℚ_[p])) f.val).toAlgCl ≠ 0 := by
       simpa using f.prop
@@ -147,7 +147,7 @@ instance instSeparableSpacePadicAlgCl : TopologicalSpace.SeparableSpace (PadicAl
     have hfg : f.natDegree = g.natDegree := by
       have := Polynomial.ofFn_natDegree_lt (by simp) fun_g
       rw [Nat.lt_add_one_iff] at this
-      simp [g]
+      simp only [natDegree_map, g]
       refine Eq.symm <| eq_of_le_of_not_lt this ?_
       by_contra hc
       have this' := hgg f.natDegree <| le_refl _
@@ -167,7 +167,7 @@ instance instSeparableSpacePadicAlgCl : TopologicalSpace.SeparableSpace (PadicAl
           rw [coeff_eq_zero_of_natDegree_lt <| Polynomial.natDegree_eq_of_degree_eq hfg ▸ hi]
           simpa using le_of_lt hδpos
         else
-        simp at hi
+        simp only [gt_iff_lt, not_lt] at hi
         rw [hgg i hi]
         unfold fun_g
         if hii : i = f.natDegree then
@@ -179,7 +179,7 @@ instance instSeparableSpacePadicAlgCl : TopologicalSpace.SeparableSpace (PadicAl
     use β
     constructor
     · simpa [dist_comm, dist_eq_norm] using lt_of_le_of_lt hβα <| by linarith
-    · simp
+    · simp only [Set.mem_setOf_eq]
       use g'
       constructor
       · have : g ≠ 0 := Monic.ne_zero hg

@@ -13,7 +13,7 @@ private lemma orth_of_orth {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     simpa only [ge_iff_le, dist_zero_right] using this
   · by_contra hc
     rcases (infDist_lt_iff (by use 0; simp)).1 hc with ⟨z, hz1, hz2⟩
-    simp at hz1
+    simp only [SetLike.mem_coe] at hz1
     rcases Submodule.mem_span_singleton.1 hz1 with ⟨a, ha⟩
     rw [← ha] at hz2
     if ha' : a = 0 then
@@ -67,7 +67,7 @@ lemma orth_iff {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     apply max_le
     · rw [← sub_neg_eq_add, ← dist_eq_norm]
       refine le_trans ?_ <| infDist_le_dist_of_mem (by
-        simp
+        simp only [neg_mem_iff]
         refine Submodule.mem_span_singleton.mpr ?_
         use b : - (b • y) ∈ 𝕜 ∙ y)
       have := infDist_smul₀ hab.1 (Submodule.span 𝕜 {y} : Set E) x
@@ -76,7 +76,7 @@ lemma orth_iff {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     · have : a • x + b • y = b • y - - (a • x) := by abel
       rw [this, ← dist_eq_norm]
       refine le_trans ?_ <| infDist_le_dist_of_mem (by
-        simp
+        simp only [neg_mem_iff]
         refine Submodule.mem_span_singleton.mpr ?_
         use a : - (a • x) ∈ 𝕜 ∙ x)
       have := infDist_smul₀ hab.2 (Submodule.span 𝕜 {x} : Set E) y

@@ -85,7 +85,7 @@ lemma stdGaussNorm_eq_zero_iff {𝕜 : Type u_1} [hn : NontriviallyNormedField �
   refine ⟨fun h => ?_, fun h => by simp [h]⟩
   unfold stdGaussNorm gaussNorm at h
   if hh : f.support.Nonempty then
-    simp [hh] at h
+    simp only [hh, ↓reduceDIte, one_pow, mul_one] at h
     have := (Finset.sup'_le_iff hh _).1 <| le_of_eq h
     replace : ∀ b ∈ f.support, f.coeff b = 0 :=
       fun b hb => norm_eq_zero.mp <| eq_of_le_of_ge (this b hb) (norm_nonneg _)
@@ -112,12 +112,12 @@ lemma le_gaussNorm_iff_coeff_le {𝕜 : Type u_1} [hn : NontriviallyNormedField 
   f.stdGaussNorm ≤ r ↔ ∀ i : ℕ, ‖f.coeff i‖ ≤ r := by
   unfold stdGaussNorm gaussNorm
   if h : f.support.Nonempty then
-    simp [h]
+    simp only [h, ↓reduceDIte, one_pow, mul_one, Finset.sup'_le_iff, mem_support_iff, ne_eq]
     refine ⟨fun hh i => ?_, fun hh i hi ↦ hh i⟩
     if ht : f.coeff i = 0 then simpa [ht]
     else exact hh i ht
   else
-  simp [h, hr]
+  simp only [h, ↓reduceDIte, hr, true_iff]
   intro i
   suffices tt : f.coeff i = 0 by simpa [tt]
   exact notMem_support_iff.mp <| forall_not_of_not_exists h i
@@ -154,9 +154,10 @@ lemma one_le_stdGaussNorm_of_monic {𝕜 : Type u_1} [hn : NontriviallyNormedFie
   have : f.support.Nonempty := by
     refine support_nonempty.mpr ?_
     exact Monic.ne_zero hf
-  simp [this]
+  simp only [this, ↓reduceDIte, one_pow, mul_one, Finset.le_sup'_iff, mem_support_iff, ne_eq]
   use f.natDegree
-  simp [hf]
+  simp only [coeff_natDegree, hf, Monic.leadingCoeff, one_ne_zero, not_false_eq_true, norm_one,
+    le_refl, and_self]
 
 /--
 If a polynomial `f : 𝕜[X]` over a field is monic and has a root in the algebraic closure
@@ -220,10 +221,10 @@ theorem spectralNorm_le_gaussNorm {𝕜 : Type u_1} [hn : NontriviallyNormedFiel
   (hfz : eval α f.toAlgCl = 0) :
   spectralNorm 𝕜 (AlgebraicClosure 𝕜) α ≤ f.stdGaussNorm := by
   if hx : ¬ 1 ≤ spectralNorm 𝕜 (AlgebraicClosure 𝕜) α then
-    simp at hx
+    simp only [not_le] at hx
     exact le_of_lt <| lt_of_lt_of_le hx (one_le_stdGaussNorm_of_monic f hf)
   else
-  simp at hx
+  simp only [not_le, not_lt] at hx
   suffices hh : (spectralNorm 𝕜 (AlgebraicClosure 𝕜) α) ^ f.natDegree ≤
     f.stdGaussNorm * (spectralNorm 𝕜 (AlgebraicClosure 𝕜) α) ^ (f.natDegree - 1) by
     have := one_le_stdGaussNorm_of_monic f hf
@@ -238,7 +239,8 @@ theorem spectralNorm_le_gaussNorm {𝕜 : Type u_1} [hn : NontriviallyNormedFiel
       (fun a ↦ hα (id (Eq.symm a)))) (f.natDegree - 1)
   have t := pos_deg_of_monic_of_root f hf α hfz
   rw [eval_eq_sum_range, Finset.sum_range_succ_comm] at hfz
-  simp [hf] at hfz
+  simp only [hf, Monic.natDegree_map, coeff_map, coeff_natDegree, Monic.leadingCoeff, map_one,
+    one_mul] at hfz
   rw [add_eq_zero_iff_eq_neg, ← Finset.sum_neg_distrib] at hfz
   apply_fun spectralNorm 𝕜 (AlgebraicClosure 𝕜) at hfz
   have : IsPowMul (spectralNorm 𝕜 (AlgebraicClosure 𝕜)) := isPowMul_spectralNorm
@@ -257,11 +259,12 @@ theorem spectralNorm_le_gaussNorm {𝕜 : Type u_1} [hn : NontriviallyNormedFiel
       simpa [hff] using stdGaussNorm_nonneg f
     else
     unfold Polynomial.stdGaussNorm Polynomial.gaussNorm
-    simp [support_nonempty.mpr <| Monic.ne_zero hf]
+    simp only [support_nonempty.mpr <| Monic.ne_zero hf, ↓reduceDIte, one_pow, mul_one,
+      Finset.le_sup'_iff, mem_support_iff, ne_eq]
     use i
   · have : IsPowMul (spectralNorm 𝕜 (AlgebraicClosure 𝕜)) := isPowMul_spectralNorm
     if hi' : i = 0 then
-      simpa [hi', spectralNorm_one] using one_le_pow₀ hx
+      simpa only [hi', pow_zero, spectralNorm_one, ge_iff_le] using one_le_pow₀ hx
     else
     rw [this α (Nat.one_le_iff_ne_zero.2 hi')]
     exact pow_le_pow_right₀ hx <| (Nat.le_sub_one_iff_lt t).mpr hi
@@ -389,13 +392,13 @@ theorem continuity_of_roots₀ {𝕜 : Type u_1} [hn : NontriviallyNormedField �
     ≤ (f - g).stdGaussNorm ^ (1 / (f.natDegree : ℝ)) * f.stdGaussNorm := by
   if hfg' : f = g then
     use α
-    simp [← hfg']
+    simp only [← hfg', IsRoot.def, eval_map_algebraMap, sub_self, map_zero, gaussNorm_zero, one_div]
     exact ⟨by simpa using hα, mul_nonneg (Real.zero_rpow_nonneg _) (stdGaussNorm_nonneg _)⟩
   else
   by_contra hc
   push_neg at hc
   have : IsAlgClosed (AlgebraicClosure 𝕜) := IsAlgClosure.isAlgClosed 𝕜
-  have := Polynomial.aeval_eq_prod_aroots_sub_of_monic_of_splits hg (this.factors g.toAlgCl) α
+  have := Polynomial.Splits.aeval_eq_prod_aroots_of_monic (this.splits g.toAlgCl) hg α
   have t : (aeval α) g = g.toAlgCl.eval α := by
     simp [aeval, toAlgCl]
   rw [t, Multiset.prod_eq_prod_toEnumFinset] at this
@@ -409,11 +412,12 @@ theorem continuity_of_roots₀ {𝕜 : Type u_1} [hn : NontriviallyNormedField �
       simpa [← hz.2] using hc z (isRoot_of_mem_roots hz.1)
     replace this' := Finset.prod_lt_prod_of_nonempty ?_ this' ?_
     · rw [← this] at this'
-      simp at this'
+      simp only [one_div, Finset.prod_const, Multiset.card_toEnumFinset, Multiset.card_map,
+        eval_map_algebraMap] at this'
       rw [IsAlgClosed.card_aroots_eq_natDegree, mul_pow] at this'
       rw [← natDegree_eq_of_degree_eq hfg, ← Real.rpow_natCast, Real.rpow_inv_rpow] at this'
       · have := spectralNorm_eval_le_gaussNorm_sub f g hf hg hfg α hα
-        simp at this
+        simp only [eval_map_algebraMap] at this
         replace := lt_of_lt_of_le this' this
         have t := (gaussNorm_pos_iff (f - g)).2 <| sub_ne_zero_of_ne hfg'
         replace := (mul_lt_mul_iff_right₀ t).1 this
@@ -436,12 +440,12 @@ theorem continuity_of_roots₀ {𝕜 : Type u_1} [hn : NontriviallyNormedField �
     · suffices hw : (g.aroots (AlgebraicClosure 𝕜)).toFinset.Nonempty by
         rcases hw with ⟨a, ha⟩
         use (α - a,0)
-        simp
+        simp only [Multiset.mem_toEnumFinset]
         refine Multiset.count_pos.mpr <| Multiset.mem_map.mpr ?_
         use a
         simp at ha
         simp [ha]
-      simp at hα
+      simp only [IsRoot.def, eval_map_algebraMap] at hα
       have := Polynomial.natDegree_pos_of_monic_of_aeval_eq_zero hf hα
       rw [natDegree_eq_of_degree_eq hfg] at this
       replace : g.toAlgCl.degree ≠ 0 := by
@@ -496,7 +500,7 @@ theorem continuity_of_roots {𝕜 : Type u_1} [hn : NontriviallyNormedField 𝕜
     suffices hh : (f - g).stdGaussNorm ^ (1 / (↑f.natDegree : ℝ)) ≤ ε / f.stdGaussNorm by
       refine (le_div_iff₀ ?_).mp hh
       have := one_le_stdGaussNorm_of_monic f hf; linarith
-    simp
+    simp only [one_div]
     rwa [Real.rpow_inv_le_iff_of_pos (stdGaussNorm_nonneg (f - g))]
     · exact div_nonneg (le_of_lt hε) (stdGaussNorm_nonneg f)
     · simpa using pos_deg_of_monic_of_root f hf α (by simpa using hα)
