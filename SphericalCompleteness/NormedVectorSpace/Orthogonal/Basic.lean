@@ -38,19 +38,33 @@ lemma orth_symm {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 (x ⟂[𝕜] y) ↔ (y ⟂[𝕜] x) :=
   ⟨fun h => orth_of_orth h, fun h => orth_of_orth h⟩
 
-/--
-Birkhoff–James orthogonality in an ultrametric normed space.
+lemma orth_iff_birkhoff_james_orth {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+{E : Type*} [SeminormedAddCommGroup E]
+[NormedSpace 𝕜 E] [iud : IsUltrametricDist E]
+(x y : E) :
+(x ⟂[𝕜] y) ↔ ∀ c : 𝕜, ‖x‖ ≤ ‖x + c • y‖ := by
+  constructor
+  · intro h c
+    have : x + c • y = x - (-c) • y := by
+      simp only [neg_smul, sub_neg_eq_add]
+    rw [← h, this, ← dist_eq_norm]
+    refine infDist_le_dist_of_mem ?_
+    simp only [neg_smul, SetLike.mem_coe, neg_mem_iff]
+    exact Submodule.mem_span_singleton.mpr ⟨c, by simp⟩
+  · intro h
+    by_contra hc
+    replace hc := lt_of_le_of_ne ?_ hc
+    · replace hc := (infDist_lt_iff ?_).1 hc
+      · rcases hc with ⟨y', hy', hy''⟩
+        rcases Submodule.mem_span_singleton.1 hy' with ⟨c, hc⟩
+        rw [← hc, dist_eq_norm, sub_eq_add_neg, ← neg_smul] at hy''
+        specialize h (-c); linarith
+      · use 0; simp only [SetLike.mem_coe, zero_mem]
+    · nth_rw 2 [← sub_zero x]
+      rw [← dist_eq_norm]
+      refine infDist_le_dist_of_mem ?_
+      simp only [SetLike.mem_coe, zero_mem]
 
-Over a nontrivially normed field `𝕜`, in a seminormed `𝕜`-vector space `E` whose distance is
-ultrametric (`IsUltrametricDist E`), this lemma characterizes the orthogonality relation
-`x ⟂[𝕜] y` by the strong “Pythagorean” ultrametric identity: for all scalars `α β : 𝕜`,
-the norm of the linear combination `α • x + β • y` is exactly the maximum of the norms
-of the two summands.
-
-In symbols:
-`(x ⟂[𝕜] y) ↔ ∀ α β, ‖α • x + β • y‖ = max ‖α • x‖ ‖β • y‖`.
--/
--- Birkhoff-James orthogonality
 lemma orth_iff {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 {E : Type*} [SeminormedAddCommGroup E]
 [NormedSpace 𝕜 E] [iud : IsUltrametricDist E] {x y : E} :
