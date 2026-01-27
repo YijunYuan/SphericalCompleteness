@@ -312,10 +312,12 @@ theorem spectralNorm_eval_le_gaussNorm_sub {𝕜 : Type u_1} [hn : NontriviallyN
 [IsUltrametricDist 𝕜]
 (f g : Polynomial 𝕜) (hf : Monic f) (hg : Monic g) (hfg : f.degree = g.degree)
 (α : AlgebraicClosure 𝕜)
-(hfz : f.toAlgCl.IsRoot α)
+(hfz : aeval α f = 0)
 : spectralAlgNorm 𝕜 (AlgebraicClosure 𝕜) (g.toAlgCl.eval α)
   ≤ (f - g).stdGaussNorm * f.stdGaussNorm ^ (f.natDegree - 1)
 := by
+  replace hfz : f.toAlgCl.IsRoot α := by
+    simpa only [IsRoot.def, eval_map_algebraMap]
   have : g.toAlgCl.eval α = (g - f).toAlgCl.eval α + f.toAlgCl.eval α := by simp
   unfold Polynomial.IsRoot at hfz
   rw [hfz, add_zero] at this
@@ -385,14 +387,14 @@ This lemma is intended as a “root stability” bound in the non-archimedean/ul
 theorem continuity_of_roots₀ {𝕜 : Type u_1} [hn : NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
   [IsUltrametricDist 𝕜]
 (f g : Polynomial 𝕜) (hf : Monic f) (hg : Monic g) (hfg : f.degree = g.degree)
-(α : AlgebraicClosure 𝕜) (hα : f.toAlgCl.IsRoot α) :
+(α : AlgebraicClosure 𝕜) (hα : aeval α f = 0) :
 ∃ β : AlgebraicClosure 𝕜,
-  g.toAlgCl.IsRoot β ∧
+  aeval β g = 0 ∧
   spectralAlgNorm 𝕜 (AlgebraicClosure 𝕜) (α - β)
     ≤ (f - g).stdGaussNorm ^ (1 / (f.natDegree : ℝ)) * f.stdGaussNorm := by
   if hfg' : f = g then
     use α
-    simp only [← hfg', IsRoot.def, eval_map_algebraMap, sub_self, map_zero, gaussNorm_zero, one_div]
+    simp only [← hfg', sub_self, map_zero, gaussNorm_zero, one_div]
     exact ⟨by simpa using hα, mul_nonneg (Real.zero_rpow_nonneg _) (stdGaussNorm_nonneg _)⟩
   else
   by_contra hc
@@ -409,14 +411,15 @@ theorem continuity_of_roots₀ {𝕜 : Type u_1} [hn : NontriviallyNormedField �
       spectralNorm 𝕜 (AlgebraicClosure 𝕜) s.1 := by
       intro s hs
       rcases Multiset.mem_map.1 (Multiset.mem_of_mem_toEnumFinset hs) with ⟨z, hz⟩
-      simpa [← hz.2] using hc z (isRoot_of_mem_roots hz.1)
+      simpa [← hz.2] using hc z (by simpa using isRoot_of_mem_roots hz.1)
     replace this' := Finset.prod_lt_prod_of_nonempty ?_ this' ?_
     · rw [← this] at this'
       simp only [one_div, Finset.prod_const, Multiset.card_toEnumFinset, Multiset.card_map,
         eval_map_algebraMap] at this'
       rw [IsAlgClosed.card_aroots_eq_natDegree, mul_pow] at this'
       rw [← natDegree_eq_of_degree_eq hfg, ← Real.rpow_natCast, Real.rpow_inv_rpow] at this'
-      · have := spectralNorm_eval_le_gaussNorm_sub f g hf hg hfg α hα
+      · have := spectralNorm_eval_le_gaussNorm_sub f g hf hg hfg α (by simpa only [IsRoot.def,
+        eval_map_algebraMap] using hα)
         simp only [eval_map_algebraMap] at this
         replace := lt_of_lt_of_le this' this
         have t := (gaussNorm_pos_iff (f - g)).2 <| sub_ne_zero_of_ne hfg'
@@ -429,8 +432,8 @@ theorem continuity_of_roots₀ {𝕜 : Type u_1} [hn : NontriviallyNormedField �
           rw [← hc] at this
           simp only [one_pow, lt_self_iff_false] at this
       · exact stdGaussNorm_nonneg (f - g)
-      · simp at hα
-        simpa using Nat.ne_zero_of_lt <| Polynomial.natDegree_pos_of_monic_of_aeval_eq_zero hf hα
+      · simpa only [ne_eq, Nat.cast_eq_zero] using
+        Nat.ne_zero_of_lt <| Polynomial.natDegree_pos_of_monic_of_aeval_eq_zero hf hα
     · intro _ _
       apply mul_pos
       · apply Real.rpow_pos_of_pos
@@ -445,7 +448,6 @@ theorem continuity_of_roots₀ {𝕜 : Type u_1} [hn : NontriviallyNormedField �
         use a
         simp at ha
         simp [ha]
-      simp only [IsRoot.def, eval_map_algebraMap] at hα
       have := Polynomial.natDegree_pos_of_monic_of_aeval_eq_zero hf hα
       rw [natDegree_eq_of_degree_eq hfg] at this
       replace : g.toAlgCl.degree ≠ 0 := by
