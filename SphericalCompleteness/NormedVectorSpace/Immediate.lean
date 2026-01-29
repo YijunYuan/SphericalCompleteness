@@ -163,8 +163,7 @@ theorem exists_linearIsometry_comp_eq_of_isImmediate {𝕜 : Type*} [Nontriviall
 [SphericallyCompleteSpace H]
 (f : E →ₗᵢ[𝕜] F) (hf : IsImmediate f)
 (g : E →ₗᵢ[𝕜] H) :
-∃ (h : F →ₗᵢ[𝕜] H), @LinearIsometry.comp 𝕜 𝕜 𝕜 E F H _ _ _ (RingHom.id _)
-(RingHom.id _) (RingHom.id _) _ _ _ _ _ _ _ h f = g := by
+∃ (h : F →ₗᵢ[𝕜] H), LinearIsometry.comp (h : F →ₗᵢ[𝕜] H) (f : E →ₗᵢ[𝕜] F) = g := by
   rcases hahn_banach' _
     (LinearIsometry.comp g (LinearIsometry.weakInv f)).toContinuousLinearMap with ⟨h, hf1, hf2⟩
   simp only [LinearMap.mem_range, LinearIsometry.coe_toContinuousLinearMap, LinearIsometry.coe_comp,

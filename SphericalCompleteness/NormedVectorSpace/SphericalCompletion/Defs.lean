@@ -163,7 +163,7 @@ The underlying type of this chosen maximal submodule is defined to be `Spherical
 abbrev SphericalCompletion (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     (E : Type u) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E] : Type u :=
   ↥(exists_max_imm_ext_in_sph_comp 𝕜 E
-      (↥(lp (fun _ ↦ E) ⊤) ⧸ c₀ 𝕜 fun _ ↦ E) (sphericallyCompleteExtension 𝕜 E)).choose
+      _ (sphericallyCompleteExtension 𝕜 E)).choose
 
 /--
 `SphericalCompletionEmbedding 𝕜 E` is the canonical linear isometric embedding of `E` into the
@@ -176,8 +176,8 @@ maximal immediate intermediate submodule selected in the definition of `Spherica
 abbrev SphericalCompletionEmbedding (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 (E : Type u) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
 : E →ₗᵢ[𝕜] SphericalCompletion 𝕜 E := {
-    toFun x := ⟨(sphericallyCompleteExtension 𝕜 E) x, (exists_max_imm_ext_in_sph_comp 𝕜 E
-      (↥(lp (fun _ ↦ E) ⊤) ⧸ c₀ 𝕜 fun _ ↦ E) (sphericallyCompleteExtension 𝕜 E)
+    toFun x := ⟨(sphericallyCompleteExtension 𝕜 E) x, (exists_max_imm_ext_in_sph_comp 𝕜 E _
+    (sphericallyCompleteExtension 𝕜 E)
       ).choose_spec.1.out.choose <| LinearMap.mem_range_self _ _⟩
     map_add' _ _:= rfl
     map_smul' _ _:= rfl

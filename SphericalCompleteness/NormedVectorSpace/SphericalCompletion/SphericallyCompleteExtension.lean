@@ -318,6 +318,7 @@ def sphericallyCompleteExtension (𝕜 : Type*) [NontriviallyNormedField 𝕜]
   (E : Type*) [NormedAddCommGroup E] [NormedSpace 𝕜 E] :
   E →ₗᵢ[𝕜] ((lp (fun (_ : ℕ) => E) ⊤)⧸ c₀ 𝕜 (fun (_ : ℕ) => E)) where
   toFun x := by
+    refine (QuotientAddGroup.mk' (c₀ 𝕜 (fun x ↦ E)).toAddSubgroup) (⟨fun (_ : ℕ) => x, ?_⟩)
     have : (fun (_ : ℕ) => x) ∈ (lp (fun (_ : ℕ) => E) ⊤) := by
       simp only [lp, AddSubgroup.mem_mk, AddSubmonoid.mem_mk, AddSubsemigroup.mem_mk]
       refine Set.mem_setOf.mpr ?_
@@ -325,7 +326,7 @@ def sphericallyCompleteExtension (𝕜 : Type*) [NontriviallyNormedField 𝕜]
       use ‖x‖
       simp only [upperBounds, Set.range_const, Set.mem_singleton_iff, forall_eq, Set.mem_setOf_eq,
         le_refl]
-    exact (QuotientAddGroup.mk' (c₀ 𝕜 (fun x ↦ E)).toAddSubgroup) (⟨fun (_ : ℕ) => x, this⟩)
+    exact this
   map_add' x y := rfl
   map_smul' c x := rfl
   norm_map' := by
