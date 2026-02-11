@@ -71,7 +71,7 @@ theorem exists_bijective_subseq_of_finite_duplication {α : Type*} (seq : ℕ �
     refine strictMono_nat_of_lt_succ fun n => ?_
     simp only [ebsofd, gt_iff_lt, ne_eq]
     grind only [= max_def]
-  refine ⟨hsm, injective_of_lt_imp_ne fun m n hmn => ?_⟩
+  refine ⟨hsm, Function.Injective.of_lt_imp_ne fun m n hmn => ?_⟩
   simp only [Function.comp_apply, ne_eq]
   suffices hh : ebsofd seq hseq n > (hseq (ebsofd seq hseq m)).choose by
     exact (hseq (ebsofd seq hseq m)).choose_spec _ hh

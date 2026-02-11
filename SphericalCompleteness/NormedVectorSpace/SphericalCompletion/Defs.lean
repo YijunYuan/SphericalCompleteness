@@ -22,11 +22,11 @@ def imm_ext_in_sph_comp {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 [SphericallyCompleteSpace E₀]
 (f : E →ₗᵢ[𝕜] E₀)
 : Set (Submodule 𝕜 E₀) := {M : Submodule 𝕜 E₀ |
-    ∃ hc : LinearMap.range f ≤ M,
+    ∃ hc : LinearMap.range f.toLinearMap ≤ M,
     IsImmediate ({toFun x := ⟨x.1, hc x.2⟩
                   map_add' _ _ := rfl
                   map_smul' _ _ := rfl
-                  norm_map' _ := rfl} : LinearMap.range f →ₗᵢ[𝕜] M)
+                  norm_map' _ := rfl} : LinearMap.range f.toLinearMap →ₗᵢ[𝕜] M)
   }
 
 /--
@@ -40,7 +40,7 @@ lemma imm_ext_nonempty {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 [SphericallyCompleteSpace E₀]
 (f : E →ₗᵢ[𝕜] E₀)
 : (imm_ext_in_sph_comp E E₀ f).Nonempty := by
-  use LinearMap.range f
+  use LinearMap.range f.toLinearMap
   simp only [imm_ext_in_sph_comp, IsImmediate, MOrth, AddSubgroupClass.coe_norm, Subtype.forall,
     Submodule.mk_eq_zero, Set.mem_setOf_eq, LinearMap.mem_range, Subtype.coe_eta,
     forall_exists_index, le_refl, exists_true_left]
@@ -49,7 +49,7 @@ lemma imm_ext_nonempty {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     exact norm_eq_zero.mp hh
   rw [← hh]
   refine Metric.infDist_zero_of_mem ?_
-  simp only [SetLike.mem_coe, LinearMap.mem_range, LinearIsometry.coe_mk, LinearMap.coe_mk,
+  simp only [SetLike.mem_coe, LinearMap.mem_range, LinearMap.coe_mk,
     AddHom.coe_mk, exists_eq]
 
 /-
@@ -109,15 +109,15 @@ theorem exists_max_imm_ext_in_sph_comp (𝕜 : Type*) [NontriviallyNormedField �
       apply csInf_le
       · use 0
         simp only [lowerBounds, SetLike.coe_sort_coe, Set.mem_range, Subtype.exists,
-          LinearMap.mem_range, LinearIsometry.coe_mk, LinearMap.coe_mk, AddHom.coe_mk, exists_prop,
+          LinearMap.mem_range, LinearMap.coe_mk, AddHom.coe_mk, exists_prop,
           Subtype.mk.injEq, exists_eq_right, exists_and_left, exists_exists_eq_and,
           forall_exists_index, Set.mem_setOf_eq]
         intro _ _ _ h
         simp only [← h, dist_nonneg]
       · rcases Set.mem_range.1 w.prop with ⟨v,hv⟩
-        simp only [LinearIsometry.coe_mk, LinearMap.coe_mk, AddHom.coe_mk] at hv
+        simp only [LinearMap.coe_mk, AddHom.coe_mk] at hv
         simp only [SetLike.coe_sort_coe, ← hv, Set.mem_range, Subtype.exists, LinearMap.mem_range,
-          LinearIsometry.coe_mk, LinearMap.coe_mk, AddHom.coe_mk, exists_prop, Subtype.mk.injEq,
+          LinearMap.coe_mk, AddHom.coe_mk, exists_prop, Subtype.mk.injEq,
           exists_eq_right, exists_and_left, exists_exists_eq_and]
         rcases LinearMap.mem_range.1 v.prop with ⟨u,hu⟩
         use u
@@ -128,15 +128,15 @@ theorem exists_max_imm_ext_in_sph_comp (𝕜 : Type*) [NontriviallyNormedField �
       apply csInf_le
       · use 0
         simp only [lowerBounds, SetLike.coe_sort_coe, Set.mem_range, Subtype.exists,
-          LinearMap.mem_range, LinearIsometry.coe_mk, LinearMap.coe_mk, AddHom.coe_mk, exists_prop,
+          LinearMap.mem_range, LinearMap.coe_mk, AddHom.coe_mk, exists_prop,
           Subtype.mk.injEq, exists_eq_right, exists_and_left, exists_exists_eq_and,
           forall_exists_index, Set.mem_setOf_eq]
         intro _ _ _ h
         simp only [← h, dist_nonneg]
       · rcases Set.mem_range.1 w.prop with ⟨v,hv⟩
-        simp only [LinearIsometry.coe_mk, LinearMap.coe_mk, AddHom.coe_mk] at hv
+        simp only [LinearMap.coe_mk, AddHom.coe_mk] at hv
         simp only [SetLike.coe_sort_coe, ← hv, Set.mem_range, Subtype.exists, LinearMap.mem_range,
-          LinearIsometry.coe_mk, LinearMap.coe_mk, AddHom.coe_mk, exists_prop, Subtype.mk.injEq,
+          LinearMap.coe_mk, AddHom.coe_mk, exists_prop, Subtype.mk.injEq,
           exists_eq_right, exists_and_left, exists_exists_eq_and]
         rcases LinearMap.mem_range.1 v.prop with ⟨u,hu⟩
         use u

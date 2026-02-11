@@ -18,7 +18,7 @@ def IsImmediate {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 {E : Type u} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
 {F : Type v} [SeminormedAddCommGroup F] [NormedSpace 𝕜 F] [IsUltrametricDist F]
 (f : E →ₗᵢ[𝕜] F) : Prop :=
-∀ v : F, (v ⟂ₘ LinearMap.range f) → v = 0
+∀ v : F, (v ⟂ₘ LinearMap.range f.toLinearMap) → v = 0
 
 /--
 `MaximallyComplete 𝕜 E` expresses a maximal completeness (a spherical-completeness–style)
@@ -39,7 +39,7 @@ def MaximallyComplete (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 private noncomputable def LinearIsometry.weakInv {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
 {F : Type*} [NormedAddCommGroup F] [NormedSpace 𝕜 F]
-(f : E →ₗᵢ[𝕜] F) : LinearMap.range f →ₗᵢ[𝕜] E where
+(f : E →ₗᵢ[𝕜] F) : LinearMap.range f.toLinearMap →ₗᵢ[𝕜] E where
   toFun := Function.invFun <| Set.rangeFactorization f
   map_add' x y := by
     have : Function.Injective (Set.rangeFactorization f) := by
@@ -76,13 +76,14 @@ private noncomputable def LinearIsometry.weakInv {𝕜 : Type*} [NontriviallyNor
     simp only [LinearMap.coe_mk, AddHom.coe_mk, AddSubgroupClass.coe_norm, Subtype.forall,
       LinearMap.mem_range, forall_exists_index]
     intro a x h
-    simp only [← h, LinearIsometry.norm_map]
-    congr
+    simp only [← h]
     have : f x = Set.rangeFactorization f x := by
       simp only [Set.rangeFactorization_coe]
-    conv => arg 1; arg 2; arg 1; rw [this]
-    exact Function.leftInverse_invFun
+    simp only [LinearIsometry.coe_toLinearMap, LinearIsometry.norm_map]
+    conv => arg 1; arg 1; arg 2; arg 1; rw [this]
+    have := Function.leftInverse_invFun
       (Set.rangeFactorization_injective.mpr <| LinearIsometry.injective f) x
+    congr
 
 private lemma norm_map_of_isImmediate {𝕜 : Type*}
   [NontriviallyNormedField 𝕜] {E : Type u_2} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
@@ -113,16 +114,16 @@ private lemma norm_map_of_isImmediate {𝕜 : Type*}
     simp only [IsImmediate] at hf
     specialize hf v
     simp only [MOrth, hv, imp_false] at hf
-    replace hf : infDist v ↑(LinearMap.range f) < ‖v‖ := by
+    replace hf : infDist v ↑(LinearMap.range f.toLinearMap) < ‖v‖ := by
       refine lt_of_le_of_ne ?_ hf
       rw [← dist_zero_right v]
-      exact infDist_le_dist_of_mem <| zero_mem (LinearMap.range f)
-    rcases(infDist_lt_iff <| Submodule.nonempty (LinearMap.range f)).1 hf with ⟨x, hx⟩
+      exact infDist_le_dist_of_mem <| zero_mem (LinearMap.range f.toLinearMap)
+    rcases(infDist_lt_iff <| Submodule.nonempty (LinearMap.range f.toLinearMap)).1 hf with ⟨x, hx⟩
     rw [dist_eq_norm] at hx
     have : ‖h x - h v‖ < ‖v‖ := by
       rw [(by simp : h x - h v = h (x - v))]
       refine lt_of_le_of_lt (ContinuousLinearMap.le_opNorm h (x - v)) ?_
-      if hrf : ¬ Nontrivial (LinearMap.range f) then
+      if hrf : ¬ Nontrivial (LinearMap.range f.toLinearMap) then
         rw [Submodule.nontrivial_iff_ne_bot] at hrf
         push_neg at hrf
         simp only [hrf, Submodule.bot_coe, Set.mem_singleton_iff] at hx
@@ -181,7 +182,7 @@ theorem exists_linearIsometry_comp_eq_of_isImmediate {𝕜 : Type*} [Nontriviall
   ext z
   simp only [LinearIsometry.coe_comp, LinearIsometry.coe_mk, ContinuousLinearMap.coe_coe,
     Function.comp_apply, h]
-  have : (LinearIsometry.weakInv f) ⟨f z, LinearMap.mem_range_self f z⟩ = z := by
+  have : (LinearIsometry.weakInv f) ⟨f z, LinearMap.mem_range_self f.toLinearMap z⟩ = z := by
     unfold LinearIsometry.weakInv
     simp only [LinearIsometry.coe_mk, LinearMap.coe_mk, AddHom.coe_mk]
     have : f z = Set.rangeFactorization f z := by

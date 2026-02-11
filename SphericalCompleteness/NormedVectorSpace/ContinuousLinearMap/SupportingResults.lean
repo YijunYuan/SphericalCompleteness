@@ -549,7 +549,7 @@ private lemma bddAbove_of_chain_of_partial_extension (𝕜 : Type*) [Nontriviall
   use { M := iSup (fun p : P ↦ p.val.M)
         hDM := fun z hz => (Submodule.mem_iSup _).2 <|
           fun N hN => (le_trans hhP.some.hDM <| hN ⟨hhP.some, hhP.some_mem⟩) hz
-        T := IsBoundedLinearMap.toContinuousLinearMap
+        T := IsBoundedLinearMap.toContinuousLinearMap _
           (isboundedlinearmap_of_glued_map 𝕜 h𝒰 ε hε1 P hP hhP)
         hT := by
           intro d
@@ -672,7 +672,7 @@ lemma exists_extension_opNorm_le
       { map_add := fun x ↦ congrFun rfl, map_smul := fun c ↦ congrFun rfl }, bound := ⟨1, ?_⟩ }
     simp only [zero_lt_one, AddSubgroupClass.coe_norm, LinearEquiv.coe_ofTop_symm_apply, one_mul,
       le_refl, implies_true, and_self]
-  use IsBoundedLinearMap.toContinuousLinearMap fiblm
+  use IsBoundedLinearMap.toContinuousLinearMap _ fiblm
   constructor
   · intro D
     simpa only [IsBoundedLinearMap.toContinuousLinearMap, IsBoundedLinearMap.toLinearMap,

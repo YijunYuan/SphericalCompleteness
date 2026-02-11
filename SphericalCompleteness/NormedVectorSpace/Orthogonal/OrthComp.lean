@@ -22,13 +22,14 @@ theorem orth_of_orthcomp
   (𝕜 : Type*) [NontriviallyNormedField 𝕜] {E : Type u_2} [NormedAddCommGroup E]
   [IsUltrametricDist E] [NormedSpace 𝕜 E] (F : Submodule 𝕜 E) [SphericallyCompleteSpace ↥F]
   (T : E →L[𝕜] ↥F) (hT1 : ∀ (a : E) (b : a ∈ F), T a = ⟨a, b⟩)
-  : IsCompl F (LinearMap.ker T) := by
+  : IsCompl F (LinearMap.ker T.toLinearMap) := by
   refine IsCompl.of_eq ?_ ?_
   · ext x
     simp only [Submodule.mem_inf, LinearMap.mem_ker, Submodule.mem_bot]
     constructor
     · intro h
       specialize hT1 x h.1
+      simp only [ContinuousLinearMap.coe_coe] at h
       simp only [h.2] at hT1
       exact (AddSubmonoid.mk_eq_zero F.toAddSubmonoid).mp (id (Eq.symm hT1))
     · intro h
@@ -38,7 +39,7 @@ theorem orth_of_orthcomp
     simp only [Submodule.mem_top, iff_true]
     rw [(by abel : x = (T x) + (x - T x))]
     refine Submodule.add_mem_sup (T x).prop <| LinearMap.sub_mem_ker_iff.mpr ?_
-    simp only [SetLike.coe_mem, hT1, Subtype.coe_eta]
+    simp only [ContinuousLinearMap.coe_coe, SetLike.coe_mem, hT1, Subtype.coe_eta]
 
 /--
 Existence of a norm-nonincreasing continuous linear projection onto a spherically complete subspace.
@@ -85,7 +86,7 @@ noncomputable def OrthComp (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 [NormedSpace 𝕜 E]
 (F : Submodule 𝕜 E) [SphericallyCompleteSpace F]
 : Submodule 𝕜 E :=
-LinearMap.ker (exists_orthproj_of_spherically_complete_space 𝕜 F).choose
+LinearMap.ker (exists_orthproj_of_spherically_complete_space 𝕜 F).choose.toLinearMap
 
 /--
 `isCompl_orthcomp` shows that, over a nontrivially normed field `𝕜`, in a normed `𝕜`-vector space `E`
@@ -139,9 +140,11 @@ theorem sorth_orthcomp (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     rw [dist_eq_norm]
     have : ‖y‖ ≤ ‖x - y‖ := by
       have : T (x - y) = -y := by
-        simp only [T, map_sub, hx, zero_sub, NegMemClass.coe_neg, neg_inj]
+        simp only [map_sub, AddSubgroupClass.coe_sub, T]
+        simp only [ContinuousLinearMap.coe_coe] at hx
+        simp only [hx, ZeroMemClass.coe_zero, zero_sub, neg_inj]
         apply hT1
-        exact hy
+        exact (Submodule.mem_toAddSubgroup F).mp hy
       rw [← norm_neg, ← this]
       have := (ContinuousLinearMap.opNorm_le_iff zero_le_one).1 hT2 (x - y)
       simpa only [map_sub, AddSubgroupClass.coe_sub, ge_iff_le, AddSubgroupClass.coe_norm, one_mul]
@@ -233,7 +236,7 @@ theorem orthcomp_eq_ker_OrthProj (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 {E : Type*} [NormedAddCommGroup E] [iud : IsUltrametricDist E]
 [NormedSpace 𝕜 E]
 (F : Submodule 𝕜 E) [SphericallyCompleteSpace F] :
-OrthComp 𝕜 F = LinearMap.ker (OrthProj 𝕜 F) := by
+OrthComp 𝕜 F = LinearMap.ker (OrthProj 𝕜 F).toLinearMap := by
   unfold OrthComp OrthProj
   rfl
 
