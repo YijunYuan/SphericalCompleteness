@@ -1,8 +1,8 @@
 # SphericalCompleteness
 
 [![CI](https://github.com/YijunYuan/SphericalCompleteness/actions/workflows/lean_action_ci.yml/badge.svg)](https://github.com/YijunYuan/SphericalCompleteness/actions/workflows/lean_action_ci.yml)
-[![Lean](https://img.shields.io/badge/Lean-4.26.0-blue)](https://github.com/leanprover/lean4)
-[![mathlib](https://img.shields.io/badge/mathlib-v4.26.0-5C2D91)](https://github.com/leanprover-community/mathlib4)
+[![Lean](https://img.shields.io/badge/Lean-4.27.0-5C2D91)](https://github.com/leanprover/lean4)
+[![mathlib](https://img.shields.io/badge/mathlib-v4.27.0-5C2D91)](https://github.com/leanprover-community/mathlib4)
 
 
 ## What the project does
