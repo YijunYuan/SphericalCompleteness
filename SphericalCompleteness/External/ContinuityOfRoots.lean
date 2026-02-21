@@ -37,8 +37,8 @@ lemma toAlgCl_natdeg_eq {𝕜 : Type u_1} [Field 𝕜] (f : Polynomial 𝕜) :
   rw [Polynomial.natDegree_map_eq_of_injective (algebraMap 𝕜 (AlgebraicClosure 𝕜)).injective]
 
 /--
-`Polynomial.stdGaussNorm f` is the Gauss norm of a polynomial `f : Polynomial 𝕜` computed with respect
-to the given norm on `𝕜` and parameter `r = 1`.
+`Polynomial.stdGaussNorm f` is the Gauss norm of a polynomial `f : Polynomial 𝕜` computed with
+respect to the given norm on `𝕜` and parameter `r = 1`.
 
 Concretely, this is `gaussNorm` specialized to `Polynomial 𝕜` (via the identity coercion) using
 `hn.norm` as the coefficient norm. It is often convenient as the “standard” Gauss norm appearing in

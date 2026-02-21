@@ -93,8 +93,8 @@ private lemma induction_sphericallyCompleteSpace_of_finiteDimensional
   · exact sphericallyCompleteSpace_of_isometryEquiv φ.toIsometryEquiv
 
 /--
-If `E` is a finite-dimensional normed vector space over a spherically complete, nontrivially normed field `𝕜`,
-and the metric on `E` is ultrametric, then `E` is spherically complete.
+If `E` is a finite-dimensional normed vector space over a spherically complete, nontrivially normed
+field `𝕜`, and the metric on `E` is ultrametric, then `E` is spherically complete.
 
 This is the standard permanence result: spherical completeness descends from the base field to any
 finite-dimensional ultrametric normed `𝕜`-vector space.

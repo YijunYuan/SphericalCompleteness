@@ -4,19 +4,6 @@ import Mathlib.Tactic
 open Metric
 open Filter
 
-/-
--- Mathlib.Topology.UniformSpace.Cauchy, after CauchySeq.subseq_mem
-theorem CauchySeq.subseq_mem' {α : Type u} [uniformSpace : UniformSpace α] {V : ℕ → SetRel α α}
-    (hV : ∀ (n : ℕ), V n ∈ uniformity α) {u : ℕ → α} (hu : CauchySeq u) :
-    ∃ (φ : ℕ → ℕ), StrictMono φ ∧ ∀ {n m: ℕ} (h : φ n ≤ m), (u (φ n), u m) ∈ V n := by
-  sorry
-
-theorem foo {α : Type*} [PseudoMetricSpace α] {u : ℕ → α}
-    (hu : CauchySeq u) : ∃ (φ : ℕ → ℕ), StrictMono φ ∧ ∀ {n m: ℕ}
-    (_h : φ n ≤ m),  dist (u (φ n)) (u m) < 1 / (2 : ℝ) ^ n :=
-  CauchySeq.subseq_mem' (fun n ↦ Metric.dist_mem_uniformity (by positivity)) hu
--/
-
 private noncomputable def dcidx {α : Type*} [PseudoMetricSpace α] {seq : ℕ → α}
   (hseq : CauchySeq seq) (n : ℕ) : ℕ :=
   match n with

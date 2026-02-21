@@ -7,12 +7,13 @@ open Metric
 namespace SphericallyCompleteSpace
 
 /--
-Shows that `F` is a complementary submodule to the kernel of a continuous linear projection `T : E →L[𝕜] F`
-which acts as the identity on `F`.
+Shows that `F` is a complementary submodule to the kernel of a continuous linear projection
+`T : E →L[𝕜] F` which acts as the identity on `F`.
 
-More precisely, assuming `T a = ⟨a, b⟩` whenever `a ∈ F` (so `T` restricts to `LinearMap.id` on `F`),
-the theorem concludes `IsCompl F (LinearMap.ker T)`, i.e. every `x : E` decomposes uniquely as
-`x = f + k` with `f ∈ F` and `k ∈ ker T`, and `F ⊓ ker T = ⊥`.
+More precisely, assuming `T a = ⟨a, b⟩` whenever `a ∈ F`
+(so `T` restricts to `LinearMap.id` on `F`), the theorem concludes `IsCompl F (LinearMap.ker T)`,
+i.e. every `x : E` decomposes uniquely as `x = f + k` with `f ∈ F` and `k ∈ ker T`, and
+`F ⊓ ker T = ⊥`.
 
 The additional hypotheses (`IsUltrametricDist E` and `[SphericallyCompleteSpace F]`) provide the
 ambient setting used elsewhere in the development; the complement statement itself is driven by the
@@ -49,7 +50,8 @@ ultrametric (`IsUltrametricDist E`). For a submodule `F : Submodule 𝕜 E` that
 complete (as a normed space), this theorem produces a continuous linear map
 `T : E →L[𝕜] F` such that:
 
-* `T` restricts to the identity on `F` (i.e. `∀ a ∈ F, T a = a`), hence `T` is a retraction onto `F`;
+* `T` restricts to the identity on `F` (i.e. `∀ a ∈ F, T a = a`), hence `T` is a retraction onto
+`F`;
 * `‖T‖ ≤ 1`, so `T` is 1-Lipschitz / nonexpanding with respect to the norm.
 
 In other words, in the ultrametric setting, spherical completeness of `F` ensures the existence of
@@ -89,9 +91,9 @@ noncomputable def OrthComp (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 LinearMap.ker (exists_orthproj_of_spherically_complete_space 𝕜 F).choose.toLinearMap
 
 /--
-`isCompl_orthcomp` shows that, over a nontrivially normed field `𝕜`, in a normed `𝕜`-vector space `E`
-whose distance is ultrametric, any submodule `F` that is spherically complete is complemented by its
-orthogonal complement `OrthComp 𝕜 F`.
+`isCompl_orthcomp` shows that, over a nontrivially normed field `𝕜`, in a normed `𝕜`-vector space
+`E` whose distance is ultrametric, any submodule `F` that is spherically complete is complemented by
+its orthogonal complement `OrthComp 𝕜 F`.
 
 More precisely, it produces an `IsCompl` decomposition:
 * every `x : E` can be written as `x = f + g` with `f ∈ F` and `g ∈ OrthComp 𝕜 F`, and

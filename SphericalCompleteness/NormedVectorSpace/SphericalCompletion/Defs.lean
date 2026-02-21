@@ -169,9 +169,10 @@ abbrev SphericalCompletion (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 `SphericalCompletionEmbedding 𝕜 E` is the canonical linear isometric embedding of `E` into the
 chosen spherical completion `SphericalCompletion 𝕜 E`.
 
-It is obtained by composing the fixed linear isometry `sphericallyCompleteExtension 𝕜 E : E →ₗᵢ[𝕜] E₀`
-into a spherically complete ambient space `E₀` with the inclusion of `LinearMap.range` into the
-maximal immediate intermediate submodule selected in the definition of `SphericalCompletion`.
+It is obtained by composing the fixed linear isometry
+`sphericallyCompleteExtension 𝕜 E : E →ₗᵢ[𝕜] E₀` into a spherically complete ambient space `E₀` with
+the inclusion of `LinearMap.range` into the maximal immediate intermediate submodule selected in the
+definition of `SphericalCompletion`.
 -/
 abbrev SphericalCompletionEmbedding (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 (E : Type u) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]

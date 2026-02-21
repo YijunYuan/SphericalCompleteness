@@ -54,13 +54,13 @@ closedBall z1 r1 ⊆ closedBall z2 r2 := by
 /--
 Transfers an ultrametric distance from a seminormed `𝕜`-normed space `E` to the quotient `E ⧸ F`.
 
-Assuming `[IsUltrametricDist E]`, this instance equips the quotient by a submodule `F : Submodule 𝕜 E`
-with an `IsUltrametricDist` structure (for the quotient distance coming from the seminormed
-additive group structure on `E ⧸ F`), i.e. the distance on `E ⧸ F` satisfies the strong triangle
-inequality.
+Assuming `[IsUltrametricDist E]`, this instance equips the quotient by a submodule
+`F : Submodule 𝕜 E` with an `IsUltrametricDist` structure (for the quotient distance coming from the
+seminormed additive group structure on `E ⧸ F`), i.e. the distance on `E ⧸ F` satisfies the strong
+triangle inequality.
 
-This is useful for working with non-Archimedean/ultrametric geometry in quotients while retaining the
-ultrametric property needed for many standard arguments.
+This is useful for working with non-Archimedean/ultrametric geometry in quotients while retaining
+the ultrametric property needed for many standard arguments.
 -/
 instance instIsUltrametricDistQuotient
 (𝕜 : Type u_1) [NontriviallyNormedField 𝕜]
@@ -255,9 +255,9 @@ dist_triangle_max a b c := by
 /--
 Lemmas about equality of norms in an ultrametric seminormed additive group.
 
-In a type `S` with `[SeminormedAddGroup S]` and `[IsUltrametricDist S]`, the ultrametric (non-Archimedean)
-triangle inequality implies a strong “dominance” principle: if the norm of a difference (or sum) is strictly
-smaller than one of the two norms, then the two norms must be equal.
+In a type `S` with `[SeminormedAddGroup S]` and `[IsUltrametricDist S]`, the ultrametric
+(non-Archimedean) triangle inequality implies a strong “dominance” principle: if the norm of a
+difference (or sum) is strictly smaller than one of the two norms, then the two norms must be equal.
 
 This file provides four convenient variants:
 

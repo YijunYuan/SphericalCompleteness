@@ -221,16 +221,19 @@ private lemma funk_chain_radius_eq (α : Type*) [PseudoMetricSpace α]
   · simp only
 
 /--
-Shows that a separable ultrametric space which is *spherically dense* cannot be spherically complete.
+Shows that a separable ultrametric space which is *spherically dense* cannot be spherically
+complete.
 
 More precisely, assuming:
 * `MetricSpace α`,
 * `IsUltrametricDist α` (the metric satisfies the strong triangle inequality),
-* `IsSphericallyDense α` (every closed ball properly contains a strictly smaller nonempty closed ball),
+* `IsSphericallyDense α` (every closed ball properly contains a strictly smaller nonempty closed
+  ball),
 * `Nonempty α`,
 * `SeparableSpace α`,
 
-the space fails to be `SphericallyCompleteSpace α`, i.e. there exists a decreasing chain of closed balls
+the space fails to be `SphericallyCompleteSpace α`, i.e. there exists a decreasing chain of closed
+balls
 with empty intersection.
 -/
 theorem not_sphericallyCompleteSpace_of_isSphericallyDense_separable_ultrametric

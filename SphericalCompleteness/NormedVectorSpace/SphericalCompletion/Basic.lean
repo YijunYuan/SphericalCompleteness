@@ -68,7 +68,7 @@ SphericallyCompleteSpace (↥(exists_max_imm_ext_in_sph_comp 𝕜 E E₀ f).choo
           simp only [← hz, LinearMap.mem_range, hm]
       · apply (le_infDist (by use 0; simp)).2
         intro y hy
-        simp only [SetLike.mem_coe, LinearMap.mem_range, LinearIsometry.coe_mk, LinearMap.coe_mk,
+        simp only [SetLike.mem_coe, LinearMap.mem_range, LinearMap.coe_mk,
           AddHom.coe_mk, Subtype.exists] at hy
         rcases hy with ⟨z, hm, hz⟩
         refine le_trans (infDist_le_dist_of_mem (?_ : ⟨y, ?_⟩ ∈ _)) (le_of_eq rfl)
