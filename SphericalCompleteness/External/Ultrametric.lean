@@ -340,3 +340,12 @@ instance instIsUltrametricDistCompletion {𝕜 : Type*} [PseudoMetricSpace 𝕜]
     nth_rw 1 [add_assoc]; nth_rw 1 [add_assoc]
     simp only [add_lt_add_iff_right]
     exact lt_of_le_of_lt t3 <| max_lt_max (by linarith) (by linarith)
+
+/-
+`PUnit` has an ultrametric distance.
+
+This is immediate because all points in `PUnit` are equal, hence all distances are `0`, and
+the strong triangle inequality is trivial.
+-/
+instance instIsUltrametricDistPUnit : IsUltrametricDist PUnit where
+  dist_triangle_max x y z := by simp

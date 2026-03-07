@@ -389,6 +389,8 @@ instance Pi.sphericallyCompleteSpace {ι : Type*} [Fintype ι] {E : ι → Type*
       exact Set.mem_iInter.1 ((hh j).isSphericallyComplete (hE j)).choose_spec i
     · exact (ri i).prop
 
+instance instSphericallyCompleteSpacePUnit : SphericallyCompleteSpace PUnit := inferInstance
+
 instance instSphericallyCompleteSpaceComplex : SphericallyCompleteSpace ℂ  := inferInstance
 
 instance instSphericallyCompleteSpaceReal : SphericallyCompleteSpace ℝ  := inferInstance
