@@ -326,8 +326,111 @@ theorem not_sphericallyCompleteSpace_of_isSphericallyDense_separable_ultrametric
     simp only [hα.spherically_dense, coe_eq_zero] at this
     simp only [this, gt_iff_lt, lt_self_iff_false] at r₀pos
 
+/-
+For any prime `p`, the `p`-adic complex field `ℂ_[p]` is not spherically complete.
+
+This is a direct specialization of
+`not_sphericallyCompleteSpace_of_isSphericallyDense_separable_ultrametric` to `ℂ_[p]`,
+using the previously established instances showing that `ℂ_[p]` is ultrametric,
+separable, and spherically dense in the required sense.
+-/
 instance instPadicComplex_not_sphercallyCompleteSpace (p : ℕ) [hp : Fact (Nat.Prime p)] :
 ¬ SphericallyCompleteSpace ℂ_[p] :=
   not_sphericallyCompleteSpace_of_isSphericallyDense_separable_ultrametric ℂ_[p]
+
+namespace SchikhofCounterexample
+
+/-
+`IsDenseMetric α` formalizes the metric-density condition used in Schikhof's discussion.
+
+For every center `z : α` and radius `r : ℝ≥0`, consider the set of pairwise distances
+between points in the closed ball `closedBall z r`:
+`Set.image2 dist (closedBall z r) (closedBall z r)`.
+
+The class asserts that the closure of this distance set is exactly the full interval
+`Set.Icc 0 (diam (closedBall z r))`.
+
+Intuitively, this says that distances occurring inside each closed ball are topologically
+dense in all admissible values between `0` and the ball diameter.
+-/
+class IsDenseMetric (α : Type*) [MetricSpace α] : Prop where
+  dense_metric : ∀ z : α, ∀ r : ℝ≥0,
+    closure (Set.image2 dist (closedBall z r) (closedBall z r)) = Set.Icc 0 (diam (closedBall z r))
+
+/-
+Constructs `IsDenseMetric α` from spherical density in an ultrametric space.
+
+Assuming:
+* `MetricSpace α`,
+* `IsUltrametricDist α`,
+* `IsSphericallyDense α`,
+
+the instance proves that in every closed ball, realized distances are dense in the full
+interval from `0` to the ball diameter.
+
+The proof combines:
+* an upper bound (`dist x y ≤ diam (closedBall z r)`), and
+* approximation from below using `exists_dist_lt_diam_of_isSphericallyDense`.
+-/
+instance instIsDenseMetric_of_isSphericallyDense (α : Type*)
+[MetricSpace α] [IsUltrametricDist α] [IsSphericallyDense α] :
+    IsDenseMetric α where
+  dense_metric := by
+    intro z r
+    have hdiam : diam (closedBall z r) = (r : ℝ) := IsSphericallyDense.spherically_dense z r
+    rw [hdiam]
+    refine le_antisymm ?_ ?_
+    · refine closure_minimal (fun t ht => ?_) isClosed_Icc
+      rcases Set.mem_image2.mp ht with ⟨x, hx, y, hy, rfl⟩
+      exact ⟨dist_nonneg, (dist_le_diam_of_mem isBounded_closedBall hx hy).trans_eq hdiam⟩
+    · rintro t ⟨ht0, htr⟩
+      rcases eq_or_lt_of_le ht0 with rfl | ht0'
+      · exact subset_closure <| Set.mem_image2.mpr ⟨z, by simp, z, by simp, by simp⟩
+      · refine Metric.mem_closure_iff.mpr <| fun ε hε => ?_
+        let e : ℝ≥0 := ⟨ε / 2, by positivity⟩
+        by_cases he : t ≤ (e : ℝ)
+        · refine ⟨0, Set.mem_image2.mpr ⟨z, by simp, z, by simp, by simp⟩, ?_⟩
+          have heps : (e : ℝ) < ε := by change ε / 2 < ε; nlinarith [hε]
+          exact lt_of_le_of_lt (by simpa [Real.dist_eq, abs_of_nonneg ht0] using he) heps
+        · let tNN : ℝ≥0 := ⟨t, le_of_lt ht0'⟩
+          let r' : ℝ≥0 := ⟨t - e, by linarith [lt_of_not_ge he]⟩
+          have hr'lt : r' < tNN := sub_lt_self _ (by change 0 < ε / 2; nlinarith [hε])
+          rcases exists_dist_lt_diam_of_isSphericallyDense (α := α) inferInstance z hr'lt with
+            ⟨x, y, hx, hy, hxy⟩
+          have hx' : x ∈ closedBall z r := by
+            simpa [mem_closedBall] using (le_trans (le_of_eq_of_le rfl hx) htr)
+          have hy' : y ∈ closedBall z r := by
+            simpa [mem_closedBall] using (le_trans (le_of_eq_of_le rfl hy) htr)
+          refine ⟨dist x y, Set.mem_image2.mpr ⟨x, hx', y, hy', rfl⟩, ?_⟩
+          have hlow : (r' : ℝ) < dist x y := hxy.1
+          have hupp : dist x y ≤ t := by
+            exact_mod_cast hxy.2
+          have hsub : t - dist x y < ε := by
+            refine lt_trans ?_ (by change ε / 2 < ε; nlinarith)
+            exact sub_lt_comm.mp <| RCLike.ofReal_lt_ofReal.mp hlow
+          simpa [Real.dist_eq, abs_of_nonneg (sub_nonneg.mpr hupp)] using hsub
+
+/-
+`PUnit` satisfies `IsDenseMetric`.
+
+Since `PUnit` is a subsingleton, each closed ball is a singleton and every pairwise distance
+is `0`, so both sides of `dense_metric` reduce to `{0}`.
+-/
+instance instIsDenseMetricPUnit : IsDenseMetric PUnit where
+  dense_metric := by
+    intros
+    simp [dist_self, closedBall_eq_singleton_of_subsingleton zero_le_coe]
+
+-- The topological space that consists of a single element is ultrametric, separable and has dense
+-- metric.
+#check (inferInstance : SeparableSpace PUnit)
+#check (inferInstance : IsDenseMetric PUnit)
+#check (inferInstance : IsUltrametricDist PUnit)
+-- The topological space that consists of a single element is spherically complete, which shows that
+-- Schikhof's result is false in general.
+#check (inferInstance : SphericallyCompleteSpace PUnit)
+
+end SchikhofCounterexample
+
 
 end SphericallyCompleteSpace
