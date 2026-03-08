@@ -25,7 +25,6 @@ Notation:
 * `F ⟂ₛ G` for `SOrth _ F G`
 * `x ⟂[𝕜] y` for `Orth 𝕜 x y`
 -/
-
 def MOrth (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 {E : Type*} [SeminormedAddCommGroup E]
 [NormedSpace 𝕜 E] [IsUltrametricDist E]
