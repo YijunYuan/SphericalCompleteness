@@ -4,6 +4,8 @@
 [![Lean](https://img.shields.io/badge/Lean-4.28.0-5C2D91)](https://github.com/leanprover/lean4)
 [![mathlib](https://img.shields.io/badge/mathlib-v4.28.0-5C2D91)](https://github.com/leanprover-community/mathlib4)
 
+[![Graph](https://img.shields.io/badge/Dependency_graph-100000?style=for-the-badge&logo=GitHub&logoColor=white&labelColor=black&color=black)](https://yijunyuan.github.io/lean-graph/?url=https://raw.githubusercontent.com/YijunYuan/SphericalCompleteness/refs/heads/master/SphericallyCompleteSpace.json#dark)
+
 This repository is a Lean 4 / mathlib formalization of **spherical completeness** in ultrametric spaces and its consequences in **non-Archimedean normed vector spaces**.
 
 ## What the project does
