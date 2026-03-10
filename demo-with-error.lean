@@ -5,7 +5,7 @@ import SphericalCompleteness.Dense
 /-
 # Miscellaneous code snippets (Not a part of the main library)
 This file contains some code snippets that appear in the paper. It is not intended to be a part of
-the main library, and it `concludes an error intendedly` to illustrate the inconsistency of the
+the main library, and it `includes an error intendedly` to illustrate the inconsistency of the
 norms on `ℂ_[p]`.
 -/
 
