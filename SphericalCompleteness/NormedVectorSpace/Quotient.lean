@@ -58,7 +58,8 @@ private lemma liftSequence_prop (𝕜 : Type u_1) [inst : NontriviallyNormedFiel
   [NormedSpace 𝕜 E] [IsUltrametricDist E]
   {F : Submodule 𝕜 E} ⦃c : ℕ → E ⧸ F⦄
   ⦃r : ℕ → NNReal⦄ (hr : StrictAnti r) (hanti : Antitone fun i ↦ closedBall (c i) ↑(r i)) :
-  ∀ i' : ℕ, ‖(liftSequence 𝕜 hr hanti (i'+ 2)).val - (liftSequence 𝕜 hr hanti (i' + 1)).val‖ < ↑(r i') := by
+  ∀ i' : ℕ, ‖(liftSequence 𝕜 hr hanti (i'+ 2)).val -
+             (liftSequence 𝕜 hr hanti (i' + 1)).val‖ < ↑(r i') := by
   intro i'
   simp only [liftSequence, QuotientAddGroup.mk'_apply]
   exact (lift_to_nearby_element 𝕜 (c (i' + 1)) (r (i' + 1)) (c (i' + 2)) (by
@@ -98,7 +99,8 @@ SphericallyCompleteSpace (E ⧸ F) := by
     refine antitone_nat_of_succ_le fun n => ?_
     intro z hz
     simp only [mem_closedBall] at *
-    have := iud.dist_triangle_max z ↑(liftSequence 𝕜 hr hanti (n + 1 + 2)) ↑(liftSequence 𝕜 hr hanti (n + 2))
+    have := iud.dist_triangle_max z ↑(liftSequence 𝕜 hr hanti (n + 1 + 2))
+      ↑(liftSequence 𝕜 hr hanti (n + 2))
     refine le_trans this <| sup_le_iff.2 ⟨le_trans hz <| le_of_lt <| hr <| lt_add_one _, ?_⟩
     simp only [dist_eq_norm, le_of_lt <| liftSequence_prop 𝕜 hr hanti (n + 1)]
     )

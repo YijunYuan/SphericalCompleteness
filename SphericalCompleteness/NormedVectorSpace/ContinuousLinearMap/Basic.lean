@@ -50,9 +50,13 @@ SphericallyCompleteSpace (E →L[𝕜] F) := by
   have := @exists_extension_opNorm_le 𝕜 _ E _ _ _ ⊥ F _ _ _ _
     htriv 𝒰 h𝒰 (fun U => r U.prop.out.choose) (fun _ => hrnneg _) (by
     intro U V
-    set nu := U.prop.out.choose
-    set nv := V.prop.out.choose
-    conv => arg 1; rw [← U.prop.out.choose_spec.2, ← V.prop.out.choose_spec.2]
+    set nu := U.prop.out.choose with hnu
+    set nv := V.prop.out.choose with hnv
+    have hU : U.val = c nu := by
+      simpa [hnu] using U.prop.out.choose_spec.2.symm
+    have hV : V.val = c nv := by
+      simpa [hnv] using V.prop.out.choose_spec.2.symm
+    rw [hU, hV]
     rcases @trichotomous ℕ (fun a b => a < b) inferInstance nu nv with hlt | heq | hgt
     · rw [show max (↑(r nu) : ℝ) ↑(r nv) = ↑(max (r nu) (r nv)) from rfl,
         max_eq_left <| le_of_lt (hsar hlt), ← dist_eq_norm, dist_comm, ← mem_closedBall]
@@ -61,7 +65,10 @@ SphericallyCompleteSpace (E →L[𝕜] F) := by
     · rw [show max (↑(r nu) : ℝ) ↑(r nv) = ↑(max (r nu) (r nv)) from rfl,
         max_eq_right <| le_of_lt (hsar hgt), ← dist_eq_norm, ← mem_closedBall]
       exact (hanti <| le_of_lt hgt) (by simp [mem_closedBall])) (by
-    intro U x; simp [htriv])
+    intro U x
+    have hx : x = 0 := Subsingleton.elim _ _
+    subst x
+    simp [htriv])
   rcases this with ⟨T, _, hT2⟩
   use T
   simp only [Set.mem_iInter]

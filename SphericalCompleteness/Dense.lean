@@ -252,7 +252,8 @@ theorem not_sphericallyCompleteSpace_of_isSphericallyDense_separable_ultrametric
       intro i t ht
       simp only [mem_closedBall, mem_ball] at *
       refine le_trans (hiud.dist_triangle_max _ z _) ?_
-      replace ht := lt_trans ht ((nestedBallChain_radius_eq α hinf.some i) ▸ shrinkingRadius_range α i)
+      replace ht := lt_trans ht
+        ((nestedBallChain_radius_eq α hinf.some i) ▸ shrinkingRadius_range α i)
       simpa only [sup_le_iff] using ⟨le_of_lt ht, hz i⟩
     have : ∀ i : ℕ, ((hinf.some.ofNat hsep.exists_countable_dense.choose i)).val ∉
       ball z ((shrinkingRadius α 0) / 2) := by

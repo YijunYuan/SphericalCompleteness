@@ -60,9 +60,11 @@ private noncomputable def LinearIsometry.weakInv {𝕜 : Type*} [NontriviallyNor
     · apply_fun Subtype.val using Subtype.val_injective
       simp only [Set.rangeFactorization_coe, map_smul]
       have t := Function.rightInverse_invFun (@Set.rangeFactorization_surjective _ _ f)
-      apply_fun Subtype.val at t using Subtype.val_injective
-      simp only [Set.rangeFactorization_coe, SetLike.val_smul] at t
-      rw [t (c • x), t x]
+      have tcx := t (c • x)
+      have tx := t x
+      apply_fun Subtype.val at tcx tx using Subtype.val_injective
+      simp only [Set.rangeFactorization_coe, SetLike.val_smul] at tcx tx
+      rw [tcx, tx]
   norm_map' := by
     intro ⟨a, x, hx⟩
     simp only [LinearMap.coe_mk, AddHom.coe_mk, AddSubgroupClass.coe_norm, ← hx,
