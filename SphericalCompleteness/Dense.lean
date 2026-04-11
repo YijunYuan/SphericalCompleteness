@@ -110,7 +110,7 @@ theorem exists_dist_lt_diam_iff_isSphericallyDense
   have := dist_le_diam_of_mem isBounded_closedBall hx hy
   linarith
 
-private lemma exists_sub_closedball_not_belong {α : Type*}
+private lemma exists_disjoint_subball {α : Type*}
 [PseudoMetricSpace α] [hiud : IsUltrametricDist α] [hα : IsSphericallyDense α]
 (c₀ : α) (r₀ : ℝ≥0) (r₁ : ℝ≥0) (hr : r₁ < r₀) (z : α) :
 ∃ c₁ : α,
@@ -138,7 +138,7 @@ private lemma exists_sub_closedball_not_belong {α : Type*}
     simp only [sup_le_iff]
     exact ⟨le_of_lt <| lt_of_le_of_lt ha hr, hx⟩
 
-private lemma exists_pos_dist (α : Type*)
+private lemma exists_pair_with_pos_dist (α : Type*)
 [PseudoMetricSpace α] [hα : IsSphericallyDense α] [nemp : Nonempty α] :
 ∃ z : α × α, nndist z.1 z.2 > 0 := by
   use ((exists_dist_lt_diam_of_isSphericallyDense hα nemp.some one_lt_two).choose,
@@ -146,76 +146,76 @@ private lemma exists_pos_dist (α : Type*)
   exact lt_trans zero_lt_one (exists_dist_lt_diam_of_isSphericallyDense
     hα nemp.some one_lt_two).choose_spec.choose_spec.2.2.out.1
 
-private noncomputable def funk_radius (α : Type*)
+private noncomputable def shrinkingRadius (α : Type*)
 [PseudoMetricSpace α] [hα : IsSphericallyDense α] [nemp : Nonempty α] (n : ℕ) : ℝ≥0 :=
-(nndist (exists_pos_dist α).choose.1 (exists_pos_dist α).choose.2)
+(nndist (exists_pair_with_pos_dist α).choose.1 (exists_pair_with_pos_dist α).choose.2)
   * (1 + 1 / (n + 1))
 
-private lemma funk_radius_strictanti (α : Type*)
+private lemma shrinkingRadius_strictanti (α : Type*)
 [PseudoMetricSpace α] [hα : IsSphericallyDense α] [nemp : Nonempty α] :
-StrictAnti (fun n => funk_radius α n) := by
+StrictAnti (fun n => shrinkingRadius α n) := by
   refine strictAnti_nat_of_succ_lt fun n↦ ?_
-  unfold funk_radius
-  refine (mul_lt_mul_iff_right₀ (exists_pos_dist α).choose_spec).mpr ?_
+  unfold shrinkingRadius
+  refine (mul_lt_mul_iff_right₀ (exists_pair_with_pos_dist α).choose_spec).mpr ?_
   simp only [Nat.cast_add, Nat.cast_one, one_div, add_lt_add_iff_left, ne_eq,
     AddLeftCancelMonoid.add_eq_zero, Nat.cast_eq_zero, one_ne_zero, and_false, not_false_eq_true,
     lt_inv_iff_mul_lt]
   field_simp
   norm_num
 
-private lemma funk_radius_range (α : Type*)
+private lemma shrinkingRadius_range (α : Type*)
 [PseudoMetricSpace α] [hα : IsSphericallyDense α] [nemp : Nonempty α] (n : ℕ) :
-(funk_radius α n) > (funk_radius α 0) / 2 := by
-  unfold funk_radius
+(shrinkingRadius α n) > (shrinkingRadius α 0) / 2 := by
+  unfold shrinkingRadius
   rw [mul_div_assoc]
-  refine (mul_lt_mul_iff_right₀ (exists_pos_dist α).choose_spec).mpr ?_
+  refine (mul_lt_mul_iff_right₀ (exists_pair_with_pos_dist α).choose_spec).mpr ?_
   simp only [CharP.cast_eq_zero, zero_add, ne_eq, one_ne_zero, not_false_eq_true, div_self,
     add_self_div_two, one_div, lt_add_iff_pos_right, inv_pos, add_pos_iff, Nat.cast_pos,
     zero_lt_one, or_true]
 
-private noncomputable def funk_chain_of_ball {α : Type*} [PseudoMetricSpace α]
+private noncomputable def nestedBallChain {α : Type*} [PseudoMetricSpace α]
 [hiud : IsUltrametricDist α] [hα : IsSphericallyDense α]
 [nemp : Nonempty α] [hsep : SeparableSpace α]
 (hα' : Denumerable hsep.exists_countable_dense.choose) (n : ℕ) : α × ℝ≥0 :=
   match n with
-  | 0 => ((exists_pos_dist α).choose.1, funk_radius α 0)
-  | n + 1 => ⟨((exists_sub_closedball_not_belong (funk_chain_of_ball hα' n).1 (funk_radius α n)
-      (funk_radius α (n + 1)) <| funk_radius_strictanti α (lt_add_one n))
-        (hα'.ofNat hsep.exists_countable_dense.choose n)).choose, funk_radius α (n+1)⟩
+  | 0 => ((exists_pair_with_pos_dist α).choose.1, shrinkingRadius α 0)
+  | n + 1 => ⟨((exists_disjoint_subball (nestedBallChain hα' n).1 (shrinkingRadius α n)
+      (shrinkingRadius α (n + 1)) <| shrinkingRadius_strictanti α (lt_add_one n))
+        (hα'.ofNat hsep.exists_countable_dense.choose n)).choose, shrinkingRadius α (n+1)⟩
 
-private lemma funk_chain_of_ball_decreasing (α : Type*) [PseudoMetricSpace α]
+private lemma nestedBallChain_decreasing (α : Type*) [PseudoMetricSpace α]
 [hiud : IsUltrametricDist α] [hα : IsSphericallyDense α]
 [nemp : Nonempty α] [hsep : SeparableSpace α]
 (hα' : Denumerable hsep.exists_countable_dense.choose) :
-Antitone (fun n => closedBall (funk_chain_of_ball hα' n).1 (funk_chain_of_ball hα' n).2) := by
+Antitone (fun n => closedBall (nestedBallChain hα' n).1 (nestedBallChain hα' n).2) := by
   refine antitone_nat_of_succ_le <| fun n ↦ ?_
-  simp only [funk_chain_of_ball, mem_closedBall, dist_le_coe, not_le, Set.le_eq_subset]
-  have := ((exists_sub_closedball_not_belong (funk_chain_of_ball hα' n).1 (funk_radius α n)
-      (funk_radius α (n + 1)) <| funk_radius_strictanti α (lt_add_one n))
+  simp only [nestedBallChain, mem_closedBall, dist_le_coe, not_le, Set.le_eq_subset]
+  have := ((exists_disjoint_subball (nestedBallChain hα' n).1 (shrinkingRadius α n)
+      (shrinkingRadius α (n + 1)) <| shrinkingRadius_strictanti α (lt_add_one n))
         (hα'.ofNat hsep.exists_countable_dense.choose n)).choose_spec.1
-  conv => arg 2; arg 2; unfold funk_chain_of_ball
+  conv => arg 2; arg 2; unfold nestedBallChain
   cases n
   · simp only [zero_add, mem_closedBall, dist_le_coe, not_le] at *
     exact this
   · simp only [mem_closedBall, dist_le_coe, not_le] at *
     exact this
 
-private lemma not_in_funk_chain_of_ball (α : Type*) [PseudoMetricSpace α]
+private lemma not_in_nestedBallChain (α : Type*) [PseudoMetricSpace α]
 [hiud : IsUltrametricDist α] [hα : IsSphericallyDense α]
 [nemp : Nonempty α] [hsep : SeparableSpace α]
 (hα' : Denumerable hsep.exists_countable_dense.choose) (n : ℕ) :
 (hα'.ofNat hsep.exists_countable_dense.choose n).val ∉
-closedBall (funk_chain_of_ball hα' (n + 1)).1 (funk_chain_of_ball hα' (n + 1)).2 :=
-  ((exists_sub_closedball_not_belong (funk_chain_of_ball hα' n).1 (funk_radius α n)
-      (funk_radius α (n + 1)) <| funk_radius_strictanti α (lt_add_one n))
+closedBall (nestedBallChain hα' (n + 1)).1 (nestedBallChain hα' (n + 1)).2 :=
+  ((exists_disjoint_subball (nestedBallChain hα' n).1 (shrinkingRadius α n)
+      (shrinkingRadius α (n + 1)) <| shrinkingRadius_strictanti α (lt_add_one n))
         (hα'.ofNat hsep.exists_countable_dense.choose n)).choose_spec.2
 
-private lemma funk_chain_radius_eq (α : Type*) [PseudoMetricSpace α]
+private lemma nestedBallChain_radius_eq (α : Type*) [PseudoMetricSpace α]
 [hiud : IsUltrametricDist α] [hα : IsSphericallyDense α]
 [nemp : Nonempty α] [hsep : SeparableSpace α]
 (hα' : Denumerable hsep.exists_countable_dense.choose) (n : ℕ) :
-(funk_chain_of_ball hα' n).2 = (funk_radius α n):= by
-  unfold funk_chain_of_ball
+(nestedBallChain hα' n).2 = (shrinkingRadius α n):= by
+  unfold nestedBallChain
   cases n
   · simp only
   · simp only
@@ -244,22 +244,22 @@ theorem not_sphericallyCompleteSpace_of_isSphericallyDense_separable_ultrametric
   by_contra hc
   replace hc := hc.isSphericallyComplete
   if hinf : Nonempty (Denumerable hsep.exists_countable_dense.choose) then
-    specialize hc <| funk_chain_of_ball_decreasing α hinf.some
+    specialize hc <| nestedBallChain_decreasing α hinf.some
     simp only [Set.nonempty_iInter] at hc
     rcases hc with ⟨z,hz⟩
-    have : ∀ i : ℕ, ball z ((funk_radius α 0) / 2) ⊆
-      closedBall (funk_chain_of_ball hinf.some i).1 ↑(funk_chain_of_ball hinf.some i).2 := by
+    have : ∀ i : ℕ, ball z ((shrinkingRadius α 0) / 2) ⊆
+      closedBall (nestedBallChain hinf.some i).1 ↑(nestedBallChain hinf.some i).2 := by
       intro i t ht
       simp only [mem_closedBall, mem_ball] at *
       refine le_trans (hiud.dist_triangle_max _ z _) ?_
-      replace ht := lt_trans ht ((funk_chain_radius_eq α hinf.some i) ▸ funk_radius_range α i)
+      replace ht := lt_trans ht ((nestedBallChain_radius_eq α hinf.some i) ▸ shrinkingRadius_range α i)
       simpa only [sup_le_iff] using ⟨le_of_lt ht, hz i⟩
     have : ∀ i : ℕ, ((hinf.some.ofNat hsep.exists_countable_dense.choose i)).val ∉
-      ball z ((funk_radius α 0) / 2) := by
+      ball z ((shrinkingRadius α 0) / 2) := by
       intro i
       by_contra hc
-      exact (not_in_funk_chain_of_ball α hinf.some i) <| (this (i + 1) hc)
-    have : Disjoint hsep.exists_countable_dense.choose (ball z ((funk_radius α 0) / 2)) := by
+      exact (not_in_nestedBallChain α hinf.some i) <| (this (i + 1) hc)
+    have : Disjoint hsep.exists_countable_dense.choose (ball z ((shrinkingRadius α 0) / 2)) := by
       refine Set.disjoint_iff_forall_ne.mpr ?_
       intro a ha b hb
       by_contra hc
@@ -269,10 +269,10 @@ theorem not_sphericallyCompleteSpace_of_isSphericallyDense_separable_ultrametric
       exact this hb
     have := hsep.exists_countable_dense.choose_spec.2.closure_eq ▸
       Disjoint.closure_left this isOpen_ball
-    simp only [funk_radius, gt_iff_lt, CharP.cast_eq_zero, zero_add, ne_eq, one_ne_zero,
+    simp only [shrinkingRadius, gt_iff_lt, CharP.cast_eq_zero, zero_add, ne_eq, one_ne_zero,
       not_false_eq_true, div_self, one_add_one_eq_two, NNReal.coe_mul, NNReal.coe_ofNat,
       OfNat.ofNat_ne_zero, mul_div_cancel_right₀, Set.univ_disjoint, ball_eq_empty] at this
-    exact (not_lt.2 this) (exists_pos_dist α).choose_spec
+    exact (not_lt.2 this) (exists_pair_with_pos_dist α).choose_spec
   else
     have : ¬ Infinite hsep.exists_countable_dense.choose := by
       by_contra hc
@@ -284,12 +284,12 @@ theorem not_sphericallyCompleteSpace_of_isSphericallyDense_separable_ultrametric
     let S := Set.image (fun (x : α × α) => (nndist x.1 x.2)) {x : α × α | x.1 ≠ x.2}
     have hfin := Set.toFinite ((fun (x : α × α) ↦ nndist x.1 x.2) '' {x | x.1 ≠ x.2})
     have hnemp : S.Nonempty := by
-      use nndist (exists_pos_dist α).choose.1 (exists_pos_dist α).choose.2
+      use nndist (exists_pair_with_pos_dist α).choose.1 (exists_pair_with_pos_dist α).choose.2
       simp only [ne_eq, gt_iff_lt, Set.mem_image, Set.mem_setOf_eq, Prod.exists, S]
-      use (exists_pos_dist α).choose.1, (exists_pos_dist α).choose.2
+      use (exists_pair_with_pos_dist α).choose.1, (exists_pair_with_pos_dist α).choose.2
       simp only [gt_iff_lt, and_true]
       by_contra hc
-      have := hc ▸ (exists_pos_dist α).choose_spec
+      have := hc ▸ (exists_pair_with_pos_dist α).choose_spec
       simp only [gt_iff_lt, nndist_self, lt_self_iff_false] at this
     let r₀ := sInf S / 2
     have r₀pos : r₀ > 0 := by

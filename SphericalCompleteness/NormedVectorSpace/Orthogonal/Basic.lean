@@ -36,7 +36,7 @@ lemma orth_symm {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 {E : Type*} [SeminormedAddCommGroup E]
 [NormedSpace 𝕜 E] [iud : IsUltrametricDist E] {x y : E} :
 (x ⟂[𝕜] y) ↔ (y ⟂[𝕜] x) :=
-  ⟨fun h => orth_of_orth h, fun h => orth_of_orth h⟩
+  ⟨orth_of_orth, orth_of_orth⟩
 
 lemma orth_iff_birkhoff_james_orth {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 {E : Type*} [SeminormedAddCommGroup E]
@@ -170,30 +170,20 @@ lemma morth_iff_forall_orth {𝕜 : Type*} [NontriviallyNormedField 𝕜]
   constructor
   · intro h y hy
     refine eq_of_le_of_not_lt ?_ ?_
-    · have := (@Metric.le_infDist E _
-        (↑(Submodule.span 𝕜 {y}) : Set E) x (infDist x ↑(Submodule.span 𝕜 {y}))
-        (Submodule.nonempty (Submodule.span 𝕜 {y}))).1 (le_refl _) (zero_mem _)
-      simpa only [ge_iff_le, dist_zero_right] using this
+    · simpa only [dist_zero_right] using
+        @infDist_le_dist_of_mem E _ _ x 0 (Submodule.zero_mem (Submodule.span 𝕜 {y}))
     · by_contra hc
-      rcases (@Metric.infDist_lt_iff E _
-        (↑(Submodule.span 𝕜 {y}) : Set E) x ‖x‖
-        (Submodule.nonempty (Submodule.span 𝕜 {y}))).1 hc with ⟨y',hy'⟩
-      refine lt_iff_not_ge.1 hy'.2 <| (@Metric.le_infDist E _ ↑F x ‖x‖ (Submodule.nonempty F)).1
-        (by
-          unfold MOrth at h
-          simp only [h, le_refl]) (by aesop : y' ∈ F)
+      rcases (infDist_lt_iff (Submodule.nonempty (Submodule.span 𝕜 {y}))).1 hc with ⟨y', hy'⟩
+      exact lt_iff_not_ge.1 hy'.2 <| (le_infDist (Submodule.nonempty F)).1
+        (by rw [h]) (by aesop : y' ∈ F)
   · intro h
     refine eq_of_le_of_not_lt ?_ ?_
-    · have := @Metric.infDist_le_dist_of_mem E _ ↑F x 0 (zero_mem _)
-      simpa only [ge_iff_le, dist_zero_right] using this
+    · simpa only [dist_zero_right] using infDist_le_dist_of_mem (Submodule.zero_mem F)
     · by_contra hc
-      rcases (@Metric.infDist_lt_iff E _
-        ↑F x ‖x‖ (Submodule.nonempty F)).1 hc with ⟨y,hy⟩
-      refine lt_iff_not_ge.1 hy.2 ?_
-      exact (h y hy.1) ▸ (@Metric.le_infDist E _ ↑(Submodule.span 𝕜 {y})
-        x (infDist x ↑(Submodule.span 𝕜 {y}))
-        (Submodule.nonempty (Submodule.span 𝕜 {y}))).1
-        (le_refl _) (Submodule.mem_span_singleton_self y)
+      rcases (infDist_lt_iff (Submodule.nonempty F)).1 hc with ⟨y, hy⟩
+      exact lt_iff_not_ge.1 hy.2 <|
+        (h y hy.1) ▸ (le_infDist (Submodule.nonempty (Submodule.span 𝕜 {y}))).1
+          le_rfl (Submodule.mem_span_singleton_self y)
 
 -- This is important, but it requires `NormedAddCommGroup` instead of `SeminormedAddCommGroup`
 theorem eq_zero_of_morth_of_mem {𝕜 : Type*} [NontriviallyNormedField 𝕜]
@@ -203,7 +193,7 @@ theorem eq_zero_of_morth_of_mem {𝕜 : Type*} [NontriviallyNormedField 𝕜]
   intro h1 h2
   unfold MOrth at h2
   rw [infDist_zero_of_mem h1] at h2
-  exact norm_eq_zero.mp (id (Eq.symm h2))
+  exact norm_eq_zero.mp h2.symm
 
 theorem smul_morth_of_morth {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 {E : Type u_2} [SeminormedAddCommGroup E]
@@ -234,10 +224,9 @@ theorem not_morth_iff_exists_dist_lt_norm {𝕜 : Type*} [NontriviallyNormedFiel
   · intro h
     contrapose h
     push_neg at h
-    refine eq_of_le_of_ge ?_ <| (le_infDist <| Submodule.nonempty F).2 h
-    nth_rw 2 [← sub_zero x]
-    rw [← dist_eq_norm]
-    exact infDist_le_dist_of_mem (by simp)
+    exact eq_of_le_of_ge
+      (by simpa only [dist_zero_right] using infDist_le_dist_of_mem (by simp : (0 : E) ∈ ↑F))
+      ((le_infDist <| Submodule.nonempty F).2 h)
   · intro h
     contrapose h
     push_neg
@@ -262,6 +251,6 @@ theorem sorth_symm {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 {E : Type*} [SeminormedAddCommGroup E]
 [NormedSpace 𝕜 E] [IsUltrametricDist E] {F1 F2 : Subspace 𝕜 E} :
 (F1 ⟂ₛ F2) ↔ (F2 ⟂ₛ F1) :=
-  ⟨fun h => sorth_of_sorth h, fun h => sorth_of_sorth h⟩
+  ⟨sorth_of_sorth, sorth_of_sorth⟩
 
 end SphericallyCompleteSpace

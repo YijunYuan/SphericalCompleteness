@@ -163,10 +163,9 @@ noncomputable def rooij_lemma_4_4_T_linear {𝕜 : Type*}
   (hε3 : ∀ (U : ↑𝒰) (x : ↥D), ‖S x - U.val ↑x‖ ≤ ε U * ‖x‖) :
   IsLinearMap 𝕜 (rooij_lemma_4_4_T ha1 S h𝒰 hε1 hε2 hε3) where
   map_add x1 x2 := by
-    have hadd := (Submodule.mem_sup.1 (x1 + x2).prop).choose_spec.2.choose_spec.2
     unfold rooij_lemma_4_4_T
     simp only
-    have := eq_and_eq_of_add_eq_add_of_not_mem_submodule_span_singleton ha1
+    have hdecomp := eq_and_eq_of_add_eq_add_of_not_mem_submodule_span_singleton ha1
       (Submodule.mem_sup.1 (x1 + x2).prop).choose
       (Submodule.mem_sup.1 (x1 + x2).prop).choose_spec.1
       (Submodule.mem_sup.1 (x1 + x2).prop).choose_spec.2.choose
@@ -187,43 +186,39 @@ noncomputable def rooij_lemma_4_4_T_linear {𝕜 : Type*}
         rw [(Submodule.mem_sup.1 x2.prop).choose_spec.2.choose_spec.2]
         exact rfl
         )
-    simp only [Submodule.add_eq_sup, Submodule.coe_add, this.1, map_add, Subtype.forall]
-    rw [add_assoc]
-    nth_rw 2 [← add_assoc]
-    have stupid : ∀ a b c d : F, a + (b + c + d) = (a + c) + (b + d) := by
-      intro a b c d
-      abel
-    rw [stupid]
-    have stupid : ∀ a b c d : F, a = b → c = d → a + c = b + d := by
-      intro a b c d hab hcd
-      rw [hab, hcd]
-    apply stupid
-    · rw [← S.map_add]
-      congr
-    · rw [← add_smul]
-      congr
-      replace := this.2
+    have hS :
+        S ⟨(Submodule.mem_sup.1 (x1 + x2).prop).choose,
+          (Submodule.mem_sup.1 (x1 + x2).prop).choose_spec.1⟩ =
+        S (⟨(Submodule.mem_sup.1 x1.prop).choose,
+            (Submodule.mem_sup.1 x1.prop).choose_spec.1⟩ +
+          ⟨(Submodule.mem_sup.1 x2.prop).choose,
+            (Submodule.mem_sup.1 x2.prop).choose_spec.1⟩) := by
+      exact congrArg S <| Subtype.ext hdecomp.1
+    have hsmul :
+        (Submodule.mem_span_singleton.1
+          (Submodule.mem_sup.1 (x1 + x2).prop).choose_spec.2.choose_spec.1).choose =
+        (Submodule.mem_span_singleton.1
+          (Submodule.mem_sup.1 x1.prop).choose_spec.2.choose_spec.1).choose +
+        (Submodule.mem_span_singleton.1
+          (Submodule.mem_sup.1 x2.prop).choose_spec.2.choose_spec.1).choose := by
+      have hspan := hdecomp.2
       rw [← (Submodule.mem_span_singleton.1
             (Submodule.mem_sup.1 x1.prop).choose_spec.2.choose_spec.1).choose_spec,
           ← (Submodule.mem_span_singleton.1
             (Submodule.mem_sup.1 x2.prop).choose_spec.2.choose_spec.1).choose_spec,
           ← (Submodule.mem_span_singleton.1
             (Submodule.mem_sup.1 (x1 + x2).prop).choose_spec.2.choose_spec.1).choose_spec,
-          ← add_smul] at this
+          ← add_smul] at hspan
       have ha : a ≠ 0 := by
         by_contra hc
         contrapose ha1
         simp only [hc, zero_mem]
-      have := smul_left_injective _ ha this
-      rw [← this]
-      simp_all only [Subtype.forall, le_sup_iff, AddSubgroupClass.coe_norm,
-      Submodule.add_eq_sup, Submodule.coe_add, implies_true, ne_eq]
+      exact smul_left_injective _ ha hspan
+    rw [hS, S.map_add, hsmul, add_smul]
+    abel
   map_smul k m := by
     unfold rooij_lemma_4_4_T
     simp only
-    have stupid : ∀ a b c d : F, a = b → c = d → a + c = b + d := by
-      intro a b c d hab hcd
-      rw [hab, hcd]
     have := eq_and_eq_of_add_eq_add_of_not_mem_submodule_span_singleton ha1
         (Submodule.mem_sup.1 (k • m).prop).choose
         (Submodule.mem_sup.1 (k • m).prop).choose_spec.1
@@ -242,7 +237,7 @@ noncomputable def rooij_lemma_4_4_T_linear {𝕜 : Type*}
         rfl
         )
     rw [smul_add, ← S.map_smul]
-    apply stupid
+    congr 1
     · congr
       rw [this.1]
     · rw [smul_smul]
@@ -275,34 +270,24 @@ noncomputable def rooij_lemma_4_4_T_boundedlinear {𝕜 : Type*}
     refine ⟨lt_max_of_lt_left <| hε1 _, fun x => ?_⟩
     unfold rooij_lemma_4_4_T
     simp only
-    have tt := (rooij_lemma_4_4_z0_prop ha1 S h𝒰 hε1 hε2 hε3)
-      ⟨(Submodule.mem_sup.1 x.prop).choose, (Submodule.mem_sup.1 x.prop).choose_spec.1⟩
-      ((Submodule.mem_span_singleton.1
-      (Submodule.mem_sup.1 x.prop).choose_spec.2.choose_spec.1).choose) ⟨h𝒰.some, h𝒰.some_mem⟩
-    have : S ⟨(Submodule.mem_sup.1 x.prop).choose, (Submodule.mem_sup.1 x.prop).choose_spec.1⟩ +
-      ((Submodule.mem_span_singleton.1
-      (Submodule.mem_sup.1 x.prop).choose_spec.2.choose_spec.1).choose) •
-      (rooij_lemma_4_4_z0 ha1 S h𝒰 hε1 hε2 hε3).choose =
-      S ⟨(Submodule.mem_sup.1 x.prop).choose, (Submodule.mem_sup.1 x.prop).choose_spec.1⟩ +
-      ((Submodule.mem_span_singleton.1
-      (Submodule.mem_sup.1 x.prop).choose_spec.2.choose_spec.1).choose) •
-      (rooij_lemma_4_4_z0 ha1 S h𝒰 hε1 hε2 hε3).choose
-      - h𝒰.some ((Submodule.mem_sup.1 x.prop).choose + ((Submodule.mem_span_singleton.1
-      (Submodule.mem_sup.1 x.prop).choose_spec.2.choose_spec.1).choose) • a)
-      + h𝒰.some ((Submodule.mem_sup.1 x.prop).choose + ((Submodule.mem_span_singleton.1
-      (Submodule.mem_sup.1 x.prop).choose_spec.2.choose_spec.1).choose) • a)
-       := by
-      simp only [sub_add_cancel]
-    rw [this, max_mul_of_nonneg _ _ (norm_nonneg x)]
-    have := (Submodule.mem_sup.1 x.prop).choose_spec.2.choose_spec.2
+    set d := (Submodule.mem_sup.1 x.prop).choose
+    set hd := (Submodule.mem_sup.1 x.prop).choose_spec.1
+    set l := (Submodule.mem_span_singleton.1
+      (Submodule.mem_sup.1 x.prop).choose_spec.2.choose_spec.1).choose
+    have tt := (rooij_lemma_4_4_z0_prop ha1 S h𝒰 hε1 hε2 hε3) ⟨d, hd⟩ l ⟨h𝒰.some, h𝒰.some_mem⟩
+    rw [show S ⟨d, hd⟩ + l • (rooij_lemma_4_4_z0 ha1 S h𝒰 hε1 hε2 hε3).choose =
+      S ⟨d, hd⟩ + l • (rooij_lemma_4_4_z0 ha1 S h𝒰 hε1 hε2 hε3).choose
+      - h𝒰.some (d + l • a) + h𝒰.some (d + l • a) from by simp only [sub_add_cancel],
+      max_mul_of_nonneg _ _ (norm_nonneg x)]
+    have hx_eq := (Submodule.mem_sup.1 x.prop).choose_spec.2.choose_spec.2
     rw [← (Submodule.mem_span_singleton.1
-      (Submodule.mem_sup.1 x.prop).choose_spec.2.choose_spec.1).choose_spec] at this
+      (Submodule.mem_sup.1 x.prop).choose_spec.2.choose_spec.1).choose_spec] at hx_eq
     refine le_trans (iud.norm_add_le_max _ _) ?_
     apply max_le_max
     · convert tt
       simp only [Submodule.add_eq_sup, AddSubgroupClass.coe_norm]
-      rw [this]
-    · rw [this]
+      rw [hx_eq]
+    · rw [hx_eq]
       exact ContinuousLinearMap.le_opNorm h𝒰.some ↑x
 
 lemma rooij_lemma_4_4_codim_1
@@ -522,21 +507,19 @@ private def isboundedlinearmap_of_glued_map (𝕜 : Type*) [NontriviallyNormedFi
       · intro x
         simp only [glued_map]
         haveI : Nonempty ↑P := Set.Nonempty.to_subtype hhP
-        let Mx := ((Submodule.mem_iSup_of_directed (fun p : P ↦ p.val.M)
+        set Mx := ((Submodule.mem_iSup_of_directed (fun p : P ↦ p.val.M)
           (by apply directed_chain; repeat assumption)).1 x.prop).choose
-        let hMx := ((Submodule.mem_iSup_of_directed (fun p : P ↦ p.val.M)
+        set hMx := ((Submodule.mem_iSup_of_directed (fun p : P ↦ p.val.M)
           (by apply directed_chain; repeat assumption)).1 x.prop).choose_spec
-        rw [← sub_add_cancel ((↑Mx : PartialExtension 𝕜 E F S 𝒰 h𝒰 ε).T ⟨↑x, hMx⟩) (h𝒰.some x.val)]
+        rw [show (↑Mx : PartialExtension 𝕜 E F S 𝒰 h𝒰 ε).T ⟨↑x, hMx⟩ =
+          (↑Mx : PartialExtension 𝕜 E F S 𝒰 h𝒰 ε).T ⟨↑x, hMx⟩ - h𝒰.some x.val + h𝒰.some x.val
+          from by simp only [sub_add_cancel]]
         refine le_trans (iudf.norm_add_le_max _ _) ?_
-        apply max_le
-        · refine le_trans (Mx.val.hU ⟨h𝒰.some, h𝒰.some_mem⟩ ⟨x.val, hMx⟩) ?_
-          rw [max_mul_of_nonneg]
-          · apply le_max_of_le_left
-            simp only [AddSubgroupClass.coe_norm, le_refl]
-          · exact norm_nonneg x
-        · rw [max_mul_of_nonneg]
-          · exact le_max_of_le_right <| ContinuousLinearMap.le_opNorm h𝒰.some ↑x
-          · exact norm_nonneg x
+        rw [max_mul_of_nonneg _ _ (norm_nonneg x)]
+        apply max_le_max
+        · exact le_trans (Mx.val.hU ⟨h𝒰.some, h𝒰.some_mem⟩ ⟨x.val, hMx⟩) le_rfl
+        · simp only [AddSubgroupClass.coe_norm]
+          exact ContinuousLinearMap.le_opNorm h𝒰.some ↑x
 
 private lemma bddAbove_of_chain_of_partial_extension (𝕜 : Type*) [NontriviallyNormedField 𝕜]
   {E : Type u_2} [SeminormedAddCommGroup E] [IsUltrametricDist E] [NormedSpace 𝕜 E]

@@ -42,48 +42,34 @@ private noncomputable def LinearIsometry.weakInv {𝕜 : Type*} [NontriviallyNor
 (f : E →ₗᵢ[𝕜] F) : LinearMap.range f.toLinearMap →ₗᵢ[𝕜] E where
   toFun := Function.invFun <| Set.rangeFactorization f
   map_add' x y := by
-    have : Function.Injective (Set.rangeFactorization f) := by
-      refine Set.rangeFactorization_injective.mpr ?_
-      exact LinearIsometry.injective f
-    have t := Function.rightInverse_invFun (@Set.rangeFactorization_surjective _ _ f)
-    unfold Function.RightInverse Function.LeftInverse at t
-    have tx := t x
-    have ty := t y
+    have hinj := Set.rangeFactorization_injective.mpr f.injective
+    have hsurj := @Set.rangeFactorization_surjective _ _ f
+    have t := Function.rightInverse_invFun hsurj
     apply_fun (Set.rangeFactorization f)
     rw [t (x + y)]
-    apply_fun Subtype.val
-    · simp only [Submodule.coe_add, Set.rangeFactorization_coe, map_add]
-      apply_fun Subtype.val at tx ty
-      simp only [Set.rangeFactorization_coe] at tx ty
-      rw [tx, ty]
-    · exact Subtype.val_injective
+    apply_fun Subtype.val using Subtype.val_injective
+    simp only [Submodule.coe_add, Set.rangeFactorization_coe, map_add]
+    have tx := t x; have ty := t y
+    apply_fun Subtype.val at tx ty using Subtype.val_injective
+    simp only [Set.rangeFactorization_coe] at tx ty
+    rw [tx, ty]
   map_smul' c x := by
     simp only [RingHom.id_apply]
+    have hinj := Set.rangeFactorization_injective.mpr f.injective
     apply_fun (Set.rangeFactorization f)
-    · apply_fun Subtype.val
-      · simp only [Set.rangeFactorization_coe, map_smul]
-        have t := Function.rightInverse_invFun (@Set.rangeFactorization_surjective _ _ f)
-        unfold Function.RightInverse Function.LeftInverse at t
-        have tc := t (c • x)
-        have tx := t x
-        apply_fun Subtype.val at tc tx
-        simp only [Set.rangeFactorization_coe, SetLike.val_smul] at tc tx
-        rw [tc, tx]
-      · exact Subtype.val_injective
-    · refine Set.rangeFactorization_injective.mpr ?_
-      exact LinearIsometry.injective f
+    · apply_fun Subtype.val using Subtype.val_injective
+      simp only [Set.rangeFactorization_coe, map_smul]
+      have t := Function.rightInverse_invFun (@Set.rangeFactorization_surjective _ _ f)
+      apply_fun Subtype.val at t using Subtype.val_injective
+      simp only [Set.rangeFactorization_coe, SetLike.val_smul] at t
+      rw [t (c • x), t x]
   norm_map' := by
-    simp only [LinearMap.coe_mk, AddHom.coe_mk, AddSubgroupClass.coe_norm, Subtype.forall,
-      LinearMap.mem_range, forall_exists_index]
-    intro a x h
-    simp only [← h]
-    have : f x = Set.rangeFactorization f x := by
-      simp only [Set.rangeFactorization_coe]
-    simp only [LinearIsometry.coe_toLinearMap, LinearIsometry.norm_map]
-    conv => arg 1; arg 1; arg 2; arg 1; rw [this]
-    have := Function.leftInverse_invFun
-      (Set.rangeFactorization_injective.mpr <| LinearIsometry.injective f) x
+    intro ⟨a, x, hx⟩
+    simp only [LinearMap.coe_mk, AddHom.coe_mk, AddSubgroupClass.coe_norm, ← hx,
+      LinearIsometry.coe_toLinearMap, LinearIsometry.norm_map]
     congr
+    exact Function.leftInverse_invFun
+      (Set.rangeFactorization_injective.mpr f.injective) x
 
 private lemma norm_map_of_isImmediate {𝕜 : Type*}
   [NontriviallyNormedField 𝕜] {E : Type u_2} [NormedAddCommGroup E] [NormedSpace 𝕜 E]

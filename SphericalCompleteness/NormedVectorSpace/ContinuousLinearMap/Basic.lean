@@ -46,46 +46,22 @@ SphericallyCompleteSpace (E →L[𝕜] F) := by
   have h𝒰 : 𝒰.Nonempty := by
     use c 0, 0
     simp only [Set.mem_univ, and_self]
-  let htriv : ↥(⊥ : Submodule 𝕜 E) →L[𝕜] F := by
-    refine { toLinearMap := IsLinearMap.mk' (fun _ => 0) ?_, cont := ?_ }
-    · refine { map_add := ?_, map_smul := ?_ }
-      · simp only [Submodule.mem_bot, add_zero, implies_true]
-      · simp only [Submodule.mem_bot, smul_zero, implies_true]
-    · exact continuous_of_const fun x ↦ congrFun rfl
+  let htriv : ↥(⊥ : Submodule 𝕜 E) →L[𝕜] F := 0
   have := @exists_extension_opNorm_le 𝕜 _ E _ _ _ ⊥ F _ _ _ _
     htriv 𝒰 h𝒰 (fun U => r U.prop.out.choose) (fun _ => hrnneg _) (by
     intro U V
-    simp only
-    let nu := U.prop.out.choose
-    let nv := V.prop.out.choose
+    set nu := U.prop.out.choose
+    set nv := V.prop.out.choose
     conv => arg 1; rw [← U.prop.out.choose_spec.2, ← V.prop.out.choose_spec.2]
     rcases @trichotomous ℕ (fun a b => a < b) inferInstance nu nv with hlt | heq | hgt
-    · specialize hsar hlt
-      unfold nu nv at hsar
-      have : max (↑(r U.prop.out.choose) : ℝ) ↑(r V.prop.out.choose) =
-        ↑(max (r U.prop.out.choose) (r V.prop.out.choose)) := rfl
-      rw [this, max_eq_left <| le_of_lt hsar, ← dist_eq_norm, dist_comm, ← mem_closedBall]
-      specialize hanti <| le_of_lt hlt
-      unfold nu nv at hanti
-      refine hanti ?_
-      simp only [Set.mem_univ, true_and, mem_closedBall, dist_self, NNReal.zero_le_coe]
-    · unfold nu nv at heq
-      rw [heq]
-      simp only [Set.mem_univ, true_and, sub_self, norm_zero, max_self, NNReal.zero_le_coe]
-    · specialize hsar hgt
-      unfold nu nv at hsar
-      have : max (↑(r U.prop.out.choose) : ℝ) ↑(r V.prop.out.choose) =
-        ↑(max (r U.prop.out.choose) (r V.prop.out.choose)) := rfl
-      rw [this, max_eq_right <| le_of_lt hsar, ← dist_eq_norm, ← mem_closedBall]
-      specialize hanti <| le_of_lt hgt
-      unfold nu nv at hanti
-      refine hanti ?_
-      simp only [Set.mem_univ, true_and, mem_closedBall, dist_self, NNReal.zero_le_coe]) (by
-      intro U x
-      simp only [Lean.Elab.WF.paramLet, ContinuousLinearMap.coe_mk', IsLinearMap.mk'_apply,
-        (Submodule.mem_bot _).1 x.prop, map_zero, sub_self, norm_zero, Set.mem_univ, true_and,
-        AddSubgroupClass.coe_norm, mul_zero, le_refl, htriv]
-      )
+    · rw [show max (↑(r nu) : ℝ) ↑(r nv) = ↑(max (r nu) (r nv)) from rfl,
+        max_eq_left <| le_of_lt (hsar hlt), ← dist_eq_norm, dist_comm, ← mem_closedBall]
+      exact (hanti <| le_of_lt hlt) (by simp [mem_closedBall])
+    · rw [heq]; simp
+    · rw [show max (↑(r nu) : ℝ) ↑(r nv) = ↑(max (r nu) (r nv)) from rfl,
+        max_eq_right <| le_of_lt (hsar hgt), ← dist_eq_norm, ← mem_closedBall]
+      exact (hanti <| le_of_lt hgt) (by simp [mem_closedBall])) (by
+    intro U x; simp [htriv])
   rcases this with ⟨T, _, hT2⟩
   use T
   simp only [Set.mem_iInter]
