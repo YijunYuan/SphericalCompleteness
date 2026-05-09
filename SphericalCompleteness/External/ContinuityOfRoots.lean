@@ -398,7 +398,7 @@ theorem continuity_of_roots₀ {𝕜 : Type u_1} [hn : NontriviallyNormedField �
     exact ⟨by simpa using hα, mul_nonneg (Real.zero_rpow_nonneg _) (stdGaussNorm_nonneg _)⟩
   else
   by_contra hc
-  push_neg at hc
+  push Not at hc
   have : IsAlgClosed (AlgebraicClosure 𝕜) := IsAlgClosure.isAlgClosed 𝕜
   have := Polynomial.Splits.aeval_eq_prod_aroots_of_monic (this.splits g.toAlgCl) hg α
   have t : (aeval α) g = g.toAlgCl.eval α := by

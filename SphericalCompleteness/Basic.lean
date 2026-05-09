@@ -241,7 +241,7 @@ theorem sphericallyCompleteSpace_iff_pairwise_inter_nonempty
       refine fun v hv => this v hv ?_
       simp only [mem_closedBall, dist_self, NNReal.zero_le_coe]
     else
-      push_neg at hw
+      push Not at hw
       replace hw : ∀ w ∈ S, sInf {x | ∃ w ∈ S, w.2 = x} < w.2 := by
         refine fun w hw' => lt_of_le_of_ne (csInf_le ?_ ?_) <| Ne.symm <| hw w hw'
         · simp only [Prod.exists, exists_eq_right, OrderBot.bddBelow]

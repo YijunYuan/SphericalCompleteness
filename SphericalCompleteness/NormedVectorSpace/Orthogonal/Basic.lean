@@ -76,7 +76,7 @@ lemma orth_iff {𝕜 : Type*} [NontriviallyNormedField 𝕜]
       · simp only [ha, zero_smul, zero_add, norm_zero, norm_nonneg, sup_of_le_right]
       · simp only [hb, zero_smul, add_zero, norm_zero, norm_nonneg, sup_of_le_left]
     else
-    push_neg at hab
+    push Not at hab
     refine eq_of_le_of_ge (iud.norm_add_le_max _ _) ?_
     apply max_le
     · rw [← sub_neg_eq_add, ← dist_eq_norm]
@@ -223,13 +223,13 @@ theorem not_morth_iff_exists_dist_lt_norm {𝕜 : Type*} [NontriviallyNormedFiel
   constructor
   · intro h
     contrapose h
-    push_neg at h
+    push Not at h
     exact eq_of_le_of_ge
       (by simpa only [dist_zero_right] using infDist_le_dist_of_mem (by simp : (0 : E) ∈ ↑F))
       ((le_infDist <| Submodule.nonempty F).2 h)
   · intro h
     contrapose h
-    push_neg
+    push Not
     rw [← h]
     exact fun z hz => infDist_le_dist_of_mem hz
 

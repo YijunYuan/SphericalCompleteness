@@ -56,25 +56,44 @@ lemma rooij_lemma_4_4_z0 {𝕜 : Type*}
         replace hε2 := mul_le_mul_of_nonneg_right hε2 (norm_nonneg (y + a))
         replace hε2 := le_trans (ContinuousLinearMap.le_opNorm (U.val - V.val) (y + a)) hε2
         refine le_trans (max_le_max hε2 hε3) ?_
-        have : max (max (ε U) (ε V) * ‖↑y + a‖) (ε U * ‖x - y‖) ≤
+        have hmax_bound : max (max (ε U) (ε V) * ‖↑y + a‖) (ε U * ‖x - y‖) ≤
           max ((ε V) * ‖↑y + a‖) (ε U * ‖x - y‖) := by
           refine sup_le_sup_right ?_ (ε U * ‖x - y‖)
           exact mul_le_mul_of_nonneg_right (max_le h <| le_refl (ε V)) (norm_nonneg _)
-        refine le_trans this ?_
-        have : ‖x - y‖ = ‖(x.val + a) + -(y.val + a)‖ := by
-          rw [← sub_eq_add_neg]
-          simp only [AddSubgroupClass.coe_norm, AddSubgroupClass.coe_sub, add_sub_add_right_eq_sub]
-        replace this : ‖x - y‖ ≤ max ‖x.val + a‖ ‖y.val + a‖:= by
-          rw [this]
+        refine le_trans hmax_bound ?_
+        have hxy_eq : ((x - y : D) : E) = (↑x + a) + -(↑y + a) := by
+          have hsubD :
+              (⟨↑x - ↑y, (Submodule.sub_mem_iff_left D y.prop).mpr x.prop⟩ : D) = x - y :=
+            rfl
+          have hsub : ((x - y : D) : E) = (↑x - ↑y : E) := by
+            exact (congrArg (fun z : D => (z : E)) hsubD).symm
+          calc
+            ((x - y : D) : E) = (↑x - ↑y : E) := hsub
+            _ = (↑x + a) + -(↑y + a) := by
+              simp [sub_eq_add_neg]
+        have hnorm_eq : ‖x - y‖ = ‖(x.val + a) + -(y.val + a)‖ := by
+          simpa using congrArg (fun z : E => ‖z‖) hxy_eq
+        have hnorm_le : ‖x - y‖ ≤ max ‖x.val + a‖ ‖y.val + a‖ := by
+          rw [hnorm_eq]
           refine le_trans (iude.norm_add_le_max _ _) ?_
           rw [norm_neg]
-        replace := mul_le_mul_of_nonneg_left this <| le_of_lt (hε1 U)
-        rw [mul_max_of_nonneg _ _ (le_of_lt (hε1 U))] at this
-        refine le_trans (max_le_max_left _ this) ?_
-        nth_rw 2 [max_comm]
-        rw [← max_assoc]
-        nth_rw 2 [max_eq_left]
-        exact mul_le_mul_of_nonneg_right h (norm_nonneg _)
+        have hmul_le : ε U * ‖x - y‖ ≤ max (ε U * ‖x + a‖) (ε U * ‖y + a‖) := by
+          refine le_trans (mul_le_mul_of_nonneg_left hnorm_le (le_of_lt (hε1 U))) ?_
+          rw [mul_max_of_nonneg _ _ (le_of_lt (hε1 U))]
+        have hy_le : ε U * ‖y + a‖ ≤ ε V * ‖y + a‖ := by
+          exact mul_le_mul_of_nonneg_right h (norm_nonneg _)
+        calc
+          max (ε V * ‖↑y + a‖) (ε U * ‖x - y‖)
+              ≤ max (ε V * ‖↑y + a‖) (max (ε U * ‖x + a‖) (ε U * ‖y + a‖)) :=
+                by
+                  apply max_le
+                  · exact le_max_left _ _
+                  · exact le_trans hmul_le (le_max_right _ _)
+          _ = max (max (ε V * ‖↑y + a‖) (ε U * ‖x + a‖)) (ε U * ‖y + a‖) := by
+                rw [max_assoc]
+          _ = max (ε V * ‖↑y + a‖) (ε U * ‖x + a‖) := by
+                apply max_eq_left
+                exact le_trans hy_le (le_max_left _ _)
       rcases le_sup_iff.1 this with hc | hc
       · use U.val ↑x + U.val a - S x
         simp only [Set.mem_inter_iff]
@@ -284,9 +303,12 @@ noncomputable def rooij_lemma_4_4_T_boundedlinear {𝕜 : Type*}
       (Submodule.mem_sup.1 x.prop).choose_spec.2.choose_spec.1).choose_spec] at hx_eq
     refine le_trans (iud.norm_add_le_max _ _) ?_
     apply max_le_max
-    · convert tt
-      simp only [Submodule.add_eq_sup, AddSubgroupClass.coe_norm]
-      rw [hx_eq]
+    · have hdx : (((⟨d, hd⟩ : D) : E) + l • a) = ↑x := by
+        simpa using hx_eq
+      have hnormx : ‖(((⟨d, hd⟩ : D) : E) + l • a)‖ = ‖x‖ := by
+        rw [hdx, Submodule.coe_norm]
+      rw [hnormx] at tt
+      simpa using tt
     · rw [hx_eq]
       exact ContinuousLinearMap.le_opNorm h𝒰.some ↑x
 
@@ -316,29 +338,49 @@ lemma rooij_lemma_4_4_codim_1
   · intro x
     unfold IsBoundedLinearMap.toContinuousLinearMap IsBoundedLinearMap.toLinearMap
       IsLinearMap.mk' rooij_lemma_4_4_T
-    simp only [Submodule.add_eq_sup, map_add, Subtype.forall, ContinuousLinearMap.coe_mk',
-      LinearMap.coe_mk, AddHom.coe_mk]
-    have : x.val ∈ D + Submodule.span 𝕜 {a} := Submodule.mem_sup_left x.prop
+    simp only [Submodule.add_eq_sup, map_add, Subtype.forall]
+    have hx_sup : x.val ∈ D + Submodule.span 𝕜 {a} := Submodule.mem_sup_left x.prop
     have t := eq_and_eq_of_add_eq_add_of_not_mem_submodule_span_singleton ha1
-      (Submodule.mem_sup.1 this).choose (Submodule.mem_sup.1 this).choose_spec.1
+      (Submodule.mem_sup.1 hx_sup).choose (Submodule.mem_sup.1 hx_sup).choose_spec.1
       ((Submodule.mem_span_singleton.1
-        (Submodule.mem_sup.1 this).choose_spec.2.choose_spec.1).choose • a)
+        (Submodule.mem_sup.1 hx_sup).choose_spec.2.choose_spec.1).choose • a)
       ((Submodule.mem_span_singleton.1
-        (Submodule.mem_sup.1 this).choose_spec.2.choose_spec.1).choose_spec.symm ▸
-        (Submodule.mem_sup.1 this).choose_spec.2.choose_spec.1)
+        (Submodule.mem_sup.1 hx_sup).choose_spec.2.choose_spec.1).choose_spec.symm ▸
+        (Submodule.mem_sup.1 hx_sup).choose_spec.2.choose_spec.1)
       x.val x.prop 0 (Submodule.zero_mem _)
     specialize t (by
       have := (Submodule.mem_span_singleton.1
-        (Submodule.mem_sup.1 this).choose_spec.2.choose_spec.1).choose_spec.symm ▸
-        (Submodule.mem_sup.1 this).choose_spec.2.choose_spec.2
+        (Submodule.mem_sup.1 hx_sup).choose_spec.2.choose_spec.1).choose_spec.symm ▸
+        (Submodule.mem_sup.1 hx_sup).choose_spec.2.choose_spec.2
       rw [this, add_zero]
       )
-    have := (smul_eq_zero_iff_left (by
+    have hscoeff0 := (smul_eq_zero_iff_left (by
       contrapose ha1
       simp only [ha1, zero_mem])).1 t.2
-    simp only [this, zero_smul, add_zero]
-    congr
-    exact t.1
+    have hx_sub :
+        (⟨(Submodule.mem_sup.1 hx_sup).choose,
+          (Submodule.mem_sup.1 hx_sup).choose_spec.1⟩ : D) = x := by
+      ext
+      exact t.1
+    let T : (D + Submodule.span 𝕜 {a}) →L[𝕜] F :=
+      (rooij_lemma_4_4_T_boundedlinear ha1 S h𝒰 hε1 hε2 hε3).toContinuousLinearMap
+    have hT : T ⟨↑x, hx_sup⟩ = S x := by
+      calc
+        T ⟨↑x, hx_sup⟩ = S ⟨(Submodule.mem_sup.1 hx_sup).choose,
+            (Submodule.mem_sup.1 hx_sup).choose_spec.1⟩ +
+            ((Submodule.mem_span_singleton.1
+              (Submodule.mem_sup.1 hx_sup).choose_spec.2.choose_spec.1).choose) •
+              (rooij_lemma_4_4_z0 ha1 S h𝒰 hε1 hε2 hε3).choose := by
+                rfl
+        _ = S ⟨(Submodule.mem_sup.1 hx_sup).choose,
+            (Submodule.mem_sup.1 hx_sup).choose_spec.1⟩ := by
+              rw [hscoeff0, zero_smul, add_zero]
+        _ = S x := congrArg S hx_sub
+    unfold T at hT
+    unfold IsBoundedLinearMap.toContinuousLinearMap IsBoundedLinearMap.toLinearMap
+      IsLinearMap.mk' rooij_lemma_4_4_T at hT
+    dsimp at hT
+    simpa using hT
   · intro U x hx
     unfold IsBoundedLinearMap.toContinuousLinearMap IsBoundedLinearMap.toLinearMap
       IsLinearMap.mk' rooij_lemma_4_4_T
@@ -518,8 +560,7 @@ private def isboundedlinearmap_of_glued_map (𝕜 : Type*) [NontriviallyNormedFi
         rw [max_mul_of_nonneg _ _ (norm_nonneg x)]
         apply max_le_max
         · exact le_trans (Mx.val.hU ⟨h𝒰.some, h𝒰.some_mem⟩ ⟨x.val, hMx⟩) le_rfl
-        · simp only [AddSubgroupClass.coe_norm]
-          exact ContinuousLinearMap.le_opNorm h𝒰.some ↑x
+        · exact ContinuousLinearMap.le_opNorm h𝒰.some ↑x
 
 private lemma bddAbove_of_chain_of_partial_extension (𝕜 : Type*) [NontriviallyNormedField 𝕜]
   {E : Type u_2} [SeminormedAddCommGroup E] [IsUltrametricDist E] [NormedSpace 𝕜 E]
@@ -536,42 +577,42 @@ private lemma bddAbove_of_chain_of_partial_extension (𝕜 : Type*) [Nontriviall
           (isboundedlinearmap_of_glued_map 𝕜 h𝒰 ε hε1 P hP hhP)
         hT := by
           intro d
-          simp only [IsBoundedLinearMap.toContinuousLinearMap, IsBoundedLinearMap.toLinearMap,
-            ContinuousLinearMap.coe_mk', IsLinearMap.mk'_apply, glued_map]
+          simp only [IsBoundedLinearMap.toContinuousLinearMap, IsBoundedLinearMap.toLinearMap]
           haveI : Nonempty ↑P := Set.Nonempty.to_subtype hhP
           have : D ≤ iSup (fun p : P ↦ p.val.M) := fun z hz => (Submodule.mem_iSup _).2 <|
             fun N hN => (le_trans hhP.some.hDM <| hN ⟨hhP.some, hhP.some_mem⟩) hz
-          rw [((Submodule.mem_iSup_of_directed (fun p : P ↦ p.val.M)
-            (by apply directed_chain; repeat assumption)).1 <| this d.prop).choose.val.hT]
+          let Md := ((Submodule.mem_iSup_of_directed (fun p : P ↦ p.val.M)
+            (by apply directed_chain; repeat assumption)).1 <| this d.prop).choose
+          let hMd := ((Submodule.mem_iSup_of_directed (fun p : P ↦ p.val.M)
+            (by apply directed_chain; repeat assumption)).1 <| this d.prop).choose_spec
+          simpa only [Md, hMd, IsBoundedLinearMap.toContinuousLinearMap,
+            IsBoundedLinearMap.toLinearMap] using Md.val.hT d
         hU := by
           intro U x
-          simp only [IsBoundedLinearMap.toContinuousLinearMap, IsBoundedLinearMap.toLinearMap,
-            ContinuousLinearMap.coe_mk', IsLinearMap.mk'_apply, glued_map,
-            AddSubgroupClass.coe_norm]
+          simp only [IsBoundedLinearMap.toContinuousLinearMap, IsBoundedLinearMap.toLinearMap]
           haveI : Nonempty ↑P := Set.Nonempty.to_subtype hhP
           let Mx := ((Submodule.mem_iSup_of_directed (fun p : P ↦ p.val.M)
             (by apply directed_chain; repeat assumption)).1 x.prop).choose
           let hMx := ((Submodule.mem_iSup_of_directed (fun p : P ↦ p.val.M)
             (by apply directed_chain; repeat assumption)).1 x.prop).choose_spec
-          simpa only [ge_iff_le, AddSubgroupClass.coe_norm] using Mx.val.hU U ⟨x.val, hMx⟩
+          simpa only [ge_iff_le, Submodule.coe_norm] using Mx.val.hU U ⟨x.val, hMx⟩
       }
   simp only [upperBounds, Set.mem_setOf_eq]
   intro M hM
   unfold LE.le instPartialOrderPartialExtension
-  simp only [Subtype.forall, not_exists, not_forall]
   have hM' : M.M ≤ ⨆ (p : ↑P), (↑p : PartialExtension 𝕜 E F S 𝒰 h𝒰 ε).M :=
     fun z hz => Submodule.mem_iSup_of_mem ⟨M,hM⟩ hz
   use hM'
-  intro a ha
-  simp only [IsBoundedLinearMap.toContinuousLinearMap, IsBoundedLinearMap.toLinearMap,
-    ContinuousLinearMap.coe_mk', IsLinearMap.mk'_apply, glued_map]
+  intro a
+  change glued_map 𝕜 h𝒰 ε P hP hhP ⟨↑a, hM' a.prop⟩ = M.T a
+  simp only [glued_map]
   haveI : Nonempty ↑P := Set.Nonempty.to_subtype hhP
   let Ma := ((Submodule.mem_iSup_of_directed (fun p : P ↦ p.val.M)
-    (by apply directed_chain; repeat assumption)).1 (hM' ha)).choose
+    (by apply directed_chain; repeat assumption)).1 (hM' a.prop)).choose
   let hMa := ((Submodule.mem_iSup_of_directed (fun p : P ↦ p.val.M)
-    (by apply directed_chain; repeat assumption)).1 (hM' ha)).choose_spec
+    (by apply directed_chain; repeat assumption)).1 (hM' a.prop)).choose_spec
   rcases hP.directed Ma ⟨M,hM⟩ with ⟨Mfinal, hMfinal1, hMfinal2⟩
-  rw [← hMfinal1.choose_spec ⟨a, hMa⟩, ← hMfinal2.choose_spec ⟨a, ha⟩]
+  exact (hMfinal1.choose_spec ⟨↑a, hMa⟩).symm.trans (hMfinal2.choose_spec a)
 
 
 /--
@@ -653,8 +694,10 @@ lemma exists_extension_opNorm_le
     apply IsBoundedLinearMap.comp (ContinuousLinearMap.isBoundedLinearMap W.T)
     refine { toIsLinearMap :=
       { map_add := fun x ↦ congrFun rfl, map_smul := fun c ↦ congrFun rfl }, bound := ⟨1, ?_⟩ }
-    simp only [zero_lt_one, AddSubgroupClass.coe_norm, LinearEquiv.coe_ofTop_symm_apply, one_mul,
-      le_refl, implies_true, and_self]
+    constructor
+    · norm_num
+    · intro x
+      simp [one_mul]
   use IsBoundedLinearMap.toContinuousLinearMap _ fiblm
   constructor
   · intro D

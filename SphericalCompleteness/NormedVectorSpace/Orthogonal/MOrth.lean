@@ -45,23 +45,25 @@ noncomputable def direct_prod_iso_sum_of_orth (𝕜 : Type*) [NontriviallyNormed
       RingHom.id_apply, SetLike.mk_smul_mk, smul_add]
   norm_map' := by
     simp only [Submodule.add_eq_sup, LinearEquiv.coe_mk, LinearMap.coe_mk, AddHom.coe_mk,
-      AddSubgroupClass.coe_norm, Prod.forall, Prod.norm_mk, Subtype.forall]
+      Submodule.coe_norm, Prod.forall, Prod.norm_mk, Subtype.forall]
     intro a ha b hab
     if hh : a = 0 ∨ b = 0 then
       cases hh with
-      |inl hh => simp only [hh, zero_add, norm_zero, norm_nonneg, sup_of_le_right]
-      |inr hh => simp only [hh, add_zero, norm_zero, norm_nonneg, sup_of_le_left]
+      |inl hh => simp [hh]
+      |inr hh => simp [hh]
     else
       refine eq_of_le_of_not_lt (IsUltrametricDist.norm_add_le_max _ _) ?_
       by_contra hc
+      have ha_norm := Submodule.coe_norm ⟨a, ha⟩
+      have hb_norm := Submodule.coe_norm ⟨b, hab⟩
       if h : ‖b‖ ≤ ‖a‖ then
-        simp only [h, sup_of_le_left] at hc
+        rw [sup_of_le_left h] at hc
         have : dist a (-b) = ‖a + b‖ := by simp only [dist_eq_norm, sub_neg_eq_add]
         rw [← this, ← smul_morth_of_morth' 𝕜 x F hxF a ha] at hc
         exact (notMem_of_dist_lt_infDist hc) <| neg_mem hab
       else
         simp only [not_le] at h
-        simp only [sup_of_le_right <| le_of_lt h] at hc
+        rw [sup_of_le_right <| le_of_lt h] at hc
         have := IsUltrametricDist.norm_add_le_max (a + b) (-a)
         simp only [add_neg_cancel_comm, norm_neg, le_sup_iff] at this
         replace this := this.resolve_right <| not_le_of_gt h

@@ -24,7 +24,7 @@ def c₀ (𝕜 : Type*) [NontriviallyNormedField 𝕜]
   carrier := {f : lp E ⊤ | ∀ ε : ℝ, ε > 0 → ∃ N : ℕ, ∀ n ≥ N, ‖f n‖ ≤ ε}
   add_mem' := by
     intro a b ha hb
-    simp only [ge_iff_le, Set.mem_setOf_eq, AddSubgroup.coe_add, Pi.add_apply] at *
+    simp only [ge_iff_le, Set.mem_setOf_eq, AddSubgroup.coe_add] at *
     intro ε hε
     rcases ha (ε / 2) (by linarith) with ⟨Na, hNa⟩
     rcases hb (ε / 2) (by linarith) with ⟨Nb, hNb⟩
@@ -35,19 +35,21 @@ def c₀ (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     refine le_trans (norm_add_le _ _) ?_
     linarith
   zero_mem' := by
-    simp only [gt_iff_lt, ge_iff_le, Set.mem_setOf_eq, ZeroMemClass.coe_zero, Pi.zero_apply,
-      norm_zero]
+    simp only [gt_iff_lt, ge_iff_le, Set.mem_setOf_eq, ZeroMemClass.coe_zero]
     intro e he
     use 0
-    simpa only [zero_le, forall_const] using le_of_lt he
+    intro n hn
+    change ‖(0 : E n)‖ ≤ e
+    simpa using (le_of_lt he : (0 : ℝ) ≤ e)
   smul_mem' := by
     intro c x hx
     if hc : c = 0 then
-      simp only [gt_iff_lt, ge_iff_le, hc, zero_smul, Set.mem_setOf_eq, ZeroMemClass.coe_zero,
-        Pi.zero_apply, norm_zero]
+      simp only [gt_iff_lt, ge_iff_le, hc, zero_smul, Set.mem_setOf_eq, ZeroMemClass.coe_zero]
       intro e he
       use 0
-      simpa only [zero_le, forall_const] using le_of_lt he
+      intro n hn
+      change ‖(0 : E n)‖ ≤ e
+      simpa using (le_of_lt he : (0 : ℝ) ≤ e)
     else
     simp only [gt_iff_lt, ge_iff_le, Set.mem_setOf_eq, lp.coeFn_smul, Pi.smul_apply] at *
     intro ε hε
@@ -72,27 +74,46 @@ private lemma exists_norm_sub_lt {𝕜 : Type u_1} [inst : NontriviallyNormedFie
     rw [← dist_eq_norm, ← mem_closedBall]
     refine (hanti (Nat.le_succ (i + 1))) ?_
     simp only [mem_closedBall, dist_self, NNReal.zero_le_coe]
-  have tt := quotient_norm_mk_eq (c₀ 𝕜 E).toAddSubgroup
-  specialize tt (c (i + 2) - c (i + 1)).out
-  simp only [QuotientAddGroup.mk'_apply, Quotient.out_eq, Submodule.coe_toAddSubgroup] at tt
-  simp only [tt] at this
-  rw [csInf_lt_iff] at this
-  · rcases this with ⟨unp1, hlun, hens1⟩
+  have hnorm :
+      ‖(QuotientAddGroup.mk' (c₀ 𝕜 E).toAddSubgroup) ((c (i + 2) - c (i + 1)).out)‖ < ↑(r i) := by
+    have hout :
+        (QuotientAddGroup.mk' (c₀ 𝕜 E).toAddSubgroup) ((c (i + 2) - c (i + 1)).out) =
+          c (i + 2) - c (i + 1) := Quotient.out_eq' _
+    simpa [hout] using this
+  rw [quotient_norm_mk_eq (c₀ 𝕜 E).toAddSubgroup ((c (i + 2) - c (i + 1)).out)] at hnorm
+  rw [csInf_lt_iff] at hnorm
+  · rcases hnorm with ⟨unp1, hlun, hens1⟩
     rw [Set.mem_image] at hlun
     rcases hlun with ⟨lun, hlun, hlun_eq⟩
     rw [← hlun_eq] at hens1
     use (c (i + 2) - c (i + 1)).out + lun + aip1
     constructor
-    · have : (QuotientAddGroup.mk' (c₀ 𝕜 E).toAddSubgroup)
-        ((c (i + 2) - c (i + 1)).out + lun + aip1) =
-      (QuotientAddGroup.mk' (c₀ 𝕜 E).toAddSubgroup)
-        (c (i + 2) - c (i + 1)).out +
-      (QuotientAddGroup.mk' (c₀ 𝕜 E).toAddSubgroup) lun +
-      (QuotientAddGroup.mk' (c₀ 𝕜 E).toAddSubgroup) aip1 := by
-        simp only [QuotientAddGroup.mk'_apply, QuotientAddGroup.mk_add, Quotient.out_eq]
-      simp only [QuotientAddGroup.mk'_apply, QuotientAddGroup.mk_add, Quotient.out_eq]
-      have : (↑aip1 : ↥(lp E ⊤) ⧸ (c₀ 𝕜 E).toAddSubgroup) = c (i + 1) := hai
-      rw [(QuotientAddGroup.eq_zero_iff lun).mpr hlun, this]
+    · let q1 : ↥(lp E ⊤) ⧸ (c₀ 𝕜 E).toAddSubgroup := c (i + 2)
+      let q2 : ↥(lp E ⊤) ⧸ (c₀ 𝕜 E).toAddSubgroup := c (i + 1)
+      have hai' : (QuotientAddGroup.mk' (c₀ 𝕜 E).toAddSubgroup) aip1 = q2 := hai
+      have hout :
+          (QuotientAddGroup.mk' (c₀ 𝕜 E).toAddSubgroup)
+              ((c (i + 2) - c (i + 1)).out) = q1 - q2 := by
+        change (QuotientAddGroup.mk' (c₀ 𝕜 E).toAddSubgroup) ((c (i + 2) - c (i + 1)).out) =
+          (c (i + 2) - c (i + 1) : ↥(lp E ⊤) ⧸ (c₀ 𝕜 E).toAddSubgroup)
+        exact Quotient.out_eq' _
+      have hmk :
+          (QuotientAddGroup.mk' (c₀ 𝕜 E).toAddSubgroup) ((c (i + 2) - c (i + 1)).out + lun + aip1) =
+            (q1 - q2) +
+              (QuotientAddGroup.mk' (c₀ 𝕜 E).toAddSubgroup) lun +
+              (QuotientAddGroup.mk' (c₀ 𝕜 E).toAddSubgroup) aip1 := by
+        calc
+          (QuotientAddGroup.mk' (c₀ 𝕜 E).toAddSubgroup) ((c (i + 2) - c (i + 1)).out + lun + aip1)
+              = (QuotientAddGroup.mk' (c₀ 𝕜 E).toAddSubgroup) ((c (i + 2) - c (i + 1)).out) +
+                  (QuotientAddGroup.mk' (c₀ 𝕜 E).toAddSubgroup) lun +
+                  (QuotientAddGroup.mk' (c₀ 𝕜 E).toAddSubgroup) aip1 := by
+                    simp [add_assoc]
+          _ = (q1 - q2) +
+                (QuotientAddGroup.mk' (c₀ 𝕜 E).toAddSubgroup) lun +
+                (QuotientAddGroup.mk' (c₀ 𝕜 E).toAddSubgroup) aip1 := by rw [hout]
+      have hlun' : (QuotientAddGroup.mk' (c₀ 𝕜 E).toAddSubgroup) lun = 0 :=
+        (QuotientAddGroup.eq_zero_iff lun).mpr hlun
+      rw [hmk, hlun', hai']
       abel
     · simp only [add_sub_cancel_right, hens1]
   · use 0
@@ -110,8 +131,8 @@ private noncomputable def quotient_mk_section {𝕜 : Type u_1} [inst : Nontrivi
   (hanti : Antitone fun i ↦ Metric.closedBall (c i) ↑(r i)) :
   (k : ℕ) → {z : ↥(lp E ⊤) // (QuotientAddGroup.mk' (c₀ 𝕜 E).toAddSubgroup) z = c k} := fun n =>
   match n with
-  | 0 => ⟨(c 0).out, by simp⟩
-  | 1 => ⟨(c 1).out, by simp⟩
+  | 0 => ⟨(c 0).out, Quotient.out_eq' (c 0)⟩
+  | 1 => ⟨(c 1).out, Quotient.out_eq' (c 1)⟩
   | m + 2 =>
       ⟨(exists_norm_sub_lt E hsr hanti m
             (quotient_mk_section E hsr hanti (m + 1)).val
@@ -223,11 +244,15 @@ lemma quotient_norm_mk_le_of_eventually_norm_le {𝕜 : Type*} [NontriviallyNorm
   refine le_trans this ?_
   rw [lp.norm_eq_ciSup]
   refine ciSup_le <| fun k => ?_
-  simp only [dite_eq_ite, AddSubgroup.coe_add, Pi.add_apply, u]
+  simp only [dite_eq_ite, AddSubgroup.coe_add, u]
   if hk : k < N then
-    simpa only [if_pos hk, add_neg_cancel, norm_zero] using le_of_lt hC
+    change ‖A k + (if k < N then -A k else 0)‖ ≤ C
+    have hzero : A k + -A k = 0 := by abel
+    rw [if_pos hk, hzero, norm_zero]
+    exact le_of_lt hC
   else
-    simpa only [if_neg hk, add_zero] using hN k <| Nat.le_of_not_lt hk
+    change ‖A k + (if k < N then -A k else 0)‖ ≤ C
+    simpa only [if_neg hk, add_zero] using hN k (Nat.le_of_not_lt hk)
 
 /-
 `lp E ⊤` is the `ℓ∞`-type space of bounded sequences in the family `E : ℕ → Type*`.
@@ -247,7 +272,7 @@ SphericallyCompleteSpace ((lp E ⊤)⧸ c₀ 𝕜 E) := by
   intro c r hsr hanti
   let f : ∀ i, E i := fun i => (quotient_mk_section E hsr hanti i).val i
   have hf_mem : ↑(f) ∈ lp E ⊤ := by
-    simp only [lp, QuotientAddGroup.mk'_apply, AddSubgroup.mem_mk, AddSubmonoid.mem_mk,
+    simp only [lp, AddSubgroup.mem_mk, AddSubmonoid.mem_mk,
       AddSubsemigroup.mem_mk, Set.mem_setOf_eq, f]
     refine memℓp_infty <| bddAbove_def.mpr ?_
     simp only [Set.mem_range, forall_exists_index, forall_apply_eq_imp_iff]
@@ -261,16 +286,14 @@ SphericallyCompleteSpace ((lp E ⊤)⧸ c₀ 𝕜 E) := by
     unfold x
     intro n hn
     rw [← (mk_eq_and_norm_sub_lt E hsr hanti (n + 1)).1]
-    have : (QuotientAddGroup.mk' (c₀ 𝕜 E).toAddSubgroup) ⟨f, hf_mem⟩ - (QuotientAddGroup.mk'
-      (c₀ 𝕜 E).toAddSubgroup) ↑(quotient_mk_section E hsr hanti (n + 1)) = (QuotientAddGroup.mk'
-      (c₀ 𝕜 E).toAddSubgroup) (⟨f, hf_mem⟩ - (quotient_mk_section E hsr hanti (n + 1)).val) := rfl
-    rw [this]
+    change ‖(QuotientAddGroup.mk' (c₀ 𝕜 E).toAddSubgroup)
+      (⟨f, hf_mem⟩ - ↑(quotient_mk_section E hsr hanti (n + 1)))‖ ≤ ↑(r n)
     have := @quotient_norm_mk_le_of_eventually_norm_le 𝕜 _ E _ _ _
       (⟨f, hf_mem⟩ - ↑(quotient_mk_section E hsr hanti (n + 1))) (r n).val ?_ (n + 1) ?_
     · exact this
     · exact lt_of_le_of_lt (r (n + 1)).prop <| hsr <| lt_add_one n
     · intro m hm
-      simp only [QuotientAddGroup.mk'_apply, AddSubgroupClass.coe_sub, Pi.sub_apply,
+      simp only [QuotientAddGroup.mk'_apply, AddSubgroupClass.coe_sub,
         NNReal.val_eq_coe, f]
       have h : ‖(quotient_mk_section E hsr hanti m).val -
         (quotient_mk_section E hsr hanti (n + 1)).val‖
@@ -291,12 +314,9 @@ SphericallyCompleteSpace ((lp E ⊤)⧸ c₀ 𝕜 E) := by
           rw [(by omega : k - 1 + 2 = k + 1), (by omega : k - 1 + 1 = k)] at this
           exact le_of_lt <| lt_of_lt_of_le this <| hsr.antitone <| by omega
       refine le_trans ?_ h
-      have : (↑(quotient_mk_section E hsr hanti m).val : (i : ℕ) → E i)  m -
-        ((quotient_mk_section E hsr hanti (n + 1)).val : (i : ℕ) → E i) m =
-        (↑((quotient_mk_section E hsr hanti m).val -
-        (quotient_mk_section E hsr hanti (n + 1)).val) : (i : ℕ) → E i) m := rfl
-      rw [this]
-      apply lp.norm_apply_le_norm ENNReal.top_ne_zero
+      simpa [f] using lp.norm_apply_le_norm ENNReal.top_ne_zero
+        ((quotient_mk_section E hsr hanti m).val -
+          (quotient_mk_section E hsr hanti (n + 1)).val) m
   simp only [Set.mem_iInter]
   suffices h : ∀ i ≥ 1, x ∈ closedBall (c i) (r i) by
     exact fun i => (hanti <| Nat.le_add_right i 1) <| h (i + 1) (Nat.le_add_left 1 i)
@@ -309,18 +329,13 @@ SphericallyCompleteSpace ((lp E ⊤)⧸ c₀ 𝕜 E) := by
   refine (hanti (Nat.le_succ i)) ?_
   simp only [Nat.succ_eq_add_one, mem_closedBall, dist_self, NNReal.zero_le_coe]
 
--- Any non-Archimedean normed field 𝕜 has a spherically complete Banach space over it
-instance {𝕜 : Type*} [NontriviallyNormedField 𝕜] [IsUltrametricDist 𝕜] :
-SphericallyCompleteSpace ((lp (fun _ => 𝕜) ⊤)⧸ c₀ 𝕜 (fun _ => 𝕜))
-:= sphericallyCompleteSpace_lp_quotient_c₀ (fun _ => 𝕜)
-
 def sphericallyCompleteExtension (𝕜 : Type*) [NontriviallyNormedField 𝕜]
   (E : Type*) [NormedAddCommGroup E] [NormedSpace 𝕜 E] :
   E →ₗᵢ[𝕜] ((lp (fun (_ : ℕ) => E) ⊤)⧸ c₀ 𝕜 (fun (_ : ℕ) => E)) where
   toFun x := by
     refine (QuotientAddGroup.mk' (c₀ 𝕜 (fun x ↦ E)).toAddSubgroup) (⟨fun (_ : ℕ) => x, ?_⟩)
     have : (fun (_ : ℕ) => x) ∈ (lp (fun (_ : ℕ) => E) ⊤) := by
-      simp only [lp, AddSubgroup.mem_mk, AddSubmonoid.mem_mk, AddSubsemigroup.mem_mk]
+      simp only [lp]
       refine Set.mem_setOf.mpr ?_
       refine memℓp_infty ?_
       use ‖x‖
@@ -332,8 +347,20 @@ def sphericallyCompleteExtension (𝕜 : Type*) [NontriviallyNormedField 𝕜]
   norm_map' := by
     simp only [LinearMap.coe_mk, AddHom.coe_mk]
     intro x
-    rw [quotient_norm_mk_eq]
+    have hv : (fun (_ : ℕ) => x) ∈ lp (fun (_ : ℕ) => E) ⊤ := by
+      refine Set.mem_setOf.mpr ?_
+      refine memℓp_infty ?_
+      use ‖x‖
+      simp only [upperBounds, Set.range_const, Set.mem_singleton_iff, forall_eq, Set.mem_setOf_eq,
+        le_refl]
+    let v : lp (fun (_ : ℕ) => E) ⊤ := ⟨fun (_ : ℕ) => x, hv⟩
+    change ‖(QuotientAddGroup.mk' (c₀ 𝕜 fun _ ↦ E).toAddSubgroup) v‖ = ‖x‖
+    rw [quotient_norm_mk_eq (c₀ 𝕜 fun _ ↦ E).toAddSubgroup v]
     simp only [Submodule.coe_toAddSubgroup]
+    have hvnorm : ‖v‖ = ‖x‖ := by
+      rw [lp.norm_eq_ciSup]
+      change (⨆ _ : ℕ, ‖x‖) = ‖x‖
+      simp
     refine eq_of_le_of_ge ?_ ?_
     · apply csInf_le
       · use 0
@@ -343,20 +370,20 @@ def sphericallyCompleteExtension (𝕜 : Type*) [NontriviallyNormedField 𝕜]
         rw [← hz.choose_spec.2]
         exact norm_nonneg _
       · rw [Set.mem_image]
-        use 0
-        constructor
+        refine ⟨0, ?_, ?_⟩
         · simp only [SetLike.mem_coe, zero_mem]
-        · simp only [add_zero, lp.norm_eq_ciSup, ciSup_const]
+        · simpa using hvnorm
     · apply le_csInf
       · use ‖x‖
-        simp only [Set.mem_image, SetLike.mem_coe, Subtype.exists, AddMemClass.mk_add_mk]
+        simp only [Set.mem_image, SetLike.mem_coe, Subtype.exists]
         use 0
         refine ⟨zero_mem _, zero_mem _, ?_⟩
-        simp only [add_zero]
-        rw [lp.norm_eq_ciSup]
-        simp only [ciSup_const]
+        have hvzero : v + (0 : lp (fun (_ : ℕ) ↦ E) ⊤) = v := by simp
+        change ‖v + (0 : lp (fun (_ : ℕ) ↦ E) ⊤)‖ = ‖x‖
+        rw [hvzero]
+        exact hvnorm
       · intro b hb
-        simp only [Set.mem_image, SetLike.mem_coe, Subtype.exists, AddMemClass.mk_add_mk] at hb
+        simp only [Set.mem_image, SetLike.mem_coe, Subtype.exists] at hb
         rcases hb with ⟨p, hp, hp', h⟩
         rw [← h]
         apply le_of_forall_pos_sub_le
@@ -393,7 +420,7 @@ noncomputable instance (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     use M.max N
     intro n hn
     specialize hM n (by simp_all only
-      [gt_iff_lt, AddSubgroupClass.coe_sub, Pi.sub_apply, ge_iff_le, sup_le_iff])
+      [gt_iff_lt, AddSubgroupClass.coe_sub, ge_iff_le, sup_le_iff])
     have := (ciSup_le_iff (by
       use ‖seq N - ⟨lim, hlim⟩‖
       simp only [upperBounds,  Set.mem_range,
@@ -402,14 +429,23 @@ noncomputable instance (𝕜 : Type*) [NontriviallyNormedField 𝕜]
       refine lp.norm_apply_le_norm ?_ (seq N - ⟨lim, hlim⟩) a
       exact ENNReal.top_ne_zero
       )).1 (le_of_lt hN) n
-    simp only [AddSubgroupClass.coe_sub, Pi.sub_apply] at this
-    simp only [ge_iff_le]
+    simp only [AddSubgroupClass.coe_sub] at this
     replace := add_le_add hM this
-    rw [norm_sub_rev, add_comm] at this
-    simp only [add_halves] at this
-    refine le_trans ?_ this
-    exact norm_le_norm_sub_add _ _
+    have htriangle : ‖lim n‖ ≤ ‖seq N n - lim n‖ + ‖seq N n‖ := by
+      calc
+        ‖lim n‖ = ‖(lim n - seq N n) + seq N n‖ := by abel_nf
+        _ ≤ ‖lim n - seq N n‖ + ‖seq N n‖ := norm_add_le _ _
+        _ = ‖seq N n - lim n‖ + ‖seq N n‖ := by rw [norm_sub_rev]
+    have hsum : ‖seq N n - lim n‖ + ‖seq N n‖ ≤ ε := by
+      simpa [add_comm, add_left_comm, add_assoc, add_halves] using this
+    exact le_trans htriangle hsum
   simp only [Submodule.carrier_eq_coe] at this
   infer_instance
+
+-- Any non-Archimedean normed field 𝕜 has a spherically complete Banach space over it
+instance {𝕜 : Type*} [NontriviallyNormedField 𝕜] [IsUltrametricDist 𝕜] :
+SphericallyCompleteSpace ((lp (fun _ => 𝕜) ⊤)⧸ c₀ 𝕜 (fun _ => 𝕜))
+:= by
+  simpa only using sphericallyCompleteSpace_lp_quotient_c₀ (fun _ => 𝕜)
 
 end SphericallyCompleteSpace

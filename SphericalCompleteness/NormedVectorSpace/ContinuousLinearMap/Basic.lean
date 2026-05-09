@@ -90,7 +90,7 @@ SphericallyCompleteSpace (E →L[𝕜] F) := by
   conv_lhs => rw [← hφ.2 <| this.out.choose_spec.2]
   simp only [Set.mem_univ, true_and]
   else
-  push_neg at hseq
+  push Not at hseq
   rcases hseq with ⟨N, hN⟩
   use c' N
   simp only [Set.mem_iInter]

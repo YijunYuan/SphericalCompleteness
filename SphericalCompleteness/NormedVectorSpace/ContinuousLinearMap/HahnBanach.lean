@@ -24,36 +24,27 @@ theorem hahn_banach {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 {F : Type*} [NormedAddCommGroup F] [NormedSpace 𝕜 F] [IsUltrametricDist F]
 [hd : SphericallyCompleteSpace D] (f : D →L[𝕜] F) :
 ∃ f' : E →L[𝕜] F,
-  (∀ v : E, (hv : v ∈ D) → f' v = f ⟨v, hv⟩) ∧ ‖f'‖ = ‖f‖ := by
+  (∀ v : E, (hv : v ∈ D) → f' v = f ⟨v, hv⟩) ∧
+    ContinuousLinearMap.opNorm f' = ContinuousLinearMap.opNorm f := by
   use comp f (OrthProj 𝕜 D)
   constructor
   · intro v hv
     rw [comp_apply, (SetLike.coe_eq_coe.mp <| OrthProj_id 𝕜 D v hv : ((OrthProj 𝕜 D) v) = ⟨v,hv⟩)]
-  · refine eq_of_le_of_ge ((opNorm_le_iff <| opNorm_nonneg f).mpr fun x => ?_) ?_
-    · rw [comp_apply]
+  · apply le_antisymm
+    · refine (opNorm_le_iff <| opNorm_nonneg f).mpr fun x => ?_
+      rw [comp_apply]
       refine le_trans (le_opNorm f _) ?_
-      have : ‖(OrthProj 𝕜 D) x‖ ≤ 1 * ‖x‖ :=
+      have hproj : ‖(OrthProj 𝕜 D) x‖ ≤ 1 * ‖x‖ :=
         le_of_opNorm_le (OrthProj 𝕜 D) (norm_OrthProj_le_one 𝕜 D) x
-      simp only [AddSubgroupClass.coe_norm, one_mul] at this
-      exact PosMulMono.mul_le_mul_of_nonneg_left (opNorm_nonneg f) this
-    · repeat rw [norm_def]
-      apply csInf_le_csInf
-      · use ‖f‖
-        simp only [lowerBounds, AddSubgroupClass.coe_norm, Subtype.forall, Set.mem_setOf_eq,
-          and_imp]
-        exact fun a ha h => (opNorm_le_iff ha).mpr fun x ↦ h (↑x) x.prop
-      · use ‖(f.comp (OrthProj 𝕜 D))‖
-        simp only [coe_comp', Function.comp_apply, Set.mem_setOf_eq,
-          norm_nonneg, true_and]
-        intro x
-        rw [← comp_apply]
-        exact le_opNorm (f.comp (OrthProj 𝕜 D)) x
-      · intro c hc
-        simp only [coe_comp', Function.comp_apply, Set.mem_setOf_eq,
-          AddSubgroupClass.coe_norm, Subtype.forall] at *
-        refine ⟨hc.1, fun a ha => ?_⟩
-        convert hc.2 a
-        exact Eq.symm (OrthProj_id 𝕜 D a ha)
+      simp only [one_mul] at hproj
+      exact PosMulMono.mul_le_mul_of_nonneg_left (opNorm_nonneg f) hproj
+    · refine (opNorm_le_iff <| opNorm_nonneg (f.comp (OrthProj 𝕜 D))).mpr ?_
+      intro x
+      have hle := le_opNorm (f.comp (OrthProj 𝕜 D)) (x : E)
+      have hproj : ((OrthProj 𝕜 D) (x : E) : E) = x := OrthProj_id 𝕜 D x x.prop
+      have hproj' : (OrthProj 𝕜 D) (x : E) = x := SetLike.coe_eq_coe.mp hproj
+      change ‖f x‖ ≤ ‖f.comp (OrthProj 𝕜 D)‖ * ‖(x : E)‖
+      simpa [ContinuousLinearMap.comp_apply, hproj'] using hle
 
 /--
 A Hahn–Banach style extension theorem for continuous linear maps between ultrametric normed spaces.
@@ -78,30 +69,52 @@ theorem hahn_banach' {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 {F : Type*} [NormedAddCommGroup F] [NormedSpace 𝕜 F] [IsUltrametricDist F]
 [hf : SphericallyCompleteSpace F] (f : D →L[𝕜] F) :
 ∃ f' : E →L[𝕜] F,
-  (∀ v : E, (hv : v ∈ D) → f' v = f ⟨v, hv⟩) ∧ ‖f'‖ = ‖f‖ := by
+  (∀ v : E, (hv : v ∈ D) → f' v = f ⟨v, hv⟩) ∧
+    ContinuousLinearMap.opNorm f' = ContinuousLinearMap.opNorm f := by
   if hf : f = 0 then
     use 0
-    simp only [zero_apply, hf, implies_true, norm_zero, and_self]
+    constructor
+    · intro v hv
+      simp [hf]
+    · rw [hf]
+      calc
+        ContinuousLinearMap.opNorm (0 : E →L[𝕜] F) = 0 := ContinuousLinearMap.opNorm_zero
+        _ = ContinuousLinearMap.opNorm (0 : D →L[𝕜] F) := by
+          symm
+          exact ContinuousLinearMap.opNorm_zero
   else
     rcases @exists_extension_opNorm_le 𝕜 _ E _ _ _ D F _ _ _ _ f {0}
-      (by simp) (fun _ => ‖f‖) (by simp [hf]) (by simp) (by
-      simpa using fun a ha => le_opNorm f ⟨a, ha⟩
+      (by simp) (fun _ => ContinuousLinearMap.opNorm f)
+      (by
+        intro U
+        refine lt_of_le_of_ne (opNorm_nonneg f) ?_
+        intro hop
+        apply hf
+        ext x
+        have hle : ‖f x‖ ≤ ContinuousLinearMap.opNorm f * ‖x‖ := le_opNorm f x
+        have hop' : ContinuousLinearMap.opNorm f = 0 := by simpa using hop.symm
+        rw [hop', zero_mul] at hle
+        have hfx : f x = 0 := by
+          exact norm_eq_zero.mp (le_antisymm hle (norm_nonneg _))
+        exact hfx)
+      (by
+        intro U V
+        have hUV : U.1 = V.1 := congrArg Subtype.val (Subsingleton.elim U V)
+        simpa [hUV] using
+          (show (0 : ℝ) ≤ max ((fun x ↦ f.opNorm) U) ((fun x ↦ f.opNorm) V) from
+            le_trans (opNorm_nonneg f) (le_max_left _ _)))
+      (by
+        intro U a
+        have hU : U.1 = 0 := Set.mem_singleton_iff.mp U.2
+        rw [hU]
+        simpa using le_opNorm f a
       ) with ⟨f', hf1, hf2⟩
     use f'
     simp only [Subtype.forall, Set.mem_singleton_iff, forall_eq, sub_zero] at hf2
-    refine ⟨fun v hv => hf1 ⟨v, hv⟩, eq_of_le_of_ge hf2 ?_⟩
-    repeat rw [norm_def]
-    apply csInf_le_csInf
-    · use ‖f‖
-      simp only [lowerBounds, AddSubgroupClass.coe_norm, Subtype.forall, Set.mem_setOf_eq,
-        and_imp]
-      exact fun a ha h => (opNorm_le_iff ha).mpr fun x ↦ h (↑x) x.prop
-    · use ‖f'‖
-      simp only [Set.mem_setOf_eq, norm_nonneg, true_and]
-      exact fun x => le_opNorm f' x
-    · intro c hc
-      simp only [AddSubgroupClass.coe_norm, Subtype.forall, Set.mem_setOf_eq] at *
-      refine ⟨hc.1, fun a ha => ?_⟩
-      simpa only [← (hf1 a ha).symm] using hc.2 a
+    refine ⟨fun v hv => hf1 ⟨v, hv⟩, le_antisymm hf2 ?_⟩
+    refine (opNorm_le_iff <| opNorm_nonneg f').mpr ?_
+    intro a
+    have hle := le_opNorm f' (a : E)
+    simpa [AddSubgroupClass.coe_norm, hf1 a] using hle
 
 end SphericallyCompleteSpace

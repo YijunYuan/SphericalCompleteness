@@ -25,7 +25,7 @@ theorem eventually_stable_or_exists_strictanti_of_antitone {α : Type*} [Partial
     exact Or.inl h
   else
     right
-    push_neg at h
+    push Not at h
     use extractStrictAntiSubseq hanti h
     constructor
     · refine strictMono_nat_of_lt_succ <| fun n => ?_

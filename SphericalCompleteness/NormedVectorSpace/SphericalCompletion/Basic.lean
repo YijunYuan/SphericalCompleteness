@@ -12,7 +12,7 @@ instance {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 SphericallyCompleteSpace (↥(exists_max_imm_ext_in_sph_comp 𝕜 E E₀ f).choose) := by
   rw [sphericallyCompleteSpace_iff_strictAnti_radius]
   by_contra hc
-  push_neg at hc
+  push Not at hc
   rcases hc with ⟨c, r, hsr, hanti, hemp⟩
   have := @hsc.isSphericallyComplete (fun n => (c n).1) r (by
     intro m n hmn z hz
@@ -39,9 +39,9 @@ SphericallyCompleteSpace (↥(exists_max_imm_ext_in_sph_comp 𝕜 E E₀ f).choo
       (exists_max_imm_ext_in_sph_comp 𝕜 E E₀ f).choose_spec.2 hc (le_of_lt this)
   simp only [imm_ext_in_sph_comp, Set.mem_setOf_eq, Submodule.add_eq_sup, not_exists] at this
   specialize this <| le_sup_of_le_left
-    (exists_max_imm_ext_in_sph_comp 𝕜 E E₀ f).choose_spec.1.out.choose
+    (exists_max_imm_ext_in_sph_comp 𝕜 E E₀ f).choose_spec.1.choose
   unfold IsImmediate at this
-  push_neg at this
+  push Not at this
   rcases this with ⟨b', hb'1, hb'2⟩
   rcases Submodule.mem_sup.1 b'.prop with ⟨x', hx', v', hv', hx'v'⟩
   rcases Submodule.mem_span_singleton.1 hv' with ⟨s, hs⟩
@@ -50,42 +50,47 @@ SphericallyCompleteSpace (↥(exists_max_imm_ext_in_sph_comp 𝕜 E E₀ f).choo
     by_contra hc
     simp only [hc, zero_smul, add_zero] at hx'v'
     subst hx'v'
-    have := (exists_max_imm_ext_in_sph_comp 𝕜 E E₀ f).choose_spec.1.out.choose_spec
+    have := (exists_max_imm_ext_in_sph_comp 𝕜 E E₀ f).choose_spec.1.choose_spec
     specialize this ⟨b', hx'⟩ ?_
-    · unfold MOrth at *
-      simp only [AddSubgroupClass.coe_norm] at *
-      rw [← hb'1]
-      refine eq_of_le_of_ge ?_ ?_
-      · apply (le_infDist (by use 0; simp)).2
-        intro y hy
-        simp only [SetLike.mem_coe, LinearMap.mem_range, LinearMap.coe_mk,
-          AddHom.coe_mk, Subtype.exists] at hy
-        rcases hy with ⟨z, hm, hz⟩
-        refine le_trans (infDist_le_dist_of_mem (?_ : ⟨y,?_⟩ ∈ _)) (le_of_eq rfl)
-        · simpa only [SetLike.mem_coe, LinearMap.mem_range, LinearMap.coe_mk,
-          AddHom.coe_mk, Subtype.exists] using ⟨z, hm, by simp only [← hz]⟩
-        · refine (exists_max_imm_ext_in_sph_comp 𝕜 E E₀ f).choose_spec.1.out.choose ?_
-          simp only [← hz, LinearMap.mem_range, hm]
-      · apply (le_infDist (by use 0; simp)).2
-        intro y hy
-        simp only [SetLike.mem_coe, LinearMap.mem_range, LinearMap.coe_mk,
-          AddHom.coe_mk, Subtype.exists] at hy
-        rcases hy with ⟨z, hm, hz⟩
-        refine le_trans (infDist_le_dist_of_mem (?_ : ⟨y, ?_⟩ ∈ _)) (le_of_eq rfl)
-        · simpa only [SetLike.mem_coe, LinearMap.mem_range, LinearIsometry.coe_mk, LinearMap.coe_mk,
-          AddHom.coe_mk, Subtype.exists] using ⟨z, hm, by simp only [← hz]⟩
-        · refine Submodule.mem_sup_left <|
-            (exists_max_imm_ext_in_sph_comp 𝕜 E E₀ f).choose_spec.1.out.choose ?_
-          simp only [← hz, LinearMap.mem_range, hm]
-    simp only [Submodule.mk_eq_zero, ZeroMemClass.coe_eq_zero] at this
-    exact hb'2 this
+    · -- Show MOrth for ⟨b', hx'⟩ in ↥⋯.choose.
+      -- hb'1 : MOrth 𝕜 b' (range gSup) in ↥(choose ⊔ 𝕜∙a).
+      -- Goal : MOrth 𝕜 ⟨b', hx'⟩ (range gChoose) in ↥choose.
+      -- Both are equivalent to infDist (b' : E₀) ↑f.range = ‖(b' : E₀)‖.
+      unfold MOrth at hb'1 ⊢
+      -- Translate both sides via isometry to infDist in E₀
+      rw [← Metric.infDist_image isometry_subtype_coe] at hb'1
+      rw [← Metric.infDist_image isometry_subtype_coe]
+      -- Normalize the LHS point so both infDists use (b' : E₀) as center
+      change Metric.infDist (b' : E₀) _ = ‖(b' : E₀)‖
+      -- Both image sets equal ↑f.range; use convert to reduce to set equality
+      convert hb'1 using 2
+      ext z
+      simp only [Set.mem_image, SetLike.mem_coe, LinearMap.mem_range,
+        LinearMap.coe_mk, AddHom.coe_mk]
+      constructor
+      · rintro ⟨x, ⟨u, hu⟩, hx⟩
+        -- x : ↥choose, hu : ⟨↑u, ⋯⟩ = x, hx : ↑x = z
+        -- ↑u = ↑x (from hu), so ↑x ∈ f.range ≤ choose ⊔ 𝕜∙a
+        subst hu
+        exact ⟨⟨↑u, Submodule.mem_sup_left
+            ((exists_max_imm_ext_in_sph_comp 𝕜 E E₀ f).choose_spec.1.out.choose u.2)⟩,
+          ⟨u, rfl⟩, hx⟩
+      · rintro ⟨x, ⟨u, hu⟩, hx⟩
+        -- x : ↥(choose ⊔ 𝕜∙a), hu : ⟨↑u, ⋯⟩ = x, hx : ↑x = z
+        -- ↑u = ↑x (from hu), so ↑x ∈ f.range ≤ choose
+        subst hu
+        exact ⟨⟨↑u, (exists_max_imm_ext_in_sph_comp 𝕜 E E₀ f).choose_spec.1.out.choose u.2⟩,
+          ⟨u, rfl⟩, hx⟩
+    exact hb'2 (ZeroMemClass.coe_eq_zero.mp (congrArg Subtype.val this))
   let b := s⁻¹ • b'
   let x := - s⁻¹ • x'
   have : b = a - x := by
     simp only [SetLike.val_smul, ← hx'v', smul_add, neg_smul, sub_neg_eq_add, b, x]
     rw [add_comm]
     simpa only [add_left_inj] using inv_smul_smul₀ hhs a
-  have hb1 := smul_morth_of_morth (s⁻¹) hb'1
+  haveI hiudSup : IsUltrametricDist ↥((exists_max_imm_ext_in_sph_comp 𝕜 E E₀ f).choose ⊔
+      (𝕜 ∙ a)) := instIsUltrametricDistSubmodule
+  have hb1 := @smul_morth_of_morth 𝕜 _ _ _ _ hiudSup b' _ s⁻¹ hb'1
   replace hb1 : MOrth 𝕜 b.val (exists_max_imm_ext_in_sph_comp 𝕜 E E₀ f).choose := by
     by_contra hc
     rcases not_morth_iff_exists_dist_lt_norm.1 hc with ⟨g, hg1, hg2⟩
@@ -94,28 +99,34 @@ SphericallyCompleteSpace (↥(exists_max_imm_ext_in_sph_comp 𝕜 E E₀ f).choo
     have hgg : g ≠ 0 := by
       by_contra hc
       simp only [hc, norm_zero, norm_eq_zero, ZeroMemClass.coe_eq_zero] at hg2'
-      simp only [dist_le_coe, MOrth, AddSubgroupClass.coe_norm, ne_eq, Subtype.forall,
-        Submodule.mk_eq_zero, hg2', ZeroMemClass.coe_zero, SetLike.val_smul, norm_zero] at *
+      simp only [dist_le_coe, MOrth, ne_eq, Subtype.forall,
+        Submodule.mk_eq_zero, hg2', ZeroMemClass.coe_zero, norm_zero] at *
       contrapose hc
       exact infDist_zero_of_mem <| by simp only [SetLike.mem_coe, zero_mem]
-    have := (exists_max_imm_ext_in_sph_comp 𝕜 E E₀ f).choose_spec.1.out.choose_spec
-    rcases not_morth_iff_exists_dist_lt_norm.1
-      ((fun x => mt (this x)) ⟨g,hg1⟩ (by simp [hgg])) with ⟨e, he1, he2⟩
-    simp only [AddSubgroupClass.coe_norm, ← hg2'] at he2
-    rw [(by rfl : dist ⟨g, hg1⟩ e = dist g e.val), dist_eq_norm] at he2
+    haveI hiudChoose : IsUltrametricDist ↥(exists_max_imm_ext_in_sph_comp 𝕜 E E₀ f).choose :=
+      instIsUltrametricDistSubmodule
+    have hChooseSpec := (exists_max_imm_ext_in_sph_comp 𝕜 E E₀ f).choose_spec.1.choose_spec
+    have hNMorth := mt (hChooseSpec ⟨g, hg1⟩)
+        (fun h => hgg (congrArg Subtype.val h))
+    rcases @not_morth_iff_exists_dist_lt_norm 𝕜 _
+        (↥(exists_max_imm_ext_in_sph_comp 𝕜 E E₀ f).choose)
+        _ _ hiudChoose (⟨g, hg1⟩) _ |>.1 hNMorth with ⟨e, he1, he2⟩
+    simp only [Submodule.coe_norm, ← hg2', dist_eq_norm, AddSubgroupClass.coe_sub] at he2
     suffices hh : ‖b.val - e.val‖ < ‖b.val‖ by
+      haveI := hiudSup
       contrapose hb1
-      apply not_morth_iff_exists_dist_lt_norm.2
+      apply @not_morth_iff_exists_dist_lt_norm 𝕜 _ _ _ _ hiudSup |>.2
       use ⟨e.val, Submodule.mem_sup_left e.prop⟩
       simp only [LinearMap.mem_range, LinearMap.coe_mk, AddHom.coe_mk,
         Subtype.exists] at he1
-      rcases he1 with ⟨q1,q2,q3⟩
+      rcases he1 with ⟨q1, q2, q3⟩
       replace q3 : q1 = e.val := by simp [← q3]
-      simp only [← q3, LinearMap.mem_range, LinearMap.coe_mk, AddHom.coe_mk,
-        Subtype.mk.injEq, Subtype.exists, exists_prop, exists_eq_right, q2,
-        AddSubgroupClass.coe_norm, SetLike.val_smul, true_and, gt_iff_lt]
-      simpa only [q3, dist_eq_norm, AddSubgroupClass.coe_norm, AddSubgroupClass.coe_sub,
-        SetLike.val_smul]
+      constructor
+      · -- Show ⟨↑e, mem_sup_left⟩ ∈ range gSup
+        exact ⟨⟨q1, q2⟩, by subst q3; rfl⟩
+      · -- Show dist (s⁻¹ • b') ⟨↑e, ⋯⟩ < ‖s⁻¹ • b'‖ in ↥(choose ⊔ 𝕜∙a)
+        rw [dist_eq_norm, Submodule.coe_norm, Submodule.coe_sub, Submodule.coe_norm]
+        exact hh
     rw [(by abel : b.val - e.val = (b.val - g) + (g - e.val))]
     exact lt_of_le_of_lt (iud.norm_add_le_max _ _) <| max_lt hg2 he2
   have hx : x ∈ (exists_max_imm_ext_in_sph_comp 𝕜 E E₀ f).choose :=
@@ -124,54 +135,71 @@ SphericallyCompleteSpace (↥(exists_max_imm_ext_in_sph_comp 𝕜 E E₀ f).choo
     contrapose hemp
     exact Set.nonempty_iff_ne_empty.mp ⟨⟨x, hx⟩, by simpa only [Set.mem_iInter]⟩
   intro i
-  simp only [mem_closedBall, dist_eq_norm]
-  refine le_trans (by simp : ‖⟨x, hx⟩ - c i‖ ≤ max ‖⟨x, hx⟩ - c i‖ ‖b‖) <| le_trans ?_ (ha i)
-  have : a - (c i).val = b - ((c i).val - x) := by
-    simp only [this, sub_sub_sub_cancel_right]
-  rw [dist_eq_norm, this]
-  conv => arg 1; simp only [AddSubgroupClass.coe_norm, AddSubgroupClass.coe_sub]
-  refine le_of_eq <| Eq.symm <| eq_of_le_of_ge ?_ ?_
-  · rw [sub_sub_eq_add_sub, ← add_sub, max_comm]
-    exact iud.norm_add_le_max _ _
-  · if hf : ‖x - ↑(c i)‖ = ‖↑b‖ then
-      simp only [hf, AddSubgroupClass.coe_norm, max_self, ← dist_eq_norm, b, SetLike.val_smul]
-      simp only [MOrth, AddSubgroupClass.coe_norm, SetLike.val_smul, b] at hb1
-      rw [← hb1]
-      apply infDist_le_dist_of_mem
-      refine SetLike.mem_coe.mpr <|
-        Submodule.sub_mem (exists_max_imm_ext_in_sph_comp 𝕜 E E₀ f).choose ?_ hx
-      simp only [SetLike.coe_mem]
-    else
-    have := iud.norm_add_eq_max_of_norm_ne_norm hf
-    simp only [LinearMap.toAddMonoidHom_coe, Submodule.subtype_apply] at this
-    rw [← this]
-    apply le_of_eq
-    congr
-    abel
+  simp only [mem_closedBall]
+  -- b.val = s⁻¹ • (b' : E₀) and hb1 : MOrth 𝕜 b.val ⋯.choose
+  -- We show dist ⟨x, hx⟩ (c i) ≤ ↑(r i)
+  have hbval : b.val = a - x := this
+  have hb1' : infDist b.val ↑(exists_max_imm_ext_in_sph_comp 𝕜 E E₀ f).choose = ‖b.val‖ := hb1
+  have hcix : (↑(c i) - x : E₀) ∈ (exists_max_imm_ext_in_sph_comp 𝕜 E E₀ f).choose :=
+    Submodule.sub_mem _ (c i).prop hx
+  have hdist : dist ⟨x, hx⟩ (c i) = ‖x - ↑(c i)‖ := by
+    have : dist (⟨x, hx⟩ : ↥(exists_max_imm_ext_in_sph_comp 𝕜 E E₀ f).choose) (c i) =
+        ‖(⟨x, hx⟩ : ↥(exists_max_imm_ext_in_sph_comp 𝕜 E E₀ f).choose) - c i‖ :=
+      dist_eq_norm _ _
+    simpa only [AddSubgroupClass.coe_norm, AddSubgroupClass.coe_sub] using this
+  have hda : dist a ↑(c i) = ‖b.val - (↑(c i) - x)‖ := by
+    rw [dist_eq_norm, hbval]; congr 1; abel
+  rw [hdist]
+  calc ‖x - ↑(c i)‖
+      ≤ max ‖x - ↑(c i)‖ ‖b.val‖ := le_max_left _ _
+    _ ≤ ‖b.val - (↑(c i) - x)‖ := by
+        if hf : ‖x - ↑(c i)‖ = ‖b.val‖ then
+          rw [hf, max_self, ← hb1', ← dist_eq_norm]
+          exact infDist_le_dist_of_mem (SetLike.mem_coe.mpr hcix)
+        else
+          have hnorm_ne : ‖b.val‖ ≠ ‖x - ↑(c i)‖ := Ne.symm hf
+          rw [show b.val - (↑(c i) - x) = b.val + (x - ↑(c i)) by abel,
+            max_comm, iud.norm_add_eq_max_of_norm_ne_norm hnorm_ne]
+    _ = dist a ↑(c i) := hda.symm
+    _ ≤ ↑(r i) := ha i
 
 /-- The spherical completion of an ultrametric normed space is spherically complete. -/
 instance instSphericallyCompleteSpaceSphericalCompletion
   (𝕜 : Type*) [NontriviallyNormedField 𝕜]
   (E : Type u) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E] :
-  SphericallyCompleteSpace (SphericalCompletion 𝕜 E) := inferInstance
+  SphericallyCompleteSpace (SphericalCompletion 𝕜 E) :=
+  show SphericallyCompleteSpace ↥(exists_max_imm_ext_in_sph_comp 𝕜 E
+    _ (sphericallyCompleteExtension 𝕜 E)).choose from inferInstance
 
 /-- The canonical embedding into the spherical completion is an immediate extension. -/
 theorem SphericalCompletionEmbedding_isImmediate (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     (E : Type u) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E] :
     IsImmediate (SphericalCompletionEmbedding 𝕜 E) := by
-  have := (exists_max_imm_ext_in_sph_comp 𝕜 E
+  have himm := (exists_max_imm_ext_in_sph_comp 𝕜 E
       (↥(lp (fun _ ↦ E) ⊤) ⧸ c₀ 𝕜 fun _ ↦ E) (sphericallyCompleteExtension 𝕜 E)
-      ).choose_spec.1.out.choose_spec
-  refine fun v hv => this v ?_
-  convert hv
+      ).choose_spec.1.choose_spec
+  haveI hsc_iud : IsUltrametricDist ↥(exists_max_imm_ext_in_sph_comp 𝕜 E
+      (↥(lp (fun _ ↦ E) ⊤) ⧸ c₀ 𝕜 fun _ ↦ E) (sphericallyCompleteExtension 𝕜 E)).choose :=
+    instIsUltrametricDistSubmodule
+  unfold IsImmediate at himm ⊢
+  intro v hv
+  apply himm v
+  -- Convert hv : MOrth 𝕜 v (range SphericalCompletionEmbedding) to
+  -- MOrth 𝕜 v (range gChoose) by showing the ranges are equal
+  convert hv using 2
   ext z
-  simp only [sphericallyCompleteExtension, QuotientAddGroup.mk'_apply,
-    LinearMap.mem_range, LinearIsometry.coe_mk, LinearMap.coe_mk, AddHom.coe_mk, Subtype.exists]
+  simp only [LinearMap.mem_range,
+    SphericalCompletionEmbedding, LinearMap.coe_mk, AddHom.coe_mk]
   constructor
-  · rintro ⟨_, _, ha2⟩
-    simpa only [← ha2, Subtype.mk.injEq, Subtype.forall, Submodule.mk_eq_zero]
-  · rintro ⟨_, ha⟩
-    simp only [← ha, Subtype.mk.injEq, exists_prop, exists_eq_right, exists_apply_eq_apply]
+  · rintro ⟨e, rfl⟩
+    -- e : ↥(sphericallyCompleteExtension 𝕜 E).range, gChoose e = z
+    -- need: ∃ e' : E, SphericalCompletionEmbedding e' = gChoose e
+    obtain ⟨e', he'⟩ := LinearMap.mem_range.mp e.prop
+    exact ⟨e', by simp [← he']⟩
+  · rintro ⟨e, rfl⟩
+    -- e : E, SphericalCompletionEmbedding e = z (unfolded)
+    -- need: ∃ e' : ↥(sphericallyCompleteExtension E).range, gChoose e' = ⟨sphExt e, _⟩
+    exact ⟨⟨(sphericallyCompleteExtension 𝕜 E) e, LinearMap.mem_range_self _ _⟩, rfl⟩
 
 /--
 Minimality of the spherical completion.
@@ -196,7 +224,7 @@ SphericallyCompleteSpace M → M = ⊤ := by
     simp only [hc', bot_le, sup_of_le_left] at this
     exact hc this
   replace hMo := (Submodule.eq_bot_iff (OrthComp 𝕜 M)).not.1 hMo
-  push_neg at hMo
+  push Not at hMo
   rcases hMo with ⟨b, hb1, hb2⟩
   apply morth_of_mem_orthComp at hb1
   refine hb2 (SphericalCompletionEmbedding_isImmediate 𝕜 E b ?_)
@@ -278,7 +306,7 @@ SphericallyCompleteSpace E ↔ MaximallyComplete 𝕜 E := by
   · intro h
     unfold MaximallyComplete
     by_contra hc
-    push_neg at hc
+    push Not at hc
     rcases hc with ⟨F, _, _, _, f, hf1, hf2⟩
     replace hf2 : LinearMap.range f.toLinearMap < ⊤ := by
       by_contra hc

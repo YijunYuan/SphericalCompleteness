@@ -22,11 +22,18 @@ def imm_ext_in_sph_comp {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 [SphericallyCompleteSpace E₀]
 (f : E →ₗᵢ[𝕜] E₀)
 : Set (Submodule 𝕜 E₀) := {M : Submodule 𝕜 E₀ |
-    ∃ hc : LinearMap.range f.toLinearMap ≤ M,
-    IsImmediate ({toFun x := ⟨x.1, hc x.2⟩
-                  map_add' _ _ := rfl
-                  map_smul' _ _ := rfl
-                  norm_map' _ := rfl} : LinearMap.range f.toLinearMap →ₗᵢ[𝕜] M)
+    ∃ hc : f.range ≤ M,
+    by
+      letI : IsUltrametricDist ↥f.range := instIsUltrametricDistSubmodule (F := f.range)
+      letI : IsUltrametricDist ↥M := instIsUltrametricDistSubmodule (F := M)
+      let g : f.range →ₗᵢ[𝕜] M := {
+        toFun := fun x => ⟨x.1, hc x.2⟩
+        map_add' := by intro x y; rfl
+        map_smul' := by intro c x; rfl
+        norm_map' := by intro x; rfl
+      }
+      exact @IsImmediate 𝕜 _ f.range _ _ (instIsUltrametricDistSubmodule (F := f.range))
+        M _ _ (instIsUltrametricDistSubmodule (F := M)) g
   }
 
 /--
@@ -40,17 +47,21 @@ lemma imm_ext_nonempty {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 [SphericallyCompleteSpace E₀]
 (f : E →ₗᵢ[𝕜] E₀)
 : (imm_ext_in_sph_comp E E₀ f).Nonempty := by
-  use LinearMap.range f.toLinearMap
-  simp only [imm_ext_in_sph_comp, IsImmediate, MOrth, AddSubgroupClass.coe_norm, Subtype.forall,
-    Submodule.mk_eq_zero, Set.mem_setOf_eq, LinearMap.mem_range, Subtype.coe_eta,
-    forall_exists_index, le_refl, exists_true_left]
-  intro a x hc hh
-  suffices hh : ‖a‖ = 0 by
-    exact norm_eq_zero.mp hh
-  rw [← hh]
-  refine Metric.infDist_zero_of_mem ?_
-  simp only [SetLike.mem_coe, LinearMap.mem_range, LinearMap.coe_mk,
-    AddHom.coe_mk, exists_eq]
+  use f.range
+  refine ⟨le_rfl, ?_⟩
+  letI : IsUltrametricDist ↥f.range := instIsUltrametricDistSubmodule (F := f.range)
+  let g : f.range →ₗᵢ[𝕜] f.range := {
+    toFun := fun x => x
+    map_add' := by intro x y; rfl
+    map_smul' := by intro c x; rfl
+    norm_map' := by intro x; rfl
+  }
+  change @IsImmediate 𝕜 _ f.range _ _ (instIsUltrametricDistSubmodule (F := f.range))
+    f.range _ _ (instIsUltrametricDistSubmodule (F := f.range)) g
+  intro a ha
+  exact @eq_zero_of_morth_of_mem 𝕜 _ f.range _ _
+    (instIsUltrametricDistSubmodule (F := f.range)) a (LinearMap.range g.toLinearMap)
+    (LinearMap.mem_range.2 ⟨a, rfl⟩) ha
 
 /-
  Existence of a maximal *immediate* intermediate space inside a fixed spherically complete ambient
@@ -87,62 +98,84 @@ theorem exists_max_imm_ext_in_sph_comp (𝕜 : Type*) [NontriviallyNormedField �
       simp only [not_not] at hC
       exact (hN ⟨hC.some, hC.some_mem⟩)  <| (hC1 hC.some_mem).1 hz
       )
-    simp only [IsImmediate, MOrth, AddSubgroupClass.coe_norm, Subtype.forall, Submodule.mk_eq_zero]
-    intro x hx hh
+    intro x horth
     haveI : Nonempty ↑C := by
       refine Set.Nonempty.coe_sort ?_
       simpa using hC
-    have t : x ∈ (↑(@iSup (Submodule 𝕜 E₀) (↑C)
-      CompleteLattice.toConditionallyCompleteLattice.toSupSet fun i ↦ ↑i : Set E₀)) := hx
+    have t : (x : E₀) ∈ (↑(@iSup (Submodule 𝕜 E₀) (↑C)
+      CompleteLattice.toConditionallyCompleteLattice.toSupSet fun i ↦ ↑i : Set E₀)) := x.prop
     rw [Submodule.coe_iSup_of_directed (fun x => x.val : C → Submodule 𝕜 E₀) hC2.directed] at t
     simp only [Set.iUnion_coe_set, Set.mem_iUnion, SetLike.mem_coe, exists_prop] at t
-    rcases t with ⟨N, hN, hx⟩
+    rcases t with ⟨N, hN, hxN⟩
     rcases (hC1 hN).out with ⟨hc, himm⟩
-    simp only [IsImmediate, MOrth, AddSubgroupClass.coe_norm, Subtype.forall,
-      Submodule.mk_eq_zero] at himm
-    apply himm x hx
-    rw [← hh]
-    repeat rw [infDist_eq_iInf]
-    refine eq_of_le_of_ge ?_ ?_
-    · apply le_ciInf
-      intro w
-      apply csInf_le
-      · use 0
-        simp only [lowerBounds, SetLike.coe_sort_coe, Set.mem_range, Subtype.exists,
-          LinearMap.mem_range, LinearMap.coe_mk, AddHom.coe_mk, exists_prop,
-          Subtype.mk.injEq, exists_eq_right, exists_and_left, exists_exists_eq_and,
-          forall_exists_index, Set.mem_setOf_eq]
-        intro _ _ _ h
-        simp only [← h, dist_nonneg]
-      · rcases Set.mem_range.1 w.prop with ⟨v,hv⟩
-        simp only [LinearMap.coe_mk, AddHom.coe_mk] at hv
-        simp only [SetLike.coe_sort_coe, ← hv, Set.mem_range, Subtype.exists, LinearMap.mem_range,
-          LinearMap.coe_mk, AddHom.coe_mk, exists_prop, Subtype.mk.injEq,
-          exists_eq_right, exists_and_left, exists_exists_eq_and]
-        rcases LinearMap.mem_range.1 v.prop with ⟨u,hu⟩
-        use u
-        rw [hu]
-        exact ⟨hc v.prop, rfl⟩
-    · apply le_ciInf
-      intro w
-      apply csInf_le
-      · use 0
-        simp only [lowerBounds, SetLike.coe_sort_coe, Set.mem_range, Subtype.exists,
-          LinearMap.mem_range, LinearMap.coe_mk, AddHom.coe_mk, exists_prop,
-          Subtype.mk.injEq, exists_eq_right, exists_and_left, exists_exists_eq_and,
-          forall_exists_index, Set.mem_setOf_eq]
-        intro _ _ _ h
-        simp only [← h, dist_nonneg]
-      · rcases Set.mem_range.1 w.prop with ⟨v,hv⟩
-        simp only [LinearMap.coe_mk, AddHom.coe_mk] at hv
-        simp only [SetLike.coe_sort_coe, ← hv, Set.mem_range, Subtype.exists, LinearMap.mem_range,
-          LinearMap.coe_mk, AddHom.coe_mk, exists_prop, Subtype.mk.injEq,
-          exists_eq_right, exists_and_left, exists_exists_eq_and]
-        rcases LinearMap.mem_range.1 v.prop with ⟨u,hu⟩
-        use u
-        rw [hu]
-        refine ⟨(?_ : N ≤ _) <| hc v.prop ,rfl⟩
-        exact le_csSup ⟨⊤, by simp [upperBounds]⟩ (by use ⟨N, hN⟩)
+    let gSup : f.range →ₗᵢ[𝕜] ↥(⨆ i, (fun x => x.val : C → Submodule 𝕜 E₀) i) := {
+      toFun := fun y => ⟨y.1, (show y.1 ∈ ⨆ i, (fun x => x.val : C → Submodule 𝕜 E₀) i from by
+        rw [Submodule.mem_iSup]
+        intro P hP
+        simp only [not_not] at hC
+        exact (hP ⟨hC.some, hC.some_mem⟩) ((hC1 hC.some_mem).1 y.2))⟩
+      map_add' := by intro x y; rfl
+      map_smul' := by intro c y; rfl
+      norm_map' := by intro y; rfl
+    }
+    let gN : f.range →ₗᵢ[𝕜] N := {
+      toFun := fun y => ⟨y.1, hc y.2⟩
+      map_add' := by intro x y; rfl
+      map_smul' := by intro c y; rfl
+      norm_map' := by intro y; rfl
+    }
+    have hrangeSup : ((↑) : ↥(⨆ i, (fun x => x.val : C → Submodule 𝕜 E₀) i) → E₀) ''
+        (LinearMap.range gSup.toLinearMap : Set ↥(⨆ i, (fun x => x.val : C → Submodule 𝕜 E₀) i)) =
+        f.range := by
+      ext z
+      constructor
+      · rintro ⟨w, hw, rfl⟩
+        rcases LinearMap.mem_range.1 hw with ⟨u, rfl⟩
+        exact u.2
+      · intro hz
+        refine ⟨⟨z, ?_⟩, ?_, rfl⟩
+        · exact (show z ∈ ⨆ i, (fun x => x.val : C → Submodule 𝕜 E₀) i from by
+          rw [Submodule.mem_iSup]
+          intro P hP
+          simp only [not_not] at hC
+          exact (hP ⟨hC.some, hC.some_mem⟩) ((hC1 hC.some_mem).1 hz))
+        · exact LinearMap.mem_range.2 ⟨⟨z, hz⟩, rfl⟩
+    have hrangeN : ((↑) : N → E₀) '' (LinearMap.range gN.toLinearMap : Set N) = f.range := by
+      ext z
+      constructor
+      · rintro ⟨w, hw, rfl⟩
+        rcases LinearMap.mem_range.1 hw with ⟨u, rfl⟩
+        exact u.2
+      · intro hz
+        refine ⟨⟨z, hc hz⟩, LinearMap.mem_range.2 ⟨⟨z, hz⟩, rfl⟩, rfl⟩
+    have horthE0 : Metric.infDist (x : E₀) f.range = ‖(x : E₀)‖ := by
+      unfold MOrth at horth
+      change
+        Metric.infDist x
+            (LinearMap.range gSup.toLinearMap :
+              Set ↥(⨆ i, (fun x => x.val : C → Submodule 𝕜 E₀) i)) =
+          ‖x‖ at horth
+      rw [(Metric.infDist_image isometry_subtype_coe
+          (x := x)
+          (t :=
+            (LinearMap.range gSup.toLinearMap :
+              Set ↥(⨆ i, (fun x => x.val : C → Submodule 𝕜 E₀) i)))).symm]
+        at horth
+      simpa [hrangeSup] using horth
+    apply Subtype.ext
+    letI : IsUltrametricDist ↥N := instIsUltrametricDistSubmodule (F := N)
+    have horthN : @MOrth 𝕜 _ N _ _ (instIsUltrametricDistSubmodule (F := N))
+      (⟨(x : E₀), hxN⟩ : N) (LinearMap.range gN.toLinearMap) := by
+      unfold MOrth
+      change Metric.infDist (⟨(x : E₀), hxN⟩ : N) (LinearMap.range gN.toLinearMap : Set N) =
+        ‖(⟨(x : E₀), hxN⟩ : N)‖
+      rw [(Metric.infDist_image isometry_subtype_coe
+          (x := (⟨(x : E₀), hxN⟩ : N)) (t := (LinearMap.range gN.toLinearMap : Set N))).symm]
+      change Metric.infDist ((⟨(x : E₀), hxN⟩ : N) : E₀)
+          (((↑) : N → E₀) '' (LinearMap.range gN.toLinearMap : Set N)) = ‖(⟨(x : E₀), hxN⟩ : N)‖
+      rw [hrangeN]
+      simpa using horthE0
+    simpa using congrArg Subtype.val (himm ⟨x, hxN⟩ horthN)
   · intro M hM z hz
     rw [Submodule.mem_iSup]
     intro N hN
@@ -160,32 +193,37 @@ which the induced inclusion is an immediate extension.
 
 The underlying type of this chosen maximal submodule is defined to be `SphericalCompletion 𝕜 E`.
 -/
-abbrev SphericalCompletion (𝕜 : Type*) [NontriviallyNormedField 𝕜]
+noncomputable def SphericalCompletion (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     (E : Type u) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E] : Type u :=
   ↥(exists_max_imm_ext_in_sph_comp 𝕜 E
       _ (sphericallyCompleteExtension 𝕜 E)).choose
 
-/--
-`SphericalCompletionEmbedding 𝕜 E` is the canonical linear isometric embedding of `E` into the
-chosen spherical completion `SphericalCompletion 𝕜 E`.
+noncomputable instance instNormedAddCommGroupSphericalCompletionAbbrev
+{𝕜 : Type*} [NontriviallyNormedField 𝕜]
+(E : Type*) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E] :
+NormedAddCommGroup (SphericalCompletion 𝕜 E) :=
+  show NormedAddCommGroup
+      ↥(exists_max_imm_ext_in_sph_comp 𝕜 E _ (sphericallyCompleteExtension 𝕜 E)).choose
+    from inferInstance
 
-It is obtained by composing the fixed linear isometry
-`sphericallyCompleteExtension 𝕜 E : E →ₗᵢ[𝕜] E₀` into a spherically complete ambient space `E₀` with
-the inclusion of `LinearMap.range` into the maximal immediate intermediate submodule selected in the
-definition of `SphericalCompletion`.
--/
-abbrev SphericalCompletionEmbedding (𝕜 : Type*) [NontriviallyNormedField 𝕜]
-(E : Type u) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
-: E →ₗᵢ[𝕜] SphericalCompletion 𝕜 E := {
-    toFun x := ⟨(sphericallyCompleteExtension 𝕜 E) x, (exists_max_imm_ext_in_sph_comp 𝕜 E _
-    (sphericallyCompleteExtension 𝕜 E)
-      ).choose_spec.1.out.choose <| LinearMap.mem_range_self _ _⟩
-    map_add' _ _:= rfl
-    map_smul' _ _:= rfl
-    norm_map' x := by simp
-  }
+noncomputable instance instNormedSpaceSphericalCompletionAbbrev
+{𝕜 : Type*} [NontriviallyNormedField 𝕜]
+(E : Type*) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E] :
+NormedSpace 𝕜 (SphericalCompletion 𝕜 E) :=
+  show NormedSpace 𝕜
+      ↥(exists_max_imm_ext_in_sph_comp 𝕜 E _ (sphericallyCompleteExtension 𝕜 E)).choose
+    from inferInstance
 
-instance instNormedAddCommGroupSphericalCompletion {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+noncomputable instance instIsUltrametricDistSphericalCompletionAbbrev
+{𝕜 : Type*} [NontriviallyNormedField 𝕜]
+(E : Type*) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E] :
+IsUltrametricDist (SphericalCompletion 𝕜 E) :=
+  show IsUltrametricDist
+      ↥(exists_max_imm_ext_in_sph_comp 𝕜 E _ (sphericallyCompleteExtension 𝕜 E)).choose
+    from inferInstance
+
+noncomputable instance instNormedAddCommGroupSphericalCompletion
+{𝕜 : Type*} [NontriviallyNormedField 𝕜]
 (E : Type*) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
 (E₀ : Type*) [NormedAddCommGroup E₀] [NormedSpace 𝕜 E₀] [IsUltrametricDist E₀]
 [SphericallyCompleteSpace E₀]
@@ -207,5 +245,28 @@ instance instIsUltrametricDistSphericalCompletion
 [SphericallyCompleteSpace E₀]
 (f : E →ₗᵢ[𝕜] E₀) :
 IsUltrametricDist (↥(exists_max_imm_ext_in_sph_comp 𝕜 E E₀ f).choose) := inferInstance
+
+/--
+`SphericalCompletionEmbedding 𝕜 E` is the canonical linear isometric embedding of `E` into the
+chosen spherical completion `SphericalCompletion 𝕜 E`.
+
+It is obtained by composing the fixed linear isometry
+`sphericallyCompleteExtension 𝕜 E : E →ₗᵢ[𝕜] E₀` into a spherically complete ambient space `E₀` with
+the inclusion of `LinearMap.range` into the maximal immediate intermediate submodule selected in the
+definition of `SphericalCompletion`.
+-/
+noncomputable def SphericalCompletionEmbedding (𝕜 : Type*) [NontriviallyNormedField 𝕜]
+(E : Type u) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
+: E →ₗᵢ[𝕜] SphericalCompletion 𝕜 E := {
+    toFun x := ⟨(sphericallyCompleteExtension 𝕜 E) x, (exists_max_imm_ext_in_sph_comp 𝕜 E _
+    (sphericallyCompleteExtension 𝕜 E)
+      ).choose_spec.1.out.choose <| LinearMap.mem_range_self _ _⟩
+    map_add' _ _:= rfl
+    map_smul' _ _:= rfl
+    norm_map' x := by
+      change ‖(⟨(sphericallyCompleteExtension 𝕜 E) x, _⟩ :
+        ↥(exists_max_imm_ext_in_sph_comp 𝕜 E _ (sphericallyCompleteExtension 𝕜 E)).choose)‖ = ‖x‖
+      simp
+  }
 
 end SphericallyCompleteSpace

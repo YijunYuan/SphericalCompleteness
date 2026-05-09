@@ -67,7 +67,7 @@ lemma exists_dist_lt_diam_of_isSphericallyDense {α : Type*} [PseudoMetricSpace 
   replace hr : (↑r' : ℝ) < ↑r := hr
   rw [← isd] at hr
   by_contra hc
-  push_neg at hc
+  push Not at hc
   refine LT.lt.not_ge hr <| Metric.diam_le_of_forall_dist_le r'.prop ?_
   intro x hx y hy
   specialize hc x y hx hy

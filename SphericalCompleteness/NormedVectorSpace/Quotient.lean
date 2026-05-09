@@ -8,29 +8,43 @@ namespace SphericallyCompleteSpace
 
 private lemma lift_to_nearby_element (𝕜 : Type u_1) [inst : NontriviallyNormedField 𝕜]
 {E : Type u_2} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] {F : Submodule 𝕜 E}
-  (un : E ⧸ F) (en : NNReal) (unp1 : E ⧸ F) (h : unp1 ∈ closedBall un en)
+  (un : E ⧸ F.toAddSubgroup) (en : NNReal) (unp1 : E ⧸ F.toAddSubgroup)
+    (h : unp1 ∈ closedBall un en)
   (lun : E) (hlun : (QuotientAddGroup.mk' F.toAddSubgroup) lun = un)
   (ens1 : NNReal) (hens1 : ens1 > en)
    : ∃ lup1 : E, (QuotientAddGroup.mk' F.toAddSubgroup) lup1 = unp1 ∧ ‖lup1 - lun‖ < ens1 := by
   simp only [mem_closedBall] at h
-  rw [← hlun, ← QuotientAddGroup.out_eq' unp1, QuotientAddGroup.mk'_apply, dist_eq_norm,
-    (by rfl : ((↑(unp1.out) : E ⧸ F.toAddSubgroup) - (↑lun: E ⧸ F.toAddSubgroup) : E ⧸ F)
-    = ↑(unp1.out - lun))] at h
-  have := quotient_norm_mk_eq F.toAddSubgroup
-  simp only [QuotientAddGroup.mk'_apply, Submodule.coe_toAddSubgroup] at this
-  rw [this] at h
+  -- h : dist unp1 un ≤ en
+  have h_norm : ‖(QuotientAddGroup.mk' F.toAddSubgroup) (unp1.out - lun)‖ ≤ en := by
+    calc
+      ‖(QuotientAddGroup.mk' F.toAddSubgroup) (unp1.out - lun)‖
+          = ‖(QuotientAddGroup.mk' F.toAddSubgroup) unp1.out -
+              (QuotientAddGroup.mk' F.toAddSubgroup) lun‖ := by
+        simp [(QuotientAddGroup.mk' F.toAddSubgroup).map_sub]
+      _ = ‖unp1 - (QuotientAddGroup.mk' F.toAddSubgroup) lun‖ := by
+        have h1 : (QuotientAddGroup.mk' F.toAddSubgroup) (unp1.out) = unp1 := by
+          calc
+            (QuotientAddGroup.mk' F.toAddSubgroup) (unp1.out)
+              = (unp1.out : E ⧸ F.toAddSubgroup) := by simp
+            _ = unp1 := Quotient.out_eq' unp1
+        rw [h1]
+      _ = ‖unp1 - un‖ := by rw [hlun]
+      _ = dist unp1 un := by rw [dist_eq_norm]
+      _ ≤ en := h
+  have this := quotient_norm_mk_eq F.toAddSubgroup
+  rw [this (unp1.out - lun)] at h_norm
   rcases (csInf_lt_iff (by
     use 0
     simp only [lowerBounds, Set.mem_image, SetLike.mem_coe, forall_exists_index, and_imp,
       forall_apply_eq_imp_iff₂, Set.mem_setOf_eq, norm_nonneg, implies_true]
     ) (by simpa only [Set.image_nonempty] using Submodule.nonempty F
-    )).1 <| lt_of_le_of_lt h hens1 with ⟨px, hxF, hx⟩
+    )).1 <| lt_of_le_of_lt h_norm hens1 with ⟨px, hxF, hx⟩
   simp only [Set.mem_image, SetLike.mem_coe] at hxF
   rcases hxF with ⟨x, hxF, hx_eq⟩
   simp only [← hx_eq, NNReal.val_eq_coe] at hx
   use unp1.out + x
-  simp only [QuotientAddGroup.mk'_apply, Submodule.mem_toAddSubgroup, hxF,
-    QuotientAddGroup.mk_add_of_mem, Quotient.out_eq, true_and]
+  simp only [QuotientAddGroup.mk'_apply, hxF,
+    QuotientAddGroup.mk_add_of_mem, Quotient.out_eq', true_and]
   refine lt_of_eq_of_lt ?_ hx
   rw [(by grind only : (unp1.out + x) - lun = unp1.out - lun + x)]
 
@@ -41,8 +55,8 @@ private noncomputable def liftSequence (𝕜 : Type u_1) [inst : NontriviallyNor
   ⦃r : ℕ → NNReal⦄ (hr : StrictAnti r) (hanti : Antitone fun i ↦ closedBall (c i) ↑(r i)) :
   (t : ℕ) → {x : E // (↑x : E ⧸ F.toAddSubgroup) = c t} := fun n =>
   match n with
-  | 0 => ⟨(c 0).out, by simp only [Quotient.out_eq]⟩
-  | 1 => ⟨(c 1).out, by simp only [Quotient.out_eq]⟩
+  | 0 => ⟨(c 0).out, Quotient.out_eq' (c 0)⟩
+  | 1 => ⟨(c 1).out, Quotient.out_eq' (c 1)⟩
   | m + 2 => by
     have := lift_to_nearby_element 𝕜 (c (m + 1)) (r (m + 1)) (c (m + 2)) (by
       specialize hanti (Nat.le_succ (m+1))
@@ -114,21 +128,32 @@ SphericallyCompleteSpace (E ⧸ F) := by
   refine le_trans this <| sup_le_iff.2 ⟨?_, ?_⟩
   · specialize hw i
     simp only [mem_closedBall, dist_eq_norm] at hw
-    rw [← (liftSequence 𝕜 hr hanti (i + 2)).prop, dist_eq_norm,
-    (by rfl : (↑w - ↑↑(liftSequence 𝕜 hr hanti (i + 2)) : E ⧸ F.toAddSubgroup) =
-      ((QuotientAddGroup.mk' F.toAddSubgroup)) (w - ↑(liftSequence 𝕜 hr hanti (i + 2)))),
-      quotient_norm_mk_eq F.toAddSubgroup]
-    replace := csInf_le (by
-      use 0
-      simp only [lowerBounds, Submodule.coe_toAddSubgroup, Set.mem_image, SetLike.mem_coe,
-        forall_exists_index, and_imp, forall_apply_eq_imp_iff₂, Set.mem_setOf_eq, norm_nonneg,
-        implies_true]
-      ) (by
-      use 0
-      simp only [Submodule.coe_toAddSubgroup, SetLike.mem_coe, zero_mem, add_zero, and_self]
-      : ‖w - ↑(liftSequence 𝕜 hr hanti (i + 2))‖ ∈
-      ((fun x ↦ ‖w - ↑(liftSequence 𝕜 hr hanti (i + 2)) + x‖) '' ↑F.toAddSubgroup))
-    exact le_trans (le_trans this hw) <| le_of_lt <| hr <| lt_add_one i
+    -- hw : ‖w - (liftSequence ... (i+2)).val‖ ≤ r (i+1)
+    let lc := liftSequence 𝕜 hr hanti (i + 2)
+    have htemp : ‖(QuotientAddGroup.mk' F.toAddSubgroup) (w - lc.val)‖ ≤ ↑(r i) := by
+      rw [quotient_norm_mk_eq F.toAddSubgroup (w - lc.val)]
+      have hbdd : BddBelow ((fun (x : E) => ‖(w - lc.val) + x‖) '' (F.toAddSubgroup : Set E)) := by
+        refine ⟨0, ?_⟩
+        intro y hy
+        simp only [Set.mem_image, SetLike.mem_coe] at hy
+        rcases hy with ⟨x, hx, rfl⟩
+        exact norm_nonneg _
+      have hmem : ‖w - lc.val‖ ∈
+        ((fun (x : E) => ‖(w - lc.val) + x‖) '' (F.toAddSubgroup : Set E)) := by
+        refine ⟨0, AddSubgroup.zero_mem _, ?_⟩
+        simp
+      refine le_trans (csInf_le hbdd hmem) ?_
+      exact le_trans hw (le_of_lt (hr (lt_add_one i)))
+    have hgoal : dist ((↑w : E ⧸ F.toAddSubgroup)) (c (i + 2)) ≤ ↑(r i) := by
+      calc
+        dist ((↑w : E ⧸ F.toAddSubgroup)) (c (i + 2))
+            = dist ((QuotientAddGroup.mk' F.toAddSubgroup) w)
+              ((QuotientAddGroup.mk' F.toAddSubgroup) lc.val) := by
+          simp [lc.prop]
+        _ = ‖(QuotientAddGroup.mk' F.toAddSubgroup) (w - lc.val)‖ := by
+          rw [dist_eq_norm, (QuotientAddGroup.mk' F.toAddSubgroup).map_sub]
+        _ ≤ ↑(r i) := htemp
+    exact hgoal
   · refine (hanti <| Nat.le_add_right i 2) ?_
     simp only [mem_closedBall, dist_self, NNReal.zero_le_coe]
 
