@@ -1,4 +1,17 @@
+/-
+Copyright (c) 2026 Yijun Yuan. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Yijun Yuan
+-/
 import SphericalCompleteness.NormedVectorSpace.Orthogonal.MOrth
+import Mathlib.Analysis.Normed.Module.FiniteDimension
+
+/-!
+# Spherical completeness of normed vector spaces
+
+Finite-dimensional ultrametric normed spaces over a spherically complete base are
+spherically complete.
+-/
 
 open Metric
 
@@ -54,16 +67,16 @@ instance instSubtypeMemSubmoduleSpanSingletonSet (𝕜 : Type*) [NontriviallyNor
         simp only [SetLike.mk_smul_mk, mem_closedBall, Subtype.dist_eq]
         rw [← (Submodule.mem_span_singleton.1 (ci (n+1)).prop).choose_spec,
           dist_eq_norm, ← sub_smul, norm_smul]
-        rw [dist_eq_norm, NNReal.coe_mk] at hx
+        rw [dist_eq_norm] at hx
         exact mul_le_of_le_div₀ NNReal.zero_le_coe (norm_nonneg z) hx
       replace this' := Set.mem_of_mem_of_subset this' this
       simp only [SetLike.mk_smul_mk, mem_closedBall, Subtype.dist_eq] at this'
-      simp only [NNReal.coe_mk, ge_iff_le]
+      simp only [ge_iff_le]
       rw [← (Submodule.mem_span_singleton.1 (ci n).prop).choose_spec,
         dist_eq_norm, ← sub_smul, norm_smul, ← dist_eq_norm] at this'
-      rwa [le_div_iff₀ (norm_pos_iff.mpr h)]
+      exact (le_div_iff₀ (norm_pos_iff.mpr h)).mpr this'
       )
-    simp only [NNReal.coe_mk, Set.nonempty_iInter, mem_closedBall] at this
+    simp only [Set.nonempty_iInter, mem_closedBall] at this
     rcases this with ⟨x, hx⟩
     use x • ⟨z, Submodule.mem_span_singleton_self z⟩
     simp only [SetLike.mk_smul_mk, Set.mem_iInter, mem_closedBall]

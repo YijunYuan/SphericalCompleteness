@@ -1,5 +1,16 @@
+/-
+Copyright (c) 2026 Yijun Yuan. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Yijun Yuan
+-/
 import SphericalCompleteness.NormedVectorSpace.ContinuousLinearMap.SupportingResults
 import SphericalCompleteness.External.Sequence
+
+/-!
+# Spherical completeness of operator spaces
+
+Spherical completeness for spaces of continuous linear maps.
+-/
 
 open Metric
 
@@ -41,7 +52,7 @@ SphericallyCompleteSpace (E →L[𝕜] F) := by
     intro i
     unfold r
     simp only [Function.comp_apply]
-    exact lt_of_le_of_lt (zero_le _) <| hsar' (Nat.lt_succ_self (φ i))
+    exact lt_of_le_of_lt zero_le <| hsar' (Nat.lt_succ_self (φ i))
   let 𝒰 := c '' Set.univ
   have h𝒰 : 𝒰.Nonempty := by
     use c 0, 0

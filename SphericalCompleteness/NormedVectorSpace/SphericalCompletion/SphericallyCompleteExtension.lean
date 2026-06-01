@@ -1,7 +1,18 @@
+/-
+Copyright (c) 2026 Yijun Yuan. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Yijun Yuan
+-/
 import SphericalCompleteness.NormedVectorSpace.Basic
 import SphericalCompleteness.NormedVectorSpace.Quotient
 import SphericalCompleteness.External.Ultrametric
 import Mathlib.Algebra.Order.Group.DenselyOrdered
+
+/-!
+# Spherically complete extensions
+
+Results on spherically complete extensions of normed vector spaces.
+-/
 
 open Metric
 

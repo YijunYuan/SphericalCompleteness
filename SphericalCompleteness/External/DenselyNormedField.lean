@@ -1,7 +1,18 @@
+/-
+Copyright (c) 2026 Yijun Yuan. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Yijun Yuan
+-/
 import Mathlib.Analysis.Normed.Field.Basic
 import Mathlib.Topology.UniformSpace.Completion
 import Mathlib.Topology.Algebra.UniformField
 import Mathlib.Analysis.Normed.Module.Completion
+
+/-!
+# Densely normed fields
+
+Auxiliary results on densely normed fields.
+-/
 
 /--
 Instantiates `DenselyNormedField` on `UniformSpace.Completion α`.

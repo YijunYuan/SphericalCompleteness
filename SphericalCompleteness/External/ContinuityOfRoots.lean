@@ -1,5 +1,9 @@
+/-
+Copyright (c) 2026 Yijun Yuan. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Yijun Yuan
+-/
 import Mathlib.Topology.MetricSpace.Ultra.Basic
-import Mathlib.Tactic
 import Mathlib.Topology.MetricSpace.Pseudo.Defs
 import Mathlib.Analysis.Normed.Group.Ultra
 import Mathlib.Algebra.Polynomial.Degree.Operations
@@ -7,6 +11,13 @@ import Mathlib.FieldTheory.IsAlgClosed.AlgebraicClosure
 import Mathlib.Analysis.Normed.Unbundled.SpectralNorm
 import Mathlib.RingTheory.Polynomial.GaussNorm
 import Mathlib.Algebra.Polynomial.Splits
+import Mathlib.Tactic.Common
+
+/-!
+# Continuity of roots
+
+Continuity-of-roots estimates in non-Archimedean settings.
+-/
 
 open Polynomial
 
@@ -246,7 +257,7 @@ theorem spectralNorm_le_gaussNorm {𝕜 : Type u_1} [hn : NontriviallyNormedFiel
   have : IsPowMul (spectralNorm 𝕜 (AlgebraicClosure 𝕜)) := isPowMul_spectralNorm
   rw [this α t] at hfz
   rw [hfz]
-  refine le_trans (IsNonarchimedean.apply_sum_le_sup_of_isNonarchimedean
+  refine le_trans (IsNonarchimedean.apply_sum_le_sup
     isNonarchimedean_spectralNorm <| Finset.Aesop.range_nonempty <| Nat.ne_zero_of_lt t) ?_
   simp only [Finset.sup'_le_iff, Finset.mem_range]
   intro i hi
@@ -324,7 +335,7 @@ theorem spectralNorm_eval_le_gaussNorm_sub {𝕜 : Type u_1} [hn : NontriviallyN
   nth_rw 2 [Polynomial.eval_eq_sum_range] at this
   rw [this]
   refine le_trans
-    (IsNonarchimedean.apply_sum_le_sup_of_isNonarchimedean isNonarchimedean_spectralNorm
+    (IsNonarchimedean.apply_sum_le_sup isNonarchimedean_spectralNorm
     (by simp : (Finset.range ((g - f).toAlgCl.natDegree + 1)).Nonempty)) ?_
   simp only [Finset.sup'_le_iff, Finset.mem_range]
   intro i hi

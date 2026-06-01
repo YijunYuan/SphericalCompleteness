@@ -1,5 +1,17 @@
+/-
+Copyright (c) 2026 Yijun Yuan. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Yijun Yuan
+-/
 import SphericalCompleteness.NormedVectorSpace.Basic
 import SphericalCompleteness.External.Submodule
+import Mathlib.Analysis.Normed.Operator.BoundedLinearMaps
+
+/-!
+# Supporting results for continuous linear maps
+
+Auxiliary results used in the Hahn-Banach development.
+-/
 
 open Metric
 
@@ -100,7 +112,7 @@ lemma rooij_lemma_4_4_z0 {𝕜 : Type*}
         constructor
         · rw [← hxU]
           unfold U x
-          simp only [Subtype.exists, NNReal.coe_mk, mem_closedBall, dist_self]
+          simp only [Subtype.exists, mem_closedBall, dist_self]
           exact Left.mul_nonneg (le_of_lt (hε1 _)) <| norm_nonneg _
         · rw [← dist_eq_norm, ← mem_closedBall] at hc
           rwa [← hyV]
@@ -111,7 +123,7 @@ lemma rooij_lemma_4_4_z0 {𝕜 : Type*}
           rwa [← hxU]
         · rw [← hyV]
           unfold V y
-          simp only [Subtype.exists, NNReal.coe_mk, mem_closedBall, dist_self]
+          simp only [Subtype.exists, mem_closedBall, dist_self]
           exact Left.mul_nonneg (le_of_lt (hε1 _)) <| norm_nonneg _
   specialize hsc h𝒮
   simp only [Set.iInter_coe_set, Set.nonempty_iInter, Set.mem_iInter, mem_closedBall] at hsc

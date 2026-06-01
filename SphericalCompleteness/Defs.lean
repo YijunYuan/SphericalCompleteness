@@ -1,8 +1,20 @@
+/-
+Copyright (c) 2026 Yijun Yuan. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Yijun Yuan
+-/
 import Mathlib.NumberTheory.Padics.ProperSpace
 import SphericalCompleteness.External.Complete
 import SphericalCompleteness.External.NNReal
 import SphericalCompleteness.External.Sequence
 import SphericalCompleteness.External.Ultrametric
+
+/-!
+# Spherical completeness: definitions
+
+Basic definitions and elementary consequences of spherical completeness for
+ultrametric (pseudo)metric spaces.
+-/
 
 open Metric
 open Filter

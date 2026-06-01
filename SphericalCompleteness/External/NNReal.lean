@@ -1,4 +1,15 @@
+/-
+Copyright (c) 2026 Yijun Yuan. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Yijun Yuan
+-/
 import Mathlib.Data.NNReal.Defs
+
+/-!
+# Auxiliary `NNReal` lemmas
+
+Supporting lemmas on nonnegative reals.
+-/
 
 lemma NNReal.exists_add_one_div_pow_two_lt
 (a b : NNReal) (h : a < b) : ∃ n : ℕ, a + 1 / 2 ^ n < b := by
@@ -6,9 +17,10 @@ lemma NNReal.exists_add_one_div_pow_two_lt
     simpa only [sub_nonneg, NNReal.coe_le_coe] using le_of_lt h
     ⟩
   have hc : c > 0 := by
-    unfold c
     refine NNReal.coe_pos.mp ?_
-    simpa only [NNReal.coe_mk, sub_pos, NNReal.coe_lt_coe]
+    have : (c : ℝ) = (b : ℝ) - (a : ℝ) := rfl
+    rw [this, sub_pos]
+    exact NNReal.coe_lt_coe.mpr h
   rcases NNReal.exists_nat_pos_inv_lt hc with ⟨N, hN1, hN2⟩
   use N
   simp only [gt_iff_lt, one_div, c] at *

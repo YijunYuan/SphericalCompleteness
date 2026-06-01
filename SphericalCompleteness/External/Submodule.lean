@@ -1,5 +1,16 @@
+/-
+Copyright (c) 2026 Yijun Yuan. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Yijun Yuan
+-/
 import Mathlib.LinearAlgebra.Span.Defs
 import Mathlib.Algebra.Field.Defs
+
+/-!
+# Auxiliary submodule lemmas
+
+Supporting lemmas on submodules.
+-/
 
 /--
 If `a ∉ D`, then the sum decomposition of an element of the form `d + l`

@@ -1,4 +1,16 @@
+/-
+Copyright (c) 2026 Yijun Yuan. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Yijun Yuan
+-/
 import SphericalCompleteness.Basic
+
+/-!
+# Spherical completeness of quotient spaces
+
+This file proves that the quotient `E ⧸ F` of a spherically complete ultrametric normed
+space `E` by a submodule `F` is again spherically complete.
+-/
 
 open Metric
 open Filter

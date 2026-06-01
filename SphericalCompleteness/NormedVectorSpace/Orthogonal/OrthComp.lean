@@ -1,8 +1,19 @@
+/-
+Copyright (c) 2026 Yijun Yuan. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Yijun Yuan
+-/
 import SphericalCompleteness.NormedVectorSpace.Orthogonal.Basic
 import SphericalCompleteness.NormedVectorSpace.ContinuousLinearMap.SupportingResults
 import SphericalCompleteness.External.Ultrametric
 import Mathlib.Analysis.Normed.Group.Submodule
 import Mathlib.Algebra.Module.Submodule.Ker
+
+/-!
+# Orthogonal complements
+
+Orthogonal complements and projections in ultrametric normed spaces.
+-/
 
 open Metric
 
@@ -83,7 +94,7 @@ theorem exists_orthproj_of_spherically_complete_space
       have hU : U.1 = 0 := by
         exact Set.mem_singleton_iff.mp U.2
       rw [hU]
-      simpa [one_mul] using (le_rfl : ‖↑x‖ ≤ ‖↑x‖))
+      simp [one_mul])
   simp only [Subtype.forall, Set.mem_singleton_iff, forall_eq, sub_zero] at this
   rcases this with ⟨T, hT1, hT2⟩
   refine ⟨T, ⟨fun a ha => ?_, hT2⟩⟩

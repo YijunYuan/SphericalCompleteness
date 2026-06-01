@@ -1,4 +1,18 @@
-import Mathlib.Tactic
+/-
+Copyright (c) 2026 Yijun Yuan. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Yijun Yuan
+-/
+import Mathlib.Tactic.Common
+import Mathlib.Order.Monotone.Basic
+import Mathlib.Order.Bounds.Basic
+import Mathlib.Data.Nat.Lattice
+
+/-!
+# Subsequence extraction
+
+Subsequence selection principles used in descending-chain arguments.
+-/
 
 private noncomputable def extractStrictAntiSubseq {α : Type u_1} [inst : PartialOrder α]
   {f : ℕ → α} (hanti : Antitone f) (h : ∀ (N : ℕ), ∃ n ≥ N, f n ≠ f N) : ℕ → ℕ := fun n =>
@@ -30,7 +44,7 @@ theorem eventually_stable_or_exists_strictanti_of_antitone {α : Type*} [Partial
     constructor
     · refine strictMono_nat_of_lt_succ <| fun n => ?_
       simp only [extractStrictAntiSubseq]
-      have := (extractStrictAntiSubseq._proof_2 hanti h n).choose_spec
+      have := (h (extractStrictAntiSubseq hanti h n)).choose_spec
       refine lt_of_le_of_ne this.1 ?_
       by_contra hc
       rw [← hc] at this
@@ -38,10 +52,10 @@ theorem eventually_stable_or_exists_strictanti_of_antitone {α : Type*} [Partial
     · refine strictAnti_nat_of_succ_lt <| fun n => lt_of_le_of_ne ?_ ?_
       · refine hanti ?_
         simp only [extractStrictAntiSubseq]
-        exact (extractStrictAntiSubseq._proof_2 hanti h n).choose_spec.1
+        exact (h (extractStrictAntiSubseq hanti h n)).choose_spec.1
       · by_contra hc
         simp only [Function.comp_apply, extractStrictAntiSubseq, ge_iff_le, ne_eq] at hc
-        exact (extractStrictAntiSubseq._proof_2 hanti h n).choose_spec.2 hc
+        exact (h (extractStrictAntiSubseq hanti h n)).choose_spec.2 hc
 
 private noncomputable def extractInjectiveSubseq {α : Type*} (seq : ℕ → α)
 (hseq : ∀ n : ℕ, ∃ N, ∀ i > N, seq n ≠ seq i) : ℕ → ℕ

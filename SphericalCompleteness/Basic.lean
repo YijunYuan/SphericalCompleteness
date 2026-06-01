@@ -1,5 +1,17 @@
+/-
+Copyright (c) 2026 Yijun Yuan. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Yijun Yuan
+-/
 import Mathlib.NumberTheory.Padics.ProperSpace
 import SphericalCompleteness.Defs
+
+/-!
+# Spherical completeness: characterizations
+
+Equivalent characterizations of spherical completeness and the implication that
+spherically complete spaces are complete.
+-/
 
 open Metric
 open Filter

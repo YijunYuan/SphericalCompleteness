@@ -1,5 +1,16 @@
+/-
+Copyright (c) 2026 Yijun Yuan. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Yijun Yuan
+-/
 import SphericalCompleteness.Basic
 import SphericalCompleteness.External.PadicComplex
+
+/-!
+# A non-spherical-completeness mechanism
+
+Results exhibiting spaces that fail to be spherically complete.
+-/
 
 open Metric
 open Filter

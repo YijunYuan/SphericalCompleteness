@@ -1,8 +1,19 @@
+/-
+Copyright (c) 2026 Yijun Yuan. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Yijun Yuan
+-/
 import Mathlib.Analysis.SpecificLimits.Basic
 import Mathlib.Topology.Instances.NNReal.Lemmas
 import Mathlib.Topology.MetricSpace.Cauchy
 import Mathlib.Topology.MetricSpace.Pseudo.Defs
-import Mathlib.Tactic
+import Mathlib.Tactic.Common
+
+/-!
+# Completeness via nested balls
+
+Auxiliary results relating completeness to nested closed balls whose radii tend to zero.
+-/
 
 open Metric
 open Filter

@@ -1,4 +1,7 @@
 import SphericalCompleteness.NormedVectorSpace.Orthogonal.Basic
+import Mathlib.LinearAlgebra.FiniteDimensional.Defs
+import Mathlib.LinearAlgebra.Dimension.RankNullity
+import Mathlib.LinearAlgebra.Dimension.DivisionRing
 
 open Metric
 open Filter
@@ -177,13 +180,13 @@ theorem exists_morth_vec_of_not_full_finrank (𝕜 : Type*) [NontriviallyNormedF
     linarith
     ⟩) (by
     refine antitone_nat_of_succ_le <| fun n => ?_
-    simp only [Nat.cast_add, Nat.cast_one, one_div, NNReal.coe_mk, Set.le_eq_subset]
+    simp only [Nat.cast_add, Nat.cast_one, one_div, Set.le_eq_subset]
     intro x hx
     have := (res_ball 𝕜 F a (infDist a F + 1 / (n + 1 + 1)) (by simp; linarith)).choose_spec
     simp only [one_div] at this
     have h1 : ↑x ∈ closedBall a (infDist a ↑F + (↑n + 1 + 1 : ℝ)⁻¹) ∩ ↑F := by
       rw [this, Set.mem_image]
-      use x
+      exact ⟨x, hx, rfl⟩
     replace h1 : ↑x ∈ closedBall a (infDist a ↑F + (↑n + 1 : ℝ)⁻¹) ∩ ↑F := by
       refine ⟨?_ , x.prop⟩
       simp only [Set.mem_inter_iff, mem_closedBall, Subtype.coe_prop, and_true] at h1
@@ -196,7 +199,7 @@ theorem exists_morth_vec_of_not_full_finrank (𝕜 : Type*) [NontriviallyNormedF
     simpa only [mem_closedBall, ge_iff_le, Set.mem_image, SetLike.coe_eq_coe, exists_eq_right] using
       h1
     )
-  simp only [one_div, NNReal.coe_mk, Set.nonempty_iInter, Subtype.exists] at this
+  simp only [one_div, Set.nonempty_iInter, Subtype.exists] at this
   rcases this with ⟨z, hz, hfin⟩
   use z
   simp only [hz, true_and]
@@ -208,7 +211,8 @@ theorem exists_morth_vec_of_not_full_finrank (𝕜 : Type*) [NontriviallyNormedF
       Nat.cast_add_one_pos])).choose) (infDist a ↑F + 1 / (i + 1))) := by
       simp only [mem_closedBall, one_div, Set.mem_image, Subtype.exists, exists_and_right,
         exists_eq_right] at *
-      use hz
+      refine ⟨hz, ?_⟩
+      simpa using hfin
     rw [← (res_ball 𝕜 F a (infDist a F + 1 / (i + 1))
       (by simp only [one_div, gt_iff_lt, lt_add_iff_pos_right,
         inv_pos, Nat.cast_add_one_pos])).choose_spec] at this

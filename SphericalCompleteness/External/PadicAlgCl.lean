@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Yijun Yuan. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Yijun Yuan
+-/
 import Mathlib.NumberTheory.Padics.Complex
 import Mathlib.Analysis.SpecialFunctions.Log.Base
 import Mathlib.Topology.Bases
@@ -5,6 +10,12 @@ import Mathlib.Algebra.Polynomial.OfFn
 import Mathlib.Algebra.Polynomial.Cardinal
 
 import SphericalCompleteness.External.ContinuityOfRoots
+
+/-!
+# Algebraic closure of the `p`-adics
+
+Auxiliary results on the algebraic closure of the `p`-adic numbers.
+-/
 
 open PadicAlgCl
 open Polynomial

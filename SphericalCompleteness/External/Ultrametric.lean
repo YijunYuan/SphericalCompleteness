@@ -1,9 +1,22 @@
+/-
+Copyright (c) 2026 Yijun Yuan. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Yijun Yuan
+-/
 import Mathlib.Topology.MetricSpace.Ultra.Basic
-import Mathlib.Tactic
+import Mathlib.Topology.MetricSpace.Completion
 import Mathlib.Topology.MetricSpace.Pseudo.Defs
 import Mathlib.Analysis.Normed.Group.Ultra
 import Mathlib.Analysis.Normed.Operator.Basic
 import Mathlib.Analysis.Normed.Lp.lpSpace
+import Mathlib.Tactic.Common
+
+/-!
+# Ultrametric auxiliary results
+
+Supporting results on ultrametric distances, including transfer to completions,
+quotients, submodules, operator spaces and `lp` spaces.
+-/
 
 open Metric
 open NNReal
@@ -206,7 +219,7 @@ Lifts the ultrametric inequality on distances from `𝕜` to its uniform complet
 
 If `𝕜` is a `PseudoMetricSpace` whose distance is ultrametric (`IsUltrametricDist 𝕜`),
 then `UniformSpace.Completion 𝕜` inherits an ultrametric distance with respect to the
-canonical `dist` coming from `UniformSpace.Completion.instMetricSpace.toDist`.
+canonical `dist` coming from `UniformSpace.Completion.instMetricSpace.toPseudoMetricSpace.toDist`.
 
 This instance is useful for transferring non-Archimedean/ultrametric arguments to the
 completion, allowing one to work in a complete ultrametric space without changing the
@@ -214,8 +227,7 @@ underlying distance structure.
 -/
 instance instIsUltrametricDistCompletion {𝕜 : Type*} [PseudoMetricSpace 𝕜]
 [IsUltrametricDist 𝕜] :
-  @IsUltrametricDist (UniformSpace.Completion 𝕜)
-  UniformSpace.Completion.instMetricSpace.toDist where
+  IsUltrametricDist (UniformSpace.Completion 𝕜) where
   dist_triangle_max x y z := by
     have := @UniformSpace.Completion.denseRange_coe 𝕜 _
     refine le_of_forall_pos_lt_add <| fun ε hε => ?_
