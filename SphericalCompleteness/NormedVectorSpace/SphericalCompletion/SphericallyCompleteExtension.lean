@@ -90,7 +90,8 @@ private lemma exists_norm_sub_lt {𝕜 : Type u_1} [inst : NontriviallyNormedFie
     have hout :
         (QuotientAddGroup.mk' (c₀ 𝕜 E).toAddSubgroup) ((c (i + 2) - c (i + 1)).out) =
           c (i + 2) - c (i + 1) := Quotient.out_eq' _
-    simpa [hout] using this
+    rw [hout]
+    exact this
   rw [quotient_norm_mk_eq (c₀ 𝕜 E).toAddSubgroup ((c (i + 2) - c (i + 1)).out)] at hnorm
   rw [csInf_lt_iff] at hnorm
   · rcases hnorm with ⟨unp1, hlun, hens1⟩
@@ -340,7 +341,7 @@ SphericallyCompleteSpace ((lp E ⊤)⧸ c₀ 𝕜 E) := by
   refine (hanti (Nat.le_succ i)) ?_
   simp only [Nat.succ_eq_add_one, mem_closedBall, dist_self, NNReal.zero_le_coe]
 
-def sphericallyCompleteExtension (𝕜 : Type*) [NontriviallyNormedField 𝕜]
+noncomputable def sphericallyCompleteExtension (𝕜 : Type*) [NontriviallyNormedField 𝕜]
   (E : Type*) [NormedAddCommGroup E] [NormedSpace 𝕜 E] :
   E →ₗᵢ[𝕜] ((lp (fun (_ : ℕ) => E) ⊤)⧸ c₀ 𝕜 (fun (_ : ℕ) => E)) where
   toFun x := by

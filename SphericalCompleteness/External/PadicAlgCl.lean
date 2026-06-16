@@ -189,7 +189,10 @@ instance instSeparableSpacePadicAlgCl : TopologicalSpace.SeparableSpace (PadicAl
     rcases hδ g hg hfg hfgδ with ⟨β, hβg, hβα⟩
     use β
     constructor
-    · simpa [dist_comm, dist_eq_norm] using lt_of_le_of_lt hβα <| by linarith
+    · rw [Metric.mem_ball, dist_comm, dist_eq_norm]
+      refine lt_of_le_of_lt ?_ (by linarith : ε / 2 < ε)
+      rw [← spectralNorm_eq, ← spectralAlgNorm_def (K := ℚ_[p]) (L := PadicAlgCl p)]
+      exact hβα
     · simp only [Set.mem_setOf_eq]
       use g'
       constructor

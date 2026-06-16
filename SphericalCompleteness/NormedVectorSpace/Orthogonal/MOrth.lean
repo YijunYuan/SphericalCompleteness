@@ -196,8 +196,12 @@ theorem exists_morth_vec_of_not_full_finrank (𝕜 : Type*) [NontriviallyNormedF
     replace := (res_ball 𝕜 F a (infDist a F + 1 / (n + 1)) (by simp; linarith)).choose_spec
     simp only [one_div] at this
     rw [this] at h1
-    simpa only [mem_closedBall, ge_iff_le, Set.mem_image, SetLike.coe_eq_coe, exists_eq_right] using
-      h1
+    obtain ⟨y, hyball, hyx⟩ := h1
+    have hyeqx : y = x := SetLike.coe_eq_coe.mp hyx
+    rw [mem_closedBall] at hyball
+    subst hyeqx
+    rw [mem_closedBall]
+    exact hyball
     )
   simp only [one_div, Set.nonempty_iInter, Subtype.exists] at this
   rcases this with ⟨z, hz, hfin⟩
@@ -212,7 +216,7 @@ theorem exists_morth_vec_of_not_full_finrank (𝕜 : Type*) [NontriviallyNormedF
       simp only [mem_closedBall, one_div, Set.mem_image, Subtype.exists, exists_and_right,
         exists_eq_right] at *
       refine ⟨hz, ?_⟩
-      simpa using hfin
+      exact hfin
     rw [← (res_ball 𝕜 F a (infDist a F + 1 / (i + 1))
       (by simp only [one_div, gt_iff_lt, lt_add_iff_pos_right,
         inv_pos, Nat.cast_add_one_pos])).choose_spec] at this

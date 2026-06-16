@@ -56,7 +56,7 @@ Concretely, this is `gaussNorm` specialized to `Polynomial 𝕜` (via the identi
 nonarchimedean/analytic arguments, where taking `r = 1` avoids additional scaling factors.
 -/
 abbrev Polynomial.stdGaussNorm {𝕜 : Type u_1} [hn : NontriviallyNormedField 𝕜] (f : Polynomial 𝕜) :=
-(@gaussNorm _ _ _ {coe := fun f => f, coe_injective' := fun _ _ stupid => stupid} hn.norm 1) f
+(@gaussNorm _ _ _ {coe := fun f => f, coe_injective := fun _ _ stupid => stupid} hn.norm 1) f
 
 /--
 `stdGaussNorm_nonneg` states that the *standard Gauss norm* of a polynomial over a
@@ -422,7 +422,7 @@ theorem continuity_of_roots₀ {𝕜 : Type u_1} [hn : NontriviallyNormedField �
       spectralNorm 𝕜 (AlgebraicClosure 𝕜) s.1 := by
       intro s hs
       rcases Multiset.mem_map.1 (Multiset.mem_of_mem_toEnumFinset hs) with ⟨z, hz⟩
-      simpa [← hz.2] using hc z (by simpa using isRoot_of_mem_roots hz.1)
+      simpa [← hz.2, spectralAlgNorm_def] using hc z (by simpa using isRoot_of_mem_roots hz.1)
     replace this' := Finset.prod_lt_prod_of_nonempty ?_ this' ?_
     · rw [← this] at this'
       simp only [one_div, Finset.prod_const, Multiset.card_toEnumFinset, Multiset.card_map,

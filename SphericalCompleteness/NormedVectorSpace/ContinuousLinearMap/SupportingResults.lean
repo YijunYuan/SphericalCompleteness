@@ -30,19 +30,18 @@ lemma rooij_lemma_4_4_z0 {𝕜 : Type*}
   rw [sphericallyCompleteSpace_iff_pairwise_inter_nonempty] at hsc
   let 𝒮 : Set (F × NNReal) := {(U.val x + U.val a - S x,
     ⟨(ε U) * ‖x + a‖, mul_nonneg (le_of_lt (hε1 _)) (norm_nonneg _)⟩) | (x : ↑D) (U : ↑𝒰)}
-  have : 𝒮.Nonempty := by
+  have h𝒮ne : 𝒮.Nonempty := by
     use (h𝒰.some 0 + h𝒰.some a - S 0, ⟨(ε ⟨h𝒰.some, h𝒰.some_mem⟩)
       * ‖0 + a‖, mul_nonneg (le_of_lt (hε1 _)) (norm_nonneg _)⟩)
     unfold 𝒮
     use 0, ⟨h𝒰.some, h𝒰.some_mem⟩
     simp only [ZeroMemClass.coe_zero, map_zero, zero_add, sub_zero]
-  specialize hsc 𝒮 this
+  specialize hsc 𝒮 h𝒮ne
   have h𝒮 : ∀ (w1 w2 : ↑𝒮), (closedBall w1.val.1 w1.val.2 ∩
     closedBall w2.val.1 ↑w2.val.2).Nonempty := by
     intro s1 s2
     wlog h : ε s1.2.out.choose_spec.choose ≤ ε s2.2.out.choose_spec.choose
-    · specialize this ha1 S h𝒰 hε1 hε2 hε3 (by assumption)
-        hsc s2 s1 (le_of_lt <| lt_of_not_ge h)
+    · specialize this ha1 S h𝒰 hε1 hε2 hε3 hsc h𝒮ne s2 s1 (le_of_lt <| lt_of_not_ge h)
       rwa [Set.inter_comm]
     · let x := s1.2.out.choose
       let U := s1.2.out.choose_spec.choose
@@ -418,7 +417,7 @@ private structure PartialExtension (𝕜 : Type*) [NontriviallyNormedField 𝕜]
   hT : ∀ x : D, T ⟨x, hDM x.prop⟩ = S x
   hU : ∀ U : ↑𝒰, ∀ x : M, ‖T x- U.val x‖ ≤ (ε U) * ‖x‖
 
-private instance instNonemptyPartialExtension
+private lemma instNonemptyPartialExtension
 (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 (E : Type*) [SeminormedAddCommGroup E] [IsUltrametricDist E] [NormedSpace 𝕜 E]
 {D : Submodule 𝕜 E}
@@ -589,7 +588,6 @@ private lemma bddAbove_of_chain_of_partial_extension (𝕜 : Type*) [Nontriviall
           (isboundedlinearmap_of_glued_map 𝕜 h𝒰 ε hε1 P hP hhP)
         hT := by
           intro d
-          simp only [IsBoundedLinearMap.toContinuousLinearMap, IsBoundedLinearMap.toLinearMap]
           haveI : Nonempty ↑P := Set.Nonempty.to_subtype hhP
           have : D ≤ iSup (fun p : P ↦ p.val.M) := fun z hz => (Submodule.mem_iSup _).2 <|
             fun N hN => (le_trans hhP.some.hDM <| hN ⟨hhP.some, hhP.some_mem⟩) hz
@@ -597,17 +595,19 @@ private lemma bddAbove_of_chain_of_partial_extension (𝕜 : Type*) [Nontriviall
             (by apply directed_chain; repeat assumption)).1 <| this d.prop).choose
           let hMd := ((Submodule.mem_iSup_of_directed (fun p : P ↦ p.val.M)
             (by apply directed_chain; repeat assumption)).1 <| this d.prop).choose_spec
-          simpa only [Md, hMd, IsBoundedLinearMap.toContinuousLinearMap,
-            IsBoundedLinearMap.toLinearMap] using Md.val.hT d
+          change glued_map 𝕜 h𝒰 ε P hP hhP ⟨↑d, _⟩ = S d
+          unfold glued_map
+          exact Md.val.hT d
         hU := by
           intro U x
-          simp only [IsBoundedLinearMap.toContinuousLinearMap, IsBoundedLinearMap.toLinearMap]
           haveI : Nonempty ↑P := Set.Nonempty.to_subtype hhP
           let Mx := ((Submodule.mem_iSup_of_directed (fun p : P ↦ p.val.M)
             (by apply directed_chain; repeat assumption)).1 x.prop).choose
           let hMx := ((Submodule.mem_iSup_of_directed (fun p : P ↦ p.val.M)
             (by apply directed_chain; repeat assumption)).1 x.prop).choose_spec
-          simpa only [ge_iff_le, Submodule.coe_norm] using Mx.val.hU U ⟨x.val, hMx⟩
+          change ‖glued_map 𝕜 h𝒰 ε P hP hhP x - U.val x.val‖ ≤ ε U * ‖x‖
+          unfold glued_map
+          exact Mx.val.hU U ⟨x.val, hMx⟩
       }
   simp only [upperBounds, Set.mem_setOf_eq]
   intro M hM
@@ -713,15 +713,16 @@ lemma exists_extension_opNorm_le
   use IsBoundedLinearMap.toContinuousLinearMap _ fiblm
   constructor
   · intro D
-    simpa only [IsBoundedLinearMap.toContinuousLinearMap, IsBoundedLinearMap.toLinearMap,
-      IsLinearMap.mk', LinearEquiv.ofTop, LinearEquiv.coe_symm_mk', ContinuousLinearMap.coe_mk',
-      LinearMap.coe_mk, AddHom.coe_mk, Function.comp_apply] using W.hT D
+    change f ↑D = S D
+    unfold f
+    simp only [Function.comp_apply, LinearEquiv.ofTop_symm_apply]
+    exact W.hT D
   · intro U
     have tt : ∀ x : E, ‖(fiblm.toContinuousLinearMap - ↑U) x‖
       = ‖W.T ⟨x, this ▸ Submodule.mem_top⟩ - U.val x‖ := by
       intro x
       simp only [IsBoundedLinearMap.toContinuousLinearMap, IsBoundedLinearMap.toLinearMap,
-        ContinuousLinearMap.coe_sub', ContinuousLinearMap.coe_mk', Pi.sub_apply,
+        sub_apply, ContinuousLinearMap.coe_mk',
         IsLinearMap.mk'_apply, Function.comp_apply, LinearEquiv.ofTop_symm_apply, f]
     rw [ContinuousLinearMap.opNorm_le_iff <| le_of_lt <| hε1 U]
     exact fun x => tt x ▸ W.hU U ⟨x, this ▸ Submodule.mem_top⟩

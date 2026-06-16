@@ -6,7 +6,7 @@ Authors: Yijun Yuan
 import Mathlib.Tactic.Common
 import Mathlib.Order.Monotone.Basic
 import Mathlib.Order.Bounds.Basic
-import Mathlib.Data.Nat.Lattice
+import Mathlib.Order.Lattice.Nat
 
 /-!
 # Subsequence extraction

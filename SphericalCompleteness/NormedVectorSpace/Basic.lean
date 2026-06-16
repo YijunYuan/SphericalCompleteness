@@ -132,7 +132,11 @@ SphericallyCompleteSpace E := by
       fun _ _ hab _ hz => (h hab) hz
     ) with ⟨x, hx⟩
     use x.val
-    simpa only [Set.mem_iInter, mem_closedBall, dist_le_coe] using hx
+    simp only [Set.mem_iInter, mem_closedBall, dist_le_coe] at hx ⊢
+    intro i
+    have := hx i
+    convert this using 1
+    rfl
   intro n hn
   induction n
   · case zero => exact ⟨⊥, ⟨finrank_bot 𝕜 E, inferInstance⟩⟩

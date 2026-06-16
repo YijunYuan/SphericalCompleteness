@@ -62,7 +62,8 @@ closedBall z1 r1 ⊆ closedBall z2 r2 := by
   simp only [mem_closedBall] at *
   refine le_trans (hiud.dist_triangle_max x y z2) <| sup_le_iff.2 ⟨?_, hy2⟩
   refine le_trans (hiud.dist_triangle_max x z1 y) <| sup_le_iff.2 ⟨le_trans hx hle, ?_⟩
-  simpa only [dist_comm] using le_trans hy1 hle
+  rw [dist_comm]
+  exact le_trans hy1 hle
 
 /--
 Transfers an ultrametric distance from a seminormed `𝕜`-normed space `E` to the quotient `E ⧸ F`.
@@ -135,7 +136,7 @@ IsUltrametricDist (E →L[𝕜] F) where
     rw [ContinuousLinearMap.opNorm_le_iff]
     · intro x
       have : ‖(f - h) x‖ = ‖(f - g) x + (g - h) x‖ := by
-        simp only [ContinuousLinearMap.coe_sub', Pi.sub_apply, sub_add_sub_cancel]
+        simp only [sub_apply, sub_add_sub_cancel]
       rw [this, max_mul_of_nonneg _ _ (norm_nonneg _)]
       refine le_trans (iud.norm_add_le_max _ _) <| max_le_max ?_ ?_
       · exact ContinuousLinearMap.le_opNorm (f - g) x

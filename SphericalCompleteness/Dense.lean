@@ -346,7 +346,7 @@ This is a direct specialization of
 using the previously established instances showing that `ℂ_[p]` is ultrametric,
 separable, and spherically dense in the required sense.
 -/
-instance instPadicComplex_not_sphercallyCompleteSpace (p : ℕ) [hp : Fact (Nat.Prime p)] :
+theorem instPadicComplex_not_sphercallyCompleteSpace (p : ℕ) [hp : Fact (Nat.Prime p)] :
 ¬ SphericallyCompleteSpace ℂ_[p] :=
   not_sphericallyCompleteSpace_of_isSphericallyDense_separable_ultrametric ℂ_[p]
 

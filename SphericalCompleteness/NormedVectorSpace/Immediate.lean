@@ -114,7 +114,7 @@ private lemma norm_map_of_isImmediate {𝕜 : Type*}
     have : ‖(LinearIsometry.weakInv f).toContinuousLinearMap x‖ = ‖x‖ := by
       simp only [LinearIsometry.coe_toContinuousLinearMap, LinearIsometry.norm_map]
     rw [← this]
-    simp only [ContinuousLinearMap.coe_comp', LinearIsometry.coe_toContinuousLinearMap,
+    simp only [ContinuousLinearMap.coe_comp, LinearIsometry.coe_toContinuousLinearMap,
       Function.comp_apply, LinearIsometry.norm_map, one_mul, le_refl]
   · if hv : v = 0 then
       simp [hv]
@@ -179,7 +179,7 @@ theorem exists_linearIsometry_comp_eq_of_isImmediate {𝕜 : Type*} [Nontriviall
   have hf2' :
     h.opNorm =
       ‖g.toContinuousLinearMap.comp (LinearIsometry.weakInv f).toContinuousLinearMap‖ := by
-    simpa using hf2
+    rw [hf2]; rfl
   let h : F →ₗᵢ[𝕜] H := {
     toFun := h.toFun,
     map_add' := h.map_add',

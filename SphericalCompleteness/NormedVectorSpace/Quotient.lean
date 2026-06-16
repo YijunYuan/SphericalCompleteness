@@ -49,7 +49,9 @@ private lemma lift_to_nearby_element (𝕜 : Type u_1) [inst : NontriviallyNorme
     use 0
     simp only [lowerBounds, Set.mem_image, SetLike.mem_coe, forall_exists_index, and_imp,
       forall_apply_eq_imp_iff₂, Set.mem_setOf_eq, norm_nonneg, implies_true]
-    ) (by simpa only [Set.image_nonempty] using Submodule.nonempty F
+    ) (by
+      simp only [Set.image_nonempty]
+      exact ⟨0, F.zero_mem⟩
     )).1 <| lt_of_le_of_lt h_norm hens1 with ⟨px, hxF, hx⟩
   simp only [Set.mem_image, SetLike.mem_coe] at hxF
   rcases hxF with ⟨x, hxF, hx_eq⟩

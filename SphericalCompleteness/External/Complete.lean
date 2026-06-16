@@ -49,9 +49,8 @@ theorem completeSpace_iff_nested_ball_with_radius_tendsto_zero_has_nonempty_inte
     have hci_cauchy : CauchySeq ci := by
       rw [Metric.cauchySeq_iff]
       intro ε hε
-      have hsmall : ∀ᶠ n in atTop, ri n < ⟨ε / 2, le_of_lt (half_pos hε)⟩ := by
-        simpa only [Filter.Eventually, Set.mem_setOf_eq, Set.preimage, Set.Iio]
-          using hri (Iio_mem_nhds (show 0 < ε / 2 by positivity))
+      have hsmall : ∀ᶠ n in atTop, ri n < ⟨ε / 2, le_of_lt (half_pos hε)⟩ :=
+        hri.eventually_lt_const (by exact_mod_cast half_pos hε)
       obtain ⟨N, hN⟩ := Filter.eventually_atTop.1 hsmall
       refine ⟨N, fun m hm n hn => ?_⟩
       have hm_ball : ci m ∈ closedBall (ci N) (ri N) := (hanti hm) (by simp [mem_closedBall])

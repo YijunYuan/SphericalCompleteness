@@ -30,7 +30,11 @@ SphericallyCompleteSpace (↥(exists_max_imm_ext_in_sph_comp 𝕜 E E₀ f).choo
     simp only [mem_closedBall] at *
     refine le_trans (iud.dist_triangle_max z (c n).val (c m).val) ?_
     refine max_le (le_trans hz <| hsr.antitone hmn) ?_
-    simpa only [← mem_closedBall] using hanti hmn <| mem_closedBall_self NNReal.zero_le_coe )
+    have h_in : c n ∈ closedBall (c m) ↑(r m) :=
+      hanti hmn <| mem_closedBall_self NNReal.zero_le_coe
+    rw [mem_closedBall] at h_in
+    rw [show dist ((c n).val) ((c m).val) = dist (c n) (c m) from rfl]
+    exact h_in)
   simp only [Set.nonempty_iInter, mem_closedBall] at this
   rcases this with ⟨a, ha⟩
   if haa : a ∈ (exists_max_imm_ext_in_sph_comp 𝕜 E E₀ f).choose then
@@ -38,7 +42,10 @@ SphericallyCompleteSpace (↥(exists_max_imm_ext_in_sph_comp 𝕜 E E₀ f).choo
     refine Set.nonempty_iff_ne_empty.mp ⟨⟨a, haa⟩, ?_⟩
     simp only [Set.mem_iInter, mem_closedBall]
     intro i
-    simpa only [dist_le_coe] using ha i
+    have := ha i
+    change dist (⟨a, haa⟩ : _) (c i) ≤ ↑(r i)
+    rw [show dist (⟨a, haa⟩ : _) (c i) = dist a (c i).val from rfl]
+    exact this
   else
   have : ((exists_max_imm_ext_in_sph_comp 𝕜 E E₀ f).choose +
     Submodule.span 𝕜 {a}) ∉ imm_ext_in_sph_comp E E₀ f := by
@@ -75,23 +82,24 @@ SphericallyCompleteSpace (↥(exists_max_imm_ext_in_sph_comp 𝕜 E E₀ f).choo
       change Metric.infDist (b' : E₀) _ = ‖(b' : E₀)‖
       -- Both image sets equal ↑f.range; use convert to reduce to set equality
       convert hb'1 using 2
-      ext z
-      simp only [Set.mem_image, SetLike.mem_coe, LinearMap.mem_range,
-        LinearMap.coe_mk, AddHom.coe_mk]
-      constructor
-      · rintro ⟨x, ⟨u, hu⟩, hx⟩
-        -- x : ↥choose, hu : ⟨↑u, ⋯⟩ = x, hx : ↑x = z
-        -- ↑u = ↑x (from hu), so ↑x ∈ f.range ≤ choose ⊔ 𝕜∙a
-        subst hu
-        exact ⟨⟨↑u, Submodule.mem_sup_left
-            ((exists_max_imm_ext_in_sph_comp 𝕜 E E₀ f).choose_spec.1.out.choose u.2)⟩,
-          ⟨u, rfl⟩, hx⟩
-      · rintro ⟨x, ⟨u, hu⟩, hx⟩
-        -- x : ↥(choose ⊔ 𝕜∙a), hu : ⟨↑u, ⋯⟩ = x, hx : ↑x = z
-        -- ↑u = ↑x (from hu), so ↑x ∈ f.range ≤ choose
-        subst hu
-        exact ⟨⟨↑u, (exists_max_imm_ext_in_sph_comp 𝕜 E E₀ f).choose_spec.1.out.choose u.2⟩,
-          ⟨u, rfl⟩, hx⟩
+      · ext z
+        simp only [Set.mem_image, SetLike.mem_coe, LinearMap.mem_range,
+          LinearMap.coe_mk, AddHom.coe_mk]
+        constructor
+        · rintro ⟨x, ⟨u, hu⟩, hx⟩
+          -- x : ↥choose, hu : ⟨↑u, ⋯⟩ = x, hx : ↑x = z
+          -- ↑u = ↑x (from hu), so ↑x ∈ f.range ≤ choose ⊔ 𝕜∙a
+          subst hu
+          exact ⟨⟨↑u, Submodule.mem_sup_left
+              ((exists_max_imm_ext_in_sph_comp 𝕜 E E₀ f).choose_spec.1.out.choose u.2)⟩,
+            ⟨u, rfl⟩, hx⟩
+        · rintro ⟨x, ⟨u, hu⟩, hx⟩
+          -- x : ↥(choose ⊔ 𝕜∙a), hu : ⟨↑u, ⋯⟩ = x, hx : ↑x = z
+          -- ↑u = ↑x (from hu), so ↑x ∈ f.range ≤ choose
+          subst hu
+          exact ⟨⟨↑u, (exists_max_imm_ext_in_sph_comp 𝕜 E E₀ f).choose_spec.1.out.choose u.2⟩,
+            ⟨u, rfl⟩, hx⟩
+      · rfl
     exact hb'2 (ZeroMemClass.coe_eq_zero.mp (congrArg Subtype.val this))
   let b := s⁻¹ • b'
   let x := - s⁻¹ • x'
@@ -157,7 +165,8 @@ SphericallyCompleteSpace (↥(exists_max_imm_ext_in_sph_comp 𝕜 E E₀ f).choo
     have : dist (⟨x, hx⟩ : ↥(exists_max_imm_ext_in_sph_comp 𝕜 E E₀ f).choose) (c i) =
         ‖(⟨x, hx⟩ : ↥(exists_max_imm_ext_in_sph_comp 𝕜 E E₀ f).choose) - c i‖ :=
       dist_eq_norm _ _
-    simpa only [AddSubgroupClass.coe_norm, AddSubgroupClass.coe_sub] using this
+    rw [this]
+    rfl
   have hda : dist a ↑(c i) = ‖b.val - (↑(c i) - x)‖ := by
     rw [dist_eq_norm, hbval]; congr 1; abel
   rw [hdist]
@@ -197,19 +206,16 @@ theorem SphericalCompletionEmbedding_isImmediate (𝕜 : Type*) [NontriviallyNor
   apply himm v
   -- Convert hv : MOrth 𝕜 v (range SphericalCompletionEmbedding) to
   -- MOrth 𝕜 v (range gChoose) by showing the ranges are equal
-  convert hv using 2
-  ext z
+  convert hv using 2 <;> try rfl
+  apply Submodule.ext_iff.mpr
+  intro z
   simp only [LinearMap.mem_range,
     SphericalCompletionEmbedding, LinearMap.coe_mk, AddHom.coe_mk]
   constructor
   · rintro ⟨e, rfl⟩
-    -- e : ↥(sphericallyCompleteExtension 𝕜 E).range, gChoose e = z
-    -- need: ∃ e' : E, SphericalCompletionEmbedding e' = gChoose e
     obtain ⟨e', he'⟩ := LinearMap.mem_range.mp e.prop
     exact ⟨e', by simp [← he']⟩
   · rintro ⟨e, rfl⟩
-    -- e : E, SphericalCompletionEmbedding e = z (unfolded)
-    -- need: ∃ e' : ↥(sphericallyCompleteExtension E).range, gChoose e' = ⟨sphExt e, _⟩
     exact ⟨⟨(sphericallyCompleteExtension 𝕜 E) e, LinearMap.mem_range_self _ _⟩, rfl⟩
 
 /--

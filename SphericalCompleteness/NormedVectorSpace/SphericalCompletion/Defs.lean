@@ -204,7 +204,7 @@ which the induced inclusion is an immediate extension.
 
 The underlying type of this chosen maximal submodule is defined to be `SphericalCompletion 𝕜 E`.
 -/
-noncomputable def SphericalCompletion (𝕜 : Type*) [NontriviallyNormedField 𝕜]
+noncomputable abbrev SphericalCompletion (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     (E : Type u) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E] : Type u :=
   ↥(exists_max_imm_ext_in_sph_comp 𝕜 E
       _ (sphericallyCompleteExtension 𝕜 E)).choose

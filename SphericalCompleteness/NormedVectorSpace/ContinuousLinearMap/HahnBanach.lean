@@ -118,7 +118,8 @@ theorem hahn_banach' {𝕜 : Type*} [NontriviallyNormedField 𝕜]
         intro U a
         have hU : U.1 = 0 := Set.mem_singleton_iff.mp U.2
         rw [hU]
-        simpa using le_opNorm f a
+        simp only [zero_apply, sub_zero]
+        exact le_opNorm f a
       ) with ⟨f', hf1, hf2⟩
     use f'
     simp only [Subtype.forall, Set.mem_singleton_iff, forall_eq, sub_zero] at hf2

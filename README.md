@@ -1,8 +1,8 @@
 # SphericalCompleteness
 
 [![CI](https://github.com/YijunYuan/SphericalCompleteness/actions/workflows/lean_action_ci.yml/badge.svg)](https://github.com/YijunYuan/SphericalCompleteness/actions/workflows/lean_action_ci.yml)
-[![Lean](https://img.shields.io/badge/Lean-4.30.0-5C2D91)](https://github.com/leanprover/lean4)
-[![mathlib](https://img.shields.io/badge/mathlib-v4.30.0-5C2D91)](https://github.com/leanprover-community/mathlib4)
+[![Lean](https://img.shields.io/badge/Lean-4.31.0-5C2D91)](https://github.com/leanprover/lean4)
+[![mathlib](https://img.shields.io/badge/mathlib-v4.31.0-5C2D91)](https://github.com/leanprover-community/mathlib4)
 [![License](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
 
 [![Graph](https://img.shields.io/badge/Dependency_graph-100000?style=for-the-badge&logo=GitHub&logoColor=white&labelColor=black&color=black)](https://yijunyuan.github.io/lean-graph/?url=https://raw.githubusercontent.com/YijunYuan/SphericalCompleteness/refs/heads/master/SphericallyCompleteSpace.json#dark)
