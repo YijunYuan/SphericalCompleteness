@@ -3,7 +3,7 @@ Copyright (c) 2026 Yijun Yuan. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Yijun Yuan
 -/
-import Mathlib.Data.NNReal.Defs
+import Mathlib.Analysis.SpecificLimits.Basic
 
 /-!
 # Auxiliary `NNReal` lemmas
@@ -13,28 +13,10 @@ Supporting lemmas on nonnegative reals.
 
 lemma NNReal.exists_add_one_div_pow_two_lt
 (a b : NNReal) (h : a < b) : ∃ n : ℕ, a + 1 / 2 ^ n < b := by
-  let c : NNReal := ⟨b - a, by
-    simpa only [sub_nonneg, NNReal.coe_le_coe] using le_of_lt h
-    ⟩
-  have hc : c > 0 := by
-    refine NNReal.coe_pos.mp ?_
-    have : (c : ℝ) = (b : ℝ) - (a : ℝ) := rfl
-    rw [this, sub_pos]
-    exact NNReal.coe_lt_coe.mpr h
-  rcases NNReal.exists_nat_pos_inv_lt hc with ⟨N, hN1, hN2⟩
-  use N
-  simp only [gt_iff_lt, one_div, c] at *
-  field_simp at hN2
-  replace hN2 : 1 < N * (b.val - a.val) := hN2
-  field_simp
-  suffices hh : 1 < 2 ^ N * (b.val - a.val) by
-    nth_rw 1 [mul_sub, lt_sub_iff_add_lt, add_comm] at hh
-    have : 2 ^ N * a.val + 1 = ↑(2 ^ N * a + 1) := rfl
-    rw [this] at hh
-    have : 2 ^ N * b.val = ↑(2 ^ N * b) := rfl
-    nth_rw 1 [this, mul_comm] at hh
-    exact NNReal.coe_lt_coe.mp hh
-  refine lt_trans hN2 ?_
-  refine mul_lt_mul_of_lt_of_le_of_pos_of_nonneg ?_ (le_refl _) hc <| pow_nonneg zero_le_two N
-  suffices _ : N < 2 ^ N by norm_cast
-  exact Nat.lt_two_pow_self
+  have hba : 0 < b - a := tsub_pos_of_lt h
+  have htend : Filter.Tendsto (fun n : ℕ => (1 / 2 : NNReal) ^ n) Filter.atTop (nhds 0) :=
+    NNReal.tendsto_pow_atTop_nhds_zero_of_lt_one (by norm_num)
+  obtain ⟨n, hn⟩ := (htend.eventually (eventually_lt_nhds hba)).exists
+  refine ⟨n, ?_⟩
+  rw [div_pow, one_pow] at hn
+  exact lt_tsub_iff_left.mp hn

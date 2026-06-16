@@ -69,8 +69,6 @@ theorem smul_submodule_eq_self {𝕜 : Type*} [Field 𝕜]
   (@HSMul.hSMul 𝕜 (Set E) (Set E) (@instHSMul 𝕜 (Set E) Set.smulSet) a ↑M)
     = ↑M := by
   ext z
-  refine ⟨fun h => ?_, fun h => ?_⟩
-  · rcases Set.mem_smul_set.1 h with ⟨c, hc1, hc2⟩
-    rw [← hc2]
-    exact SMulMemClass.smul_mem a hc1
-  · exact Set.mem_smul_set.mpr ⟨a⁻¹ • z, ⟨SMulMemClass.smul_mem a⁻¹ h, smul_inv_smul₀ ha z⟩⟩
+  refine ⟨?_, fun h => ⟨a⁻¹ • z, SMulMemClass.smul_mem a⁻¹ h, smul_inv_smul₀ ha z⟩⟩
+  rintro ⟨c, hc, rfl⟩
+  exact SMulMemClass.smul_mem a hc

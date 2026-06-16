@@ -47,16 +47,9 @@ theorem sphericallyCompleteSpace_iff_antitone_radius
     refine { isSphericallyComplete := ?_ }
     intro c r hanti
     let r' : ℕ → NNReal := fun n => sInf {r k | k ≤ n}
-    have hr'_Antitone : Antitone r' := by
-      refine antitone_nat_of_succ_le fun n => ?_
-      unfold r'
-      refine csInf_le_csInf' ?_ ?_
-      · use r n, n
-      · simp only [Set.setOf_subset_setOf, forall_exists_index, and_imp, forall_apply_eq_imp_iff₂]
-        intro a ha
-        use a
-        simp only [and_true]
-        linarith
+    have hr'_Antitone : Antitone r' := fun m n hmn =>
+      csInf_le_csInf' ⟨r m, m, le_rfl, rfl⟩ <| by
+        rintro a ⟨k, hk, rfl⟩; exact ⟨k, hk.trans hmn, rfl⟩
     have : Antitone fun i ↦ closedBall (c i) ↑(r' i) := by
       refine antitone_nat_of_succ_le fun n => ?_
       intro x hx
@@ -274,13 +267,11 @@ theorem sphericallyCompleteSpace_iff_pairwise_inter_nonempty
       rcases w1.prop with ⟨i1, hi1⟩
       rcases w2.prop with ⟨i2, hi2⟩
       simp only [Set.mem_setOf_eq, ← hi1, ← hi2]
-      if hi : i2 ≤ i1 then
-        rw [Set.inter_eq_self_of_subset_left <| hanti hi]
-        simp only [nonempty_closedBall, NNReal.zero_le_coe]
-      else
-        rw [Set.inter_eq_self_of_subset_right <| hanti (le_of_lt <| lt_of_not_ge hi)]
-        simp only [nonempty_closedBall, NNReal.zero_le_coe]
-        )
+      rcases le_total i1 i2 with hi | hi
+      · rw [Set.inter_eq_self_of_subset_right <| hanti hi]
+        exact nonempty_closedBall.mpr NNReal.zero_le_coe
+      · rw [Set.inter_eq_self_of_subset_left <| hanti hi]
+        exact nonempty_closedBall.mpr NNReal.zero_le_coe)
     simp only [Set.coe_setOf, Set.mem_setOf_eq, Set.nonempty_iInter] at h
     rcases h with ⟨z, hz⟩
     exact ⟨z, Set.mem_iInter.2 <| fun i => hz ⟨(c i, r i), Exists.intro i (Eq.refl (c i, r i))⟩⟩
@@ -317,30 +308,20 @@ instance Prod.sphericallyCompleteSpace {E F : Type*}
     SphericallyCompleteSpace (E × F) where
   isSphericallyComplete := by
     intro ci ri hanti
-    have hE : Antitone (fun i => closedBall (ci i).1 (ri i)) := by
-      intro m n hmn
-      simp only [Set.le_eq_subset]
-      specialize hanti hmn
-      simp only [Set.le_eq_subset] at hanti
-      rw [← closedBall_prod_same (ci n).1 (r := ri n),
-          ← closedBall_prod_same (ci m).1 (r := ri m)] at hanti
-      intro z hz
-      have : (z , (ci n).2) ∈ closedBall (ci n).1 ↑(ri n) ×ˢ closedBall (ci n).2 ↑(ri n) := by
-        simp only [Set.mem_prod, mem_closedBall, dist_self, NNReal.zero_le_coe,and_true]
-        simpa only [mem_closedBall] using hz
-      exact (Set.mem_prod.1 <| hanti this).1
-    have hF : Antitone (fun i => closedBall (ci i).2 (ri i)) := by
-      intro m n hmn
-      simp only [Set.le_eq_subset]
-      specialize hanti hmn
-      simp only [Set.le_eq_subset] at hanti
-      rw [← closedBall_prod_same (ci n).1 (r := ri n),
-          ← closedBall_prod_same (ci m).1 (r := ri m)] at hanti
-      intro z hz
-      have : ((ci n).1 , z) ∈ closedBall (ci n).1 ↑(ri n) ×ˢ closedBall (ci n).2 ↑(ri n) := by
-        simpa only [Set.mem_prod, mem_closedBall, dist_self, NNReal.zero_le_coe, dist_le_coe,
-          true_and] using hz
-      exact (Set.mem_prod.1 <| hanti this).2
+    have hE : Antitone (fun i => closedBall (ci i).1 (ri i)) := fun m n hmn x hx => by
+      simp only [mem_closedBall] at hx ⊢
+      have h1 : (x, (ci n).2) ∈ closedBall (ci n) (ri n) := by
+        simpa [Prod.dist_eq, sup_le_iff] using hx
+      have h2 := hanti hmn h1
+      simp only [mem_closedBall, Prod.dist_eq, sup_le_iff] at h2
+      exact h2.1
+    have hF : Antitone (fun i => closedBall (ci i).2 (ri i)) := fun m n hmn x hx => by
+      simp only [mem_closedBall] at hx ⊢
+      have h1 : ((ci n).1, x) ∈ closedBall (ci n) (ri n) := by
+        simpa [Prod.dist_eq, sup_le_iff] using hx
+      have h2 := hanti hmn h1
+      simp only [mem_closedBall, Prod.dist_eq, sup_le_iff] at h2
+      exact h2.2
     replace hE := hse.isSphericallyComplete hE
     replace hF := hsf.isSphericallyComplete hF
     simp only [Set.nonempty_iInter, mem_closedBall, Prod.exists] at *

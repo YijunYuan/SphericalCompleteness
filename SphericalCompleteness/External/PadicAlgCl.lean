@@ -68,13 +68,7 @@ noncomputable instance instDenselyNormedFieldPadicAlgCl : DenselyNormedField (Pa
     rcases exists_rat_pow_p_norm_between p a b ha hab with ⟨r, hr1, hr2⟩
     let f : Polynomial (PadicAlgCl p) := X ^ r.den - Polynomial.C ((p : PadicAlgCl p) ^ r.num)
     have hf : f.degree ≠ 0 := by
-      have := @Polynomial.degree_eq_of_le_of_coeff_ne_zero _ r.den _ f ?_ ?_
-      · simp [this]
-      · unfold f
-        rw [sub_eq_add_neg]
-        refine le_trans (Polynomial.degree_add_le _ _) ?_
-        simpa using le_trans degree_C_le Nat.WithBot.coe_nonneg
-      · simp [f, Polynomial.coeff_C]
+      simp [f, Polynomial.degree_X_pow_sub_C r.den_pos]
     rcases IsAlgClosed.exists_root f hf with ⟨z, hz⟩
     have hz' : z ^ r.den - (p : PadicAlgCl p) ^ r.num = 0 := by
       rw [← hz]

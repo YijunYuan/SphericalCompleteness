@@ -346,56 +346,36 @@ noncomputable def sphericallyCompleteExtension (𝕜 : Type*) [NontriviallyNorme
   E →ₗᵢ[𝕜] ((lp (fun (_ : ℕ) => E) ⊤)⧸ c₀ 𝕜 (fun (_ : ℕ) => E)) where
   toFun x := by
     refine (QuotientAddGroup.mk' (c₀ 𝕜 (fun x ↦ E)).toAddSubgroup) (⟨fun (_ : ℕ) => x, ?_⟩)
-    have : (fun (_ : ℕ) => x) ∈ (lp (fun (_ : ℕ) => E) ⊤) := by
-      simp only [lp]
-      refine Set.mem_setOf.mpr ?_
-      refine memℓp_infty ?_
-      use ‖x‖
-      simp only [upperBounds, Set.range_const, Set.mem_singleton_iff, forall_eq, Set.mem_setOf_eq,
-        le_refl]
-    exact this
+    refine memℓp_infty ⟨‖x‖, ?_⟩
+    simp only [upperBounds, Set.range_const, Set.mem_singleton_iff, forall_eq, Set.mem_setOf_eq,
+      le_refl]
   map_add' x y := rfl
   map_smul' c x := rfl
   norm_map' := by
-    simp only [LinearMap.coe_mk, AddHom.coe_mk]
     intro x
-    have hv : (fun (_ : ℕ) => x) ∈ lp (fun (_ : ℕ) => E) ⊤ := by
-      refine Set.mem_setOf.mpr ?_
-      refine memℓp_infty ?_
-      use ‖x‖
-      simp only [upperBounds, Set.range_const, Set.mem_singleton_iff, forall_eq, Set.mem_setOf_eq,
-        le_refl]
+    have hv : (fun (_ : ℕ) => x) ∈ lp (fun (_ : ℕ) => E) ⊤ :=
+      memℓp_infty ⟨‖x‖, by
+        simp only [upperBounds, Set.range_const, Set.mem_singleton_iff, forall_eq,
+          Set.mem_setOf_eq, le_refl]⟩
     let v : lp (fun (_ : ℕ) => E) ⊤ := ⟨fun (_ : ℕ) => x, hv⟩
     change ‖(QuotientAddGroup.mk' (c₀ 𝕜 fun _ ↦ E).toAddSubgroup) v‖ = ‖x‖
-    rw [quotient_norm_mk_eq (c₀ 𝕜 fun _ ↦ E).toAddSubgroup v]
-    simp only [Submodule.coe_toAddSubgroup]
     have hvnorm : ‖v‖ = ‖x‖ := by
       rw [lp.norm_eq_ciSup]
       change (⨆ _ : ℕ, ‖x‖) = ‖x‖
       simp
-    refine eq_of_le_of_ge ?_ ?_
-    · apply csInf_le
-      · use 0
-        apply mem_lowerBounds.2
-        intro z hz
-        rw [Set.mem_image] at hz
-        rw [← hz.choose_spec.2]
-        exact norm_nonneg _
-      · rw [Set.mem_image]
-        refine ⟨0, ?_, ?_⟩
-        · simp only [SetLike.mem_coe, zero_mem]
-        · simpa using hvnorm
-    · apply le_csInf
-      · use ‖x‖
-        simp only [Set.mem_image, SetLike.mem_coe, Subtype.exists]
-        use 0
-        refine ⟨zero_mem _, zero_mem _, ?_⟩
-        have hvzero : v + (0 : lp (fun (_ : ℕ) ↦ E) ⊤) = v := by simp
-        change ‖v + (0 : lp (fun (_ : ℕ) ↦ E) ⊤)‖ = ‖x‖
-        rw [hvzero]
-        exact hvnorm
+    refine le_antisymm ?_ ?_
+    · refine le_trans (Submodule.Quotient.norm_mk_le (S := c₀ 𝕜 fun _ ↦ E) v) ?_
+      exact hvnorm.le
+    · rw [quotient_norm_mk_eq (c₀ 𝕜 fun _ ↦ E).toAddSubgroup v]
+      apply le_csInf
+      · refine ⟨‖x‖, ?_⟩
+        simp only [Set.mem_image, Submodule.coe_toAddSubgroup, SetLike.mem_coe, Subtype.exists]
+        refine ⟨0, zero_mem _, zero_mem _, ?_⟩
+        change ‖v + 0‖ = ‖x‖
+        rw [add_zero]; exact hvnorm
       · intro b hb
-        simp only [Set.mem_image, SetLike.mem_coe, Subtype.exists] at hb
+        simp only [Submodule.coe_toAddSubgroup, Set.mem_image, SetLike.mem_coe,
+          Subtype.exists] at hb
         rcases hb with ⟨p, hp, hp', h⟩
         rw [← h]
         apply le_of_forall_pos_sub_le

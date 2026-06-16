@@ -50,49 +50,8 @@ def MaximallyComplete (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 private noncomputable def LinearIsometry.weakInv {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
 {F : Type*} [NormedAddCommGroup F] [NormedSpace 𝕜 F]
-(f : E →ₗᵢ[𝕜] F) : LinearMap.range f.toLinearMap →ₗᵢ[𝕜] E where
-  toFun := Function.invFun <| Set.rangeFactorization f
-  map_add' x y := by
-    have hsurj := @Set.rangeFactorization_surjective _ _ f
-    have t := Function.rightInverse_invFun hsurj
-    apply f.injective
-    have hxy := congrArg Subtype.val (t (x + y))
-    have hx := congrArg Subtype.val (t x)
-    have hy := congrArg Subtype.val (t y)
-    simp only [Set.rangeFactorization_coe, Submodule.coe_add] at hxy hx hy
-    calc
-      f (Function.invFun (Set.rangeFactorization f) (x + y)) = x + y := hxy
-      _ = f (Function.invFun (Set.rangeFactorization f) x) +
-        f (Function.invFun (Set.rangeFactorization f) y) := by rw [hx, hy]
-      _ = f (Function.invFun (Set.rangeFactorization f) x +
-        Function.invFun (Set.rangeFactorization f) y) := by rw [map_add]
-  map_smul' c x := by
-    simp only [RingHom.id_apply]
-    have t := Function.rightInverse_invFun (@Set.rangeFactorization_surjective _ _ f)
-    apply f.injective
-    have hcx := congrArg Subtype.val (t (c • x))
-    have hx := congrArg Subtype.val (t x)
-    simp only [Set.rangeFactorization_coe, SetLike.val_smul] at hcx hx
-    calc
-      f (Function.invFun (Set.rangeFactorization f) (c • x)) = c • x := hcx
-      _ = c • f (Function.invFun (Set.rangeFactorization f) x) := by rw [hx]
-      _ = f (c • Function.invFun (Set.rangeFactorization f) x) := by rw [map_smul]
-  norm_map' := by
-    intro ⟨a, x, hx⟩
-    let y : LinearMap.range f.toLinearMap := ⟨a, x, hx⟩
-    have hy : Set.rangeFactorization f x = y := by
-      apply Subtype.ext
-      exact hx
-    have hleft : Function.invFun (Set.rangeFactorization f) y = x := by
-      rw [← hy]
-      exact Function.leftInverse_invFun (Set.rangeFactorization_injective.mpr f.injective) x
-    calc
-      ‖Function.invFun (Set.rangeFactorization f) y‖ = ‖x‖ := by
-        simpa using congrArg norm hleft
-      _ = ‖y‖ := by
-        simpa [y] using calc
-          ‖x‖ = ‖f x‖ := (f.norm_map x).symm
-          _ = ‖a‖ := congrArg norm hx
+(f : E →ₗᵢ[𝕜] F) : LinearMap.range f.toLinearMap →ₗᵢ[𝕜] E :=
+  f.equivRange.symm.toLinearIsometry
 
 private lemma norm_map_of_isImmediate {𝕜 : Type*}
   [NontriviallyNormedField 𝕜] {E : Type u_2} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
@@ -192,12 +151,7 @@ theorem exists_linearIsometry_comp_eq_of_isImmediate {𝕜 : Type*} [Nontriviall
     Function.comp_apply, h]
   have : (LinearIsometry.weakInv f) ⟨f z, LinearMap.mem_range_self f.toLinearMap z⟩ = z := by
     unfold LinearIsometry.weakInv
-    simp only [LinearIsometry.coe_mk, LinearMap.coe_mk, AddHom.coe_mk]
-    have : f z = Set.rangeFactorization f z := by
-      simp only [Set.rangeFactorization_coe]
-    conv => arg 1; arg 2; arg 1; rw [this]
-    exact Function.leftInverse_invFun
-      (Set.rangeFactorization_injective.mpr <| LinearIsometry.injective f) z
+    exact f.equivRange.symm_apply_apply z
   rw [hf1 (f z) z rfl]
   change g ((LinearIsometry.weakInv f) ⟨f z, LinearMap.mem_range_self f.toLinearMap z⟩) = g z
   rw [this]

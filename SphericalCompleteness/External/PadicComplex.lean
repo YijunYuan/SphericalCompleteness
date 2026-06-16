@@ -23,4 +23,3 @@ noncomputable instance instDenselyNormedFieldPadicComplex : DenselyNormedField �
 
 instance instSeparableSpacePadicComplex : SeparableSpace ℂ_[p] := inferInstance
 
-instance : @IsUltrametricDist ℂ_[p] UniformSpace.Completion.instMetricSpace.toDist := inferInstance

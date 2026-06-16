@@ -31,14 +31,10 @@ ultrametrics: any two points in the same ball are at distance at most the ball's
 theorem diam_le_radius_of_ultrametric {α : Type*}
 [PseudoMetricSpace α] [hiud : IsUltrametricDist α]
 (z : α) (r : ℝ≥0) :
-diam (closedBall z r) ≤ r := by
-  apply diam_le_of_forall_dist_le
-  · exact r.prop
-  · intro x hx y hy
-    simp only [closedBall, Set.mem_setOf_eq] at hx hy
-    rw [dist_comm] at hy
-    have := hiud.dist_triangle_max x z y
-    grind only [= max_def]
+diam (closedBall z r) ≤ r :=
+  diam_le_of_forall_dist_le r.prop fun _ hx _ hy =>
+    (hiud.dist_triangle_max _ z _).trans <|
+      max_le hx <| (dist_comm _ _).trans_le hy
 
 /--
 In an ultrametric space, if two closed balls `closedBall z1 r1` and `closedBall z2 r2` intersect
@@ -192,28 +188,22 @@ The proofs are straightforward wrappers around
 `IsUltrametricDist.norm_eq_of_add_norm_lt_max`, using simple rewriting
 to convert between subtraction and addition and to manage negations.
 -/
-theorem norm_eq_of_norm_sub_lt_left {S : Type*} [SeminormedAddGroup S] [IsUltrametricDist S]
-{x y : S} (h : ‖x - y‖ < ‖x‖) : ‖x‖ = ‖y‖ := by
-  rw [sub_eq_add_neg] at h
-  nth_rw 2 [← norm_neg]
-  apply IsUltrametricDist.norm_eq_of_add_norm_lt_max
-  simp_all only [norm_neg, lt_sup_iff, true_or]
-
-theorem norm_eq_of_norm_sub_lt_right {S : Type*} [SeminormedAddGroup S] [IsUltrametricDist S]
-{x y : S} (h : ‖x - y‖ < ‖y‖) : ‖x‖ = ‖y‖ := by
-  rw [← norm_neg] at h
-  simp only [neg_sub] at h
-  exact Eq.symm (norm_eq_of_norm_sub_lt_left h)
-
 theorem norm_eq_of_norm_add_lt_left {S : Type*} [SeminormedAddGroup S] [IsUltrametricDist S]
-{x y : S} (h : ‖x + y‖ < ‖x‖) : ‖x‖ = ‖y‖ := by
-  apply IsUltrametricDist.norm_eq_of_add_norm_lt_max
-  simp_all only [lt_sup_iff, true_or]
+{x y : S} (h : ‖x + y‖ < ‖x‖) : ‖x‖ = ‖y‖ :=
+  IsUltrametricDist.norm_eq_of_add_norm_lt_max <| by simp_all [lt_sup_iff, true_or]
 
 theorem norm_eq_of_norm_add_lt_right {S : Type*} [SeminormedAddGroup S] [IsUltrametricDist S]
-{x y : S} (h : ‖x + y‖ < ‖y‖) : ‖x‖ = ‖y‖ := by
-  apply IsUltrametricDist.norm_eq_of_add_norm_lt_max
-  simp_all only [lt_sup_iff, or_true]
+{x y : S} (h : ‖x + y‖ < ‖y‖) : ‖x‖ = ‖y‖ :=
+  IsUltrametricDist.norm_eq_of_add_norm_lt_max <| by simp_all [lt_sup_iff, or_true]
+
+theorem norm_eq_of_norm_sub_lt_left {S : Type*} [SeminormedAddGroup S] [IsUltrametricDist S]
+{x y : S} (h : ‖x - y‖ < ‖x‖) : ‖x‖ = ‖y‖ := by
+  rw [← norm_neg y]
+  exact norm_eq_of_norm_add_lt_left (by rwa [sub_eq_add_neg] at h)
+
+theorem norm_eq_of_norm_sub_lt_right {S : Type*} [SeminormedAddGroup S] [IsUltrametricDist S]
+{x y : S} (h : ‖x - y‖ < ‖y‖) : ‖x‖ = ‖y‖ :=
+  (norm_eq_of_norm_sub_lt_left (by rwa [← norm_neg, neg_sub])).symm
 
 /--
 Lifts the ultrametric inequality on distances from `𝕜` to its uniform completion.
@@ -230,37 +220,14 @@ instance instIsUltrametricDistCompletion {𝕜 : Type*} [PseudoMetricSpace 𝕜]
 [IsUltrametricDist 𝕜] :
   IsUltrametricDist (UniformSpace.Completion 𝕜) where
   dist_triangle_max x y z := by
-    have := @UniformSpace.Completion.denseRange_coe 𝕜 _
-    refine le_of_forall_pos_lt_add <| fun ε hε => ?_
-    rcases Metric.mem_closure_iff.1 (this x) (ε / 4) (by linarith) with ⟨x'', hx'1, hx'2⟩
-    rcases hx'1 with ⟨x', hx'⟩; rw [← hx'] at hx'2
-    rcases Metric.mem_closure_iff.1 (this y) (ε / 4) (by linarith) with ⟨y'', hy'1, hy'2⟩
-    rcases hy'1 with ⟨y', hy'⟩; rw [← hy'] at hy'2
-    rcases Metric.mem_closure_iff.1 (this z) (ε / 4) (by linarith) with ⟨z'', hz'1, hz'2⟩
-    rcases hz'1 with ⟨z', hz'⟩; rw [← hz'] at hz'2
-    have : dist x z < dist (↑x' : UniformSpace.Completion 𝕜) ↑z' + ε / 4 + ε / 4 := by
-      have t1 := dist_triangle x ↑x' z
-      have t2 := dist_triangle ↑x' ↑z' z
-      rw [dist_comm] at hz'2
-      linarith
-    refine lt_trans this ?_
-    have t3 := dist_triangle_max x' y' z'
-    have t4 := dist_triangle ↑x' x ↑y'
-    have t5 := dist_triangle x y ↑y'
-    have t6 := dist_triangle ↑y' y ↑z'
-    have t7 := dist_triangle y z ↑z'
-    have t8 : max (dist x y) (dist y z) + (ε / 4 + ε / 4 + ε / 4 + ε / 4) =
-      max (dist x y) (dist y z) + (ε / 4 + ε / 4) + ε / 4 + ε / 4 := by abel
-    nth_rw 1 [← UniformSpace.Completion.dist_eq] at t3
-    nth_rw 2 [← UniformSpace.Completion.dist_eq] at t3
-    nth_rw 3 [← UniformSpace.Completion.dist_eq] at t3
-    nth_rw 2 [dist_comm] at t4
-    nth_rw 2 [dist_comm] at t6
-    nth_rw 3 [(by linarith : ε = ε / 4 + ε / 4 + ε / 4 + ε / 4)]
-    rw [t8, max_add]
-    nth_rw 1 [add_assoc]; nth_rw 1 [add_assoc]
-    simp only [add_lt_add_iff_right]
-    exact lt_of_le_of_lt t3 <| max_lt_max (by linarith) (by linarith)
+    refine UniformSpace.Completion.induction_on₃ x y z (isClosed_le ?_ ?_) fun a b c => ?_
+    · exact UniformSpace.Completion.continuous_dist
+        (by fun_prop) (by fun_prop)
+    · exact Continuous.max
+        (UniformSpace.Completion.continuous_dist (by fun_prop) (by fun_prop))
+        (UniformSpace.Completion.continuous_dist (by fun_prop) (by fun_prop))
+    · simp_rw [UniformSpace.Completion.dist_eq]
+      exact IsUltrametricDist.dist_triangle_max a b c
 
 /-
 `PUnit` has an ultrametric distance.

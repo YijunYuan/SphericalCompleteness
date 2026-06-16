@@ -280,32 +280,6 @@ theorem spectralNorm_le_gaussNorm {𝕜 : Type u_1} [hn : NontriviallyNormedFiel
     rw [this α (Nat.one_le_iff_ne_zero.2 hi')]
     exact pow_le_pow_right₀ hx <| (Nat.le_sub_one_iff_lt t).mpr hi
 
-open Classical in
-/--
-`Finset.prod.multiplicative_mor` states that a function `g : M → β` which is a multiplicative
-monoid morphism (in the sense that it maps `1 ↦ 1` and preserves multiplication) commutes with
-finite products over a `Finset`.
-
-More precisely, for a finset `s : Finset ι` and a function `f : ι → M`, if
-* `hg1 : g 1 = 1`, and
-* `hgmul : ∀ x y, g (x * y) = g x * g y`,
-then applying `g` to the (double) finset product `∏ i ∈ s, f i` equals the product of the
-images `∏ i ∈ s, g (f i)`.
-
-This is useful when `g` is not bundled as a `MonoidHom`, but one still wants the standard
-"map over product" lemma.
--/
-lemma Finset.prod.multiplicative_mor {ι : Type*}
-{M : Type*} [CommMonoid M] (s : Finset ι) (f : ι → M)
-{β : Type*} [CommMonoid β] (g : M → β)
-(hg1 : g 1 = 1) (hgmul : ∀ x y : M, g (x * y) = g x * g y) :
-  g (∏ i ∈ s, f i) = ∏ i ∈ s, g (f i) := by
-  induction s using Finset.induction_on with
-  | empty => simpa
-  | insert a s ha ih =>
-    nth_rw 2 [Finset.prod_insert ha]
-    rw [← ih, ← hgmul, ← Finset.prod_insert ha]
-
 /--
 Bounds the spectral algebra norm of `g(α)` in terms of the Gauss norm of `f - g` and the
 Gauss norm of `f`, assuming `α` is a root of `f`.
@@ -416,59 +390,62 @@ theorem continuity_of_roots₀ {𝕜 : Type u_1} [hn : NontriviallyNormedField �
     simp [aeval, toAlgCl]
   rw [t, Multiset.prod_eq_prod_toEnumFinset] at this
   apply_fun (spectralNorm 𝕜 (AlgebraicClosure 𝕜)) at this
-  rw [Finset.prod.multiplicative_mor _ _ (spectralNorm 𝕜 (AlgebraicClosure 𝕜))] at this
-  · have this' : ∀ s ∈ (Multiset.map (fun a ↦ α - a) (g.aroots (AlgebraicClosure 𝕜))).toEnumFinset,
-      (f - g).stdGaussNorm ^ (1 / (↑f.natDegree : ℝ)) * f.stdGaussNorm <
-      spectralNorm 𝕜 (AlgebraicClosure 𝕜) s.1 := by
-      intro s hs
-      rcases Multiset.mem_map.1 (Multiset.mem_of_mem_toEnumFinset hs) with ⟨z, hz⟩
-      simpa [← hz.2, spectralAlgNorm_def] using hc z (by simpa using isRoot_of_mem_roots hz.1)
-    replace this' := Finset.prod_lt_prod_of_nonempty ?_ this' ?_
-    · rw [← this] at this'
-      simp only [one_div, Finset.prod_const, Multiset.card_toEnumFinset, Multiset.card_map,
-        eval_map_algebraMap] at this'
-      rw [IsAlgClosed.card_aroots_eq_natDegree, mul_pow] at this'
-      rw [← natDegree_eq_of_degree_eq hfg, ← Real.rpow_natCast, Real.rpow_inv_rpow] at this'
-      · have := spectralNorm_eval_le_gaussNorm_sub f g hf hg hfg α (by simpa only [IsRoot.def,
-        eval_map_algebraMap] using hα)
-        simp only [eval_map_algebraMap] at this
-        replace := lt_of_lt_of_le this' this
-        have t := (gaussNorm_pos_iff (f - g)).2 <| sub_ne_zero_of_ne hfg'
-        replace := (mul_lt_mul_iff_right₀ t).1 this
-        rw [pow_lt_pow_iff_right₀] at this
-        · omega
-        · have t := one_le_stdGaussNorm_of_monic f hf
-          refine lt_of_le_of_ne t ?_
-          by_contra hc
-          rw [← hc] at this
-          simp only [one_pow, lt_self_iff_false] at this
-      · exact stdGaussNorm_nonneg (f - g)
-      · simpa only [ne_eq, Nat.cast_eq_zero] using
-        Nat.ne_zero_of_lt <| Polynomial.natDegree_pos_of_monic_of_aeval_eq_zero hf hα
-    · intro _ _
-      apply mul_pos
-      · apply Real.rpow_pos_of_pos
-        replace hfg' : f - g ≠ 0 := sub_ne_zero_of_ne hfg'
-        exact (gaussNorm_pos_iff (f - g)).mpr hfg'
-      · have := one_le_stdGaussNorm_of_monic f hf; linarith
-    · suffices hw : (g.aroots (AlgebraicClosure 𝕜)).toFinset.Nonempty by
-        rcases hw with ⟨a, ha⟩
-        use (α - a,0)
-        simp only [Multiset.mem_toEnumFinset]
-        refine Multiset.count_pos.mpr <| Multiset.mem_map.mpr ?_
-        use a
-        simp at ha
-        simp [ha]
-      have := Polynomial.natDegree_pos_of_monic_of_aeval_eq_zero hf hα
-      rw [natDegree_eq_of_degree_eq hfg] at this
-      replace : g.toAlgCl.degree ≠ 0 := by
-        simpa using ne_of_gt <| natDegree_pos_iff_degree_pos.1 this
-      rcases IsAlgClosed.exists_root _ this with ⟨a, ha⟩
+  have hprod := map_prod (spectralMulAlgNorm 𝕜 (AlgebraicClosure 𝕜))
+    (fun x : _ × _ => x.1)
+    (Multiset.map (fun a ↦ α - a) (g.aroots (AlgebraicClosure 𝕜))).toEnumFinset
+  rw [show (spectralMulAlgNorm 𝕜 (AlgebraicClosure 𝕜) :
+    AlgebraicClosure 𝕜 → ℝ) = spectralNorm 𝕜 (AlgebraicClosure 𝕜) from rfl] at hprod
+  rw [hprod] at this
+  have this' : ∀ s ∈ (Multiset.map (fun a ↦ α - a) (g.aroots (AlgebraicClosure 𝕜))).toEnumFinset,
+    (f - g).stdGaussNorm ^ (1 / (↑f.natDegree : ℝ)) * f.stdGaussNorm <
+    spectralNorm 𝕜 (AlgebraicClosure 𝕜) s.1 := by
+    intro s hs
+    rcases Multiset.mem_map.1 (Multiset.mem_of_mem_toEnumFinset hs) with ⟨z, hz⟩
+    simpa [← hz.2, spectralAlgNorm_def] using hc z (by simpa using isRoot_of_mem_roots hz.1)
+  replace this' := Finset.prod_lt_prod_of_nonempty ?_ this' ?_
+  · rw [← this] at this'
+    simp only [one_div, Finset.prod_const, Multiset.card_toEnumFinset, Multiset.card_map,
+      eval_map_algebraMap] at this'
+    rw [IsAlgClosed.card_aroots_eq_natDegree, mul_pow] at this'
+    rw [← natDegree_eq_of_degree_eq hfg, ← Real.rpow_natCast, Real.rpow_inv_rpow] at this'
+    · have := spectralNorm_eval_le_gaussNorm_sub f g hf hg hfg α (by simpa only [IsRoot.def,
+      eval_map_algebraMap] using hα)
+      simp only [eval_map_algebraMap] at this
+      replace := lt_of_lt_of_le this' this
+      have t := (gaussNorm_pos_iff (f - g)).2 <| sub_ne_zero_of_ne hfg'
+      replace := (mul_lt_mul_iff_right₀ t).1 this
+      rw [pow_lt_pow_iff_right₀] at this
+      · omega
+      · have t := one_le_stdGaussNorm_of_monic f hf
+        refine lt_of_le_of_ne t ?_
+        by_contra hc
+        rw [← hc] at this
+        simp only [one_pow, lt_self_iff_false] at this
+    · exact stdGaussNorm_nonneg (f - g)
+    · simpa only [ne_eq, Nat.cast_eq_zero] using
+      Nat.ne_zero_of_lt <| Polynomial.natDegree_pos_of_monic_of_aeval_eq_zero hf hα
+  · intro _ _
+    apply mul_pos
+    · apply Real.rpow_pos_of_pos
+      replace hfg' : f - g ≠ 0 := sub_ne_zero_of_ne hfg'
+      exact (gaussNorm_pos_iff (f - g)).mpr hfg'
+    · have := one_le_stdGaussNorm_of_monic f hf; linarith
+  · suffices hw : (g.aroots (AlgebraicClosure 𝕜)).toFinset.Nonempty by
+      rcases hw with ⟨a, ha⟩
+      use (α - a,0)
+      simp only [Multiset.mem_toEnumFinset]
+      refine Multiset.count_pos.mpr <| Multiset.mem_map.mpr ?_
       use a
       simp at ha
-      simpa [ha] using Polynomial.Monic.ne_zero_of_ne (zero_ne_one' 𝕜) hg
-  · exact spectralNorm_one
-  · exact fun x y => spectralAlgNorm_mul x y
+      simp [ha]
+    have := Polynomial.natDegree_pos_of_monic_of_aeval_eq_zero hf hα
+    rw [natDegree_eq_of_degree_eq hfg] at this
+    replace : g.toAlgCl.degree ≠ 0 := by
+      simpa using ne_of_gt <| natDegree_pos_iff_degree_pos.1 this
+    rcases IsAlgClosed.exists_root _ this with ⟨a, ha⟩
+    use a
+    simp at ha
+    simpa [ha] using Polynomial.Monic.ne_zero_of_ne (zero_ne_one' 𝕜) hg
 
 /--
 `continuity_of_roots` (informal): roots of a monic polynomial over a complete nontrivially normed
