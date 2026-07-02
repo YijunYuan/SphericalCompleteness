@@ -38,16 +38,13 @@ lemma eq_and_eq_of_add_eq_add_of_not_mem_submodule_span_singleton {𝕜 : Type*}
   if hr' : r = 0 then
     simp only [hr', zero_smul] at hr
     rw [← hr] at heq
-    constructor
-    · exact Eq.symm <| sub_eq_zero.1 <| hr.symm
-    · rwa [sub_eq_zero] at heq
+    exact ⟨(sub_eq_zero.1 hr.symm).symm, sub_eq_zero.1 heq⟩
   else
   replace hr : a = r⁻¹ • (d2 - d1) := by
     rw [← hr]
     exact (eq_inv_smul_iff₀ hr').mpr rfl
   simp only [hr] at ha
-  exfalso
-  exact ha <| Submodule.smul_mem D r⁻¹ <| (Submodule.sub_mem_iff_left D hd1).mpr hd2
+  exact absurd (Submodule.smul_mem D r⁻¹ <| (Submodule.sub_mem_iff_left D hd1).mpr hd2) ha
 
 /--
 If `a : 𝕜` is nonzero, then scalar multiplication by `a` leaves any submodule `M` invariant:

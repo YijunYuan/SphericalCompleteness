@@ -37,8 +37,7 @@ private lemma exists_rat_pow_p_norm_between (a b : ℝ) (ha : 0 ≤ a) (hab : a 
     refine Real.logb_lt_logb ?_ ha' ha'b
     simpa only [Nat.one_lt_cast] using hp.out.one_lt
   rcases exists_rat_btwn this with ⟨c, hc1, hc2⟩
-  use c
-  constructor
+  refine ⟨c, ?_, ?_⟩
   · simp only [Real.logb_inv_base] at hc2
     replace hc2 : Real.logb (↑p) a' < -↑c := lt_neg_of_lt_neg hc2
     apply (Real.logb_lt_iff_lt_rpow
@@ -67,12 +66,10 @@ noncomputable instance instDenselyNormedFieldPadicAlgCl : DenselyNormedField (Pa
   lt_norm_lt a b ha hab := by
     rcases exists_rat_pow_p_norm_between p a b ha hab with ⟨r, hr1, hr2⟩
     let f : Polynomial (PadicAlgCl p) := X ^ r.den - Polynomial.C ((p : PadicAlgCl p) ^ r.num)
-    have hf : f.degree ≠ 0 := by
-      simp [f, Polynomial.degree_X_pow_sub_C r.den_pos]
+    have hf : f.degree ≠ 0 := by simp [f, Polynomial.degree_X_pow_sub_C r.den_pos]
     rcases IsAlgClosed.exists_root f hf with ⟨z, hz⟩
     have hz' : z ^ r.den - (p : PadicAlgCl p) ^ r.num = 0 := by
-      rw [← hz]
-      simp only [f, eval_sub, eval_pow, eval_X, eval_C]
+      rw [← hz]; simp only [f, eval_sub, eval_pow, eval_X, eval_C]
     replace hz' : ‖z‖ ^ r.den = ‖(p : PadicAlgCl p)‖ ^ r.num := by
       apply eq_of_sub_eq_zero at hz'
       repeat rw [← norm_pow]
@@ -104,9 +101,8 @@ theorem QAlg_in_QpAlgCl_is_countable (p : ℕ) [hp : Fact (Nat.Prime p)] :
   let S := {z : PadicAlgCl p | IsAlgebraic ℚ z}
   have : S ⊆ ⋃ (f : {g : ℚ[X] // g ≠ 0}), {z : PadicAlgCl p | aeval z f.val = 0} := by
     intro z hz
-    simp only [ne_eq, Set.mem_iUnion, Set.mem_setOf_eq, Subtype.exists, exists_prop]
-    rcases hz with ⟨f, hfne, hfz⟩
-    use f
+    simpa only [S, ne_eq, Set.mem_iUnion, Set.mem_setOf_eq, Subtype.exists, exists_prop,
+      IsAlgebraic] using hz
   replace := le_trans (Cardinal.mk_le_mk_of_subset this) <| Cardinal.mk_iUnion_le
     (fun (f : { g : ℚ[X] // g ≠ 0 }) ↦ {z : PadicAlgCl p | (aeval z) f.val = 0})
   suffices hfinal : Cardinal.mk S ≤ Cardinal.aleph0 by
@@ -136,9 +132,7 @@ instance instSeparableSpacePadicAlgCl : TopologicalSpace.SeparableSpace (PadicAl
     rcases (PadicAlgCl.isAlgebraic p).isAlgebraic α with ⟨f', hfne', hfz'⟩
     let f := f' * C (f'.leadingCoeff)⁻¹
     have hf : Monic f := monic_mul_leadingCoeff_inv hfne'
-    have hfz : aeval α f = 0 := by
-      rw [aeval_mul, hfz', aeval_C]
-      simp
+    have hfz : aeval α f = 0 := by rw [aeval_mul, hfz', zero_mul]
     rcases continuity_of_roots f hf α hfz (by linarith : 0 < ε / 2) with ⟨δ, hδpos, hδ⟩
     let fun_g : Fin (f.natDegree + 1) → ℚ := fun i =>
       if hi : i = f.natDegree then 1
@@ -181,16 +175,10 @@ instance instSeparableSpacePadicAlgCl : TopologicalSpace.SeparableSpace (PadicAl
           simpa [hii] using le_of_lt (Padic.rat_dense p (f.coeff i) hδpos).choose_spec
       · exact le_of_lt hδpos
     rcases hδ g hg hfg hfgδ with ⟨β, hβg, hβα⟩
-    use β
-    constructor
+    refine ⟨β, ?_, ?_⟩
     · rw [Metric.mem_ball, dist_comm, dist_eq_norm]
       refine lt_of_le_of_lt ?_ (by linarith : ε / 2 < ε)
       rw [← spectralNorm_eq, ← spectralAlgNorm_def (K := ℚ_[p]) (L := PadicAlgCl p)]
       exact hβα
     · simp only [Set.mem_setOf_eq]
-      use g'
-      constructor
-      · have : g ≠ 0 := Monic.ne_zero hg
-        contrapose this
-        simpa [g]
-      · simpa [g] using hβg
+      refine ⟨g', fun h => hg.ne_zero (by simp [g, h]), by simpa [g] using hβg⟩

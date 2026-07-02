@@ -205,10 +205,8 @@ Antitone (fun n => closedBall (nestedBallChain hα' n).1 (nestedBallChain hα' n
       (shrinkingRadius α (n + 1)) <| shrinkingRadius_strictanti α (lt_add_one n))
         (hα'.ofNat hsep.exists_countable_dense.choose n)).choose_spec.1
   conv => arg 2; arg 2; unfold nestedBallChain
-  cases n
+  cases n <;>
   · simp only [zero_add, mem_closedBall, dist_le_coe, not_le] at *
-    exact this
-  · simp only [mem_closedBall, dist_le_coe, not_le] at *
     exact this
 
 private lemma not_in_nestedBallChain (α : Type*) [PseudoMetricSpace α]
@@ -227,9 +225,7 @@ private lemma nestedBallChain_radius_eq (α : Type*) [PseudoMetricSpace α]
 (hα' : Denumerable hsep.exists_countable_dense.choose) (n : ℕ) :
 (nestedBallChain hα' n).2 = (shrinkingRadius α n):= by
   unfold nestedBallChain
-  cases n
-  · simp only
-  · simp only
+  cases n <;> simp only
 
 /--
 Shows that a separable ultrametric space which is *spherically dense* cannot be spherically
@@ -415,8 +411,7 @@ instance instIsDenseMetric_of_isSphericallyDense (α : Type*)
             simpa [mem_closedBall] using (le_trans (le_of_eq_of_le rfl hy) htr)
           refine ⟨dist x y, Set.mem_image2.mpr ⟨x, hx', y, hy', rfl⟩, ?_⟩
           have hlow : (r' : ℝ) < dist x y := hxy.1
-          have hupp : dist x y ≤ t := by
-            exact_mod_cast hxy.2
+          have hupp : dist x y ≤ t := by exact_mod_cast hxy.2
           have hsub : t - dist x y < ε := by
             refine lt_trans ?_ (by change ε / 2 < ε; nlinarith)
             exact sub_lt_comm.mp <| RCLike.ofReal_lt_ofReal.mp hlow

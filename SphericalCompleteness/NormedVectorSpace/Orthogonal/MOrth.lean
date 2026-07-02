@@ -169,8 +169,7 @@ theorem exists_morth_vec_of_not_full_finrank (𝕜 : Type*) [NontriviallyNormedF
       exact infDist_le_dist_of_mem <| sub_mem hw hz.1
     · rw [Metric.le_infDist <| Submodule.nonempty F]
       intro w hw
-      rw [dist_eq_norm, (sub_sub a z w : a - z - w = a - (z + w)),
-        ← dist_eq_norm]
+      rw [dist_eq_norm, (sub_sub a z w : a - z - w = a - (z + w)), ← dist_eq_norm]
       exact infDist_le_dist_of_mem <| add_mem hz.1 hw
   have := @sF.isSphericallyComplete (fun i => (res_ball 𝕜 F a (infDist a F + 1 / (i + 1))
     (by simp only [one_div, gt_iff_lt, lt_add_iff_pos_right, inv_pos, Nat.cast_add_one_pos]

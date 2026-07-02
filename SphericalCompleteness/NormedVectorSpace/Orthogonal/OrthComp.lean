@@ -76,10 +76,7 @@ theorem exists_orthproj_of_spherically_complete_space
 [NormedSpace 𝕜 E]
 (F : Submodule 𝕜 E) [SphericallyCompleteSpace ↥F] :
 ∃ T : E →L[𝕜] ↥F, (∀ a ∈ F, T a = a) ∧ ContinuousLinearMap.opNorm T ≤ 1 := by
-  let hiudF : IsUltrametricDist ↥F :=
-    IsUltrametricDist.isUltrametricDist_of_isNonarchimedean_norm <| by
-      intro x y
-      simpa using iud.norm_add_le_max (x : E) (y : E)
+  let hiudF : IsUltrametricDist ↥F := inferInstance
   have hscF : SphericallyCompleteSpace ↥F := inferInstance
   have := @exists_extension_opNorm_le 𝕜 _ E _ _ _ F ↥F inferInstance hiudF inferInstance hscF
     (ContinuousLinearMap.id 𝕜 ↥F) {0} (by simp) (fun _ => 1)
@@ -91,8 +88,7 @@ theorem exists_orthproj_of_spherically_complete_space
       simp)
     (by
       intro U x
-      have hU : U.1 = 0 := by
-        exact Set.mem_singleton_iff.mp U.2
+      have hU : U.1 = 0 := Set.mem_singleton_iff.mp U.2
       rw [hU]
       simp [one_mul])
   simp only [Subtype.forall, Set.mem_singleton_iff, forall_eq, sub_zero] at this

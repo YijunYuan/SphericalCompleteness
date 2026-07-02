@@ -436,8 +436,7 @@ theorem continuity_of_roots₀ {𝕜 : Type u_1} [hn : NontriviallyNormedField �
       simp only [Multiset.mem_toEnumFinset]
       refine Multiset.count_pos.mpr <| Multiset.mem_map.mpr ?_
       use a
-      simp at ha
-      simp [ha]
+      simpa using ha
     have := Polynomial.natDegree_pos_of_monic_of_aeval_eq_zero hf hα
     rw [natDegree_eq_of_degree_eq hfg] at this
     replace : g.toAlgCl.degree ≠ 0 := by

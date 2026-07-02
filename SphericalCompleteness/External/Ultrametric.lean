@@ -53,7 +53,6 @@ theorem closedBall_subset_closedBall_of_le_radius_of_nonempty_intersection_of_ul
 (hne : (closedBall z1 r1 ∩ closedBall z2 r2).Nonempty) :
 closedBall z1 r1 ⊆ closedBall z2 r2 := by
   intro x hx
-  simp only [closedBall, Set.mem_setOf_eq] at hx
   rcases hne with ⟨y, hy1, hy2⟩
   simp only [mem_closedBall] at *
   refine le_trans (hiud.dist_triangle_max x y z2) <| sup_le_iff.2 ⟨?_, hy2⟩
@@ -99,9 +98,7 @@ instance instIsUltrametricDistSubmodule
 {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 {E : Type*} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [iud : IsUltrametricDist E]
 {F : Submodule 𝕜 E} : IsUltrametricDist ↥F :=
-  IsUltrametricDist.isUltrametricDist_of_isNonarchimedean_norm <| by
-    intro x y
-    simpa using iud.norm_add_le_max (x : E) (y : E)
+  inferInstance
 
 /--
 Provides an `IsUltrametricDist` instance on the space of continuous linear maps `E →L[𝕜] F`
@@ -134,9 +131,8 @@ IsUltrametricDist (E →L[𝕜] F) where
       have : ‖(f - h) x‖ = ‖(f - g) x + (g - h) x‖ := by
         simp only [sub_apply, sub_add_sub_cancel]
       rw [this, max_mul_of_nonneg _ _ (norm_nonneg _)]
-      refine le_trans (iud.norm_add_le_max _ _) <| max_le_max ?_ ?_
-      · exact ContinuousLinearMap.le_opNorm (f - g) x
-      · exact ContinuousLinearMap.le_opNorm (g - h) x
+      exact le_trans (iud.norm_add_le_max _ _) <| max_le_max
+        (ContinuousLinearMap.le_opNorm (f - g) x) (ContinuousLinearMap.le_opNorm (g - h) x)
     · simp only [le_sup_iff, norm_nonneg, or_self]
 
 /--
@@ -221,8 +217,7 @@ instance instIsUltrametricDistCompletion {𝕜 : Type*} [PseudoMetricSpace 𝕜]
   IsUltrametricDist (UniformSpace.Completion 𝕜) where
   dist_triangle_max x y z := by
     refine UniformSpace.Completion.induction_on₃ x y z (isClosed_le ?_ ?_) fun a b c => ?_
-    · exact UniformSpace.Completion.continuous_dist
-        (by fun_prop) (by fun_prop)
+    · exact UniformSpace.Completion.continuous_dist (by fun_prop) (by fun_prop)
     · exact Continuous.max
         (UniformSpace.Completion.continuous_dist (by fun_prop) (by fun_prop))
         (UniformSpace.Completion.continuous_dist (by fun_prop) (by fun_prop))

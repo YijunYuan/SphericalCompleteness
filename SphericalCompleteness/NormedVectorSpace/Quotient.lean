@@ -102,8 +102,6 @@ theorem Quotient.sphericallyCompleteSpace
 SphericallyCompleteSpace (E ⧸ F) := by
   rw [sphericallyCompleteSpace_iff_strictAnti_radius]
   intro c r hr hanti
-  let lc : ℕ → E := fun n => (liftSequence 𝕜 hr hanti (n + 2)).val
-  let lr : ℕ → NNReal := fun n => r (n + 1)
   have := @scsk.isSphericallyComplete (fun n => (liftSequence 𝕜 hr hanti (n + 2)).val)
     (fun n => r (n + 1)) (by
     refine antitone_nat_of_succ_le fun n => ?_

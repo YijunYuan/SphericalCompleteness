@@ -73,11 +73,7 @@ theorem completeSpace_iff_nested_ball_with_radius_tendsto_zero_has_nonempty_inte
     choose N hN using fun n : ℕ =>
       Metric.cauchySeq_iff.1 hu (((1 / 2 : NNReal) ^ n : NNReal) : ℝ) (by positivity)
     let φ : ℕ → ℕ := Nat.rec (N 0) fun n prev => max (N (n + 1)) (prev + 1)
-    have hN_le_φ : ∀ n, N n ≤ φ n := by
-      intro n
-      induction n with
-      | zero => simp [φ]
-      | succ n ihn => simp [φ]
+    have hN_le_φ : ∀ n, N n ≤ φ n := fun n => by induction n <;> simp [φ]
     have hφ_strict : StrictMono φ := strictMono_nat_of_lt_succ fun n => by simp [φ]
     let ri : ℕ → NNReal := fun n => 2 * (1 / 2 : NNReal) ^ n
     have hanti : Antitone fun n => closedBall (u (φ n)) (ri n) := by
@@ -89,10 +85,9 @@ theorem completeSpace_iff_nested_ball_with_radius_tendsto_zero_has_nonempty_inte
       calc
         dist x (u (φ n)) ≤ dist x (u (φ (n + 1))) + dist (u (φ (n + 1))) (u (φ n)) :=
           dist_triangle _ _ _
-        _ ≤ ((ri (n + 1) : NNReal) : ℝ) + (((1 / 2 : NNReal) ^ n : NNReal) : ℝ) := by
-          exact add_le_add hx (le_of_lt htail)
-        _ = (ri n : ℝ) := by
-          simpa [ri, pow_succ] using by ring
+        _ ≤ ((ri (n + 1) : NNReal) : ℝ) + (((1 / 2 : NNReal) ^ n : NNReal) : ℝ) :=
+          add_le_add hx (le_of_lt htail)
+        _ = (ri n : ℝ) := by simpa [ri, pow_succ] using by ring
     have hri : Tendsto ri atTop (nhds 0) := by
       simpa [ri] using ((NNReal.tendsto_pow_atTop_nhds_zero_of_lt_one
           (by norm_num : (1 / 2 : NNReal) < 1)).const_mul (2 : NNReal))
@@ -110,8 +105,7 @@ theorem completeSpace_iff_nested_ball_with_radius_tendsto_zero_has_nonempty_inte
       simpa [mem_closedBall, dist_comm] using this
     calc
       dist (u m) x ≤ dist (u m) (u (φ n)) + dist (u (φ n)) x := dist_triangle _ _ _
-      _ < ((((1 / 2 : NNReal) ^ n : NNReal)) : ℝ) + (ri n : ℝ) := by
-        exact add_lt_add_of_lt_of_le htail hx_ball
-      _ = (3 : ℝ) * (1 / 2 : ℝ) ^ n := by
-        simpa [ri] using by ring
+      _ < ((((1 / 2 : NNReal) ^ n : NNReal)) : ℝ) + (ri n : ℝ) :=
+        add_lt_add_of_lt_of_le htail hx_ball
+      _ = (3 : ℝ) * (1 / 2 : ℝ) ^ n := by simpa [ri] using by ring
       _ < ε := hn n le_rfl

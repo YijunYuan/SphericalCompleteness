@@ -40,22 +40,16 @@ theorem eventually_stable_or_exists_strictanti_of_antitone {α : Type*} [Partial
   else
     right
     push Not at h
-    use extractStrictAntiSubseq hanti h
-    constructor
+    refine ⟨extractStrictAntiSubseq hanti h, ?_, ?_⟩
     · refine strictMono_nat_of_lt_succ <| fun n => ?_
       simp only [extractStrictAntiSubseq]
       have := (h (extractStrictAntiSubseq hanti h n)).choose_spec
-      refine lt_of_le_of_ne this.1 ?_
-      by_contra hc
-      rw [← hc] at this
-      simp only [ge_iff_le, le_refl, ne_eq, not_true_eq_false, and_false] at this
+      exact lt_of_le_of_ne this.1 fun hc => this.2 (hc ▸ rfl)
     · refine strictAnti_nat_of_succ_lt <| fun n => lt_of_le_of_ne ?_ ?_
       · refine hanti ?_
         simp only [extractStrictAntiSubseq]
         exact (h (extractStrictAntiSubseq hanti h n)).choose_spec.1
-      · by_contra hc
-        simp only [Function.comp_apply, extractStrictAntiSubseq, ge_iff_le, ne_eq] at hc
-        exact (h (extractStrictAntiSubseq hanti h n)).choose_spec.2 hc
+      · exact (h (extractStrictAntiSubseq hanti h n)).choose_spec.2
 
 private noncomputable def extractInjectiveSubseq {α : Type*} (seq : ℕ → α)
 (hseq : ∀ n : ℕ, ∃ N, ∀ i > N, seq n ≠ seq i) : ℕ → ℕ

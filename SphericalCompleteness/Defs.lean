@@ -113,11 +113,8 @@ theorem sphericallyCompleteSpace_of_isometryEquiv {E F : Type*}
     rcases he.isSphericallyComplete hanti' with ⟨z',hz'⟩
     simp only [Set.mem_iInter, mem_closedBall, Set.nonempty_iInter] at *
     refine ⟨f z', fun i ↦ ?_⟩
-    specialize hz' i
-    unfold ci' at hz'
-    rw [← IsometryEquiv.apply_symm_apply f (ci i), Isometry.dist_eq]
-    · exact hz'
-    · exact IsometryEquiv.isometry f
+    rw [← IsometryEquiv.apply_symm_apply f (ci i), Isometry.dist_eq f.isometry]
+    exact hz' i
 
 /--
 Constructs a `SphericallyCompleteSpace` instance for a type `α` under the assumptions that `α` is a

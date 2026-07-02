@@ -107,9 +107,7 @@ private lemma norm_map_of_isImmediate {𝕜 : Type*}
       exact hx.2
     have hx' := norm_eq_of_norm_sub_lt_left hx.2
     have t : ‖h x‖ = ‖x‖ := by
-      rcases hx.1 with ⟨z, hz⟩
-      rw [hf1 x z hz]
-      simp
+      obtain ⟨z, hz⟩ := hx.1; rw [hf1 x z hz]; simp
     rw [hx', ← t] at this
     apply norm_eq_of_norm_sub_lt_left at this
     simp only [hx', ContinuousLinearMap.coe_coe, ← this, t, le_refl]

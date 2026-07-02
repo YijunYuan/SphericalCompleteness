@@ -30,6 +30,5 @@ noncomputable instance instDenselyNormedFieldCompletionOfCompletion
 DenselyNormedField (UniformSpace.Completion α) where
   __ : NormedField (UniformSpace.Completion α) := inferInstance
   lt_norm_lt x y hx hxy := by
-    rcases hdnf.lt_norm_lt x y hx hxy with ⟨z, hz⟩
-    use z
-    simp only [UniformSpace.Completion.norm_coe, hz, and_self]
+    obtain ⟨z, hz⟩ := hdnf.lt_norm_lt x y hx hxy
+    exact ⟨z, by simpa only [UniformSpace.Completion.norm_coe] using hz⟩

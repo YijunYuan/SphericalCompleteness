@@ -41,10 +41,8 @@ theorem sphericallyCompleteSpace_iff_antitone_radius
   ∀ ⦃ci : ℕ → α⦄, ∀ ⦃ri : ℕ → NNReal⦄,
     Antitone ri →
     Antitone (fun i => closedBall (ci i) (ri i)) → (⋂ i, closedBall (ci i) (ri i)).Nonempty := by
-  constructor
-  · exact fun h ci ri hri hanti => h.isSphericallyComplete hanti
-  · intro h
-    refine { isSphericallyComplete := ?_ }
+  refine ⟨fun h ci ri hri hanti => h.isSphericallyComplete hanti, fun h => ?_⟩
+  · refine { isSphericallyComplete := ?_ }
     intro c r hanti
     let r' : ℕ → NNReal := fun n => sInf {r k | k ≤ n}
     have hr'_Antitone : Antitone r' := fun m n hmn =>
@@ -100,8 +98,7 @@ theorem sphericallyCompleteSpace_iff_strictAnti_radius
   ∀ ⦃ci : ℕ → α⦄, ∀ ⦃ri : ℕ → NNReal⦄,
     StrictAnti ri →
     Antitone (fun i => closedBall (ci i) (ri i)) → (⋂ i, closedBall (ci i) (ri i)).Nonempty := by
-  constructor
-  · exact fun h ci ri hri hanti => h.isSphericallyComplete hanti
+  refine ⟨fun h ci ri hri hanti => h.isSphericallyComplete hanti, ?_⟩
   · rw [sphericallyCompleteSpace_iff_antitone_radius α]
     intro h ci ri hri hanti
     rcases eventually_stable_or_exists_strictanti_of_antitone hri with hc | hc
@@ -119,8 +116,7 @@ theorem sphericallyCompleteSpace_iff_strictAnti_radius
         simp only [mem_closedBall, dist_self, NNReal.zero_le_coe]
     · rcases hc with ⟨φ, hφ1, hφ2⟩
       have := @h (ci ∘ φ) (ri ∘ φ) hφ2
-        (antitone_nat_of_succ_le fun n => hanti <| le_of_lt <| hφ1 (by linarith : n < n + 1)
-      )
+        (antitone_nat_of_succ_le fun n => hanti <| le_of_lt <| hφ1 (by linarith : n < n + 1))
       simp only [Function.comp_apply, Set.nonempty_iInter] at this
       rcases this with ⟨z, hz⟩
       use z

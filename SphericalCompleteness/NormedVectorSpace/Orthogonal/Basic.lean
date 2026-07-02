@@ -56,8 +56,7 @@ lemma orth_iff_birkhoff_james_orth {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 (x ⟂[𝕜] y) ↔ ∀ c : 𝕜, ‖x‖ ≤ ‖x + c • y‖ := by
   constructor
   · intro h c
-    have : x + c • y = x - (-c) • y := by
-      simp only [neg_smul, sub_neg_eq_add]
+    have : x + c • y = x - (-c) • y := by simp only [neg_smul, sub_neg_eq_add]
     rw [← h, this, ← dist_eq_norm]
     refine infDist_le_dist_of_mem ?_
     simp only [neg_smul, SetLike.mem_coe, neg_mem_iff]

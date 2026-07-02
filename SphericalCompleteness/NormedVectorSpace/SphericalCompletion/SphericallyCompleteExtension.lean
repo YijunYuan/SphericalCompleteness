@@ -163,13 +163,12 @@ private lemma mk_eq_and_norm_sub_lt {𝕜 : Type u_1} [inst : NontriviallyNormed
         ‖(quotient_mk_section E hsr hanti (i + 2)).1 -
         (quotient_mk_section E hsr hanti (i + 1)).1‖ < ↑(r i) := by
   intro m
-  constructor
-  · exact (quotient_mk_section E hsr hanti m).prop
-  · simp only [QuotientAddGroup.mk'_apply, quotient_mk_section]
-    exact
-      (exists_norm_sub_lt E hsr hanti m
-            (quotient_mk_section E hsr hanti (m + 1)).val
-            (quotient_mk_section E hsr hanti (m + 1)).prop).choose_spec.2
+  refine ⟨(quotient_mk_section E hsr hanti m).prop, ?_⟩
+  simp only [QuotientAddGroup.mk'_apply, quotient_mk_section]
+  exact
+    (exists_norm_sub_lt E hsr hanti m
+          (quotient_mk_section E hsr hanti (m + 1)).val
+          (quotient_mk_section E hsr hanti (m + 1)).prop).choose_spec.2
 
 private lemma quotient_mk_section_norm_apply_self_le_max {𝕜 : Type*} [NontriviallyNormedField 𝕜]
   (E : ℕ → Type u_2) [(i : ℕ) → NormedAddCommGroup (E i)] [(i : ℕ) → NormedSpace 𝕜 (E i)]

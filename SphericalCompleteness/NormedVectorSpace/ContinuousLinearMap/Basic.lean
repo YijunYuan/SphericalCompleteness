@@ -45,18 +45,12 @@ SphericallyCompleteSpace (E →L[𝕜] F) := by
   let c := c' ∘ φ
   let r := r' ∘ φ
   have hsar : StrictAnti r := StrictAnti.comp_strictMono hsar' hφ.1
-  have hanti : Antitone fun i ↦ closedBall (c i) ↑(r i) := by
-    intro m n hmn
-    exact hanti' <| hφ.1.monotone hmn
-  have hrnneg : ∀ i, 0 < r i := by
-    intro i
-    unfold r
-    simp only [Function.comp_apply]
-    exact lt_of_le_of_lt zero_le <| hsar' (Nat.lt_succ_self (φ i))
+  have hanti : Antitone fun i ↦ closedBall (c i) ↑(r i) :=
+    fun m n hmn => hanti' <| hφ.1.monotone hmn
+  have hrnneg : ∀ i, 0 < r i := fun i =>
+    lt_of_le_of_lt zero_le <| hsar' (Nat.lt_succ_self (φ i))
   let 𝒰 := c '' Set.univ
-  have h𝒰 : 𝒰.Nonempty := by
-    use c 0, 0
-    simp only [Set.mem_univ, and_self]
+  have h𝒰 : 𝒰.Nonempty := ⟨c 0, 0, Set.mem_univ 0, rfl⟩
   let htriv : ↥(⊥ : Submodule 𝕜 E) →L[𝕜] F := 0
   have := @exists_extension_opNorm_le 𝕜 _ E _ _ _ ⊥ F _ _ _ _
     htriv 𝒰 h𝒰 (fun U => r U.prop.out.choose) (fun _ => hrnneg _) (by
@@ -92,9 +86,7 @@ SphericallyCompleteSpace (E →L[𝕜] F) := by
     exact (hanti' hN) hh
   simp only [mem_closedBall]
   intro i
-  have : c i ∈ 𝒰 := by
-    use i
-    simp only [Set.mem_univ, and_self]
+  have : c i ∈ 𝒰 := ⟨i, Set.mem_univ i, rfl⟩
   specialize hT2 ⟨c i, this⟩
   simp only [← dist_eq_norm, Set.mem_univ, true_and] at hT2
   convert hT2

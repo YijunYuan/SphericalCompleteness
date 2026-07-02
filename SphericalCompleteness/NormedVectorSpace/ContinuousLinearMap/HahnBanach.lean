@@ -105,9 +105,7 @@ theorem hahn_banach' {𝕜 : Type*} [NontriviallyNormedField 𝕜]
         have hle : ‖f x‖ ≤ ContinuousLinearMap.opNorm f * ‖x‖ := le_opNorm f x
         have hop' : ContinuousLinearMap.opNorm f = 0 := by simpa using hop.symm
         rw [hop', zero_mul] at hle
-        have hfx : f x = 0 := by
-          exact norm_eq_zero.mp (le_antisymm hle (norm_nonneg _))
-        exact hfx)
+        exact norm_eq_zero.mp (le_antisymm hle (norm_nonneg _)))
       (by
         intro U V
         have hUV : U.1 = V.1 := congrArg Subtype.val (Subsingleton.elim U V)
