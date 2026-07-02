@@ -133,8 +133,7 @@ theorem exists_linearIsometry_comp_eq_of_isImmediate {𝕜 : Type*} [Nontriviall
   rcases hahn_banach' _
     (LinearIsometry.comp g (LinearIsometry.weakInv f)).toContinuousLinearMap with ⟨h, hf1, hf2⟩
   simp only [LinearMap.mem_range, forall_exists_index] at hf1
-  have hf2' :
-    h.opNorm =
+  have hf2' : h.opNorm =
       ‖g.toContinuousLinearMap.comp (LinearIsometry.weakInv f).toContinuousLinearMap‖ := by
     rw [hf2]; rfl
   let h : F →ₗᵢ[𝕜] H := {

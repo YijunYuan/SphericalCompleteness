@@ -378,10 +378,8 @@ private lemma directed_chain (𝕜 : Type*) [NontriviallyNormedField 𝕜]
   [NormedSpace 𝕜 F] [SphericallyCompleteSpace F] {S : ↥D →L[𝕜] F} {𝒰 : Set (E →L[𝕜] F)}
   (h𝒰 : 𝒰.Nonempty) (ε : ↑𝒰 → ℝ)
   (P : Set (PartialExtension 𝕜 E F S 𝒰 h𝒰 ε)) (hP : IsChain (fun x1 x2 ↦ x1 ≤ x2) P)
-  : Directed (fun x1 x2 ↦ x1 ≤ x2) fun p : P ↦ p.val.M := by
-  intro a b
-  rcases hP.directed a b with ⟨c, hc1, hc2⟩
-  exact ⟨c, hc1.1, hc2.1⟩
+  : Directed (fun x1 x2 ↦ x1 ≤ x2) fun p : P ↦ p.val.M := fun a b =>
+  (hP.directed a b).imp fun _ h => ⟨h.1.1, h.2.1⟩
 
 private noncomputable def glued_map (𝕜 : Type*) [NontriviallyNormedField 𝕜]
   {E : Type u_2} [SeminormedAddCommGroup E] [IsUltrametricDist E] [NormedSpace 𝕜 E]

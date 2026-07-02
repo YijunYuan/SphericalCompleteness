@@ -144,9 +144,7 @@ theorem smul_orth_of_orth {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     refine infDist_zero_of_mem ?_
     simp only [SetLike.mem_coe, zero_mem]
   else
-  rw [norm_smul, ← h, ← infDist_smul₀ ha]
-  congr
-  rw [smul_submodule_eq_self ha]
+  rw [norm_smul, ← h, ← infDist_smul₀ ha, smul_submodule_eq_self ha]
 
 theorem smul_orth_iff_orth_of_nonzero {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 {E : Type u_2} [SeminormedAddCommGroup E]
@@ -199,11 +197,8 @@ lemma morth_iff_forall_orth {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 theorem eq_zero_of_morth_of_mem {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 {E : Type u_2} [NormedAddCommGroup E]
 [NormedSpace 𝕜 E] [IsUltrametricDist E]
-{x : E} {F : Subspace 𝕜 E} : x ∈ F → (x ⟂ₘ F) → x = 0 := by
-  intro h1 h2
-  unfold MOrth at h2
-  rw [infDist_zero_of_mem h1] at h2
-  exact norm_eq_zero.mp h2.symm
+{x : E} {F : Subspace 𝕜 E} : x ∈ F → (x ⟂ₘ F) → x = 0 :=
+  fun h1 h2 => norm_eq_zero.mp (infDist_zero_of_mem h1 ▸ h2 : (0 : ℝ) = ‖x‖).symm
 
 theorem smul_morth_of_morth {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 {E : Type u_2} [SeminormedAddCommGroup E]

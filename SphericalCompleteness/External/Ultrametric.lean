@@ -151,20 +151,14 @@ instance instIsUltrametricDistLp
 [iiud : ∀ i, IsUltrametricDist (E i)] :
 IsUltrametricDist (lp E ⊤) where
 dist_triangle_max a b c := by
-  repeat rw [dist_eq_norm, lp.norm_eq_ciSup]
-  apply ciSup_le
-  intro j
-  have : ‖(↑(a - c): (i : ι) → E i) j‖ = ‖a j - c j‖ := rfl
-  rw [this, ← dist_eq_norm]
-  refine le_trans ((iiud j).dist_triangle_max (a j) (b j) (c j)) ?_
-  repeat rw [dist_eq_norm]
-  apply max_le_max
-  · have : ‖(↑a: (i : ι) → E i) j - (↑b: (i : ι) → E i) j‖ = ‖(↑(a - b) : (i : ι) → E i) j‖ := rfl
-    rw [this]
-    apply lp.norm_apply_le_norm ENNReal.top_ne_zero
-  · have : ‖(↑b: (i : ι) → E i) j - (↑c: (i : ι) → E i) j‖ = ‖(↑(b - c) : (i : ι) → E i) j‖ := rfl
-    rw [this]
-    apply lp.norm_apply_le_norm ENNReal.top_ne_zero
+  simp only [dist_eq_norm, lp.norm_eq_ciSup]
+  refine ciSup_le fun j => ?_
+  rw [show ‖(↑(a - c) : (i : ι) → E i) j‖ = ‖a j - c j‖ from rfl, ← dist_eq_norm]
+  refine ((iiud j).dist_triangle_max (a j) (b j) (c j)).trans (max_le_max ?_ ?_)
+  · rw [dist_eq_norm, show ‖a j - b j‖ = ‖(↑(a - b) : (i : ι) → E i) j‖ from rfl]
+    exact lp.norm_apply_le_norm ENNReal.top_ne_zero _ j
+  · rw [dist_eq_norm, show ‖b j - c j‖ = ‖(↑(b - c) : (i : ι) → E i) j‖ from rfl]
+    exact lp.norm_apply_le_norm ENNReal.top_ne_zero _ j
 
 /--
 Lemmas about equality of norms in an ultrametric seminormed additive group.

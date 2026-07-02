@@ -104,12 +104,8 @@ theorem sphericallyCompleteSpace_of_isometryEquiv {E F : Type*}
     let ci' := fun n => f.symm (ci n)
     have hanti' : Antitone (fun i => closedBall (ci' i) (ri i)) := by
       intro m n hmn
-      simp only [Set.le_eq_subset]
-      rw [← IsometryEquiv.preimage_closedBall f (ci m) ↑(ri m),
-          ← IsometryEquiv.preimage_closedBall f (ci n) ↑(ri n)]
-      specialize hanti hmn
-      simp only [Set.le_eq_subset] at hanti
-      grind only [= Set.subset_def, = Set.mem_preimage]
+      simp only [ci', Set.le_eq_subset, ← IsometryEquiv.preimage_closedBall f]
+      exact Set.preimage_mono (hanti hmn)
     rcases he.isSphericallyComplete hanti' with ⟨z',hz'⟩
     simp only [Set.mem_iInter, mem_closedBall, Set.nonempty_iInter] at *
     refine ⟨f z', fun i ↦ ?_⟩

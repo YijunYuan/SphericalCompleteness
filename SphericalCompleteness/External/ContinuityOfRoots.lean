@@ -43,9 +43,8 @@ moving a polynomial to `AlgebraicClosure 𝕜` (e.g. to talk about roots there) 
 degree computations unchanged.
 -/
 lemma toAlgCl_natdeg_eq {𝕜 : Type u_1} [Field 𝕜] (f : Polynomial 𝕜) :
-  (f.toAlgCl).natDegree = f.natDegree := by
-  unfold toAlgCl
-  rw [Polynomial.natDegree_map_eq_of_injective (algebraMap 𝕜 (AlgebraicClosure 𝕜)).injective]
+  (f.toAlgCl).natDegree = f.natDegree :=
+  Polynomial.natDegree_map_eq_of_injective (algebraMap 𝕜 (AlgebraicClosure 𝕜)).injective f
 
 /--
 `Polynomial.stdGaussNorm f` is the Gauss norm of a polynomial `f : Polynomial 𝕜` computed with
@@ -143,9 +142,7 @@ the zero polynomial and is strictly positive otherwise.
 lemma gaussNorm_pos_iff {𝕜 : Type u_1} [hn : NontriviallyNormedField 𝕜]
 (f : Polynomial 𝕜) :
   0 < f.stdGaussNorm ↔ f ≠ 0 := by
-  refine iff_not_comm.mp ?_
-  simpa [← stdGaussNorm_eq_zero_iff] using
-    ⟨fun h => ge_of_eq (id (Eq.symm h)), fun h => eq_of_le_of_ge h (stdGaussNorm_nonneg f)⟩
+  rw [(stdGaussNorm_nonneg f).lt_iff_ne, ne_comm, Ne, stdGaussNorm_eq_zero_iff]
 
 /--
 If `f` is a monic polynomial over a nontrivially normed field `𝕜`, then its

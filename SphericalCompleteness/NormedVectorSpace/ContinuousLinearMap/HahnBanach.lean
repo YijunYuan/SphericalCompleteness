@@ -42,20 +42,14 @@ theorem hahn_banach {𝕜 : Type*} [NontriviallyNormedField 𝕜]
   · intro v hv
     rw [comp_apply, (SetLike.coe_eq_coe.mp <| OrthProj_id 𝕜 D v hv : ((OrthProj 𝕜 D) v) = ⟨v,hv⟩)]
   · apply le_antisymm
-    · refine (opNorm_le_iff <| opNorm_nonneg f).mpr fun x => ?_
-      rw [comp_apply]
-      refine le_trans (le_opNorm f _) ?_
-      have hproj : ‖(OrthProj 𝕜 D) x‖ ≤ 1 * ‖x‖ :=
-        le_of_opNorm_le (OrthProj 𝕜 D) (norm_OrthProj_le_one 𝕜 D) x
-      simp only [one_mul] at hproj
-      exact PosMulMono.mul_le_mul_of_nonneg_left (opNorm_nonneg f) hproj
-    · refine (opNorm_le_iff <| opNorm_nonneg (f.comp (OrthProj 𝕜 D))).mpr ?_
-      intro x
-      have hle := le_opNorm (f.comp (OrthProj 𝕜 D)) (x : E)
-      have hproj : ((OrthProj 𝕜 D) (x : E) : E) = x := OrthProj_id 𝕜 D x x.prop
-      have hproj' : (OrthProj 𝕜 D) (x : E) = x := SetLike.coe_eq_coe.mp hproj
+    · calc ‖f.comp (OrthProj 𝕜 D)‖ ≤ ‖f‖ * ‖OrthProj 𝕜 D‖ := opNorm_comp_le f _
+        _ ≤ ‖f‖ * 1 := by gcongr; exact norm_OrthProj_le_one 𝕜 D
+        _ = ‖f‖ := mul_one _
+    · refine (opNorm_le_iff <| opNorm_nonneg (f.comp (OrthProj 𝕜 D))).mpr fun x => ?_
+      have hproj' : (OrthProj 𝕜 D) (x : E) = x :=
+        SetLike.coe_eq_coe.mp (OrthProj_id 𝕜 D x x.prop)
       change ‖f x‖ ≤ ‖f.comp (OrthProj 𝕜 D)‖ * ‖(x : E)‖
-      simpa [ContinuousLinearMap.comp_apply, hproj'] using hle
+      simpa [ContinuousLinearMap.comp_apply, hproj'] using le_opNorm (f.comp (OrthProj 𝕜 D)) (x : E)
 
 /--
 A Hahn–Banach style extension theorem for continuous linear maps between ultrametric normed spaces.

@@ -13,8 +13,7 @@ private lemma smul_morth_of_morth' (𝕜 : Type*) [inst : NontriviallyNormedFiel
 [NormedSpace 𝕜 E] [IsUltrametricDist E]
 (x : E) (F : Subspace 𝕜 E)
   (hxF : x ⟂ₘ F) (a : E) (ha : a ∈ Submodule.span 𝕜 {x}) : a ⟂ₘ F := by
-  rcases Submodule.mem_span_singleton.mp ha with ⟨r, hr⟩
-  rw [← hr]
+  obtain ⟨r, rfl⟩ := Submodule.mem_span_singleton.mp ha
   exact smul_morth_of_morth r hxF
 
 /--

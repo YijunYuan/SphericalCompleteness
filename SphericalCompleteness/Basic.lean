@@ -305,18 +305,14 @@ instance Prod.sphericallyCompleteSpace {E F : Type*}
   isSphericallyComplete := by
     intro ci ri hanti
     have hE : Antitone (fun i => closedBall (ci i).1 (ri i)) := fun m n hmn x hx => by
-      simp only [mem_closedBall] at hx ⊢
-      have h1 : (x, (ci n).2) ∈ closedBall (ci n) (ri n) := by
-        simpa [Prod.dist_eq, sup_le_iff] using hx
-      have h2 := hanti hmn h1
-      simp only [mem_closedBall, Prod.dist_eq, sup_le_iff] at h2
+      have h2 := hanti hmn (show (x, (ci n).2) ∈ closedBall (ci n) (ri n) by
+        simpa [Prod.dist_eq, sup_le_iff, mem_closedBall] using hx)
+      simp only [mem_closedBall, Prod.dist_eq, sup_le_iff] at h2 ⊢
       exact h2.1
     have hF : Antitone (fun i => closedBall (ci i).2 (ri i)) := fun m n hmn x hx => by
-      simp only [mem_closedBall] at hx ⊢
-      have h1 : ((ci n).1, x) ∈ closedBall (ci n) (ri n) := by
-        simpa [Prod.dist_eq, sup_le_iff] using hx
-      have h2 := hanti hmn h1
-      simp only [mem_closedBall, Prod.dist_eq, sup_le_iff] at h2
+      have h2 := hanti hmn (show ((ci n).1, x) ∈ closedBall (ci n) (ri n) by
+        simpa [Prod.dist_eq, sup_le_iff, mem_closedBall] using hx)
+      simp only [mem_closedBall, Prod.dist_eq, sup_le_iff] at h2 ⊢
       exact h2.2
     replace hE := hse.isSphericallyComplete hE
     replace hF := hsf.isSphericallyComplete hF

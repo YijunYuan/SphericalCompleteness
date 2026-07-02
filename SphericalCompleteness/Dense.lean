@@ -50,11 +50,9 @@ spherically_dense := by
   by_contra hc
   simp only [not_le] at hc
   rcases dnf.lt_norm_lt (diam (closedBall z ↑r)) ↑r diam_nonneg hc with ⟨δ, _, hδ2⟩
-  have : z + δ ∈ closedBall z r := by
+  have hmem : z + δ ∈ closedBall z r := by
     simp only [mem_closedBall, dist_self_add_left, le_of_lt hδ2]
-  have this' : z ∈ closedBall z r := by
-    simp only [mem_closedBall, dist_self, zero_le_coe]
-  have := dist_le_diam_of_mem isBounded_closedBall this this'
+  have := dist_le_diam_of_mem isBounded_closedBall hmem (mem_closedBall_self zero_le_coe)
   simp only [dist_self_add_left] at this
   linarith
 
