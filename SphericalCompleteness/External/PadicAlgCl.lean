@@ -6,10 +6,8 @@ Authors: Yijun Yuan
 import Mathlib.NumberTheory.Padics.Complex
 import Mathlib.Analysis.SpecialFunctions.Log.Base
 import Mathlib.Topology.Bases
-import Mathlib.Algebra.Polynomial.OfFn
 import Mathlib.Algebra.Polynomial.Cardinal
-
-import SphericalCompleteness.External.ContinuityOfRoots
+import Mathlib.Analysis.Normed.Field.Approximation
 
 /-!
 # Algebraic closure of the `p`-adics
@@ -112,9 +110,12 @@ theorem QAlg_in_QpAlgCl_is_countable (p : ℕ) [hp : Fact (Nat.Prime p)] :
   · refine ciSup_le' <| fun f => ?_
     simp only [ne_eq, Set.coe_setOf, Cardinal.le_aleph0_iff_subtype_countable]
     refine Set.Finite.countable ?_
-    have t : ((Polynomial.map (algebraMap ℚ ℚ_[p])) f.val).toAlgCl ≠ 0 := by
-      simpa using f.prop
-    simpa using Polynomial.finite_setOf_isRoot t
+    have t : (f.val.map (algebraMap ℚ (PadicAlgCl p))) ≠ 0 := by simpa using f.prop
+    have heq : {z : PadicAlgCl p | (aeval z) f.val = 0}
+        = {z : PadicAlgCl p | (f.val.map (algebraMap ℚ (PadicAlgCl p))).IsRoot z} := by
+      ext z; simp [Polynomial.IsRoot, aeval_def, eval_map]
+    rw [heq]
+    exact Polynomial.finite_setOf_isRoot t
 
 open Classical in
 /--
@@ -127,58 +128,36 @@ Such an instance is often used to enable results and constructions that require 
 -/
 instance instSeparableSpacePadicAlgCl : TopologicalSpace.SeparableSpace (PadicAlgCl p) where
   exists_countable_dense := by
-    use {z : PadicAlgCl p | IsAlgebraic ℚ z}
-    refine ⟨QAlg_in_QpAlgCl_is_countable p, Metric.dense_iff.mpr <| fun α ε hε => ?_⟩
+    refine ⟨{z : PadicAlgCl p | IsAlgebraic ℚ z}, QAlg_in_QpAlgCl_is_countable p,
+      Metric.dense_iff.mpr <| fun α ε hε => ?_⟩
     rcases (PadicAlgCl.isAlgebraic p).isAlgebraic α with ⟨f', hfne', hfz'⟩
-    let f := f' * C (f'.leadingCoeff)⁻¹
+    set f := f' * C (f'.leadingCoeff)⁻¹ with hf_def
     have hf : Monic f := monic_mul_leadingCoeff_inv hfne'
-    have hfz : aeval α f = 0 := by rw [aeval_mul, hfz', zero_mul]
-    rcases continuity_of_roots f hf α hfz (by linarith : 0 < ε / 2) with ⟨δ, hδpos, hδ⟩
-    let fun_g : Fin (f.natDegree + 1) → ℚ := fun i =>
-      if hi : i = f.natDegree then 1
-      else (Padic.rat_dense p (f.coeff i) hδpos).choose
-    let g' := Polynomial.ofFn _ fun_g
-    let g := (Polynomial.map (algebraMap ℚ ℚ_[p])) g'
-    have hgg : ∀ i, (hi : i ≤ f.natDegree) →  g.coeff i = fun_g ⟨i,
-      Order.lt_add_one_iff.mpr hi⟩ := by
-      intro i hi
-      simpa [g, g'] using ofFn_coeff_eq_val_of_lt fun_g (Order.lt_add_one_iff.mpr hi)
-    have hfg : f.natDegree = g.natDegree := by
-      have := Polynomial.ofFn_natDegree_lt (by simp) fun_g
-      rw [Nat.lt_add_one_iff] at this
-      simp only [natDegree_map, g]
-      refine Eq.symm <| eq_of_le_of_not_lt this ?_
-      by_contra hc
-      have this' := hgg f.natDegree <| le_refl _
-      simp [g, Polynomial.coeff_eq_zero_of_natDegree_lt hc, fun_g] at this'
-    have hg : Monic g := by
-      unfold Monic leadingCoeff
-      rw [hgg g.natDegree (hfg ▸ (le_refl _))]
-      simp [fun_g, hfg]
-    replace hfg : f.degree = g.degree := by
-      rw [Polynomial.degree_eq_natDegree hf.ne_zero, Polynomial.degree_eq_natDegree hg.ne_zero, hfg]
-    have hfgδ : (f - g).stdGaussNorm ≤ δ := by
-      rw [le_gaussNorm_iff_coeff_le]
-      · intro i
-        simp
-        if hi : i > f.natDegree then
-          rw [coeff_eq_zero_of_natDegree_lt hi]
-          rw [coeff_eq_zero_of_natDegree_lt <| Polynomial.natDegree_eq_of_degree_eq hfg ▸ hi]
-          simpa using le_of_lt hδpos
-        else
-        simp only [gt_iff_lt, not_lt] at hi
-        rw [hgg i hi]
-        unfold fun_g
-        if hii : i = f.natDegree then
-          simpa [hii, hf] using le_of_lt hδpos
-        else
-          simpa [hii] using le_of_lt (Padic.rat_dense p (f.coeff i) hδpos).choose_spec
-      · exact le_of_lt hδpos
-    rcases hδ g hg hfg hfgδ with ⟨β, hβg, hβα⟩
+    have hfz : aeval α f = 0 := by rw [hf_def, aeval_mul, hfz', zero_mul]
+    have hdense : DenseRange (algebraMap ℚ ℚ_[p]) := by
+      have : (algebraMap ℚ ℚ_[p] : ℚ → ℚ_[p]) = Rat.cast := by ext q; simp [Rat.cast_def]
+      rw [this]; exact Padic.denseRange_ratCast p
+    set n := f.natDegree with hn
+    have hnpos : 0 < n := natDegree_pos_of_monic_of_aeval_eq_zero hf hfz
+    set M := max ‖α‖ 1 with hM
+    have hMpos : 0 < M := lt_of_lt_of_le one_pos (le_max_right _ _)
+    set δ := (ε / M) ^ (n : ℝ) / (n + 1) with hδ_def
+    have hδpos : 0 < δ :=
+      div_pos (Real.rpow_pos_of_pos (div_pos hε hMpos) _) (by positivity)
+    rcases exists_monic_and_natDegree_eq_and_norm_map_algebraMap_coeff_sub_lt hdense hf hδpos
+      with ⟨g, hgm, hdeg, hgcoeff⟩
+    rcases exists_aroots_norm_sub_lt_of_norm_coeff_sub_lt (K := ℚ_[p]) (L := PadicAlgCl p)
+      hδpos (f := f) (g := g.map (algebraMap ℚ ℚ_[p])) hfz hf (hgm.map _)
+      (by rw [natDegree_map_eq_of_injective (algebraMap ℚ ℚ_[p]).injective]; omega)
+      (fun i => by simpa using hgcoeff i) (IsAlgClosed.splits _) with ⟨β, hβroot, hβnorm⟩
     refine ⟨β, ?_, ?_⟩
     · rw [Metric.mem_ball, dist_comm, dist_eq_norm]
-      refine lt_of_le_of_lt ?_ (by linarith : ε / 2 < ε)
-      rw [← spectralNorm_eq, ← spectralAlgNorm_def (K := ℚ_[p]) (L := PadicAlgCl p)]
-      exact hβα
+      refine hβnorm.trans_le ?_
+      rw [← hn, ← hM, show ((↑n + 1) * δ) = (ε / M) ^ (n : ℝ) by rw [hδ_def]; field_simp,
+        ← Real.rpow_mul (by positivity), mul_inv_cancel₀ (by positivity : (n : ℝ) ≠ 0),
+        Real.rpow_one, div_mul_cancel₀ _ (ne_of_gt hMpos)]
     · simp only [Set.mem_setOf_eq]
-      refine ⟨g', fun h => hg.ne_zero (by simp [g, h]), by simpa [g] using hβg⟩
+      rw [mem_aroots] at hβroot
+      refine ⟨g, hgm.ne_zero, ?_⟩
+      have hβ := hβroot.2
+      rwa [aeval_map_algebraMap] at hβ

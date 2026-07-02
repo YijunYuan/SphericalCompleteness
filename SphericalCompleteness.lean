@@ -1,5 +1,4 @@
 import SphericalCompleteness.External.Complete
-import SphericalCompleteness.External.ContinuityOfRoots
 import SphericalCompleteness.External.DenselyNormedField
 import SphericalCompleteness.External.NNReal
 import SphericalCompleteness.External.PadicAlgCl
