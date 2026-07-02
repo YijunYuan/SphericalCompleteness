@@ -6,7 +6,7 @@ Authors: Yijun Yuan
 import Mathlib.NumberTheory.Padics.Complex
 import Mathlib.Analysis.SpecialFunctions.Log.Base
 import Mathlib.Topology.Bases
-import Mathlib.Algebra.Polynomial.Cardinal
+import Mathlib.Algebra.AlgebraicCard
 import Mathlib.Analysis.Normed.Field.Approximation
 
 /-!
@@ -83,40 +83,6 @@ noncomputable instance instDenselyNormedFieldPadicAlgCl : DenselyNormedField (Pa
       simp [← Real.rpow_mul (norm_nonneg _)]
     exact ⟨z, hz' ▸ ⟨hr1, hr2⟩⟩
 
-/--
-`QAlg_in_QpAlgCl_is_countable` states that, for a natural number `p` equipped with a proof
-that `p` is prime, the subset of the `p`-adic algebraic closure `PadicAlgCl p` consisting
-of elements that are algebraic over `ℚ` is a countable set.
-
-More precisely, it proves `Countable` for the set
-`{z : PadicAlgCl p | IsAlgebraic ℚ z}`.
-
-This is a basic cardinality fact used to control the size of the algebraic elements inside
-a (typically uncountable) ambient extension field.
--/
-theorem QAlg_in_QpAlgCl_is_countable (p : ℕ) [hp : Fact (Nat.Prime p)] :
-  {z : PadicAlgCl p | IsAlgebraic ℚ z}.Countable := by
-  let S := {z : PadicAlgCl p | IsAlgebraic ℚ z}
-  have : S ⊆ ⋃ (f : {g : ℚ[X] // g ≠ 0}), {z : PadicAlgCl p | aeval z f.val = 0} := by
-    intro z hz
-    simpa only [S, ne_eq, Set.mem_iUnion, Set.mem_setOf_eq, Subtype.exists, exists_prop,
-      IsAlgebraic] using hz
-  replace := le_trans (Cardinal.mk_le_mk_of_subset this) <| Cardinal.mk_iUnion_le
-    (fun (f : { g : ℚ[X] // g ≠ 0 }) ↦ {z : PadicAlgCl p | (aeval z) f.val = 0})
-  suffices hfinal : Cardinal.mk S ≤ Cardinal.aleph0 by
-    exact Cardinal.le_aleph0_iff_subtype_countable.mp hfinal
-  refine le_trans this <| le_trans (Cardinal.mul_le_max _ _) <| max_le (max_le ?_ ?_) (le_refl _)
-  · exact le_trans (Cardinal.mk_subtype_le _) <| by simp
-  · refine ciSup_le' <| fun f => ?_
-    simp only [ne_eq, Set.coe_setOf, Cardinal.le_aleph0_iff_subtype_countable]
-    refine Set.Finite.countable ?_
-    have t : (f.val.map (algebraMap ℚ (PadicAlgCl p))) ≠ 0 := by simpa using f.prop
-    have heq : {z : PadicAlgCl p | (aeval z) f.val = 0}
-        = {z : PadicAlgCl p | (f.val.map (algebraMap ℚ (PadicAlgCl p))).IsRoot z} := by
-      ext z; simp [Polynomial.IsRoot, aeval_def, eval_map]
-    rw [heq]
-    exact Polynomial.finite_setOf_isRoot t
-
 open Classical in
 /--
 `PadicAlgCl p` is a separable topological space.
@@ -128,7 +94,7 @@ Such an instance is often used to enable results and constructions that require 
 -/
 instance instSeparableSpacePadicAlgCl : TopologicalSpace.SeparableSpace (PadicAlgCl p) where
   exists_countable_dense := by
-    refine ⟨{z : PadicAlgCl p | IsAlgebraic ℚ z}, QAlg_in_QpAlgCl_is_countable p,
+    refine ⟨{z : PadicAlgCl p | IsAlgebraic ℚ z}, Algebraic.countable ℚ (PadicAlgCl p),
       Metric.dense_iff.mpr <| fun α ε hε => ?_⟩
     rcases (PadicAlgCl.isAlgebraic p).isAlgebraic α with ⟨f', hfne', hfz'⟩
     set f := f' * C (f'.leadingCoeff)⁻¹ with hf_def
