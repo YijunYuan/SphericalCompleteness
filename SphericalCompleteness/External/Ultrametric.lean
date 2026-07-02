@@ -122,18 +122,12 @@ instance instIsUltrametricDistContinuousLinearMap
 {E : Type*} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E]
 {F : Type*} [SeminormedAddCommGroup F] [iud : IsUltrametricDist F]
 [NormedSpace 𝕜 F] :
-IsUltrametricDist (E →L[𝕜] F) where
-  dist_triangle_max := by
-    intro f g h
-    repeat rw [dist_eq_norm]
-    rw [ContinuousLinearMap.opNorm_le_iff]
-    · intro x
-      have : ‖(f - h) x‖ = ‖(f - g) x + (g - h) x‖ := by
-        simp only [sub_apply, sub_add_sub_cancel]
-      rw [this, max_mul_of_nonneg _ _ (norm_nonneg _)]
-      exact le_trans (iud.norm_add_le_max _ _) <| max_le_max
-        (ContinuousLinearMap.le_opNorm (f - g) x) (ContinuousLinearMap.le_opNorm (g - h) x)
-    · simp only [le_sup_iff, norm_nonneg, or_self]
+IsUltrametricDist (E →L[𝕜] F) :=
+  IsUltrametricDist.isUltrametricDist_of_isNonarchimedean_norm fun f g => by
+    rw [ContinuousLinearMap.opNorm_le_iff (le_max_of_le_left (norm_nonneg _))]
+    intro x
+    rw [max_mul_of_nonneg _ _ (norm_nonneg x)]
+    exact (iud.norm_add_le_max _ _).trans (max_le_max (f.le_opNorm x) (g.le_opNorm x))
 
 /--
 `lp E ⊤` (the `ℓ∞`-product) inherits an ultrametric distance from its coordinate spaces.

@@ -7,6 +7,7 @@ import Mathlib.Analysis.SpecificLimits.Basic
 import Mathlib.Topology.Instances.NNReal.Lemmas
 import Mathlib.Topology.MetricSpace.Cauchy
 import Mathlib.Topology.MetricSpace.Pseudo.Defs
+import Mathlib.Topology.MetricSpace.Bounded
 import Mathlib.Tactic.Common
 
 /-!
@@ -46,29 +47,15 @@ theorem completeSpace_iff_nested_ball_with_radius_tendsto_zero_has_nonempty_inte
       (⋂ i, closedBall (ci i) (ri i)).Nonempty := by
   constructor
   · intro hcomplete ci ri hanti hri
-    have hci_cauchy : CauchySeq ci := by
-      rw [Metric.cauchySeq_iff]
-      intro ε hε
-      have hsmall : ∀ᶠ n in atTop, ri n < ⟨ε / 2, le_of_lt (half_pos hε)⟩ :=
-        hri.eventually_lt_const (by exact_mod_cast half_pos hε)
-      obtain ⟨N, hN⟩ := Filter.eventually_atTop.1 hsmall
-      refine ⟨N, fun m hm n hn => ?_⟩
-      have hm_ball : ci m ∈ closedBall (ci N) (ri N) := (hanti hm) (by simp [mem_closedBall])
-      have hn_ball : ci n ∈ closedBall (ci N) (ri N) := (hanti hn) (by simp [mem_closedBall])
-      have hm_dist : dist (ci m) (ci N) ≤ (ri N : ℝ) := by simpa [mem_closedBall] using hm_ball
-      have hn_dist : dist (ci N) (ci n) ≤ (ri N : ℝ) := by
-        simpa [mem_closedBall, dist_comm] using hn_ball
-      have hN' : (ri N : ℝ) < ε / 2 := by exact_mod_cast hN N le_rfl
-      calc
-        dist (ci m) (ci n) ≤ dist (ci m) (ci N) + dist (ci N) (ci n) := dist_triangle _ _ _
-        _ ≤ (ri N : ℝ) + (ri N : ℝ) := add_le_add hm_dist hn_dist
-        _ < ε := by linarith
-    obtain ⟨x, hxlim⟩ := cauchySeq_tendsto_of_complete hci_cauchy
-    refine ⟨x, Set.mem_iInter.2 ?_⟩
-    intro i
-    have hmem : ∀ᶠ n in atTop, ci n ∈ closedBall (ci i) (ri i) :=
-      Filter.eventually_atTop.2 ⟨i, fun n hn => (hanti hn) (by simp [mem_closedBall])⟩
-    exact isClosed_closedBall.mem_of_tendsto hxlim hmem
+    apply Metric.nonempty_iInter_of_nonempty_biInter
+      (fun n => isClosed_closedBall) (fun n => isBounded_closedBall)
+    · refine fun N => ⟨ci N, Set.mem_iInter.2 fun n => Set.mem_iInter.2 fun hn => ?_⟩
+      exact hanti hn (mem_closedBall_self (by positivity))
+    · have h2 : Tendsto (fun n => 2 * (ri n : ℝ)) atTop (nhds 0) := by
+        rw [← NNReal.tendsto_coe] at hri
+        simpa using (hri.comp tendsto_id).const_mul 2
+      exact squeeze_zero (fun n => Metric.diam_nonneg) (fun n => Metric.diam_closedBall
+        (ri n).coe_nonneg) h2
   · refine fun hballs => Metric.complete_of_cauchySeq_tendsto fun u hu => ?_
     choose N hN using fun n : ℕ =>
       Metric.cauchySeq_iff.1 hu (((1 / 2 : NNReal) ^ n : NNReal) : ℝ) (by positivity)
