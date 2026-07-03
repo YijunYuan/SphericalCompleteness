@@ -36,7 +36,7 @@ The additional hypotheses (`IsUltrametricDist E` and `[SphericallyCompleteSpace 
 ambient setting used elsewhere in the development; the complement statement itself is driven by the
 projection property of `T`.
 -/
-theorem orth_of_orthComp
+theorem isCompl_ker_of_forall_apply_eq
     (𝕜 : Type*) [NontriviallyNormedField 𝕜] {E : Type*} [NormedAddCommGroup E]
     [IsUltrametricDist E] [NormedSpace 𝕜 E] (F : Submodule 𝕜 E) [SphericallyCompleteSpace ↥F]
     (T : E →L[𝕜] ↥F) (hT1 : ∀ (a : E) (b : a ∈ F), T a = ⟨a, b⟩)
@@ -120,7 +120,7 @@ completeness providing the completeness hypothesis needed to construct the compl
 theorem isCompl_orthComp :
     IsCompl F (orthComp 𝕜 F) := by
   unfold orthComp
-  apply orth_of_orthComp
+  apply isCompl_ker_of_forall_apply_eq
   have := (exists_orthproj_of_spherically_complete_space 𝕜 F).choose_spec.1
   exact fun a ha ↦ SetLike.coe_eq_coe.mp <| this a ha
 

@@ -57,7 +57,7 @@ theorem sphericallyCompleteSpace_iff_antitone_radius :
     have : Antitone fun i ↦ closedBall (c i) ↑(r' i) := by
       refine antitone_nat_of_succ_le fun n ↦ ?_
       intro x hx
-      simp only [mem_closedBall, dist_le_coe, r']  at *
+      simp only [mem_closedBall, dist_le_coe, r'] at *
       rw [le_csInf_iff''] at *
       · intro b hb
         rcases hb with ⟨k, hk1, hk2⟩
@@ -106,7 +106,7 @@ theorem sphericallyCompleteSpace_iff_strictAnti_radius :
   refine ⟨fun h ci ri hri hanti ↦ h.isSphericallyComplete hanti, ?_⟩
   · rw [sphericallyCompleteSpace_iff_antitone_radius α]
     intro h ci ri hri hanti
-    rcases eventually_stable_or_exists_strictanti_of_antitone hri with hc | hc
+    rcases eventually_stable_or_exists_strictAnti_of_antitone hri with hc | hc
     · rcases hc with ⟨N, hN⟩
       use (ci N)
       simp only [Set.mem_iInter]
@@ -283,7 +283,21 @@ theorem sphericallyCompleteSpace_iff_pairwise_inter_nonempty :
     exact ⟨z, Set.mem_iInter.2 <| fun i ↦ hz ⟨(c i, r i), Exists.intro i (Eq.refl (c i, r i))⟩⟩
 
 open List in
-theorem sphericallyCompleteSpace_equiv :
+/--
+The equivalent characterizations of spherical completeness, bundled as a `TFAE` list.
+
+For an ultrametric pseudometric space the following are equivalent:
+1. `SphericallyCompleteSpace α` (every nested family of closed balls meets);
+2. the intersection property for nested balls with *antitone* radii;
+3. the intersection property for nested balls with *strictly decreasing* radii;
+4. the pairwise-intersection property for an arbitrary family of closed balls.
+
+This packages `sphericallyCompleteSpace_iff_antitone_radius`,
+`sphericallyCompleteSpace_iff_strictAnti_radius` and
+`sphericallyCompleteSpace_iff_pairwise_inter_nonempty` into a single statement, so that any one
+form can be obtained from any other via `List.TFAE.out`.
+-/
+theorem sphericallyCompleteSpace_tfae :
     TFAE [
     SphericallyCompleteSpace α,
     ∀ ⦃ci : ℕ → α⦄, ∀ ⦃ri : ℕ → NNReal⦄,
@@ -387,9 +401,9 @@ instance Pi.sphericallyCompleteSpace {ι : Type*} [Fintype ι] {E : ι → Type*
 
 instance instSphericallyCompleteSpacePUnit : SphericallyCompleteSpace PUnit := inferInstance
 
-instance instSphericallyCompleteSpaceComplex : SphericallyCompleteSpace ℂ  := inferInstance
+instance instSphericallyCompleteSpaceComplex : SphericallyCompleteSpace ℂ := inferInstance
 
-instance instSphericallyCompleteSpaceReal : SphericallyCompleteSpace ℝ  := inferInstance
+instance instSphericallyCompleteSpaceReal : SphericallyCompleteSpace ℝ := inferInstance
 
 instance instSphericallyCompleteSpacePadic {p : ℕ} [Fact (Nat.Prime p)] :
     SphericallyCompleteSpace (ℚ_[p]) := inferInstance

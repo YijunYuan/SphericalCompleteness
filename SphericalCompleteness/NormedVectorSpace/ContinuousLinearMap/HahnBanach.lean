@@ -26,18 +26,13 @@ variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
   {F : Type*} [NormedAddCommGroup F] [NormedSpace 𝕜 F]
 
 /--
-Hahn–Banach extension theorem in the ultrametric setting, assuming spherical completeness.
+The **non-Archimedean Hahn–Banach theorem**, spherically complete domain form.
 
-Given a nontrivially normed field `𝕜`, normed `𝕜`-spaces `E` and `F` equipped with an
-ultrametric distance, a submodule `D : Submodule 𝕜 E` that is spherically complete
-(`SphericallyCompleteSpace D`), and a continuous linear map `f : D →L[𝕜] F`,
-this theorem produces an extension `f' : E →L[𝕜] F` such that:
-
-* `f'` agrees with `f` on `D` (via the subtype coercion `⟨v, hv⟩`), and
-* the operator norm is preserved: `‖f'‖ = ‖f‖`.
-
-This is a norm-preserving extension result (isometric on operator norm) for continuous
-linear maps from a spherically complete subspace in a non-Archimedean (ultrametric) context.
+If the source subspace `D` is spherically complete, then any continuous linear map
+`f : D →L[𝕜] F` extends to `f' : E →L[𝕜] F` that agrees with `f` on `D` and preserves the operator
+norm, `‖f'‖ = ‖f‖`. Here the extension is concrete: `f` is precomposed with the norm-nonincreasing
+orthogonal projection `orthProj 𝕜 D` onto `D`, which exists precisely because `D` is spherically
+complete.
 -/
 theorem hahn_banach [hd : SphericallyCompleteSpace D] (f : D →L[𝕜] F) :
     ∃ f' : E →L[𝕜] F, (∀ v : E, (hv : v ∈ D) → f' v = f ⟨v, hv⟩) ∧ ‖f'‖ = ‖f‖ := by
@@ -56,22 +51,13 @@ theorem hahn_banach [hd : SphericallyCompleteSpace D] (f : D →L[𝕜] F) :
       simpa [ContinuousLinearMap.comp_apply, hproj'] using le_opNorm (f.comp (orthProj 𝕜 D)) (x : E)
 
 /--
-A Hahn–Banach style extension theorem for continuous linear maps between ultrametric normed spaces.
+The **non-Archimedean Hahn–Banach theorem**, spherically complete codomain form.
 
-Given:
-* a nontrivially normed field `𝕜`,
-* normed `𝕜`-vector spaces `E` and `F` equipped with an ultrametric distance
-  (`[IsUltrametricDist E]` and `[IsUltrametricDist F]`),
-* a submodule `D : Submodule 𝕜 E`,
-* a continuous linear map `f : D →L[𝕜] F`,
-* and the assumption that `F` is spherically complete (`[SphericallyCompleteSpace F]`),
-
-this theorem produces a continuous linear map `f' : E →L[𝕜] F` extending `f` from `D` to all of `E`,
-and preserving the operator norm: `‖f'‖ = ‖f‖`.
-
-The extension property is stated pointwise: for any `v : E` with `hv : v ∈ D`, we have
-`f' v = f ⟨v, hv⟩`.
--/
+If the *target* `F` is spherically complete, then any continuous linear map `f : D →L[𝕜] F` from a
+submodule `D` extends to `f' : E →L[𝕜] F` agreeing with `f` on `D` and preserving the operator norm,
+`‖f'‖ = ‖f‖`. Unlike `hahn_banach`, no completeness assumption is placed on `D`; the extension is
+built by iterating the codimension-one step `exists_extension_codimOne` over all of `E`, which is
+why spherical completeness is required on the side where the values live. -/
 theorem hahn_banach' [IsUltrametricDist F] [hf : SphericallyCompleteSpace F] (f : D →L[𝕜] F) :
     ∃ f' : E →L[𝕜] F, (∀ v : E, (hv : v ∈ D) → f' v = f ⟨v, hv⟩) ∧ ‖f'‖ = ‖f‖ := by
   if hf : f = 0 then exact ⟨0, ⟨fun v hv ↦ by simp [hf], by simp [hf]⟩⟩

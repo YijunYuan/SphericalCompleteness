@@ -58,7 +58,7 @@ private noncomputable def LinearIsometry.weakInv {𝕜 : Type*} [NontriviallyNor
 
 private lemma norm_map_of_isImmediate {𝕜 : Type*}
     [NontriviallyNormedField 𝕜] {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
-    [IsUltrametricDist E] {F : Type*} [NormedAddCommGroup F] [inst_5 : NormedSpace 𝕜 F]
+    [IsUltrametricDist E] {F : Type*} [NormedAddCommGroup F] [NormedSpace 𝕜 F]
     [IsUltrametricDist F] {H : Type*} [NormedAddCommGroup H] [NormedSpace 𝕜 H]
     [IsUltrametricDist H] [SphericallyCompleteSpace H] (f : E →ₗᵢ[𝕜] F) (hf : IsImmediate f)
     (g : E →ₗᵢ[𝕜] H) (h : F →L[𝕜] H)
@@ -71,7 +71,7 @@ private lemma norm_map_of_isImmediate {𝕜 : Type*}
       have := (ContinuousLinearMap.opNorm_le_iff zero_le_one).1 hh v
       simpa only [one_mul]
     rw [hf2]
-    apply  (ContinuousLinearMap.opNorm_le_iff zero_le_one).2
+    apply (ContinuousLinearMap.opNorm_le_iff zero_le_one).2
     intro x
     have : ‖(LinearIsometry.weakInv f).toContinuousLinearMap x‖ = ‖x‖ := by
       simp only [LinearIsometry.coe_toContinuousLinearMap, LinearIsometry.norm_map]

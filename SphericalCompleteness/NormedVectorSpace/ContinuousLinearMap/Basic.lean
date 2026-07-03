@@ -43,7 +43,7 @@ instance instSphericallyCompleteSpaceContinuousLinearMap {𝕜 : Type*} [Nontriv
   rw [sphericallyCompleteSpace_iff_strictAnti_radius]
   intro c' r' hsar' hanti'
   if hseq : ∀ n : ℕ, ∃ N, ∀ i > N, c' n ≠ c' i then
-  rcases exists_bijective_subseq_of_finite_duplication c' hseq with ⟨φ, hφ⟩
+  rcases exists_injective_subseq_of_finite_duplication c' hseq with ⟨φ, hφ⟩
   let c := c' ∘ φ
   let r := r' ∘ φ
   have hsar : StrictAnti r := StrictAnti.comp_strictMono hsar' hφ.1

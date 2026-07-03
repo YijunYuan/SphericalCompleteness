@@ -33,6 +33,11 @@ sequences `f` with values in `E n` that *tend to `0` in norm*, i.e.
 This is the natural analogue of the classical Banach space `c₀` of scalar-valued
 sequences, but for a family of normed spaces `E : ℕ → Type*`.
 -/
+
+/-- The submodule `c₀ 𝕜 E` of `lp E ⊤` consisting of the bounded sequences that tend to `0` in
+norm: `∀ ε > 0, ∃ N, ∀ n ≥ N, ‖f n‖ ≤ ε`. Quotienting `lp E ⊤` by `c₀` glues together sequences
+with the same asymptotic behaviour; this quotient is the spherically complete space into which
+`sphericallyCompleteExtension` embeds an arbitrary normed space. -/
 def c₀ (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     (E : ℕ → Type*) [∀ i, NormedAddCommGroup (E i)]
     [∀ i, NormedSpace 𝕜 (E i)] : Submodule 𝕜 ↥(lp E ⊤) where
@@ -269,15 +274,14 @@ lemma quotient_norm_mk_le_of_eventually_norm_le {𝕜 : Type*} [NontriviallyNorm
     change ‖A k + (if k < N then -A k else 0)‖ ≤ C
     simpa only [if_neg hk, add_zero] using hN k (Nat.le_of_not_lt hk)
 
-/-
-`lp E ⊤` is the `ℓ∞`-type space of bounded sequences in the family `E : ℕ → Type*`.
+/--
+The quotient `lp E ⊤ ⧸ c₀ 𝕜 E` is spherically complete whenever each `E i` is ultrametric.
 
-This instance shows that the quotient by the submodule `c₀ 𝕜 E` of sequences tending to `0`
-in norm is *spherically complete* (assuming each `E i` carries an ultrametric distance).
-
-The proof follows the standard construction: choose representatives of a nested family of
-closed balls in the quotient, build a diagonal candidate in `lp E ⊤`, and verify it lies in
-all balls using ultrametric estimates and a `c₀`-correction.
+This is the concrete source of spherically complete spaces used to build spherical completions:
+`lp E ⊤` is the `ℓ∞`-type space of bounded sequences, and killing the null sequences `c₀ 𝕜 E`
+makes nested families of closed balls meet. Given such a family, one lifts it to representatives
+in `lp E ⊤` (via `quotientMkSection`), assembles a diagonal candidate sequence, and checks it lies
+in every ball using the ultrametric estimates and a `c₀`-correction.
 -/
 instance sphericallyCompleteSpace_lp_quotient_c₀ {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     (E : ℕ → Type*) [∀ i, NormedAddCommGroup (E i)]
@@ -344,6 +348,11 @@ instance sphericallyCompleteSpace_lp_quotient_c₀ {𝕜 : Type*} [NontriviallyN
   refine (hanti (Nat.le_succ i)) ?_
   simp only [Nat.succ_eq_add_one, mem_closedBall, dist_self, NNReal.zero_le_coe]
 
+/-- A linear isometric embedding of an arbitrary normed `𝕜`-space `E` into a spherically complete
+space, namely the constant-sequence map `x ↦ [x, x, x, …]` into `lp (fun _ ↦ E) ⊤ ⧸ c₀ 𝕜 _`.
+It is an isometry because the quotient norm of a constant sequence equals `‖x‖`. This realises
+every normed space inside a spherically complete one, the first step in constructing the
+`SphericalCompletion`. -/
 noncomputable def sphericallyCompleteExtension (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     (E : Type*) [NormedAddCommGroup E] [NormedSpace 𝕜 E] :
     E →ₗᵢ[𝕜] ((lp (fun (_ : ℕ) ↦ E) ⊤)⧸ c₀ 𝕜 (fun (_ : ℕ) ↦ E)) where
@@ -396,7 +405,7 @@ noncomputable def sphericallyCompleteExtension (𝕜 : Type*) [NontriviallyNorme
 
 noncomputable instance (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     (E : Type*) [NormedAddCommGroup E] [NormedSpace 𝕜 E] :
-    NormedAddCommGroup (↥(lp (fun _ ↦ E) ⊤) ⧸ c₀ 𝕜 fun _ ↦ E):= by
+    NormedAddCommGroup (↥(lp (fun _ ↦ E) ⊤) ⧸ c₀ 𝕜 fun _ ↦ E) := by
   have : IsClosed (↑(c₀ 𝕜 fun x ↦ E).carrier) := by
     apply IsSeqClosed.isClosed
     simp only [IsSeqClosed, Submodule.carrier_eq_coe, SetLike.mem_coe, Subtype.forall]
@@ -439,8 +448,7 @@ noncomputable instance (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 
 -- Any non-Archimedean normed field 𝕜 has a spherically complete Banach space over it
 instance {𝕜 : Type*} [NontriviallyNormedField 𝕜] [IsUltrametricDist 𝕜] :
-    SphericallyCompleteSpace ((lp (fun _ ↦ 𝕜) ⊤)⧸ c₀ 𝕜 (fun _ ↦ 𝕜))
-    := by
+    SphericallyCompleteSpace ((lp (fun _ ↦ 𝕜) ⊤)⧸ c₀ 𝕜 (fun _ ↦ 𝕜)) := by
   simpa only using sphericallyCompleteSpace_lp_quotient_c₀ (fun _ ↦ 𝕜)
 
 end SphericallyCompleteSpace

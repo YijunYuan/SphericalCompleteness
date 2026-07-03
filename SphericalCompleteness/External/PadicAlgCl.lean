@@ -24,6 +24,9 @@ open Polynomial
 
 variable (p : ℕ) [hp : Fact (Nat.Prime p)]
 
+/-- Between any two nonnegative reals `a < b` there is a rational power of `‖p‖` (the `p`-adic norm
+of the prime `p` in `PadicAlgCl p`). This is the density input that makes `PadicAlgCl p` a densely
+normed field: the norm attains values `‖p‖ ^ (c : ℝ)` for `c : ℚ`, which are dense in `ℝ≥0`. -/
 private lemma exists_rat_pow_p_norm_between (a b : ℝ) (ha : 0 ≤ a) (hab : a < b) : ∃ c : ℚ,
     a < ‖(p : (PadicAlgCl p))‖ ^ (c : ℝ) ∧
     ‖(p : (PadicAlgCl p))‖ ^ (c : ℝ) < b := by

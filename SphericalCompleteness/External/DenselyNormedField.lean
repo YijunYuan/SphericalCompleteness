@@ -29,7 +29,7 @@ about balls, and approximation arguments) directly on `UniformSpace.Completion �
 This instance is marked `noncomputable` because the completion and its induced
 structures are not definitional/computational in general.
 -/
-noncomputable instance instDenselyNormedFieldCompletionOfCompletion
+noncomputable instance instDenselyNormedFieldCompletion
     {α : Type*} [hdnf : DenselyNormedField α] [CompletableTopField α] :
     DenselyNormedField (UniformSpace.Completion α) where
   __ : NormedField (UniformSpace.Completion α) := inferInstance

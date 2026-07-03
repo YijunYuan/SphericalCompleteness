@@ -19,14 +19,19 @@ open Metric
 
 namespace SphericallyCompleteSpace
 
+/-- The maximal immediate extension submodule chosen by
+`exists_maximal_immediateExtensionSubmodule` is itself spherically complete. This is the key
+step: were it not, one could enlarge it by a vector realizing a non-met nested family of balls
+(using density inside the ambient spherically complete `E₀`), contradicting maximality. It is what
+makes `SphericalCompletion 𝕜 E` a spherically complete space. -/
 instance {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     (E : Type*) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
     (E₀ : Type*) [NormedAddCommGroup E₀] [NormedSpace 𝕜 E₀] [iud : IsUltrametricDist E₀]
     [hsc : SphericallyCompleteSpace E₀]
     (f : E →ₗᵢ[𝕜] E₀) :
-    SphericallyCompleteSpace (↥(exists_max_immExtInSphComp 𝕜 E E₀ f).choose) := by
+    SphericallyCompleteSpace (↥(exists_maximal_immediateExtensionSubmodule 𝕜 E E₀ f).choose) := by
   rw [sphericallyCompleteSpace_iff_strictAnti_radius]
-  set K := (exists_max_immExtInSphComp 𝕜 E E₀ f).choose with hK
+  set K := (exists_maximal_immediateExtensionSubmodule 𝕜 E E₀ f).choose with hK
   by_contra hc
   push Not at hc
   rcases hc with ⟨c, r, hsr, hanti, hemp⟩
@@ -49,15 +54,15 @@ instance {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     intro i
     simpa [show dist (⟨a, haa⟩ : _) (c i) = dist a (c i).val from rfl] using ha i
   else
-  have : (K + Submodule.span 𝕜 {a}) ∉ immExtInSphComp E E₀ f := by
+  have : (K + Submodule.span 𝕜 {a}) ∉ immediateExtensionSubmodules E E₀ f := by
     by_contra hc
     have : K < K + Submodule.span 𝕜 {a} := by
       simpa only [Submodule.add_eq_sup, left_lt_sup, Submodule.span_singleton_le_iff_mem]
     exact (not_le_of_gt this) <|
-      (exists_max_immExtInSphComp 𝕜 E E₀ f).choose_spec.2 hc (le_of_lt this)
-  rw [mem_immExtInSphComp_iff, not_exists] at this
+      (exists_maximal_immediateExtensionSubmodule 𝕜 E E₀ f).choose_spec.2 hc (le_of_lt this)
+  rw [mem_immediateExtensionSubmodules_iff, not_exists] at this
   specialize this <| le_sup_of_le_left
-    (exists_max_immExtInSphComp 𝕜 E E₀ f).choose_spec.1.choose
+    (exists_maximal_immediateExtensionSubmodule 𝕜 E E₀ f).choose_spec.1.choose
   simp only [not_forall] at this
   rcases this with ⟨b', hb'1, hb'2⟩
   rcases Submodule.mem_sup.1 b'.prop with ⟨x', hx', v', hv', hx'v'⟩
@@ -68,7 +73,8 @@ instance {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     simp only [hc, zero_smul, add_zero] at hx'v'
     subst hx'v'
     obtain ⟨_, himmK⟩ :=
-      mem_immExtInSphComp_iff.1 (exists_max_immExtInSphComp 𝕜 E E₀ f).choose_spec.1
+      mem_immediateExtensionSubmodules_iff.1
+        (exists_maximal_immediateExtensionSubmodule 𝕜 E E₀ f).choose_spec.1
     exact hb'2 (ZeroMemClass.coe_eq_zero.mp (congrArg Subtype.val (himmK ⟨b', hx'⟩ hb'1)))
   let b := s⁻¹ • b'
   let x := - s⁻¹ • x'
@@ -77,7 +83,7 @@ instance {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     rw [add_comm]
     simpa only [add_left_inj] using inv_smul_smul₀ hhs a
   have hb'1' : MOrth 𝕜 b' (LinearMap.range (inclusionᵢ (le_sup_of_le_left
-      (exists_max_immExtInSphComp 𝕜 E E₀ f).choose_spec.1.choose)).toLinearMap) :=
+      (exists_maximal_immediateExtensionSubmodule 𝕜 E E₀ f).choose_spec.1.choose)).toLinearMap) :=
     (morth_range_inclusionᵢ_iff _ b').2 hb'1
   have hb1 := @smul_morth_of_morth 𝕜 _ _ _ _ inferInstance b' _ s⁻¹ hb'1'
   replace hb1 : MOrth 𝕜 b.val K := by
@@ -92,7 +98,8 @@ instance {𝕜 : Type*} [NontriviallyNormedField 𝕜]
         hg2', ZeroMemClass.coe_zero, norm_zero] at *
       contrapose hc
       exact infDist_zero_of_mem <| by simp only [SetLike.mem_coe, zero_mem]
-    have hChooseSpec := (exists_max_immExtInSphComp 𝕜 E E₀ f).choose_spec.1.choose_spec
+    have hChooseSpec :=
+      (exists_maximal_immediateExtensionSubmodule 𝕜 E E₀ f).choose_spec.1.choose_spec
     have hNMorth := mt (hChooseSpec ⟨g, hg1⟩)
         (fun h ↦ hgg (congrArg Subtype.val h))
     rcases @not_morth_iff_exists_dist_lt_norm 𝕜 _ (↥K)
@@ -144,14 +151,14 @@ instance instSphericallyCompleteSpaceSphericalCompletion
     (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     (E : Type u) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E] :
     SphericallyCompleteSpace (SphericalCompletion 𝕜 E) :=
-  show SphericallyCompleteSpace ↥(exists_max_immExtInSphComp 𝕜 E
+  show SphericallyCompleteSpace ↥(exists_maximal_immediateExtensionSubmodule 𝕜 E
     _ (sphericallyCompleteExtension 𝕜 E)).choose from inferInstance
 
 /-- The canonical embedding into the spherical completion is an immediate extension. -/
 theorem sphericalCompletionEmbedding_isImmediate (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     (E : Type u) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E] :
     IsImmediate (sphericalCompletionEmbedding 𝕜 E) := by
-  have himm := (exists_max_immExtInSphComp 𝕜 E
+  have himm := (exists_maximal_immediateExtensionSubmodule 𝕜 E
       (↥(lp (fun _ ↦ E) ⊤) ⧸ c₀ 𝕜 fun _ ↦ E) (sphericallyCompleteExtension 𝕜 E)
       ).choose_spec.1.choose_spec
   unfold IsImmediate at himm ⊢
@@ -236,7 +243,7 @@ linearly isometric to `SphericalCompletion 𝕜 E`.
 This is a streamlined version of `sphericalCompletion_unique` where the minimality hypothesis is
 replaced by the assumption `IsImmediate f`.
 -/
-theorem sphericalCompletion_unique'
+theorem sphericalCompletion_unique_of_isImmediate
     {f : E →ₗᵢ[𝕜] F} (hf : IsImmediate f) :
     Nonempty (SphericalCompletion 𝕜 E ≃ₗᵢ[𝕜] F) := by
   rcases exists_linearIsometry_comp_eq_of_isImmediate f hf

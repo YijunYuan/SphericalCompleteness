@@ -21,7 +21,13 @@ open Metric
 
 namespace SphericallyCompleteSpace
 
-lemma rooij_lemma_4_4_z0 {𝕜 : Type*}
+/-- The heart of the codimension-one extension step (van Rooij, *Non-Archimedean Functional
+Analysis*, Lemma 4.4). Given a continuous linear `S : D →L[𝕜] F` approximated on `D` by a
+compatible family `𝒰` with tolerances `ε`, and a vector `a ∉ D`, spherical completeness of `F`
+produces a single value `z0` that plays the role of `S a`: adjoining it keeps every approximation
+bound `‖S x + z0 - U (x + a)‖ ≤ ε U * ‖x + a‖` valid on `D + 𝕜 ∙ a`. The witness is extracted from
+the nonempty intersection of the family of operator-norm balls. -/
+lemma exists_extensionValue_norm_le {𝕜 : Type*}
     [NontriviallyNormedField 𝕜] {E : Type*} [SeminormedAddCommGroup E] [iude : IsUltrametricDist E]
     [NormedSpace 𝕜 E] {D : Submodule 𝕜 E}
     {a : E} (ha1 : a ∉ D)
@@ -118,7 +124,11 @@ lemma rooij_lemma_4_4_z0 {𝕜 : Type*}
     simp only [map_add]; abel
   rwa [this] at hz0
 
-lemma rooij_lemma_4_4_z0_prop {𝕜 : Type*}
+/-- Homogeneity form of `exists_extensionValue_norm_le`: the approximation bound provided by the
+chosen extension value survives scaling of `a` by any `l : 𝕜`, i.e.
+`‖S x + l • z0 - U (x + l • a)‖ ≤ ε U * ‖x + l • a‖`. This upgrades the single-vector bound to the
+full line `𝕜 ∙ a`, which is what makes the extension well defined on `D + 𝕜 ∙ a`. -/
+lemma norm_smul_extensionValue_le {𝕜 : Type*}
     [NontriviallyNormedField 𝕜] {E : Type*} [SeminormedAddCommGroup E] [iude : IsUltrametricDist E]
     [NormedSpace 𝕜 E] {D : Submodule 𝕜 E}
     {a : E} (ha1 : a ∉ D)
@@ -128,7 +138,7 @@ lemma rooij_lemma_4_4_z0_prop {𝕜 : Type*}
     {ε : ↑𝒰 → ℝ} (hε1 : ∀ (T : ↑𝒰), 0 < ε T) (hε2 : ∀ (U V : ↑𝒰), ‖U.val - V.val‖ ≤ max (ε U) (ε V))
     (hε3 : ∀ (U : ↑𝒰) (x : ↥D), ‖S x - U.val ↑x‖ ≤ ε U * ‖x‖) :
     ∀ (x : ↥D) (l : 𝕜) (U : ↑𝒰),
-    ‖S x + l • (rooij_lemma_4_4_z0 ha1 S h𝒰 hε1 hε2 hε3).choose - U.val (↑x + l • a)‖ ≤
+    ‖S x + l • (exists_extensionValue_norm_le ha1 S h𝒰 hε1 hε2 hε3).choose - U.val (↑x + l • a)‖ ≤
     ε U * ‖↑x + l • a‖ := by
   intro x l U
   by_cases hl : l = 0
@@ -137,9 +147,14 @@ lemma rooij_lemma_4_4_z0_prop {𝕜 : Type*}
     rw [this, S.map_smul, show ↑(l • l⁻¹ • x) + l • a = l • ((l⁻¹ • x) + a) by simp [smul_add]]
     rw [U.val.map_smul, ← smul_add, ← smul_sub, norm_smul, norm_smul, ← mul_assoc, mul_comm (ε U)]
     rw [mul_assoc, mul_le_mul_iff_of_pos_left <| norm_pos_iff.mpr hl]
-    exact (rooij_lemma_4_4_z0 ha1 S h𝒰 hε1 hε2 hε3).choose_spec (l⁻¹ • x) U
+    exact (exists_extensionValue_norm_le ha1 S h𝒰 hε1 hε2 hε3).choose_spec (l⁻¹ • x) U
 
-noncomputable def rooijLemma44T {𝕜 : Type*}
+/-- The underlying function of the codimension-one extension of `S` to `D + 𝕜 ∙ a`. On the unique
+decomposition `m = d + l • a` (with `d ∈ D`, valid because `a ∉ D`) it returns
+`S d + l • z0`, where `z0` is the extension value from `exists_extensionValue_norm_le`. Linearity
+and boundedness are established separately in `isLinearMap_codimOneExtension` and
+`isBoundedLinearMap_codimOneExtension`. -/
+noncomputable def codimOneExtension {𝕜 : Type*}
     [NontriviallyNormedField 𝕜] {E : Type*} [SeminormedAddCommGroup E] [iude : IsUltrametricDist E]
     [NormedSpace 𝕜 E] {D : Submodule 𝕜 E}
     {a : E} (ha1 : a ∉ D)
@@ -152,7 +167,7 @@ noncomputable def rooijLemma44T {𝕜 : Type*}
     have := Submodule.mem_sup.1 M.prop
     let lambda := (Submodule.mem_span_singleton.1 this.choose_spec.2.choose_spec.1).choose
     use S ⟨this.choose, this.choose_spec.1⟩ +
-      lambda • (rooij_lemma_4_4_z0 ha1 S h𝒰 hε1 hε2 hε3).choose
+      lambda • (exists_extensionValue_norm_le ha1 S h𝒰 hε1 hε2 hε3).choose
 
 /-- The linear equivalence `↥(D + 𝕜∙a) ≃ₗ D × 𝕜` given by the (unique, since `a ∉ D`)
 decomposition `x = d + l • a`. -/
@@ -176,9 +191,11 @@ noncomputable def spanSupDecomp {𝕜 : Type*} [NontriviallyNormedField 𝕜] {E
     [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] {D : Submodule 𝕜 E} {a : E} (ha : a ∉ D)
     (d : D) (l : 𝕜) : (((spanSupDecomp ha).symm (d, l)) : E) = (d : E) + l • a := rfl
 
-/-- Value of `rooijLemma44T` expressed through the `spanSupDecomp` coordinates: it is the
-composition of `S` on the `D`-part with scaling `rooij_lemma_4_4_z0` by the `𝕜`-part. -/
-lemma rooijLemma44T_eq {𝕜 : Type*}
+/-- Closed form of `codimOneExtension` in the `spanSupDecomp` coordinates `m ↦ (d, l)`:
+its value is `S d + l • z0`, where `z0` is the extension value from
+`exists_extensionValue_norm_le`. This is the computational identity that all downstream
+linearity, boundedness and approximation proofs rewrite with. -/
+lemma codimOneExtension_eq {𝕜 : Type*}
     [NontriviallyNormedField 𝕜] {E : Type*} [SeminormedAddCommGroup E] [iude : IsUltrametricDist E]
     [NormedSpace 𝕜 E] {D : Submodule 𝕜 E}
     {a : E} (ha1 : a ∉ D)
@@ -187,10 +204,10 @@ lemma rooijLemma44T_eq {𝕜 : Type*}
     (S : ↥D →L[𝕜] F) {𝒰 : Set (E →L[𝕜] F)} (h𝒰 : 𝒰.Nonempty)
     {ε : ↑𝒰 → ℝ} (hε1 : ∀ (T : ↑𝒰), 0 < ε T) (hε2 : ∀ (U V : ↑𝒰), ‖U.val - V.val‖ ≤ max (ε U) (ε V))
     (hε3 : ∀ (U : ↑𝒰) (x : ↥D), ‖S x - U.val ↑x‖ ≤ ε U * ‖x‖) (M : ↥(D + Submodule.span 𝕜 {a})) :
-    rooijLemma44T ha1 S h𝒰 hε1 hε2 hε3 M =
+    codimOneExtension ha1 S h𝒰 hε1 hε2 hε3 M =
     S (spanSupDecomp ha1 M).1 +
-      (spanSupDecomp ha1 M).2 • (rooij_lemma_4_4_z0 ha1 S h𝒰 hε1 hε2 hε3).choose := by
-  unfold rooijLemma44T
+      (spanSupDecomp ha1 M).2 • (exists_extensionValue_norm_le ha1 S h𝒰 hε1 hε2 hε3).choose := by
+  unfold codimOneExtension
   set p := Submodule.mem_sup.1 M.prop with hp
   set l := (Submodule.mem_span_singleton.1 p.choose_spec.2.choose_spec.1).choose with hl
   have ha0 : a ≠ 0 := fun h ↦ ha1 (h ▸ D.zero_mem)
@@ -200,14 +217,17 @@ lemma rooijLemma44T_eq {𝕜 : Type*}
   have hpeq : (p.choose : E) + l • a = (M : E) := by
     rw [hl, (Submodule.mem_span_singleton.1 p.choose_spec.2.choose_spec.1).choose_spec,
       p.choose_spec.2.choose_spec.2]
-  have hdecomp := eq_and_eq_of_add_eq_add_of_not_mem_submodule_span_singleton ha1
+  have hdecomp := eq_and_eq_of_add_eq_add_of_notMem ha1
     p.choose p.choose_spec.1 (l • a) (Submodule.mem_span_singleton.2 ⟨l, rfl⟩)
     (spanSupDecomp ha1 M).1 (spanSupDecomp ha1 M).1.2 ((spanSupDecomp ha1 M).2 • a)
     (Submodule.mem_span_singleton.2 ⟨_, rfl⟩) (hpeq.trans hMeq)
   refine congrArg₂ _ (congrArg S (Subtype.ext hdecomp.1)) ?_
   exact congrArg (· • _) (smul_left_injective 𝕜 ha0 hdecomp.2)
 
-noncomputable def rooijLemma44T_linear {𝕜 : Type*}
+/-- The codimension-one extension `codimOneExtension` is `𝕜`-linear. Additivity and homogeneity
+both reduce, via `codimOneExtension_eq`, to the linearity of `S` and of scalar multiplication in
+the `spanSupDecomp` coordinates. -/
+noncomputable def isLinearMap_codimOneExtension {𝕜 : Type*}
     [NontriviallyNormedField 𝕜] {E : Type*} [SeminormedAddCommGroup E] [iude : IsUltrametricDist E]
     [NormedSpace 𝕜 E] {D : Submodule 𝕜 E}
     {a : E} (ha1 : a ∉ D)
@@ -216,16 +236,20 @@ noncomputable def rooijLemma44T_linear {𝕜 : Type*}
     (S : ↥D →L[𝕜] F) {𝒰 : Set (E →L[𝕜] F)} (h𝒰 : 𝒰.Nonempty)
     {ε : ↑𝒰 → ℝ} (hε1 : ∀ (T : ↑𝒰), 0 < ε T) (hε2 : ∀ (U V : ↑𝒰), ‖U.val - V.val‖ ≤ max (ε U) (ε V))
     (hε3 : ∀ (U : ↑𝒰) (x : ↥D), ‖S x - U.val ↑x‖ ≤ ε U * ‖x‖) :
-    IsLinearMap 𝕜 (rooijLemma44T ha1 S h𝒰 hε1 hε2 hε3) where
+    IsLinearMap 𝕜 (codimOneExtension ha1 S h𝒰 hε1 hε2 hε3) where
   map_add x1 x2 := by
-    simp only [rooijLemma44T_eq, map_add, Prod.fst_add, Prod.snd_add, S.map_add, add_smul]
+    simp only [codimOneExtension_eq, map_add, Prod.fst_add, Prod.snd_add, S.map_add, add_smul]
     abel
   map_smul k m := by
-    simp only [rooijLemma44T_eq, map_smul, Prod.smul_fst, Prod.smul_snd, S.map_smul,
+    simp only [codimOneExtension_eq, map_smul, Prod.smul_fst, Prod.smul_snd, S.map_smul,
       smul_smul, smul_add, smul_eq_mul]
 
 
-noncomputable def rooijLemma44T_boundedlinear {𝕜 : Type*}
+/-- The codimension-one extension is a bounded linear map: on top of linearity
+(`isLinearMap_codimOneExtension`) the ultrametric estimate bounds its value by
+`max (ε U₀) ‖U₀‖ * ‖x‖` for a fixed member `U₀` of the family, using the extension bound
+`norm_smul_extensionValue_le`. -/
+noncomputable def isBoundedLinearMap_codimOneExtension {𝕜 : Type*}
     [NontriviallyNormedField 𝕜] {E : Type*} [SeminormedAddCommGroup E] [iude : IsUltrametricDist E]
     [NormedSpace 𝕜 E] {D : Submodule 𝕜 E}
     {a : E} (ha1 : a ∉ D)
@@ -234,20 +258,20 @@ noncomputable def rooijLemma44T_boundedlinear {𝕜 : Type*}
     (S : ↥D →L[𝕜] F) {𝒰 : Set (E →L[𝕜] F)} (h𝒰 : 𝒰.Nonempty)
     {ε : ↑𝒰 → ℝ} (hε1 : ∀ (T : ↑𝒰), 0 < ε T) (hε2 : ∀ (U V : ↑𝒰), ‖U.val - V.val‖ ≤ max (ε U) (ε V))
     (hε3 : ∀ (U : ↑𝒰) (x : ↥D), ‖S x - U.val ↑x‖ ≤ ε U * ‖x‖) :
-    IsBoundedLinearMap 𝕜 (rooijLemma44T ha1 S h𝒰 hε1 hε2 hε3) where
-  map_add := (rooijLemma44T_linear ha1 S h𝒰 hε1 hε2 hε3).map_add
-  map_smul := (rooijLemma44T_linear ha1 S h𝒰 hε1 hε2 hε3).map_smul
+    IsBoundedLinearMap 𝕜 (codimOneExtension ha1 S h𝒰 hε1 hε2 hε3) where
+  map_add := (isLinearMap_codimOneExtension ha1 S h𝒰 hε1 hε2 hε3).map_add
+  map_smul := (isLinearMap_codimOneExtension ha1 S h𝒰 hε1 hε2 hε3).map_smul
   bound := by
     use max (ε ⟨h𝒰.some,h𝒰.some_mem⟩) ‖h𝒰.some‖
     refine ⟨lt_max_of_lt_left <| hε1 _, fun x ↦ ?_⟩
-    rw [rooijLemma44T_eq]
+    rw [codimOneExtension_eq]
     set d := (spanSupDecomp ha1 x).1 with hd
     set l := (spanSupDecomp ha1 x).2 with hl
     have hx_eq : (d : E) + l • a = ↑x := by
       rw [hd, hl, ← spanSupDecomp_symm_apply ha1, LinearEquiv.symm_apply_apply]
-    have tt := (rooij_lemma_4_4_z0_prop ha1 S h𝒰 hε1 hε2 hε3) d l ⟨h𝒰.some, h𝒰.some_mem⟩
-    rw [show S d + l • (rooij_lemma_4_4_z0 ha1 S h𝒰 hε1 hε2 hε3).choose =
-      S d + l • (rooij_lemma_4_4_z0 ha1 S h𝒰 hε1 hε2 hε3).choose
+    have tt := (norm_smul_extensionValue_le ha1 S h𝒰 hε1 hε2 hε3) d l ⟨h𝒰.some, h𝒰.some_mem⟩
+    rw [show S d + l • (exists_extensionValue_norm_le ha1 S h𝒰 hε1 hε2 hε3).choose =
+      S d + l • (exists_extensionValue_norm_le ha1 S h𝒰 hε1 hε2 hε3).choose
       - h𝒰.some (d + l • a) + h𝒰.some (d + l • a) from by simp only [sub_add_cancel],
       max_mul_of_nonneg _ _ (norm_nonneg x)]
     refine le_trans (iud.norm_add_le_max _ _) (max_le_max ?_ ?_)
@@ -256,7 +280,14 @@ noncomputable def rooijLemma44T_boundedlinear {𝕜 : Type*}
     · rw [hx_eq]
       exact ContinuousLinearMap.le_opNorm h𝒰.some ↑x
 
-lemma rooij_lemma_4_4_codim_1
+/-- **Codimension-one Hahn–Banach step.** Given `S : D →L[𝕜] F` approximated on `D` by a
+compatible family `𝒰` (pairwise close in operator norm, each within tolerance `ε U` of `S`), and a
+single vector `a ∉ D`, there is a continuous linear extension `T` to `D + 𝕜 ∙ a` that still agrees
+with `S` on `D` and stays within the same tolerances: `‖T x - U x‖ ≤ ε U * ‖x‖` for all `U ∈ 𝒰`.
+Iterating this one-dimension-at-a-time step (via Zorn) is what yields the full extension
+`exists_extension_opNorm_le`, and ultimately non-Archimedean Hahn–Banach. Spherical completeness of
+`F` is what makes the single step possible. -/
+lemma exists_extension_codimOne
     (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     (E : Type*) [SeminormedAddCommGroup E] [iude : IsUltrametricDist E] [NormedSpace 𝕜 E]
     (D : Submodule 𝕜 E)
@@ -277,19 +308,19 @@ lemma rooij_lemma_4_4_codim_1
     ⟩ = S x) ∧
     (∀ U : ↑𝒰, ∀ x : E, (hx : x ∈ (D + Submodule.span 𝕜 {a})) → ‖T ⟨x, hx⟩ - U.val x‖ ≤ ε U * ‖x‖)
     := by
-  use (rooijLemma44T_boundedlinear ha1 S h𝒰 hε1 hε2 hε3).toContinuousLinearMap
+  use (isBoundedLinearMap_codimOneExtension ha1 S h𝒰 hε1 hε2 hε3).toContinuousLinearMap
   refine ⟨fun x ↦ ?_, fun U x hx ↦ ?_⟩
   · have hsup : x.val ∈ D + Submodule.span 𝕜 {a} := Submodule.mem_sup_left x.prop
     have hcoord : spanSupDecomp ha1 ⟨x.val, hsup⟩ = (x, 0) := by
       apply (spanSupDecomp ha1).symm.injective
       rw [LinearEquiv.symm_apply_apply]
       exact Subtype.ext (by rw [spanSupDecomp_symm_apply]; simp)
-    change rooijLemma44T ha1 S h𝒰 hε1 hε2 hε3 ⟨x.val, hsup⟩ = S x
-    rw [rooijLemma44T_eq, hcoord]; simp
-  · change ‖rooijLemma44T ha1 S h𝒰 hε1 hε2 hε3 ⟨x, hx⟩ - U.val x‖ ≤ ε U * ‖x‖
-    rw [rooijLemma44T_eq]
+    change codimOneExtension ha1 S h𝒰 hε1 hε2 hε3 ⟨x.val, hsup⟩ = S x
+    rw [codimOneExtension_eq, hcoord]; simp
+  · change ‖codimOneExtension ha1 S h𝒰 hε1 hε2 hε3 ⟨x, hx⟩ - U.val x‖ ≤ ε U * ‖x‖
+    rw [codimOneExtension_eq]
     simpa [← spanSupDecomp_symm_apply ha1, LinearEquiv.symm_apply_apply] using
-      (rooij_lemma_4_4_z0_prop ha1 S h𝒰 hε1 hε2 hε3)
+      (norm_smul_extensionValue_le ha1 S h𝒰 hε1 hε2 hε3)
         (spanSupDecomp ha1 ⟨x, hx⟩).1 (spanSupDecomp ha1 ⟨x, hx⟩).2 U
 
 @[ext]
@@ -326,7 +357,7 @@ private instance instPartialOrderPartialExtension (𝕜 : Type*) [NontriviallyNo
     (S : D →L[𝕜] F) (𝒰 : Set (E →L[𝕜] F)) (h𝒰 : 𝒰.Nonempty)
     (ε : ↑𝒰 → ℝ)
     : PartialOrder (PartialExtension 𝕜 E F S 𝒰 h𝒰 ε) where
-  le a b := ∃ hab : a.M ≤ b.M , ∀ x : a.M, b.T ⟨x.val, hab x.prop⟩ = a.T x
+  le a b := ∃ hab : a.M ≤ b.M, ∀ x : a.M, b.T ⟨x.val, hab x.prop⟩ = a.T x
   le_refl a := ⟨fun ⦃x⦄ a ↦ a, by simp⟩
   le_trans a b c := by
     rintro ⟨hab, habT⟩ ⟨hbc, hbcT⟩
@@ -514,7 +545,7 @@ lemma exists_extension_opNorm_le
     by_contra hc
     have : W.M < ⊤ := Ne.lt_top' fun a ↦ hc (id (Eq.symm a))
     rcases Set.exists_of_ssubset this with ⟨a, ha⟩
-    rcases rooij_lemma_4_4_codim_1 𝕜 E W.M a ha.2 F W.T 𝒰 h𝒰 ε hε1 hε2 W.hU with ⟨L, hL1, hL2⟩
+    rcases exists_extension_codimOne 𝕜 E W.M a ha.2 F W.T 𝒰 h𝒰 ε hε1 hε2 W.hU with ⟨L, hL1, hL2⟩
     let W' : PartialExtension 𝕜 E F S 𝒰 h𝒰 ε :=
       { M := W.M + Submodule.span 𝕜 {a}
         T := L

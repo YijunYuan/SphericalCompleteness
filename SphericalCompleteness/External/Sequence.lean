@@ -36,7 +36,7 @@ dichotomy:
 This is useful for extracting a strictly decreasing subsequence from a non-stabilizing antitone
 sequence, a common step in arguments about descending chains and related completeness properties.
 -/
-theorem eventually_stable_or_exists_strictanti_of_antitone {α : Type*} [PartialOrder α]
+theorem eventually_stable_or_exists_strictAnti_of_antitone {α : Type*} [PartialOrder α]
     {f : ℕ → α} (hanti : Antitone f) :
     (∃ N : ℕ, ∀ n ≥ N, f n = f N) ∨ (∃ φ : ℕ → ℕ, StrictMono φ ∧ StrictAnti (f ∘ φ)) := by
   if h : ∃ N, ∀ n ≥ N, f n = f N then
@@ -75,7 +75,7 @@ This can be viewed as a subsequence selection principle: under the hypothesis th
 the sequence occurs only finitely many times, one can choose indices increasing in `ℕ` so that all
 selected values are pairwise distinct.
 -/
-theorem exists_bijective_subseq_of_finite_duplication {α : Type*} (seq : ℕ → α)
+theorem exists_injective_subseq_of_finite_duplication {α : Type*} (seq : ℕ → α)
     (hseq : ∀ n : ℕ, ∃ N, ∀ i > N, seq n ≠ seq i) :
     ∃ φ : ℕ → ℕ, StrictMono φ ∧ Function.Injective (seq ∘ φ) := by
   use extractInjectiveSubseq seq hseq

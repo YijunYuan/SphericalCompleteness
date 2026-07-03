@@ -22,8 +22,11 @@ open TopologicalSpace
 
 variable (p : ℕ) [hp : Fact (Nat.Prime p)]
 
+/-- The `p`-adic complex numbers `ℂ_[p]` form a densely normed field: their norm takes a dense set
+of values, inherited from the completed algebraic closure of `ℚ_[p]`. -/
 noncomputable instance instDenselyNormedFieldPadicComplex : DenselyNormedField ℂ_[p] :=
   inferInstance
 
+/-- The `p`-adic complex numbers `ℂ_[p]` form a separable topological space. -/
 instance instSeparableSpacePadicComplex : SeparableSpace ℂ_[p] := inferInstance
 

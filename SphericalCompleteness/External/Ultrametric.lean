@@ -145,47 +145,46 @@ instance instIsUltrametricDistLp
     {ι : Type*} {E : ι → Type*} [Nonempty ι] [∀ i, NormedAddCommGroup (E i)]
     [iiud : ∀ i, IsUltrametricDist (E i)] :
     IsUltrametricDist (lp E ⊤) where
-dist_triangle_max a b c := by
-  simp only [dist_eq_norm, lp.norm_eq_ciSup]
-  refine ciSup_le fun j ↦ ?_
-  rw [show ‖(↑(a - c) : (i : ι) → E i) j‖ = ‖a j - c j‖ from rfl, ← dist_eq_norm]
-  refine ((iiud j).dist_triangle_max (a j) (b j) (c j)).trans (max_le_max ?_ ?_)
-  · rw [dist_eq_norm, show ‖a j - b j‖ = ‖(↑(a - b) : (i : ι) → E i) j‖ from rfl]
-    exact lp.norm_apply_le_norm ENNReal.top_ne_zero _ j
-  · rw [dist_eq_norm, show ‖b j - c j‖ = ‖(↑(b - c) : (i : ι) → E i) j‖ from rfl]
-    exact lp.norm_apply_le_norm ENNReal.top_ne_zero _ j
+  dist_triangle_max a b c := by
+    simp only [dist_eq_norm, lp.norm_eq_ciSup]
+    refine ciSup_le fun j ↦ ?_
+    rw [show ‖(↑(a - c) : (i : ι) → E i) j‖ = ‖a j - c j‖ from rfl, ← dist_eq_norm]
+    refine ((iiud j).dist_triangle_max (a j) (b j) (c j)).trans (max_le_max ?_ ?_)
+    · rw [dist_eq_norm, show ‖a j - b j‖ = ‖(↑(a - b) : (i : ι) → E i) j‖ from rfl]
+      exact lp.norm_apply_le_norm ENNReal.top_ne_zero _ j
+    · rw [dist_eq_norm, show ‖b j - c j‖ = ‖(↑(b - c) : (i : ι) → E i) j‖ from rfl]
+      exact lp.norm_apply_le_norm ENNReal.top_ne_zero _ j
 
 section
 variable {S : Type*} [SeminormedAddGroup S] [IsUltrametricDist S] {x y : S}
 
-/--
-Lemmas about equality of norms in an ultrametric seminormed additive group.
+/-!
+### Norm equality from a strictly smaller sum or difference
 
-In a type `S` with `[SeminormedAddGroup S]` and `[IsUltrametricDist S]`, the ultrametric
-(non-Archimedean) triangle inequality implies a strong “dominance” principle: if the norm of a
-difference (or sum) is strictly smaller than one of the two norms, then the two norms must be equal.
-
-This file provides four convenient variants:
-
-* `norm_eq_of_norm_sub_lt_left`: if `‖x - y‖ < ‖x‖` then `‖x‖ = ‖y‖`.
-* `norm_eq_of_norm_sub_lt_right`: if `‖x - y‖ < ‖y‖` then `‖x‖ = ‖y‖`.
-* `norm_eq_of_norm_add_lt_left`: if `‖x + y‖ < ‖x‖` then `‖x‖ = ‖y‖`.
-* `norm_eq_of_norm_add_lt_right`: if `‖x + y‖ < ‖y‖` then `‖x‖ = ‖y‖`.
-
-The proofs are straightforward wrappers around
-`IsUltrametricDist.norm_eq_of_add_norm_lt_max`, using simple rewriting
-to convert between subtraction and addition and to manage negations.
+In an ultrametric seminormed additive group the strong triangle inequality forces a *dominance*
+principle: if `‖x ± y‖` is strictly smaller than one of `‖x‖`, `‖y‖`, then that inequality cannot
+have been strict on both sides, so `‖x‖ = ‖y‖`. The four lemmas below package this in the
+`add`/`sub` and `left`/`right` forms needed downstream; each is a thin wrapper around
+`IsUltrametricDist.norm_eq_of_add_norm_lt_max`.
 -/
+
+/-- If `‖x + y‖ < ‖x‖` then `‖x‖ = ‖y‖`: the sum cannot drop below the larger summand's norm
+unless the two norms coincide. -/
 theorem norm_eq_of_norm_add_lt_left (h : ‖x + y‖ < ‖x‖) : ‖x‖ = ‖y‖ :=
   IsUltrametricDist.norm_eq_of_add_norm_lt_max <| by simp_all [lt_sup_iff, true_or]
 
+/-- If `‖x + y‖ < ‖y‖` then `‖x‖ = ‖y‖`, the right-hand companion of
+`norm_eq_of_norm_add_lt_left`. -/
 theorem norm_eq_of_norm_add_lt_right (h : ‖x + y‖ < ‖y‖) : ‖x‖ = ‖y‖ :=
   IsUltrametricDist.norm_eq_of_add_norm_lt_max <| by simp_all [lt_sup_iff, or_true]
 
+/-- If `‖x - y‖ < ‖x‖` then `‖x‖ = ‖y‖`: the difference form of `norm_eq_of_norm_add_lt_left`. -/
 theorem norm_eq_of_norm_sub_lt_left (h : ‖x - y‖ < ‖x‖) : ‖x‖ = ‖y‖ := by
   rw [← norm_neg y]
   exact norm_eq_of_norm_add_lt_left (by rwa [sub_eq_add_neg] at h)
 
+/-- If `‖x - y‖ < ‖y‖` then `‖x‖ = ‖y‖`, the right-hand companion of
+`norm_eq_of_norm_sub_lt_left`. -/
 theorem norm_eq_of_norm_sub_lt_right (h : ‖x - y‖ < ‖y‖) : ‖x‖ = ‖y‖ :=
   (norm_eq_of_norm_sub_lt_left (by rwa [← norm_neg, neg_sub])).symm
 
@@ -214,11 +213,11 @@ instance instIsUltrametricDistCompletion {𝕜 : Type*} [PseudoMetricSpace 𝕜]
     · simp_rw [UniformSpace.Completion.dist_eq]
       exact IsUltrametricDist.dist_triangle_max a b c
 
-/-
-`PUnit` has an ultrametric distance.
+/--
+`PUnit` carries an ultrametric distance.
 
 This is immediate because all points in `PUnit` are equal, hence all distances are `0`, and
-the strong triangle inequality is trivial.
--/
+the strong triangle inequality is trivial. It lets the one-point space serve as a base case and
+as a witness that the hypotheses of the ultrametric development are satisfiable. -/
 instance instIsUltrametricDistPUnit : IsUltrametricDist PUnit where
   dist_triangle_max x y z := by simp

@@ -28,7 +28,7 @@ submodules `D` and `span 𝕜 {a}` intersect trivially and the ambient module
 behaves like a direct sum along these components (at least with respect to
 equality of such decompositions).
 -/
-lemma eq_and_eq_of_add_eq_add_of_not_mem_submodule_span_singleton {𝕜 : Type*} [Field 𝕜]
+lemma eq_and_eq_of_add_eq_add_of_notMem {𝕜 : Type*} [Field 𝕜]
     {V : Type*} [AddCommGroup V] [Module 𝕜 V]
     {D : Submodule 𝕜 V} {a : V} (ha : a ∉ D) :
     ∀ d₁ ∈ D, ∀ l₁ ∈ Submodule.span 𝕜 {a}, ∀ d₂ ∈ D, ∀ l₂ ∈ Submodule.span 𝕜 {a},

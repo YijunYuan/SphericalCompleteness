@@ -47,7 +47,7 @@ In a `PseudoMetricSpace`, completeness can be characterized by the property that
 antitone (nested) family of closed balls whose radii tend to `0` has a nonempty intersection.
 A spherically complete space provides exactly this nonempty-intersection property for nested
 balls, so we can rewrite completeness using
-`completeSpace_iff_nested_ball_with_radius_tendsto_zero_has_nonempty_inter` and discharge the
+`completeSpace_iff_nonempty_iInter_closedBall_of_tendsto_zero` and discharge the
 resulting goal via `SphericallyCompleteSpace.isSphericallyComplete`.
 
 This instance is useful for transferring results stated for `CompleteSpace` to contexts where
@@ -55,7 +55,7 @@ spherical completeness is assumed.
 -/
 instance instCompleteOfSphericallyComplete (α : Type*)
     [PseudoMetricSpace α] [sc : SphericallyCompleteSpace α] : CompleteSpace α := by
-  rw [completeSpace_iff_nested_ball_with_radius_tendsto_zero_has_nonempty_inter]
+  rw [completeSpace_iff_nonempty_iInter_closedBall_of_tendsto_zero]
   exact fun _ _ hanti _ ↦ sc.isSphericallyComplete hanti
 
 /--
@@ -80,7 +80,7 @@ instance instSphericallyCompleteSpaceOfProperSpace (α : Type*)
     intro ci ri hanti
     apply IsCompact.nonempty_iInter_of_sequence_nonempty_isCompact_isClosed
     <| fun i ↦ closedBall (ci i) ↑(ri i)
-    · exact fun _ ↦  hanti (by linarith)
+    · exact fun _ ↦ hanti (by linarith)
     · exact fun h ↦ nonempty_closedBall.mpr (ri h).prop
     · exact isCompact_closedBall (ci 0) ↑(ri 0)
     · exact fun i ↦ isClosed_closedBall

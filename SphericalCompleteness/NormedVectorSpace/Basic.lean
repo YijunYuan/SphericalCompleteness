@@ -22,13 +22,12 @@ open Metric
 namespace SphericallyCompleteSpace
 
 /--
-Constructs a `SphericallyCompleteSpace` instance for a normed vector space `E` over a
-nontrivially normed field `𝕜`, assuming `E` is locally compact as a topological space.
+A locally compact normed vector space over a nontrivially normed field is spherically complete.
 
-In this setting, local compactness (together with the nontriviality of the norm on `𝕜`)
-is used to deduce spherical completeness of `E`.
--/
-theorem SphericallyComplete.of_nontriviallyNormedField_of_weaklyLocallyCompactSpace
+Local compactness upgrades to `ProperSpace` over a nontrivially normed field (so every closed ball
+is compact), and properness already gives spherical completeness via Cantor's intersection
+theorem. -/
+theorem of_locallyCompactSpace
     (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     {E : Type*} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [LocallyCompactSpace E] :
     SphericallyCompleteSpace E := by
@@ -44,7 +43,7 @@ This is a convenience instance allowing downstream results to use spherical
 completeness on the span of a single vector without explicitly transporting the
 structure from `𝕜`.
 -/
-instance instSubtypeMemSubmoduleSpanSingletonSet (𝕜 : Type*) [NontriviallyNormedField 𝕜]
+instance instSphericallyCompleteSpaceSpanSingleton (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     [scsk : SphericallyCompleteSpace 𝕜]
     {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
     (z : E) : SphericallyCompleteSpace (Submodule.span 𝕜 {z}) where
@@ -108,7 +107,7 @@ private lemma induction_sphericallyCompleteSpace_of_finiteDimensional
     exact finrank_span_singleton hz'
   · letI : SphericallyCompleteSpace M := ‹SphericallyCompleteSpace M›
     let hsSpan : SphericallyCompleteSpace (Submodule.span 𝕜 {z}) :=
-      instSubtypeMemSubmoduleSpanSingletonSet 𝕜 z
+      instSphericallyCompleteSpaceSpanSingleton 𝕜 z
     let hsProd : SphericallyCompleteSpace ((Submodule.span 𝕜 {z}) × M) := by
       letI : SphericallyCompleteSpace (Submodule.span 𝕜 {z}) := hsSpan
       infer_instance

@@ -47,7 +47,7 @@ private lemma lift_to_nearby_element (𝕜 : Type*) [NontriviallyNormedField �
       exact hm_norm
     exact_mod_cast hms
 
-private noncomputable def liftSequence (𝕜 : Type*) [inst : NontriviallyNormedField 𝕜]
+private noncomputable def liftSequence (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     {E : Type*} [SeminormedAddCommGroup E]
     [NormedSpace 𝕜 E] [IsUltrametricDist E]
     {F : Submodule 𝕜 E} ⦃c : ℕ → E ⧸ F⦄
@@ -66,7 +66,7 @@ private noncomputable def liftSequence (𝕜 : Type*) [inst : NontriviallyNormed
     ) (r m) (hr <| lt_add_one m)
     exact ⟨this.choose, this.choose_spec.1⟩
 
-private lemma liftSequence_prop (𝕜 : Type*) [inst : NontriviallyNormedField 𝕜]
+private lemma liftSequence_prop (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     {E : Type*} [SeminormedAddCommGroup E]
     [NormedSpace 𝕜 E] [IsUltrametricDist E]
     {F : Submodule 𝕜 E} ⦃c : ℕ → E ⧸ F⦄

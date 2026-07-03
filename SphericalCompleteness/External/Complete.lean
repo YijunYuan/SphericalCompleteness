@@ -42,7 +42,7 @@ More precisely:
 This is a standard “Cantor intersection / nested balls” criterion for completeness,
 formulated for closed balls and radii in `NNReal`.
 -/
-theorem completeSpace_iff_nested_ball_with_radius_tendsto_zero_has_nonempty_inter
+theorem completeSpace_iff_nonempty_iInter_closedBall_of_tendsto_zero
     (α : Type*) [PseudoMetricSpace α] :
     CompleteSpace α ↔
     ∀ ⦃ci : ℕ → α⦄ ⦃ri : ℕ → NNReal⦄,
