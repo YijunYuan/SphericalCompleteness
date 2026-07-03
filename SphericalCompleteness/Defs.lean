@@ -5,7 +5,6 @@ Authors: Yijun Yuan
 -/
 import Mathlib.NumberTheory.Padics.ProperSpace
 import SphericalCompleteness.External.Complete
-import SphericalCompleteness.External.NNReal
 import SphericalCompleteness.External.Sequence
 import SphericalCompleteness.External.Ultrametric
 

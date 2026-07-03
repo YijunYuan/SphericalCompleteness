@@ -31,12 +31,10 @@ linear maps from a spherically complete subspace in a non-Archimedean (ultrametr
 -/
 theorem hahn_banach {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
-(D : Submodule 𝕜 E)
+(D : Submodule 𝕜 E) [hd : SphericallyCompleteSpace D]
 {F : Type*} [NormedAddCommGroup F] [NormedSpace 𝕜 F] [IsUltrametricDist F]
-[hd : SphericallyCompleteSpace D] (f : D →L[𝕜] F) :
-∃ f' : E →L[𝕜] F,
-  (∀ v : E, (hv : v ∈ D) → f' v = f ⟨v, hv⟩) ∧
-    ContinuousLinearMap.opNorm f' = ContinuousLinearMap.opNorm f := by
+(f : D →L[𝕜] F) :
+  ∃ f' : E →L[𝕜] F, (∀ v : E, (hv : v ∈ D) → f' v = f ⟨v, hv⟩) ∧ ‖f'‖ = ‖f‖ := by
   use comp f (OrthProj 𝕜 D)
   constructor
   · intro v hv
@@ -73,27 +71,14 @@ theorem hahn_banach' {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 (D : Submodule 𝕜 E)
 {F : Type*} [NormedAddCommGroup F] [NormedSpace 𝕜 F] [IsUltrametricDist F]
 [hf : SphericallyCompleteSpace F] (f : D →L[𝕜] F) :
-∃ f' : E →L[𝕜] F,
-  (∀ v : E, (hv : v ∈ D) → f' v = f ⟨v, hv⟩) ∧
-    ContinuousLinearMap.opNorm f' = ContinuousLinearMap.opNorm f := by
-  if hf : f = 0 then
-    use 0
-    constructor
-    · intro v hv
-      simp [hf]
-    · rw [hf]
-      calc
-        ContinuousLinearMap.opNorm (0 : E →L[𝕜] F) = 0 := ContinuousLinearMap.opNorm_zero
-        _ = ContinuousLinearMap.opNorm (0 : D →L[𝕜] F) := by
-          symm
-          exact ContinuousLinearMap.opNorm_zero
+  ∃ f' : E →L[𝕜] F, (∀ v : E, (hv : v ∈ D) → f' v = f ⟨v, hv⟩) ∧ ‖f'‖ = ‖f‖ := by
+  if hf : f = 0 then exact ⟨0, ⟨fun v hv => by simp [hf], by simp [hf]⟩⟩
   else
     rcases @exists_extension_opNorm_le 𝕜 _ E _ _ _ D F _ _ _ _ f {0}
       (by simp) (fun _ => ContinuousLinearMap.opNorm f)
       (by
         intro U
-        refine lt_of_le_of_ne (opNorm_nonneg f) ?_
-        intro hop
+        refine lt_of_le_of_ne (opNorm_nonneg f) fun hop => ?_
         apply hf
         ext x
         have hle : ‖f x‖ ≤ ContinuousLinearMap.opNorm f * ‖x‖ := le_opNorm f x
@@ -116,9 +101,7 @@ theorem hahn_banach' {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     use f'
     simp only [Subtype.forall, Set.mem_singleton_iff, forall_eq, sub_zero] at hf2
     refine ⟨fun v hv => hf1 ⟨v, hv⟩, le_antisymm hf2 ?_⟩
-    refine (opNorm_le_iff <| opNorm_nonneg f').mpr ?_
-    intro a
-    have hle := le_opNorm f' (a : E)
-    simpa [AddSubgroupClass.coe_norm, hf1 a] using hle
+    refine (opNorm_le_iff <| opNorm_nonneg f').mpr fun a => ?_
+    simpa [AddSubgroupClass.coe_norm, hf1 a] using le_opNorm f' (a : E)
 
 end SphericallyCompleteSpace

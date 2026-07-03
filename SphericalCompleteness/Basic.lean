@@ -186,8 +186,9 @@ private lemma cofinal_of_countable_chain_of_ball {α : Type*}
     (countable_chain_of_ball hw n).val.1
     (countable_chain_of_ball hw n).val.2 ⊆ closedBall s.1 s.2 := by
   intro s hs
-  rcases NNReal.exists_add_one_div_pow_two_lt
-    (sInf {x | ∃ w ∈ S, w.2 = x}) s.2 (hw s hs) with ⟨n, hn⟩
+  obtain ⟨n, hn⟩ :=
+    exists_pow_lt_of_lt_one (tsub_pos_of_lt (hw s hs)) (by norm_num : (1 / 2 : NNReal) < 1)
+  replace hn := lt_tsub_iff_left.mp (by rwa [div_pow, one_pow] at hn)
   use n
   apply closedBall_subset_closedBall_of_le_radius_of_nonempty_intersection_of_ultrametric
   · refine le_of_lt <| lt_of_le_of_lt ?_ hn

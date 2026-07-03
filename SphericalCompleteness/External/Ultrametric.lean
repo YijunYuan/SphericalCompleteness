@@ -94,12 +94,6 @@ instance instIsUltrametricDistQuotient
           (max_add_add_right ‖(Submodule.Quotient.mk x' : E ⧸ F)‖
             ‖(Submodule.Quotient.mk y' : E ⧸ F)‖ ε)
 
-instance instIsUltrametricDistSubmodule
-{𝕜 : Type*} [NontriviallyNormedField 𝕜]
-{E : Type*} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [iud : IsUltrametricDist E]
-{F : Submodule 𝕜 E} : IsUltrametricDist ↥F :=
-  inferInstance
-
 /--
 Provides an `IsUltrametricDist` instance on the space of continuous linear maps `E →L[𝕜] F`
 whenever the codomain `F` has an ultrametric distance.

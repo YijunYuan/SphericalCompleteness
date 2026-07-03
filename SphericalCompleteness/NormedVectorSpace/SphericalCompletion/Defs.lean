@@ -42,10 +42,8 @@ transport principle for immediate extensions built from submodule inclusions. -/
 lemma morth_range_inclusionᵢ_iff {𝕜 : Type*} [NontriviallyNormedField 𝕜] {E₀ : Type*}
     [SeminormedAddCommGroup E₀] [NormedSpace 𝕜 E₀] [IsUltrametricDist E₀]
     {p q : Submodule 𝕜 E₀} (h : p ≤ q) (x : q) :
-    letI : IsUltrametricDist q := instIsUltrametricDistSubmodule (F := q)
     (MOrth 𝕜 x (LinearMap.range (inclusionᵢ h).toLinearMap)) ↔
       Metric.infDist (x : E₀) p = ‖(x : E₀)‖ := by
-  letI : IsUltrametricDist q := instIsUltrametricDistSubmodule (F := q)
   rw [MOrth, ← range_inclusionᵢ_image h,
     Metric.infDist_image (Φ := ((↑) : q → E₀)) isometry_subtype_coe (x := x)]
   exact Iff.rfl
@@ -66,10 +64,7 @@ def imm_ext_in_sph_comp {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 [SphericallyCompleteSpace E₀]
 (f : E →ₗᵢ[𝕜] E₀)
 : Set (Submodule 𝕜 E₀) := {M : Submodule 𝕜 E₀ |
-    ∃ hc : f.range ≤ M,
-    letI : IsUltrametricDist ↥f.range := instIsUltrametricDistSubmodule (F := f.range)
-    letI : IsUltrametricDist ↥M := instIsUltrametricDistSubmodule (F := M)
-    IsImmediate (inclusionᵢ hc) }
+    ∃ hc : f.range ≤ M, IsImmediate (inclusionᵢ hc) }
 
 /-- Clean membership criterion for `imm_ext_in_sph_comp`, expressed entirely in the ambient
 space `E₀`: `M` contains `f.range`, and any `v ∈ M` metrically orthogonal to `f.range`

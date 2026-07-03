@@ -27,7 +27,7 @@ private lemma exists_rat_pow_p_norm_between (a b : ℝ) (ha : 0 ≤ a) (hab : a 
   have ha' : 0 < a' := by unfold a'; linarith
   have ha'b : a' < b := by unfold a'; linarith
   have : (p : PadicAlgCl p) = ((p : ℚ_[p]): PadicAlgCl p) := rfl
-  have := this ▸ PadicAlgCl.norm_extends p (p : ℚ_[p])
+  replace := this ▸ PadicAlgCl.norm_extends p (p : ℚ_[p])
   repeat rw [this]
   rw [Padic.norm_p]
   have : Real.logb ((↑p)⁻¹) b < Real.logb ((↑p)⁻¹) a' := by
@@ -112,7 +112,7 @@ instance instSeparableSpacePadicAlgCl : TopologicalSpace.SeparableSpace (PadicAl
       div_pos (Real.rpow_pos_of_pos (div_pos hε hMpos) _) (by positivity)
     rcases exists_monic_and_natDegree_eq_and_norm_map_algebraMap_coeff_sub_lt hdense hf hδpos
       with ⟨g, hgm, hdeg, hgcoeff⟩
-    rcases exists_aroots_norm_sub_lt_of_norm_coeff_sub_lt (K := ℚ_[p]) (L := PadicAlgCl p)
+    rcases exists_aroots_norm_sub_lt_of_norm_coeff_sub_lt
       hδpos (f := f) (g := g.map (algebraMap ℚ ℚ_[p])) hfz hf (hgm.map _)
       (by rw [natDegree_map_eq_of_injective (algebraMap ℚ ℚ_[p]).injective]; omega)
       (fun i => by simpa using hgcoeff i) (IsAlgClosed.splits _) with ⟨β, hβroot, hβnorm⟩

@@ -31,10 +31,8 @@ Conclusion:
 This is useful for transferring spherical completeness to function-like spaces of operators,
 enabling fixed point / completeness arguments in non-Archimedean functional analysis.
 -/
-instance instSphericallyCompleteSpaceContinuousLinearMap
-{𝕜 : Type*} [NontriviallyNormedField 𝕜]
-{E : Type*} [SeminormedAddCommGroup E] [IsUltrametricDist E]
-[NormedSpace 𝕜 E]
+instance instSphericallyCompleteSpaceContinuousLinearMap {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+{E : Type*} [SeminormedAddCommGroup E] [IsUltrametricDist E] [NormedSpace 𝕜 E]
 {F : Type*} [SeminormedAddCommGroup F] [IsUltrametricDist F]
 [NormedSpace 𝕜 F] [SphericallyCompleteSpace F] :
 SphericallyCompleteSpace (E →L[𝕜] F) := by
@@ -50,17 +48,13 @@ SphericallyCompleteSpace (E →L[𝕜] F) := by
   have hrnneg : ∀ i, 0 < r i := fun i =>
     lt_of_le_of_lt zero_le <| hsar' (Nat.lt_succ_self (φ i))
   let 𝒰 := c '' Set.univ
-  have h𝒰 : 𝒰.Nonempty := ⟨c 0, 0, Set.mem_univ 0, rfl⟩
-  let htriv : ↥(⊥ : Submodule 𝕜 E) →L[𝕜] F := 0
   have := @exists_extension_opNorm_le 𝕜 _ E _ _ _ ⊥ F _ _ _ _
-    htriv 𝒰 h𝒰 (fun U => r U.prop.out.choose) (fun _ => hrnneg _) (by
+    0 𝒰 ⟨c 0, 0, Set.mem_univ 0, rfl⟩ (fun U => r U.prop.out.choose) (fun _ => hrnneg _) (by
     intro U V
     set nu := U.prop.out.choose with hnu
     set nv := V.prop.out.choose with hnv
-    have hU : U.val = c nu := by
-      simpa [hnu] using U.prop.out.choose_spec.2.symm
-    have hV : V.val = c nv := by
-      simpa [hnv] using V.prop.out.choose_spec.2.symm
+    have hU : U.val = c nu := by simpa [hnu] using U.prop.out.choose_spec.2.symm
+    have hV : V.val = c nv := by simpa [hnv] using V.prop.out.choose_spec.2.symm
     rw [hU, hV]
     rcases @trichotomous ℕ (fun a b => a < b) inferInstance nu nv with hlt | heq | hgt
     · rw [show max (↑(r nu) : ℝ) ↑(r nv) = ↑(max (r nu) (r nv)) from rfl,
@@ -72,8 +66,7 @@ SphericallyCompleteSpace (E →L[𝕜] F) := by
       exact (hanti <| le_of_lt hgt) (by simp [mem_closedBall])) (by
     intro U x
     have hx : x = 0 := Subsingleton.elim _ _
-    subst x
-    simp [htriv])
+    subst x; simp)
   rcases this with ⟨T, _, hT2⟩
   use T
   simp only [Set.mem_iInter]

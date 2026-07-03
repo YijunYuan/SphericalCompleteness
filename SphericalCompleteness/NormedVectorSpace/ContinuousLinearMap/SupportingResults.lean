@@ -226,8 +226,6 @@ lemma rooij_lemma_4_4_T_eq {𝕜 : Type*}
   refine congrArg₂ _ (congrArg S (Subtype.ext hdecomp.1)) ?_
   exact congrArg (· • _) (smul_left_injective 𝕜 ha0 hdecomp.2)
 
-
-
 noncomputable def rooij_lemma_4_4_T_linear {𝕜 : Type*}
   [NontriviallyNormedField 𝕜] {E : Type u_2} [SeminormedAddCommGroup E] [iude : IsUltrametricDist E]
   [NormedSpace 𝕜 E] {D : Submodule 𝕜 E}

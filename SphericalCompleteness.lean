@@ -1,6 +1,5 @@
 import SphericalCompleteness.External.Complete
 import SphericalCompleteness.External.DenselyNormedField
-import SphericalCompleteness.External.NNReal
 import SphericalCompleteness.External.PadicAlgCl
 import SphericalCompleteness.External.PadicComplex
 import SphericalCompleteness.External.Sequence

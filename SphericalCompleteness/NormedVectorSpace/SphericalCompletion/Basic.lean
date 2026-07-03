@@ -74,11 +74,10 @@ SphericallyCompleteSpace (↥(exists_max_imm_ext_in_sph_comp 𝕜 E E₀ f).choo
     simp only [SetLike.val_smul, ← hx'v', smul_add, neg_smul, sub_neg_eq_add, b, x]
     rw [add_comm]
     simpa only [add_left_inj] using inv_smul_smul₀ hhs a
-  haveI hiudSup : IsUltrametricDist ↥(K ⊔ (𝕜 ∙ a)) := instIsUltrametricDistSubmodule
   have hb'1' : MOrth 𝕜 b' (LinearMap.range (inclusionᵢ (le_sup_of_le_left
       (exists_max_imm_ext_in_sph_comp 𝕜 E E₀ f).choose_spec.1.choose)).toLinearMap) :=
     (morth_range_inclusionᵢ_iff _ b').2 hb'1
-  have hb1 := @smul_morth_of_morth 𝕜 _ _ _ _ hiudSup b' _ s⁻¹ hb'1'
+  have hb1 := @smul_morth_of_morth 𝕜 _ _ _ _ inferInstance b' _ s⁻¹ hb'1'
   replace hb1 : MOrth 𝕜 b.val K := by
     by_contra hc
     rcases not_morth_iff_exists_dist_lt_norm.1 hc with ⟨g, hg1, hg2⟩
@@ -91,17 +90,15 @@ SphericallyCompleteSpace (↥(exists_max_imm_ext_in_sph_comp 𝕜 E E₀ f).choo
         hg2', ZeroMemClass.coe_zero, norm_zero] at *
       contrapose hc
       exact infDist_zero_of_mem <| by simp only [SetLike.mem_coe, zero_mem]
-    haveI hiudChoose : IsUltrametricDist ↥K := instIsUltrametricDistSubmodule
     have hChooseSpec := (exists_max_imm_ext_in_sph_comp 𝕜 E E₀ f).choose_spec.1.choose_spec
     have hNMorth := mt (hChooseSpec ⟨g, hg1⟩)
         (fun h => hgg (congrArg Subtype.val h))
     rcases @not_morth_iff_exists_dist_lt_norm 𝕜 _ (↥K)
-        _ _ hiudChoose (⟨g, hg1⟩) _ |>.1 hNMorth with ⟨e, he1, he2⟩
+        _ _ inferInstance (⟨g, hg1⟩) _ |>.1 hNMorth with ⟨e, he1, he2⟩
     simp only [Submodule.coe_norm, ← hg2', dist_eq_norm, AddSubgroupClass.coe_sub] at he2
     suffices hh : ‖b.val - e.val‖ < ‖b.val‖ by
-      haveI := hiudSup
       contrapose hb1
-      apply @not_morth_iff_exists_dist_lt_norm 𝕜 _ _ _ _ hiudSup |>.2
+      apply @not_morth_iff_exists_dist_lt_norm 𝕜 _ _ _ _ inferInstance |>.2
       use ⟨e.val, Submodule.mem_sup_left e.prop⟩
       simp only [LinearMap.mem_range, LinearMap.coe_mk, AddHom.coe_mk,
         inclusionᵢ, Subtype.exists] at he1
@@ -155,9 +152,6 @@ theorem SphericalCompletionEmbedding_isImmediate (𝕜 : Type*) [NontriviallyNor
   have himm := (exists_max_imm_ext_in_sph_comp 𝕜 E
       (↥(lp (fun _ ↦ E) ⊤) ⧸ c₀ 𝕜 fun _ ↦ E) (sphericallyCompleteExtension 𝕜 E)
       ).choose_spec.1.choose_spec
-  haveI hsc_iud : IsUltrametricDist ↥(exists_max_imm_ext_in_sph_comp 𝕜 E
-      (↥(lp (fun _ ↦ E) ⊤) ⧸ c₀ 𝕜 fun _ ↦ E) (sphericallyCompleteExtension 𝕜 E)).choose :=
-    instIsUltrametricDistSubmodule
   unfold IsImmediate at himm ⊢
   intro v hv
   apply himm v

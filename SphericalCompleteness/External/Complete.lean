@@ -66,8 +66,8 @@ theorem completeSpace_iff_nested_ball_with_radius_tendsto_zero_has_nonempty_inte
     have hanti : Antitone fun n => closedBall (u (φ n)) (ri n) := by
       refine antitone_nat_of_succ_le fun n => fun x hx => ?_
       simp only [mem_closedBall] at hx ⊢
-      have htail : dist (u (φ (n + 1))) (u (φ n)) < (((1 / 2 : NNReal) ^ n : NNReal) : ℝ) := by
-        refine hN n (φ (n + 1)) (le_trans (hN_le_φ n) (le_of_lt (hφ_strict (Nat.lt_succ_self n))))
+      have htail : dist (u (φ (n + 1))) (u (φ n)) < (((1 / 2 : NNReal) ^ n : NNReal) : ℝ) :=
+        hN n (φ (n + 1)) (le_trans (hN_le_φ n) (le_of_lt (hφ_strict (Nat.lt_succ_self n))))
           (φ n) (hN_le_φ n)
       calc
         dist x (u (φ n)) ≤ dist x (u (φ (n + 1))) + dist (u (φ (n + 1))) (u (φ n)) :=
@@ -77,7 +77,7 @@ theorem completeSpace_iff_nested_ball_with_radius_tendsto_zero_has_nonempty_inte
         _ = (ri n : ℝ) := by simpa [ri, pow_succ] using by ring
     have hri : Tendsto ri atTop (nhds 0) := by
       simpa [ri] using ((NNReal.tendsto_pow_atTop_nhds_zero_of_lt_one
-          (by norm_num : (1 / 2 : NNReal) < 1)).const_mul (2 : NNReal))
+        (by norm_num : (1 / 2 : NNReal) < 1)).const_mul (2 : NNReal))
     rcases hballs hanti hri with ⟨x, hx⟩
     refine ⟨x, Metric.tendsto_atTop.2 <| fun ε hε => ?_⟩
     have hbound : Tendsto (fun n : ℕ => (3 : ℝ) * (1 / 2 : ℝ) ^ n) atTop (nhds 0) := by
@@ -85,14 +85,11 @@ theorem completeSpace_iff_nested_ball_with_radius_tendsto_zero_has_nonempty_inte
         (by norm_num : (1 / 2 : ℝ) < 1)).const_mul (3 : ℝ))
     obtain ⟨n, hn⟩ := Filter.eventually_atTop.1 <| hbound (Iio_mem_nhds hε)
     refine ⟨φ n, fun m hm => ?_⟩
-    have htail : dist (u m) (u (φ n)) < ((((1 / 2 : NNReal) ^ n : NNReal)) : ℝ) := by
-      refine hN n m (le_trans (hN_le_φ n) hm) (φ n) (hN_le_φ n)
     have hx_ball : dist (u (φ n)) x ≤ (ri n : ℝ) := by
-      have : x ∈ closedBall (u (φ n)) (ri n) := Set.mem_iInter.1 hx n
-      simpa [mem_closedBall, dist_comm] using this
+      simpa [mem_closedBall, dist_comm] using Set.mem_iInter.1 hx n
     calc
       dist (u m) x ≤ dist (u m) (u (φ n)) + dist (u (φ n)) x := dist_triangle _ _ _
       _ < ((((1 / 2 : NNReal) ^ n : NNReal)) : ℝ) + (ri n : ℝ) :=
-        add_lt_add_of_lt_of_le htail hx_ball
+        add_lt_add_of_lt_of_le (hN n m (le_trans (hN_le_φ n) hm) (φ n) (hN_le_φ n)) hx_ball
       _ = (3 : ℝ) * (1 / 2 : ℝ) ^ n := by simpa [ri] using by ring
       _ < ε := hn n le_rfl
