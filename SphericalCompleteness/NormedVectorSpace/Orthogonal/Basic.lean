@@ -44,16 +44,13 @@ private lemma orth_of_orth {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     linarith
 
 lemma orth_symm {𝕜 : Type*} [NontriviallyNormedField 𝕜]
-{E : Type*} [SeminormedAddCommGroup E]
-[NormedSpace 𝕜 E] [iud : IsUltrametricDist E] {x y : E} :
-(x ⟂[𝕜] y) ↔ (y ⟂[𝕜] x) :=
+{E : Type*} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [iud : IsUltrametricDist E] {x y : E} :
+  (x ⟂[𝕜] y) ↔ (y ⟂[𝕜] x) :=
   ⟨orth_of_orth, orth_of_orth⟩
 
 lemma orth_iff_birkhoff_james_orth {𝕜 : Type*} [NontriviallyNormedField 𝕜]
-{E : Type*} [SeminormedAddCommGroup E]
-[NormedSpace 𝕜 E] [iud : IsUltrametricDist E]
-(x y : E) :
-(x ⟂[𝕜] y) ↔ ∀ c : 𝕜, ‖x‖ ≤ ‖x + c • y‖ := by
+{E : Type*} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [iud : IsUltrametricDist E]
+(x y : E) : (x ⟂[𝕜] y) ↔ ∀ c : 𝕜, ‖x‖ ≤ ‖x + c • y‖ := by
   constructor
   · intro h c
     have : x + c • y = x - (-c) • y := by simp only [neg_smul, sub_neg_eq_add]
@@ -76,8 +73,7 @@ lemma orth_iff_birkhoff_james_orth {𝕜 : Type*} [NontriviallyNormedField 𝕜]
       simp only [SetLike.mem_coe, zero_mem]
 
 lemma orth_iff {𝕜 : Type*} [NontriviallyNormedField 𝕜]
-{E : Type*} [SeminormedAddCommGroup E]
-[NormedSpace 𝕜 E] [iud : IsUltrametricDist E] {x y : E} :
+{E : Type*} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [iud : IsUltrametricDist E] {x y : E} :
 (x ⟂[𝕜] y) ↔ (∀ α β : 𝕜, ‖α • x + β • y‖ = max ‖α • x‖ ‖β • y‖) := by
   constructor
   · intro h a b
@@ -133,8 +129,7 @@ lemma orth_iff {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     simp only [h, le_sup_left]
 
 theorem smul_orth_of_orth {𝕜 : Type*} [NontriviallyNormedField 𝕜]
-{E : Type u_2} [SeminormedAddCommGroup E]
-[NormedSpace 𝕜 E] [IsUltrametricDist E] {x y : E}
+{E : Type u_2} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E] {x y : E}
 (a : 𝕜) : (x ⟂[𝕜] y) → ((a • x) ⟂[𝕜] y) := by
   intro h
   unfold Orth at *
@@ -147,32 +142,28 @@ theorem smul_orth_of_orth {𝕜 : Type*} [NontriviallyNormedField 𝕜]
   rw [norm_smul, ← h, ← infDist_smul₀ ha, smul_submodule_eq_self ha]
 
 theorem smul_orth_iff_orth_of_nonzero {𝕜 : Type*} [NontriviallyNormedField 𝕜]
-{E : Type u_2} [SeminormedAddCommGroup E]
-[NormedSpace 𝕜 E] [IsUltrametricDist E] {x y : E}
+{E : Type u_2} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E] {x y : E}
 {a : 𝕜} (ha : a ≠ 0) : (x ⟂[𝕜] y) ↔ ((a • x) ⟂[𝕜] y) := by
   refine ⟨smul_orth_of_orth a, fun h => ?_⟩
   apply smul_orth_of_orth a⁻¹ at h
   rwa [inv_smul_smul₀ ha x] at h
 
 theorem orth_smul_of_orth {𝕜 : Type*} [NontriviallyNormedField 𝕜]
-{E : Type u_2} [SeminormedAddCommGroup E]
-[NormedSpace 𝕜 E] [IsUltrametricDist E] {x y : E}
+{E : Type u_2} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E] {x y : E}
 (a : 𝕜) : (x ⟂[𝕜] y) → (x ⟂[𝕜] (a • y)) := by
   intro h
   rw [orth_symm] at *
   exact smul_orth_of_orth a h
 
 theorem orth_smul_iff_orth_of_nonzero {𝕜 : Type*} [NontriviallyNormedField 𝕜]
-{E : Type u_2} [SeminormedAddCommGroup E]
-[NormedSpace 𝕜 E] [IsUltrametricDist E] {x y : E}
+{E : Type u_2} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E] {x y : E}
 {a : 𝕜} (ha : a ≠ 0) : (x ⟂[𝕜] y) ↔ (x ⟂[𝕜] (a • y)) := by
   nth_rw 1 [orth_symm]
   nth_rw 2 [orth_symm]
   exact smul_orth_iff_orth_of_nonzero ha
 
 lemma morth_iff_forall_orth {𝕜 : Type*} [NontriviallyNormedField 𝕜]
-{E : Type u_2} [SeminormedAddCommGroup E]
-[NormedSpace 𝕜 E] [IsUltrametricDist E]
+{E : Type u_2} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
 (x : E) (F : Subspace 𝕜 E) :
   (x ⟂ₘ F) ↔ ∀ y ∈ F, (x ⟂[𝕜] y) := by
   constructor
@@ -195,14 +186,12 @@ lemma morth_iff_forall_orth {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 
 -- This is important, but it requires `NormedAddCommGroup` instead of `SeminormedAddCommGroup`
 theorem eq_zero_of_morth_of_mem {𝕜 : Type*} [NontriviallyNormedField 𝕜]
-{E : Type u_2} [NormedAddCommGroup E]
-[NormedSpace 𝕜 E] [IsUltrametricDist E]
+{E : Type u_2} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
 {x : E} {F : Subspace 𝕜 E} : x ∈ F → (x ⟂ₘ F) → x = 0 :=
   fun h1 h2 => norm_eq_zero.mp (infDist_zero_of_mem h1 ▸ h2 : (0 : ℝ) = ‖x‖).symm
 
 theorem smul_morth_of_morth {𝕜 : Type*} [NontriviallyNormedField 𝕜]
-{E : Type u_2} [SeminormedAddCommGroup E]
-[NormedSpace 𝕜 E] [IsUltrametricDist E]
+{E : Type u_2} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
 {x : E} {F : Subspace 𝕜 E} (a : 𝕜) :
   (x ⟂ₘ F) → ((a • x) ⟂ₘ F) := by
   intro h
@@ -211,8 +200,7 @@ theorem smul_morth_of_morth {𝕜 : Type*} [NontriviallyNormedField 𝕜]
   exact smul_orth_of_orth a (h y hy)
 
 theorem smul_morth_iff_morth_of_nonzero {𝕜 : Type*} [NontriviallyNormedField 𝕜]
-{E : Type u_2} [SeminormedAddCommGroup E]
-[NormedSpace 𝕜 E] [IsUltrametricDist E]
+{E : Type u_2} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
 {x : E} {F : Subspace 𝕜 E} {a : 𝕜} (ha : a ≠ 0) :
   (x ⟂ₘ F) ↔ ((a • x) ⟂ₘ F) := by
   refine ⟨smul_morth_of_morth a, fun h => ?_⟩
@@ -220,8 +208,7 @@ theorem smul_morth_iff_morth_of_nonzero {𝕜 : Type*} [NontriviallyNormedField 
   rwa [inv_smul_smul₀ ha x] at h
 
 theorem not_morth_iff_exists_dist_lt_norm {𝕜 : Type*} [NontriviallyNormedField 𝕜]
-{E : Type u_2} [SeminormedAddCommGroup E]
-[NormedSpace 𝕜 E] [IsUltrametricDist E]
+{E : Type u_2} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
 {x : E} {F : Subspace 𝕜 E} :
   ¬ (x ⟂ₘ F) ↔ ∃ y ∈ F, dist x y < ‖x‖ := by
   unfold MOrth
@@ -239,23 +226,20 @@ theorem not_morth_iff_exists_dist_lt_norm {𝕜 : Type*} [NontriviallyNormedFiel
     exact fun z hz => infDist_le_dist_of_mem hz
 
 theorem sorth_iff_forall_orth {𝕜 : Type*} [NontriviallyNormedField 𝕜]
-{E : Type u_2} [SeminormedAddCommGroup E]
-[NormedSpace 𝕜 E] [IsUltrametricDist E]
+{E : Type u_2} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
 (F1 F2 : Subspace 𝕜 E) : (F1 ⟂ₛ F2) ↔ ∀ x ∈ F1, ∀ y ∈ F2, (x ⟂[𝕜] y) := by
   simp only [SOrth, morth_iff_forall_orth]
 
 private lemma sorth_of_sorth {𝕜 : Type*} [NontriviallyNormedField 𝕜]
-{E : Type*} [SeminormedAddCommGroup E]
-[NormedSpace 𝕜 E] [IsUltrametricDist E] {F1 F2 : Subspace 𝕜 E} :
-(F1 ⟂ₛ F2) → (F2 ⟂ₛ F1) := by
+{E : Type*} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
+{F1 F2 : Subspace 𝕜 E} : (F1 ⟂ₛ F2) → (F2 ⟂ₛ F1) := by
   intro h
   simp only [SOrth, morth_iff_forall_orth] at *
   exact fun x hx y hy => orth_of_orth (h y hy x hx)
 
 theorem sorth_symm {𝕜 : Type*} [NontriviallyNormedField 𝕜]
-{E : Type*} [SeminormedAddCommGroup E]
-[NormedSpace 𝕜 E] [IsUltrametricDist E] {F1 F2 : Subspace 𝕜 E} :
-(F1 ⟂ₛ F2) ↔ (F2 ⟂ₛ F1) :=
+{E : Type*} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
+{F1 F2 : Subspace 𝕜 E} : (F1 ⟂ₛ F2) ↔ (F2 ⟂ₛ F1) :=
   ⟨sorth_of_sorth, sorth_of_sorth⟩
 
 end SphericallyCompleteSpace

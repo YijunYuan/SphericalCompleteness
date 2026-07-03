@@ -50,8 +50,7 @@ def MaximallyComplete (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 private noncomputable def LinearIsometry.weakInv {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
 {F : Type*} [NormedAddCommGroup F] [NormedSpace 𝕜 F]
-(f : E →ₗᵢ[𝕜] F) : LinearMap.range f.toLinearMap →ₗᵢ[𝕜] E :=
-  f.equivRange.symm.toLinearIsometry
+(f : E →ₗᵢ[𝕜] F) := f.equivRange.symm.toLinearIsometry
 
 private lemma norm_map_of_isImmediate {𝕜 : Type*}
   [NontriviallyNormedField 𝕜] {E : Type u_2} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
@@ -133,7 +132,7 @@ theorem exists_linearIsometry_comp_eq_of_isImmediate {𝕜 : Type*} [Nontriviall
   rcases hahn_banach' _
     (LinearIsometry.comp g (LinearIsometry.weakInv f)).toContinuousLinearMap with ⟨h, hf1, hf2⟩
   simp only [LinearMap.mem_range, forall_exists_index] at hf1
-  have hf2' : h.opNorm =
+  have hf2' : ‖h‖ =
       ‖g.toContinuousLinearMap.comp (LinearIsometry.weakInv f).toContinuousLinearMap‖ := by
     rw [hf2]; rfl
   let h : F →ₗᵢ[𝕜] H := {
@@ -146,9 +145,8 @@ theorem exists_linearIsometry_comp_eq_of_isImmediate {𝕜 : Type*} [Nontriviall
   ext z
   simp only [LinearIsometry.coe_comp, LinearIsometry.coe_mk, ContinuousLinearMap.coe_coe,
     Function.comp_apply, h]
-  have : (LinearIsometry.weakInv f) ⟨f z, LinearMap.mem_range_self f.toLinearMap z⟩ = z := by
-    unfold LinearIsometry.weakInv
-    exact f.equivRange.symm_apply_apply z
+  have : (LinearIsometry.weakInv f) ⟨f z, LinearMap.mem_range_self f.toLinearMap z⟩ = z :=
+    f.equivRange.symm_apply_apply z
   rw [hf1 (f z) z rfl]
   change g ((LinearIsometry.weakInv f) ⟨f z, LinearMap.mem_range_self f.toLinearMap z⟩) = g z
   rw [this]

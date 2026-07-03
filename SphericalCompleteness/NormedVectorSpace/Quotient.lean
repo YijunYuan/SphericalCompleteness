@@ -20,11 +20,10 @@ namespace SphericallyCompleteSpace
 
 private lemma lift_to_nearby_element (𝕜 : Type u_1) [inst : NontriviallyNormedField 𝕜]
 {E : Type u_2} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] {F : Submodule 𝕜 E}
-  (un : E ⧸ F.toAddSubgroup) (en : NNReal) (unp1 : E ⧸ F.toAddSubgroup)
-    (h : unp1 ∈ closedBall un en)
-  (lun : E) (hlun : (QuotientAddGroup.mk' F.toAddSubgroup) lun = un)
-  (ens1 : NNReal) (hens1 : ens1 > en)
-   : ∃ lup1 : E, (QuotientAddGroup.mk' F.toAddSubgroup) lup1 = unp1 ∧ ‖lup1 - lun‖ < ens1 := by
+(un : E ⧸ F.toAddSubgroup) (en : NNReal) (unp1 : E ⧸ F.toAddSubgroup) (h : unp1 ∈ closedBall un en)
+(lun : E) (hlun : (QuotientAddGroup.mk' F.toAddSubgroup) lun = un)
+(ens1 : NNReal) (hens1 : ens1 > en) :
+  ∃ lup1 : E, (QuotientAddGroup.mk' F.toAddSubgroup) lup1 = unp1 ∧ ‖lup1 - lun‖ < ens1 := by
   subst hlun
   rw [mem_closedBall, dist_eq_norm] at h
   have hε : (0 : ℝ) < ens1 - ‖unp1 - (QuotientAddGroup.mk' F.toAddSubgroup) lun‖ := by

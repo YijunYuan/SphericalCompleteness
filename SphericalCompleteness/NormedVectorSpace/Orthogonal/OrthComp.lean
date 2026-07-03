@@ -76,25 +76,13 @@ theorem exists_orthproj_of_spherically_complete_space
 [NormedSpace 𝕜 E]
 (F : Submodule 𝕜 E) [SphericallyCompleteSpace ↥F] :
 ∃ T : E →L[𝕜] ↥F, (∀ a ∈ F, T a = a) ∧ ContinuousLinearMap.opNorm T ≤ 1 := by
-  let hiudF : IsUltrametricDist ↥F := inferInstance
-  have hscF : SphericallyCompleteSpace ↥F := inferInstance
-  have := @exists_extension_opNorm_le 𝕜 _ E _ _ _ F ↥F inferInstance hiudF inferInstance hscF
-    (ContinuousLinearMap.id 𝕜 ↥F) {0} (by simp) (fun _ => 1)
-    (by intro U; simp)
-    (by
-      intro U V
-      have hUV : U.1 = V.1 := congrArg Subtype.val (Subsingleton.elim U V)
-      rw [hUV]
-      simp)
-    (by
-      intro U x
-      have hU : U.1 = 0 := Set.mem_singleton_iff.mp U.2
-      rw [hU]
-      simp [one_mul])
+  have := @exists_extension_opNorm_le 𝕜 _ E _ _ _ F ↥F _ _ _ _
+    (ContinuousLinearMap.id 𝕜 ↥F) {0} (by simp) (fun _ => 1) (fun _ => by simp)
+    (fun U V => by rw [congrArg Subtype.val (Subsingleton.elim U V)]; simp)
+    (fun U x => by simp [Set.mem_singleton_iff.mp U.2, one_mul])
   simp only [Subtype.forall, Set.mem_singleton_iff, forall_eq, sub_zero] at this
   rcases this with ⟨T, hT1, hT2⟩
-  refine ⟨T, ⟨fun a ha => ?_, hT2⟩⟩
-  exact congrArg Subtype.val (hT1 a ha)
+  exact ⟨T, ⟨fun a ha => congrArg Subtype.val (hT1 a ha), hT2⟩⟩
 
 /--
 `OrthComp 𝕜 F` is the *orthogonal complement* of a submodule `F : Submodule 𝕜 E` in a
@@ -135,9 +123,7 @@ IsCompl F (OrthComp 𝕜 F) := by
   unfold OrthComp
   apply orth_of_orthcomp
   have := (exists_orthproj_of_spherically_complete_space 𝕜 F).choose_spec.1
-  intro a ha
-  specialize this a ha
-  exact SetLike.coe_eq_coe.mp this
+  exact fun a ha => SetLike.coe_eq_coe.mp <| this a ha
 
 /--
 `F` is *sphere-orthogonal* to its orthogonal complement `OrthComp 𝕜 F`.
@@ -153,10 +139,8 @@ theorem sorth_orthcomp (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 (F ⟂ₛ (OrthComp 𝕜 F)) := by
   unfold OrthComp
   let T := (exists_orthproj_of_spherically_complete_space 𝕜 F).choose
-  let hT1 := (exists_orthproj_of_spherically_complete_space 𝕜 F).choose_spec.1
   let hT2 := (exists_orthproj_of_spherically_complete_space 𝕜 F).choose_spec.2
   rw [sorth_symm]
-  unfold SOrth MOrth
   intro x hx
   simp only [LinearMap.mem_ker] at hx
   refine eq_of_le_of_ge ?_ ?_
@@ -170,7 +154,7 @@ theorem sorth_orthcomp (𝕜 : Type*) [NontriviallyNormedField 𝕜]
         simp only [map_sub, AddSubgroupClass.coe_sub, T]
         simp only [ContinuousLinearMap.coe_coe] at hx
         simp only [hx, ZeroMemClass.coe_zero, zero_sub, neg_inj]
-        apply hT1
+        apply (exists_orthproj_of_spherically_complete_space 𝕜 F).choose_spec.1
         exact (Submodule.mem_toAddSubgroup F).mp hy
       rw [← norm_neg, ← this]
       have := (ContinuousLinearMap.opNorm_le_iff zero_le_one).1 hT2 (x - y)
@@ -192,10 +176,8 @@ lemma morth_of_mem_orthComp (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 [NormedSpace 𝕜 E]
 (F : Submodule 𝕜 E) [SphericallyCompleteSpace ↥F]
 {x : E} (hx : x ∈ OrthComp 𝕜 F) :
-(x ⟂ₘ F) := by
-  have := sorth_orthcomp 𝕜 F
-  rw [sorth_symm] at this
-  exact this x hx
+(x ⟂ₘ F) :=
+  (sorth_symm.1 <| sorth_orthcomp 𝕜 F) x hx
 
 /--
 `OrthProj 𝕜 F` is the (noncomputable) continuous `𝕜`-linear map from `E` to the submodule `F`,
@@ -218,7 +200,7 @@ noncomputable def OrthProj (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 [NormedSpace 𝕜 E]
 (F : Submodule 𝕜 E) [SphericallyCompleteSpace ↥F] :
 E →L[𝕜] ↥F :=
-(exists_orthproj_of_spherically_complete_space 𝕜 F).choose
+  (exists_orthproj_of_spherically_complete_space 𝕜 F).choose
 
 /--
 The orthogonal projection `OrthProj 𝕜 F` has operator norm at most `1`.
@@ -231,9 +213,8 @@ theorem norm_OrthProj_le_one (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 {E : Type*} [NormedAddCommGroup E] [iud : IsUltrametricDist E]
 [NormedSpace 𝕜 E]
 (F : Submodule 𝕜 E) [SphericallyCompleteSpace ↥F] :
-ContinuousLinearMap.opNorm (OrthProj 𝕜 F) ≤ 1 := by
-  unfold OrthProj
-  exact (exists_orthproj_of_spherically_complete_space 𝕜 F).choose_spec.2
+ContinuousLinearMap.opNorm (OrthProj 𝕜 F) ≤ 1 :=
+  (exists_orthproj_of_spherically_complete_space 𝕜 F).choose_spec.2
 
 /--
 `OrthProj 𝕜 F` restricts to the identity on the submodule `F`.
@@ -248,9 +229,8 @@ theorem OrthProj_id (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 {E : Type*} [NormedAddCommGroup E] [iud : IsUltrametricDist E]
 [NormedSpace 𝕜 E]
 (F : Submodule 𝕜 E) [SphericallyCompleteSpace ↥F] :
-∀ a ∈ F, (OrthProj 𝕜 F) a = a := by
-  unfold OrthProj
-  exact (exists_orthproj_of_spherically_complete_space 𝕜 F).choose_spec.1
+∀ a ∈ F, (OrthProj 𝕜 F) a = a :=
+  (exists_orthproj_of_spherically_complete_space 𝕜 F).choose_spec.1
 
 /--
 `OrthComp 𝕜 F` is definitionally the kernel of the chosen orthogonal projection `OrthProj 𝕜 F`.
@@ -263,8 +243,7 @@ theorem orthcomp_eq_ker_OrthProj (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 {E : Type*} [NormedAddCommGroup E] [iud : IsUltrametricDist E]
 [NormedSpace 𝕜 E]
 (F : Submodule 𝕜 E) [SphericallyCompleteSpace ↥F] :
-OrthComp 𝕜 F = LinearMap.ker (OrthProj 𝕜 F).toLinearMap := by
-  unfold OrthComp OrthProj
+OrthComp 𝕜 F = LinearMap.ker (OrthProj 𝕜 F).toLinearMap :=
   rfl
 
 /--

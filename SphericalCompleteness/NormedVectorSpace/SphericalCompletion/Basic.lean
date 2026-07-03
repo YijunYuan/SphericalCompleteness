@@ -43,10 +43,7 @@ SphericallyCompleteSpace (↥(exists_max_imm_ext_in_sph_comp 𝕜 E E₀ f).choo
     refine Set.nonempty_iff_ne_empty.mp ⟨⟨a, haa⟩, ?_⟩
     simp only [Set.mem_iInter, mem_closedBall]
     intro i
-    have := ha i
-    change dist (⟨a, haa⟩ : _) (c i) ≤ ↑(r i)
-    rw [show dist (⟨a, haa⟩ : _) (c i) = dist a (c i).val from rfl]
-    exact this
+    simpa [show dist (⟨a, haa⟩ : _) (c i) = dist a (c i).val from rfl] using ha i
   else
   have : (K + Submodule.span 𝕜 {a}) ∉ imm_ext_in_sph_comp E E₀ f := by
     by_contra hc

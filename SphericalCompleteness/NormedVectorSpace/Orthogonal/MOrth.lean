@@ -9,8 +9,7 @@ open Filter
 namespace SphericallyCompleteSpace
 
 private lemma smul_morth_of_morth' (𝕜 : Type*) [inst : NontriviallyNormedField 𝕜]
-{E : Type u_2} [SeminormedAddCommGroup E]
-[NormedSpace 𝕜 E] [IsUltrametricDist E]
+{E : Type u_2} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
 (x : E) (F : Subspace 𝕜 E)
   (hxF : x ⟂ₘ F) (a : E) (ha : a ∈ Submodule.span 𝕜 {x}) : a ⟂ₘ F := by
   obtain ⟨r, rfl⟩ := Submodule.mem_span_singleton.mp ha
@@ -29,8 +28,8 @@ This is stated as an isometric linear equivalence (`≃ₛₗᵢ[RingHom.id 𝕜
 equivalence that preserves norms.
 -/
 noncomputable def direct_prod_iso_sum_of_orth (𝕜 : Type*) [NontriviallyNormedField 𝕜]
-{E : Type u_2} [NormedAddCommGroup E]
-[NormedSpace 𝕜 E] [IsUltrametricDist E] (x : E) (F : Subspace 𝕜 E) (hxF : x ⟂ₘ F) :
+{E : Type u_2} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
+(x : E) (F : Subspace 𝕜 E) (hxF : x ⟂ₘ F) :
 (Submodule.span 𝕜 {x}) × F≃ₛₗᵢ[RingHom.id 𝕜] (Submodule.span 𝕜 {x}) + F where
   toFun z := ⟨z.1.val + z.2.val, by
     simp only [Submodule.add_eq_sup]
@@ -198,8 +197,7 @@ theorem exists_morth_vec_of_not_full_finrank (𝕜 : Type*) [NontriviallyNormedF
     have hyeqx : y = x := SetLike.coe_eq_coe.mp hyx
     rw [mem_closedBall] at hyball
     subst hyeqx
-    rw [mem_closedBall]
-    exact hyball
+    rwa [mem_closedBall]
     )
   simp only [one_div, Set.nonempty_iInter, Subtype.exists] at this
   rcases this with ⟨z, hz, hfin⟩
@@ -207,14 +205,12 @@ theorem exists_morth_vec_of_not_full_finrank (𝕜 : Type*) [NontriviallyNormedF
   simp only [hz, true_and]
   replace hfin : ∀ i : ℕ, z ∈ closedBall a (infDist a ↑F + 1 / (↑i + 1)) := by
     intro i
-    specialize hfin i
     have : z ∈ ((fun x : F => (x : E)) '' closedBall ((res_ball 𝕜 F a (infDist a F + 1 / (i + 1))
     (by simp only [one_div, gt_iff_lt, lt_add_iff_pos_right, inv_pos,
       Nat.cast_add_one_pos])).choose) (infDist a ↑F + 1 / (i + 1))) := by
       simp only [mem_closedBall, one_div, Set.mem_image, Subtype.exists, exists_and_right,
         exists_eq_right] at *
-      refine ⟨hz, ?_⟩
-      exact hfin
+      exact ⟨hz, hfin i⟩
     rw [← (res_ball 𝕜 F a (infDist a F + 1 / (i + 1))
       (by simp only [one_div, gt_iff_lt, lt_add_iff_pos_right,
         inv_pos, Nat.cast_add_one_pos])).choose_spec] at this
@@ -222,15 +218,13 @@ theorem exists_morth_vec_of_not_full_finrank (𝕜 : Type*) [NontriviallyNormedF
   refine ⟨eq_of_le_of_ge ?_ ?_ , fun hc => ha <| (sub_eq_zero.1 hc) ▸ hz⟩
   · simp only [one_div, mem_closedBall, dist_comm, dist_eq_norm] at hfin
     refine le_of_forall_pos_le_add (fun ε hε => ?_)
-    specialize hfin (⌈1 / ε⌉₊ + 1)
-    refine le_trans hfin ?_
+    refine le_trans (hfin (⌈1 / ε⌉₊ + 1)) ?_
     simp only [one_div, Nat.cast_add, Nat.cast_one, add_le_add_iff_left]
     field_simp
     rw [mul_add,mul_add, add_assoc]
     have : ε * ↑⌈1 / ε⌉₊ ≥ 1 := by
       simpa only [one_div, ge_iff_le] using (inv_le_iff_one_le_mul₀' hε).mp <| Nat.le_ceil (ε⁻¹)
     linarith
-  · rw [← dist_eq_norm]
-    exact infDist_le_dist_of_mem hz
+  · simpa [← dist_eq_norm] using infDist_le_dist_of_mem hz
 
 end SphericallyCompleteSpace

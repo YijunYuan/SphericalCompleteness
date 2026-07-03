@@ -27,7 +27,7 @@ def inclusionᵢ {𝕜 : Type*} [NontriviallyNormedField 𝕜] {E₀ : Type*}
   norm_map' _ := rfl
 
 /-- The image in the ambient space of the range of `inclusionᵢ h` is `p`. -/
-lemma range_inclusionᵢ_image {𝕜 : Type*} [NontriviallyNormedField 𝕜] {E₀ : Type*}
+private lemma range_inclusionᵢ_image {𝕜 : Type*} [NontriviallyNormedField 𝕜] {E₀ : Type*}
     [SeminormedAddCommGroup E₀] [NormedSpace 𝕜 E₀] {p q : Submodule 𝕜 E₀} (h : p ≤ q) :
     ((↑) : q → E₀) '' (LinearMap.range (inclusionᵢ h).toLinearMap : Set q) = (p : Set E₀) := by
   ext z
