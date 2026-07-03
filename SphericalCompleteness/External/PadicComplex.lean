@@ -3,15 +3,19 @@ Copyright (c) 2026 Yijun Yuan. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Yijun Yuan
 -/
-import SphericalCompleteness.External.PadicAlgCl
-import SphericalCompleteness.External.DenselyNormedField
-import SphericalCompleteness.External.Ultrametric
+module
+
+public import SphericalCompleteness.External.DenselyNormedField
+public import SphericalCompleteness.External.PadicAlgCl
+public import SphericalCompleteness.External.Ultrametric
 
 /-!
 # The field `ℂ_[p]`
 
 Auxiliary results on the completed algebraic closure of the `p`-adic numbers.
 -/
+
+@[expose] public section
 
 open PadicComplex
 open TopologicalSpace

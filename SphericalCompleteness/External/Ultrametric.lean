@@ -3,13 +3,15 @@ Copyright (c) 2026 Yijun Yuan. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Yijun Yuan
 -/
-import Mathlib.Topology.MetricSpace.Ultra.Basic
-import Mathlib.Topology.MetricSpace.Completion
-import Mathlib.Topology.MetricSpace.Pseudo.Defs
-import Mathlib.Analysis.Normed.Group.Ultra
-import Mathlib.Analysis.Normed.Operator.Basic
-import Mathlib.Analysis.Normed.Lp.lpSpace
-import Mathlib.Tactic.Common
+module
+
+public import Mathlib.Analysis.Normed.Group.Ultra
+public import Mathlib.Analysis.Normed.Lp.lpSpace
+public import Mathlib.Analysis.Normed.Operator.Basic
+public import Mathlib.Tactic.Common
+public import Mathlib.Topology.MetricSpace.Completion
+public import Mathlib.Topology.MetricSpace.Pseudo.Defs
+public import Mathlib.Topology.MetricSpace.Ultra.Basic
 
 /-!
 # Ultrametric auxiliary results
@@ -17,6 +19,8 @@ import Mathlib.Tactic.Common
 Supporting results on ultrametric distances, including transfer to completions,
 quotients, submodules, operator spaces and `lp` spaces.
 -/
+
+@[expose] public section
 
 open Metric
 open NNReal
@@ -32,9 +36,9 @@ the set `closedBall z r` has `diam (closedBall z r) ≤ r`. This is a characteri
 ultrametrics: any two points in the same ball are at distance at most the ball's radius.
 -/
 theorem diam_le_radius_of_ultrametric
-(z : α) (r : ℝ≥0) :
-diam (closedBall z r) ≤ r :=
-  diam_le_of_forall_dist_le r.prop fun _ hx _ hy =>
+    (z : α) (r : ℝ≥0) :
+    diam (closedBall z r) ≤ r :=
+  diam_le_of_forall_dist_le r.prop fun _ hx _ hy ↦
     (hiud.dist_triangle_max _ z _).trans <|
       max_le hx <| (dist_comm _ _).trans_le hy
 
@@ -49,10 +53,10 @@ More precisely, assuming `IsUltrametricDist α`, `r1 ≤ r2`, and
 This is a standard “nesting of intersecting balls” property characteristic of ultrametric spaces.
 -/
 theorem closedBall_subset_closedBall_of_le_radius_of_nonempty_intersection_of_ultrametric
-{z1 z2 : α} {r1 r2 : ℝ≥0}
-(hle : r1 ≤ r2)
-(hne : (closedBall z1 r1 ∩ closedBall z2 r2).Nonempty) :
-closedBall z1 r1 ⊆ closedBall z2 r2 := by
+    {z1 z2 : α} {r1 r2 : ℝ≥0}
+    (hle : r1 ≤ r2)
+    (hne : (closedBall z1 r1 ∩ closedBall z2 r2).Nonempty) :
+    closedBall z1 r1 ⊆ closedBall z2 r2 := by
   intro x hx
   rcases hne with ⟨y, hy1, hy2⟩
   simp only [mem_closedBall] at *
@@ -75,10 +79,10 @@ This is useful for working with non-Archimedean/ultrametric geometry in quotient
 the ultrametric property needed for many standard arguments.
 -/
 instance instIsUltrametricDistQuotient
-(𝕜 : Type u_1) [NormedField 𝕜]
-{E : Type u_2} [inst_1 : SeminormedAddCommGroup E]
-[NormedSpace 𝕜 E] [iud : IsUltrametricDist E]
-{F : Submodule 𝕜 E} : IsUltrametricDist (E ⧸ F) :=
+    (𝕜 : Type*) [NormedField 𝕜]
+    {E : Type*} [inst_1 : SeminormedAddCommGroup E]
+    [NormedSpace 𝕜 E] [iud : IsUltrametricDist E]
+    {F : Submodule 𝕜 E} : IsUltrametricDist (E ⧸ F) :=
   IsUltrametricDist.isUltrametricDist_of_isNonarchimedean_norm <| by
     intro x y
     refine le_of_forall_pos_le_add fun ε hε ↦ ?_
@@ -115,12 +119,12 @@ normed spaces, where spaces of bounded linear operators inherit ultrametric beha
 their codomain.
 -/
 instance instIsUltrametricDistContinuousLinearMap
-{𝕜 : Type*} [NontriviallyNormedField 𝕜]
-{E : Type*} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E]
-{F : Type*} [SeminormedAddCommGroup F] [iud : IsUltrametricDist F]
-[NormedSpace 𝕜 F] :
-IsUltrametricDist (E →L[𝕜] F) :=
-  IsUltrametricDist.isUltrametricDist_of_isNonarchimedean_norm fun f g => by
+    {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+    {E : Type*} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E]
+    {F : Type*} [SeminormedAddCommGroup F] [iud : IsUltrametricDist F]
+    [NormedSpace 𝕜 F] :
+    IsUltrametricDist (E →L[𝕜] F) :=
+  IsUltrametricDist.isUltrametricDist_of_isNonarchimedean_norm fun f g ↦ by
     rw [ContinuousLinearMap.opNorm_le_iff (le_max_of_le_left (norm_nonneg _))]
     intro x
     rw [max_mul_of_nonneg _ _ (norm_nonneg x)]
@@ -138,12 +142,12 @@ This instance is the standard fact that the supremum metric on a product of ultr
 remains ultrametric.
 -/
 instance instIsUltrametricDistLp
-{ι : Type*} {E : ι → Type*} [Nonempty ι] [∀ i, NormedAddCommGroup (E i)]
-[iiud : ∀ i, IsUltrametricDist (E i)] :
-IsUltrametricDist (lp E ⊤) where
+    {ι : Type*} {E : ι → Type*} [Nonempty ι] [∀ i, NormedAddCommGroup (E i)]
+    [iiud : ∀ i, IsUltrametricDist (E i)] :
+    IsUltrametricDist (lp E ⊤) where
 dist_triangle_max a b c := by
   simp only [dist_eq_norm, lp.norm_eq_ciSup]
-  refine ciSup_le fun j => ?_
+  refine ciSup_le fun j ↦ ?_
   rw [show ‖(↑(a - c) : (i : ι) → E i) j‖ = ‖a j - c j‖ from rfl, ← dist_eq_norm]
   refine ((iiud j).dist_triangle_max (a j) (b j) (c j)).trans (max_le_max ?_ ?_)
   · rw [dist_eq_norm, show ‖a j - b j‖ = ‖(↑(a - b) : (i : ι) → E i) j‖ from rfl]
@@ -199,10 +203,10 @@ completion, allowing one to work in a complete ultrametric space without changin
 underlying distance structure.
 -/
 instance instIsUltrametricDistCompletion {𝕜 : Type*} [PseudoMetricSpace 𝕜]
-[IsUltrametricDist 𝕜] :
-  IsUltrametricDist (UniformSpace.Completion 𝕜) where
+    [IsUltrametricDist 𝕜] :
+    IsUltrametricDist (UniformSpace.Completion 𝕜) where
   dist_triangle_max x y z := by
-    refine UniformSpace.Completion.induction_on₃ x y z (isClosed_le ?_ ?_) fun a b c => ?_
+    refine UniformSpace.Completion.induction_on₃ x y z (isClosed_le ?_ ?_) fun a b c ↦ ?_
     · exact UniformSpace.Completion.continuous_dist (by fun_prop) (by fun_prop)
     · exact Continuous.max
         (UniformSpace.Completion.continuous_dist (by fun_prop) (by fun_prop))

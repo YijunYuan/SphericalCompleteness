@@ -3,14 +3,18 @@ Copyright (c) 2026 Yijun Yuan. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Yijun Yuan
 -/
-import SphericalCompleteness.Basic
-import SphericalCompleteness.External.PadicComplex
+module
+
+public import SphericalCompleteness.Basic
+public import SphericalCompleteness.External.PadicComplex
 
 /-!
 # A non-spherical-completeness mechanism
 
 Results exhibiting spaces that fail to be spherically complete.
 -/
+
+@[expose] public section
 
 open Metric
 open Filter
@@ -43,8 +47,8 @@ relevant sense, every (nonempty) nested family of closed balls has a point that 
 arbitrarily close to being in all of them, i.e. `α` is *spherically dense*.
 -/
 instance instIsSphericallyDenseOfDenselyNormedField (α : Type*)
-[dnf : DenselyNormedField α] [hiud : IsUltrametricDist α] :
-IsSphericallyDense α where
+    [dnf : DenselyNormedField α] [hiud : IsUltrametricDist α] :
+    IsSphericallyDense α where
 spherically_dense := by
   refine fun z r ↦ eq_of_le_of_ge (diam_le_radius_of_ultrametric _ _) ?_
   by_contra hc
@@ -68,9 +72,9 @@ This provides a convenient way to extract "almost diameter-realizing" pairs insi
 with a quantitative lower bound on their separation.
 -/
 lemma exists_dist_lt_diam_of_isSphericallyDense {α : Type*} [PseudoMetricSpace α]
-: IsSphericallyDense α →
-∀ (z : α), ∀ ⦃r r' : ℝ≥0⦄, r' < r →
-∃ x y : α, x ∈ closedBall z r ∧ y ∈ closedBall z r ∧  nndist x y ∈ Set.Ioc r' r := by
+    : IsSphericallyDense α →
+    ∀ (z : α), ∀ ⦃r r' : ℝ≥0⦄, r' < r →
+    ∃ x y : α, x ∈ closedBall z r ∧ y ∈ closedBall z r ∧  nndist x y ∈ Set.Ioc r' r := by
   intro isd z r r' hr
   replace isd := isd.spherically_dense z r
   replace hr : (↑r' : ℝ) < ↑r := hr
@@ -105,10 +109,10 @@ a distance arbitrarily close to `r` from below (but still bounded by `r`), match
 intuition that balls contain “enough” points at all intermediate distance scales.
 -/
 theorem exists_dist_lt_diam_iff_isSphericallyDense
-{α : Type*} [PseudoMetricSpace α] [hiud : IsUltrametricDist α]
-: IsSphericallyDense α ↔
-∀ (z : α), ∀ ⦃r r' : ℝ≥0⦄, r' < r →
-∃ x y : α, x ∈ closedBall z r ∧ y ∈ closedBall z r ∧  nndist x y ∈ Set.Ioc r' r := by
+    {α : Type*} [PseudoMetricSpace α] [hiud : IsUltrametricDist α]
+    : IsSphericallyDense α ↔
+    ∀ (z : α), ∀ ⦃r r' : ℝ≥0⦄, r' < r →
+    ∃ x y : α, x ∈ closedBall z r ∧ y ∈ closedBall z r ∧  nndist x y ∈ Set.Ioc r' r := by
   refine ⟨exists_dist_lt_diam_of_isSphericallyDense, ?_⟩
   intro h
   refine {spherically_dense := fun z r ↦ eq_of_le_of_ge (diam_le_radius_of_ultrametric _ _) ?_}
@@ -120,12 +124,12 @@ theorem exists_dist_lt_diam_iff_isSphericallyDense
   linarith
 
 private lemma exists_disjoint_subball {α : Type*}
-[PseudoMetricSpace α] [hiud : IsUltrametricDist α] [hα : IsSphericallyDense α]
-(c₀ : α) (r₀ : ℝ≥0) (r₁ : ℝ≥0) (hr : r₁ < r₀) (z : α) :
-∃ c₁ : α,
-  closedBall c₁ r₁ ⊆ closedBall c₀ r₀ ∧
-  z ∉ closedBall c₁ r₁
-  := by
+    [PseudoMetricSpace α] [hiud : IsUltrametricDist α] [hα : IsSphericallyDense α]
+    (c₀ : α) (r₀ : ℝ≥0) (r₁ : ℝ≥0) (hr : r₁ < r₀) (z : α) :
+    ∃ c₁ : α,
+    closedBall c₁ r₁ ⊆ closedBall c₀ r₀ ∧
+    z ∉ closedBall c₁ r₁
+    := by
   apply exists_dist_lt_diam_of_isSphericallyDense at hα
   rcases hα c₀ hr with ⟨x, y, hx, hy, hxy⟩
   have : Disjoint (closedBall x r₁) (closedBall y r₁) := by
@@ -148,21 +152,21 @@ private lemma exists_disjoint_subball {α : Type*}
     exact ⟨le_of_lt <| lt_of_le_of_lt ha hr, hx⟩
 
 private lemma exists_pair_with_pos_dist (α : Type*)
-[PseudoMetricSpace α] [hα : IsSphericallyDense α] [nemp : Nonempty α] :
-∃ z : α × α, nndist z.1 z.2 > 0 := by
+    [PseudoMetricSpace α] [hα : IsSphericallyDense α] [nemp : Nonempty α] :
+    ∃ z : α × α, nndist z.1 z.2 > 0 := by
   use ((exists_dist_lt_diam_of_isSphericallyDense hα nemp.some one_lt_two).choose,
   (exists_dist_lt_diam_of_isSphericallyDense hα nemp.some one_lt_two).choose_spec.choose)
   exact lt_trans zero_lt_one (exists_dist_lt_diam_of_isSphericallyDense
     hα nemp.some one_lt_two).choose_spec.choose_spec.2.2.out.1
 
 private noncomputable def shrinkingRadius (α : Type*)
-[PseudoMetricSpace α] [hα : IsSphericallyDense α] [nemp : Nonempty α] (n : ℕ) : ℝ≥0 :=
+    [PseudoMetricSpace α] [hα : IsSphericallyDense α] [nemp : Nonempty α] (n : ℕ) : ℝ≥0 :=
 (nndist (exists_pair_with_pos_dist α).choose.1 (exists_pair_with_pos_dist α).choose.2)
   * (1 + 1 / (n + 1))
 
 private lemma shrinkingRadius_strictanti (α : Type*)
-[PseudoMetricSpace α] [hα : IsSphericallyDense α] [nemp : Nonempty α] :
-StrictAnti (fun n => shrinkingRadius α n) := by
+    [PseudoMetricSpace α] [hα : IsSphericallyDense α] [nemp : Nonempty α] :
+    StrictAnti (fun n ↦ shrinkingRadius α n) := by
   refine strictAnti_nat_of_succ_lt fun n↦ ?_
   unfold shrinkingRadius
   refine (mul_lt_mul_iff_right₀ (exists_pair_with_pos_dist α).choose_spec).mpr ?_
@@ -173,8 +177,8 @@ StrictAnti (fun n => shrinkingRadius α n) := by
   norm_num
 
 private lemma shrinkingRadius_range (α : Type*)
-[PseudoMetricSpace α] [hα : IsSphericallyDense α] [nemp : Nonempty α] (n : ℕ) :
-(shrinkingRadius α n) > (shrinkingRadius α 0) / 2 := by
+    [PseudoMetricSpace α] [hα : IsSphericallyDense α] [nemp : Nonempty α] (n : ℕ) :
+    (shrinkingRadius α n) > (shrinkingRadius α 0) / 2 := by
   unfold shrinkingRadius
   rw [mul_div_assoc]
   refine (mul_lt_mul_iff_right₀ (exists_pair_with_pos_dist α).choose_spec).mpr ?_
@@ -183,9 +187,9 @@ private lemma shrinkingRadius_range (α : Type*)
     zero_lt_one, or_true]
 
 private noncomputable def nestedBallChain {α : Type*} [PseudoMetricSpace α]
-[hiud : IsUltrametricDist α] [hα : IsSphericallyDense α]
-[nemp : Nonempty α] [hsep : SeparableSpace α]
-(hα' : Denumerable hsep.exists_countable_dense.choose) (n : ℕ) : α × ℝ≥0 :=
+    [hiud : IsUltrametricDist α] [hα : IsSphericallyDense α]
+    [nemp : Nonempty α] [hsep : SeparableSpace α]
+    (hα' : Denumerable hsep.exists_countable_dense.choose) (n : ℕ) : α × ℝ≥0 :=
   match n with
   | 0 => ((exists_pair_with_pos_dist α).choose.1, shrinkingRadius α 0)
   | n + 1 => ⟨((exists_disjoint_subball (nestedBallChain hα' n).1 (shrinkingRadius α n)
@@ -199,7 +203,7 @@ variable (α : Type*) [PseudoMetricSpace α]
   (hα' : Denumerable hsep.exists_countable_dense.choose)
 
 private lemma nestedBallChain_decreasing :
-Antitone (fun n => closedBall (nestedBallChain hα' n).1 (nestedBallChain hα' n).2) := by
+    Antitone (fun n ↦ closedBall (nestedBallChain hα' n).1 (nestedBallChain hα' n).2) := by
   refine antitone_nat_of_succ_le <| fun n ↦ ?_
   simp only [nestedBallChain, mem_closedBall, dist_le_coe, not_le, Set.le_eq_subset]
   have := ((exists_disjoint_subball (nestedBallChain hα' n).1 (shrinkingRadius α n)
@@ -211,14 +215,14 @@ Antitone (fun n => closedBall (nestedBallChain hα' n).1 (nestedBallChain hα' n
     exact this
 
 private lemma not_in_nestedBallChain (n : ℕ) :
-(hα'.ofNat hsep.exists_countable_dense.choose n).val ∉
-closedBall (nestedBallChain hα' (n + 1)).1 (nestedBallChain hα' (n + 1)).2 :=
+    (hα'.ofNat hsep.exists_countable_dense.choose n).val ∉
+    closedBall (nestedBallChain hα' (n + 1)).1 (nestedBallChain hα' (n + 1)).2 :=
   ((exists_disjoint_subball (nestedBallChain hα' n).1 (shrinkingRadius α n)
       (shrinkingRadius α (n + 1)) <| shrinkingRadius_strictanti α (lt_add_one n))
         (hα'.ofNat hsep.exists_countable_dense.choose n)).choose_spec.2
 
 private lemma nestedBallChain_radius_eq (n : ℕ) :
-(nestedBallChain hα' n).2 = (shrinkingRadius α n):= by
+    (nestedBallChain hα' n).2 = (shrinkingRadius α n):= by
   unfold nestedBallChain
   cases n <;> simp only
 
@@ -241,10 +245,10 @@ balls
 with empty intersection.
 -/
 theorem not_sphericallyCompleteSpace_of_isSphericallyDense_separable_ultrametric
-(α : Type*) [MetricSpace α]
-[hiud : IsUltrametricDist α] [hα : IsSphericallyDense α]
-[nemp : Nonempty α] [hsep : SeparableSpace α] :
-¬ SphericallyCompleteSpace α := by
+    (α : Type*) [MetricSpace α]
+    [hiud : IsUltrametricDist α] [hα : IsSphericallyDense α]
+    [nemp : Nonempty α] [hsep : SeparableSpace α] :
+    ¬ SphericallyCompleteSpace α := by
   by_contra hc
   replace hc := hc.isSphericallyComplete
   if hinf : Nonempty (Denumerable hsep.exists_countable_dense.choose) then
@@ -286,7 +290,7 @@ theorem not_sphericallyCompleteSpace_of_isSphericallyDense_separable_ultrametric
     have hcl := Set.Finite.isClosed this
     rw [← closure_eq_iff_isClosed, hsep.exists_countable_dense.choose_spec.2.closure_eq] at hcl
     rw [← hcl, Set.finite_univ_iff] at this
-    let S := Set.image (fun (x : α × α) => (nndist x.1 x.2)) {x : α × α | x.1 ≠ x.2}
+    let S := Set.image (fun (x : α × α) ↦ (nndist x.1 x.2)) {x : α × α | x.1 ≠ x.2}
     have hfin := Set.toFinite ((fun (x : α × α) ↦ nndist x.1 x.2) '' {x | x.1 ≠ x.2})
     have hnemp : S.Nonempty := by
       use nndist (exists_pair_with_pos_dist α).choose.1 (exists_pair_with_pos_dist α).choose.2
@@ -340,7 +344,7 @@ using the previously established instances showing that `ℂ_[p]` is ultrametric
 separable, and spherically dense in the required sense.
 -/
 theorem instPadicComplex_not_sphercallyCompleteSpace (p : ℕ) [hp : Fact (Nat.Prime p)] :
-¬ SphericallyCompleteSpace ℂ_[p] :=
+    ¬ SphericallyCompleteSpace ℂ_[p] :=
   not_sphericallyCompleteSpace_of_isSphericallyDense_separable_ultrametric ℂ_[p]
 
 namespace SchikhofCounterexample
@@ -378,20 +382,20 @@ The proof combines:
 * approximation from below using `exists_dist_lt_diam_of_isSphericallyDense`.
 -/
 instance instIsDenseMetric_of_isSphericallyDense (α : Type*)
-[MetricSpace α] [IsUltrametricDist α] [IsSphericallyDense α] :
+    [MetricSpace α] [IsUltrametricDist α] [IsSphericallyDense α] :
     IsDenseMetric α where
   dense_metric := by
     intro z r
     have hdiam : diam (closedBall z r) = (r : ℝ) := IsSphericallyDense.spherically_dense z r
     rw [hdiam]
     refine le_antisymm ?_ ?_
-    · refine closure_minimal (fun t ht => ?_) isClosed_Icc
+    · refine closure_minimal (fun t ht ↦ ?_) isClosed_Icc
       rcases Set.mem_image2.mp ht with ⟨x, hx, y, hy, rfl⟩
       exact ⟨dist_nonneg, (dist_le_diam_of_mem isBounded_closedBall hx hy).trans_eq hdiam⟩
     · rintro t ⟨ht0, htr⟩
       rcases eq_or_lt_of_le ht0 with rfl | ht0'
       · exact subset_closure <| Set.mem_image2.mpr ⟨z, by simp, z, by simp, by simp⟩
-      · refine Metric.mem_closure_iff.mpr <| fun ε hε => ?_
+      · refine Metric.mem_closure_iff.mpr <| fun ε hε ↦ ?_
         let e : ℝ≥0 := ⟨ε / 2, by positivity⟩
         by_cases he : t ≤ (e : ℝ)
         · refine ⟨0, Set.mem_image2.mpr ⟨z, by simp, z, by simp, by simp⟩, ?_⟩

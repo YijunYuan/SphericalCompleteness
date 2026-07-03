@@ -3,8 +3,10 @@ Copyright (c) 2026 Yijun Yuan. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Yijun Yuan
 -/
-import Mathlib.NumberTheory.Padics.ProperSpace
-import SphericalCompleteness.Defs
+module
+
+public import Mathlib.NumberTheory.Padics.ProperSpace
+public import SphericalCompleteness.Defs
 
 /-!
 # Spherical completeness: characterizations
@@ -12,6 +14,8 @@ import SphericalCompleteness.Defs
 Equivalent characterizations of spherical completeness and the implication that
 spherically complete spaces are complete.
 -/
+
+@[expose] public section
 
 open Metric
 open Filter
@@ -30,7 +34,7 @@ intersection property: for every sequence of centers `ci : ℕ → α` and radii
 `ri : ℕ → NNReal` such that
 
 * `Antitone ri` (the radii are nonincreasing), and
-* `Antitone (fun i => closedBall (ci i) (ri i))` (the closed balls form a nested,
+* `Antitone (fun i ↦ closedBall (ci i) (ri i))` (the closed balls form a nested,
   decreasing chain by inclusion),
 
 the intersection `⋂ i, closedBall (ci i) (ri i)` is nonempty.
@@ -39,19 +43,19 @@ This is the standard “Cantor intersection” formulation of spherical complete
 ultrametric spaces, expressed for sequences indexed by `ℕ`.
 -/
 theorem sphericallyCompleteSpace_iff_antitone_radius :
-  SphericallyCompleteSpace α ↔
-  ∀ ⦃ci : ℕ → α⦄, ∀ ⦃ri : ℕ → NNReal⦄,
+    SphericallyCompleteSpace α ↔
+    ∀ ⦃ci : ℕ → α⦄, ∀ ⦃ri : ℕ → NNReal⦄,
     Antitone ri →
-    Antitone (fun i => closedBall (ci i) (ri i)) → (⋂ i, closedBall (ci i) (ri i)).Nonempty := by
-  refine ⟨fun h ci ri hri hanti => h.isSphericallyComplete hanti, fun h => ?_⟩
+    Antitone (fun i ↦ closedBall (ci i) (ri i)) → (⋂ i, closedBall (ci i) (ri i)).Nonempty := by
+  refine ⟨fun h ci ri hri hanti ↦ h.isSphericallyComplete hanti, fun h ↦ ?_⟩
   · refine { isSphericallyComplete := ?_ }
     intro c r hanti
-    let r' : ℕ → NNReal := fun n => sInf {r k | k ≤ n}
-    have hr'_Antitone : Antitone r' := fun m n hmn =>
+    let r' : ℕ → NNReal := fun n ↦ sInf {r k | k ≤ n}
+    have hr'_Antitone : Antitone r' := fun m n hmn ↦
       csInf_le_csInf' ⟨r m, m, le_rfl, rfl⟩ <| by
         rintro a ⟨k, hk, rfl⟩; exact ⟨k, hk.trans hmn, rfl⟩
     have : Antitone fun i ↦ closedBall (c i) ↑(r' i) := by
-      refine antitone_nat_of_succ_le fun n => ?_
+      refine antitone_nat_of_succ_le fun n ↦ ?_
       intro x hx
       simp only [mem_closedBall, dist_le_coe, r']  at *
       rw [le_csInf_iff''] at *
@@ -74,7 +78,7 @@ theorem sphericallyCompleteSpace_iff_antitone_radius :
     rcases h with ⟨z, hz⟩
     use z
     simp only [Set.mem_iInter, mem_closedBall]
-    refine fun i => le_trans (hz i) ?_
+    refine fun i ↦ le_trans (hz i) ?_
     simp only [NNReal.coe_le_coe, r']
     exact csInf_le (OrderBot.bddBelow _) (by use i)
 
@@ -87,7 +91,7 @@ equivalent to the following intersection property:
 
 For any sequence of centers `ci : ℕ → α` and radii `ri : ℕ → NNReal`, if
 * `StrictAnti ri` (the radii strictly decrease), and
-* `Antitone (fun i => closedBall (ci i) (ri i))` (the closed balls are nested decreasingly),
+* `Antitone (fun i ↦ closedBall (ci i) (ri i))` (the closed balls are nested decreasingly),
 
 then the intersection `⋂ i, closedBall (ci i) (ri i)` is nonempty.
 
@@ -95,11 +99,11 @@ This provides a convenient reformulation of spherical completeness when working 
 chains of balls indexed by `ℕ` whose radii shrink strictly.
 -/
 theorem sphericallyCompleteSpace_iff_strictAnti_radius :
-  SphericallyCompleteSpace α ↔
-  ∀ ⦃ci : ℕ → α⦄, ∀ ⦃ri : ℕ → NNReal⦄,
+    SphericallyCompleteSpace α ↔
+    ∀ ⦃ci : ℕ → α⦄, ∀ ⦃ri : ℕ → NNReal⦄,
     StrictAnti ri →
-    Antitone (fun i => closedBall (ci i) (ri i)) → (⋂ i, closedBall (ci i) (ri i)).Nonempty := by
-  refine ⟨fun h ci ri hri hanti => h.isSphericallyComplete hanti, ?_⟩
+    Antitone (fun i ↦ closedBall (ci i) (ri i)) → (⋂ i, closedBall (ci i) (ri i)).Nonempty := by
+  refine ⟨fun h ci ri hri hanti ↦ h.isSphericallyComplete hanti, ?_⟩
   · rw [sphericallyCompleteSpace_iff_antitone_radius α]
     intro h ci ri hri hanti
     rcases eventually_stable_or_exists_strictanti_of_antitone hri with hc | hc
@@ -117,7 +121,7 @@ theorem sphericallyCompleteSpace_iff_strictAnti_radius :
         simp only [mem_closedBall, dist_self, NNReal.zero_le_coe]
     · rcases hc with ⟨φ, hφ1, hφ2⟩
       have := @h (ci ∘ φ) (ri ∘ φ) hφ2
-        (antitone_nat_of_succ_le fun n => hanti <| le_of_lt <| hφ1 (by linarith : n < n + 1))
+        (antitone_nat_of_succ_le fun n ↦ hanti <| le_of_lt <| hφ1 (by linarith : n < n + 1))
       simp only [Function.comp_apply, Set.nonempty_iInter] at this
       rcases this with ⟨z, hz⟩
       use z
@@ -131,10 +135,10 @@ theorem sphericallyCompleteSpace_iff_strictAnti_radius :
 end
 
 private lemma smaller_radius {α : Type*} [PseudoMetricSpace α]
-  {S : Set (α × NNReal)} [hS : Nonempty ↑S]
-  (hw : (∀ w ∈ S, sInf {x | ∃ w ∈ S, w.2 = x} < w.2)) :
-  ∀ (n : ℕ) (s : ↑S), ∃ b ∈ {x | ∃ w ∈ S, w.2 = x},
-  b < min (sInf {x | ∃ w ∈ S, w.2 = x} + 1 / 2 ^ n) s.val.2 := by
+    {S : Set (α × NNReal)} [hS : Nonempty ↑S]
+    (hw : (∀ w ∈ S, sInf {x | ∃ w ∈ S, w.2 = x} < w.2)) :
+    ∀ (n : ℕ) (s : ↑S), ∃ b ∈ {x | ∃ w ∈ S, w.2 = x},
+    b < min (sInf {x | ∃ w ∈ S, w.2 = x} + 1 / 2 ^ n) s.val.2 := by
   intro m s
   exact ((csInf_lt_iff (by simp) (by
       use hS.some.val.2
@@ -150,44 +154,44 @@ private lemma smaller_radius {α : Type*} [PseudoMetricSpace α]
       min (sInf {x | ∃ w ∈ S, w.2 = x} + 1 / 2 ^ m)
         s.val.2))
 
-private noncomputable def countable_chain_of_ball {α : Type*}
-  [PseudoMetricSpace α]
-  {S : Set (α × NNReal)} [hS : Nonempty S]
-  (hw : ∀ w ∈ S, sInf {x | ∃ w ∈ S, w.2 = x} < w.2) : ℕ → ↑S := fun n =>
+private noncomputable def countableChainOfBall {α : Type*}
+    [PseudoMetricSpace α]
+    {S : Set (α × NNReal)} [hS : Nonempty S]
+    (hw : ∀ w ∈ S, sInf {x | ∃ w ∈ S, w.2 = x} < w.2) : ℕ → ↑S := fun n ↦
   match n with
   | 0 => ⟨(smaller_radius hw 0 hS.some).choose_spec.1.out.choose,
      (smaller_radius hw 0 hS.some).choose_spec.1.out.choose_spec.1⟩
   | m + 1 =>
-    ⟨(smaller_radius hw (m + 1) (countable_chain_of_ball hw m)).choose_spec.1.out.choose,
-     (smaller_radius hw (m + 1) (countable_chain_of_ball hw m)).choose_spec.1.out.choose_spec.1⟩
+    ⟨(smaller_radius hw (m + 1) (countableChainOfBall hw m)).choose_spec.1.out.choose,
+     (smaller_radius hw (m + 1) (countableChainOfBall hw m)).choose_spec.1.out.choose_spec.1⟩
 
-private lemma antitone_of_countable_chain_of_ball {α : Type*}
-  [PseudoMetricSpace α] [iud : IsUltrametricDist α]
-  [SphericallyCompleteSpace α]
-  {S : Set (α × NNReal)} [hS : Nonempty S]
-  (hS' : ∀ w1 w2 : ↑S, (closedBall w1.val.1 w1.val.2 ∩ closedBall w2.val.1 w2.val.2).Nonempty)
-  (hw : ∀ w ∈ S, sInf {x | ∃ w ∈ S, w.2 = x} < w.2) :
-  Antitone (fun n => closedBall
-    (countable_chain_of_ball hw n).val.1
-    (countable_chain_of_ball hw n).val.2) := by
-  refine antitone_nat_of_succ_le fun n => ?_
+private lemma antitone_of_countableChainOfBall {α : Type*}
+    [PseudoMetricSpace α] [iud : IsUltrametricDist α]
+    [SphericallyCompleteSpace α]
+    {S : Set (α × NNReal)} [hS : Nonempty S]
+    (hS' : ∀ w1 w2 : ↑S, (closedBall w1.val.1 w1.val.2 ∩ closedBall w2.val.1 w2.val.2).Nonempty)
+    (hw : ∀ w ∈ S, sInf {x | ∃ w ∈ S, w.2 = x} < w.2) :
+    Antitone (fun n ↦ closedBall
+    (countableChainOfBall hw n).val.1
+    (countableChainOfBall hw n).val.2) := by
+  refine antitone_nat_of_succ_le fun n ↦ ?_
   apply closedBall_subset_closedBall_of_le_radius_of_nonempty_intersection_of_ultrametric
-  · conv => arg 1; unfold countable_chain_of_ball
+  · conv => arg 1; unfold countableChainOfBall
     rw [((smaller_radius hw (n + 1)
-      (countable_chain_of_ball hw n))).choose_spec.1.out.choose_spec.2]
+      (countableChainOfBall hw n))).choose_spec.1.out.choose_spec.2]
     refine le_trans (le_of_lt ((smaller_radius hw (n + 1)
-      (countable_chain_of_ball hw n))).choose_spec.2) ?_
+      (countableChainOfBall hw n))).choose_spec.2) ?_
     simp only [inf_le_right]
   · apply hS'
 
-private lemma cofinal_of_countable_chain_of_ball {α : Type*}
-  [PseudoMetricSpace α] [IsUltrametricDist α]
-  [SphericallyCompleteSpace α]
-  {S : Set (α × NNReal)} [hS : Nonempty S]
-  (hS' : ∀ w1 w2 : ↑S, (closedBall w1.val.1 w1.val.2 ∩ closedBall w2.val.1 w2.val.2).Nonempty)
-  (hw : ∀ w ∈ S, sInf {x | ∃ w ∈ S, w.2 = x} < w.2) : ∀ s ∈ S, ∃ n : ℕ, closedBall
-    (countable_chain_of_ball hw n).val.1
-    (countable_chain_of_ball hw n).val.2 ⊆ closedBall s.1 s.2 := by
+private lemma cofinal_of_countableChainOfBall {α : Type*}
+    [PseudoMetricSpace α] [IsUltrametricDist α]
+    [SphericallyCompleteSpace α]
+    {S : Set (α × NNReal)} [hS : Nonempty S]
+    (hS' : ∀ w1 w2 : ↑S, (closedBall w1.val.1 w1.val.2 ∩ closedBall w2.val.1 w2.val.2).Nonempty)
+    (hw : ∀ w ∈ S, sInf {x | ∃ w ∈ S, w.2 = x} < w.2) : ∀ s ∈ S, ∃ n : ℕ, closedBall
+    (countableChainOfBall hw n).val.1
+    (countableChainOfBall hw n).val.2 ⊆ closedBall s.1 s.2 := by
   intro s hs
   obtain ⟨n, hn⟩ :=
     exists_pow_lt_of_lt_one (tsub_pos_of_lt (hw s hs)) (by norm_num : (1 / 2 : NNReal) < 1)
@@ -195,16 +199,16 @@ private lemma cofinal_of_countable_chain_of_ball {α : Type*}
   use n
   apply closedBall_subset_closedBall_of_le_radius_of_nonempty_intersection_of_ultrametric
   · refine le_of_lt <| lt_of_le_of_lt ?_ hn
-    conv => arg 1; unfold countable_chain_of_ball
+    conv => arg 1; unfold countableChainOfBall
     cases n
     · rw [(smaller_radius hw 0 hS.some).choose_spec.1.out.choose_spec.2]
       exact le_of_lt <| lt_of_lt_of_le (smaller_radius hw 0 hS.some).choose_spec.2 inf_le_left
     · expose_names
       rw [(smaller_radius hw (n + 1)
-        (countable_chain_of_ball hw n)).choose_spec.1.out.choose_spec.2]
+        (countableChainOfBall hw n)).choose_spec.1.out.choose_spec.2]
       exact le_of_lt <| lt_of_lt_of_le (smaller_radius hw (n + 1)
-        (countable_chain_of_ball hw n)).choose_spec.2 inf_le_left
-  · exact hS' (countable_chain_of_ball hw n) ⟨s, hs⟩
+        (countableChainOfBall hw n)).choose_spec.2 inf_le_left
+  · exact hS' (countableChainOfBall hw n) ⟨s, hs⟩
 
 section
 variable (α : Type*) [PseudoMetricSpace α] [iud : IsUltrametricDist α]
@@ -227,11 +231,11 @@ of nested balls), this formulation replaces nesting by a pairwise intersection h
 which is sufficient in the ultrametric setting.
 -/
 theorem sphericallyCompleteSpace_iff_pairwise_inter_nonempty :
-  SphericallyCompleteSpace α ↔ (
-  ∀ S : Set (α × NNReal), S.Nonempty →
-  (∀ w1 w2 : ↑S, (closedBall w1.val.1 w1.val.2 ∩ closedBall w2.val.1 w2.val.2).Nonempty) →
-  (⋂ w : ↑S, closedBall w.val.1 w.val.2).Nonempty) := by
-  refine ⟨fun h S hSne h'=> ?_, fun h => { isSphericallyComplete := ?_ }⟩
+    SphericallyCompleteSpace α ↔ (
+    ∀ S : Set (α × NNReal), S.Nonempty →
+    (∀ w1 w2 : ↑S, (closedBall w1.val.1 w1.val.2 ∩ closedBall w2.val.1 w2.val.2).Nonempty) →
+    (⋂ w : ↑S, closedBall w.val.1 w.val.2).Nonempty) := by
+  refine ⟨fun h S hSne h'↦ ?_, fun h ↦ { isSphericallyComplete := ?_ }⟩
   · if hw : ∃ w ∈ S, w.2 = sInf {w.2 | w ∈ S} then
       rcases hw with ⟨w, hwS, hwr⟩
       have : ∀ w' ∈ S, closedBall w.1 w.2 ⊆ closedBall w'.1 w'.2 := by
@@ -245,21 +249,21 @@ theorem sphericallyCompleteSpace_iff_pairwise_inter_nonempty :
         · exact h' ⟨w,hwS⟩ ⟨w',hw'⟩
       use w.1
       simp only [Set.iInter_coe_set, Set.mem_iInter]
-      refine fun v hv => this v hv ?_
+      refine fun v hv ↦ this v hv ?_
       simp only [mem_closedBall, dist_self, NNReal.zero_le_coe]
     else
       push Not at hw
       replace hw : ∀ w ∈ S, sInf {x | ∃ w ∈ S, w.2 = x} < w.2 := by
-        refine fun w hw' => lt_of_le_of_ne (csInf_le ?_ ?_) <| Ne.symm <| hw w hw'
+        refine fun w hw' ↦ lt_of_le_of_ne (csInf_le ?_ ?_) <| Ne.symm <| hw w hw'
         · simp only [Prod.exists, exists_eq_right, OrderBot.bddBelow]
         · simp only [Prod.exists, exists_eq_right, Set.mem_setOf_eq]
           use w.1
       haveI := Set.Nonempty.to_subtype hSne
-      rcases h.isSphericallyComplete (antitone_of_countable_chain_of_ball h' hw) with ⟨u, hu⟩
+      rcases h.isSphericallyComplete (antitone_of_countableChainOfBall h' hw) with ⟨u, hu⟩
       use u
       simp only [Set.mem_iInter] at *
       intro s
-      rcases cofinal_of_countable_chain_of_ball h' hw s s.prop with ⟨n, hn⟩
+      rcases cofinal_of_countableChainOfBall h' hw s s.prop with ⟨n, hn⟩
       exact hn <| hu n
   · intro c r hanti
     specialize h {(c i, r i) | (i : ℕ)} (by
@@ -276,22 +280,22 @@ theorem sphericallyCompleteSpace_iff_pairwise_inter_nonempty :
         exact nonempty_closedBall.mpr NNReal.zero_le_coe)
     simp only [Set.coe_setOf, Set.mem_setOf_eq, Set.nonempty_iInter] at h
     rcases h with ⟨z, hz⟩
-    exact ⟨z, Set.mem_iInter.2 <| fun i => hz ⟨(c i, r i), Exists.intro i (Eq.refl (c i, r i))⟩⟩
+    exact ⟨z, Set.mem_iInter.2 <| fun i ↦ hz ⟨(c i, r i), Exists.intro i (Eq.refl (c i, r i))⟩⟩
 
 open List in
 theorem sphericallyCompleteSpace_equiv :
-TFAE [
-  SphericallyCompleteSpace α,
-  ∀ ⦃ci : ℕ → α⦄, ∀ ⦃ri : ℕ → NNReal⦄,
+    TFAE [
+    SphericallyCompleteSpace α,
+    ∀ ⦃ci : ℕ → α⦄, ∀ ⦃ri : ℕ → NNReal⦄,
     Antitone ri →
-    Antitone (fun i => closedBall (ci i) (ri i)) → (⋂ i, closedBall (ci i) (ri i)).Nonempty,
-  ∀ ⦃ci : ℕ → α⦄, ∀ ⦃ri : ℕ → NNReal⦄,
+    Antitone (fun i ↦ closedBall (ci i) (ri i)) → (⋂ i, closedBall (ci i) (ri i)).Nonempty,
+    ∀ ⦃ci : ℕ → α⦄, ∀ ⦃ri : ℕ → NNReal⦄,
     StrictAnti ri →
-    Antitone (fun i => closedBall (ci i) (ri i)) → (⋂ i, closedBall (ci i) (ri i)).Nonempty,
-  ∀ S : Set (α × NNReal), S.Nonempty →
+    Antitone (fun i ↦ closedBall (ci i) (ri i)) → (⋂ i, closedBall (ci i) (ri i)).Nonempty,
+    ∀ S : Set (α × NNReal), S.Nonempty →
     (∀ w1 w2 : ↑S, (closedBall w1.val.1 w1.val.2 ∩ closedBall w2.val.1 w2.val.2).Nonempty) →
     (⋂ w : ↑S, closedBall w.val.1 w.val.2).Nonempty
-] := by
+    ] := by
   tfae_have 1 ↔ 2 := sphericallyCompleteSpace_iff_antitone_radius α
   tfae_have 1 ↔ 3 := sphericallyCompleteSpace_iff_strictAnti_radius α
   tfae_have 1 ↔ 4 := sphericallyCompleteSpace_iff_pairwise_inter_nonempty α
@@ -306,17 +310,17 @@ This instance equips `E × F` with a `SphericallyCompleteSpace` structure assumi
 factors `E` and `F` are spherically complete pseudo-metric spaces.
 -/
 instance Prod.sphericallyCompleteSpace {E F : Type*}
-[PseudoMetricSpace E] [PseudoMetricSpace F]
-[hse : SphericallyCompleteSpace E] [hsf : SphericallyCompleteSpace F] :
+    [PseudoMetricSpace E] [PseudoMetricSpace F]
+    [hse : SphericallyCompleteSpace E] [hsf : SphericallyCompleteSpace F] :
     SphericallyCompleteSpace (E × F) where
   isSphericallyComplete := by
     intro ci ri hanti
-    have hE : Antitone (fun i => closedBall (ci i).1 (ri i)) := fun m n hmn x hx => by
+    have hE : Antitone (fun i ↦ closedBall (ci i).1 (ri i)) := fun m n hmn x hx ↦ by
       have h2 := hanti hmn (show (x, (ci n).2) ∈ closedBall (ci n) (ri n) by
         simpa [Prod.dist_eq, sup_le_iff, mem_closedBall] using hx)
       simp only [mem_closedBall, Prod.dist_eq, sup_le_iff] at h2 ⊢
       exact h2.1
-    have hF : Antitone (fun i => closedBall (ci i).2 (ri i)) := fun m n hmn x hx => by
+    have hF : Antitone (fun i ↦ closedBall (ci i).2 (ri i)) := fun m n hmn x hx ↦ by
       have h2 := hanti hmn (show ((ci n).1, x) ∈ closedBall (ci n) (ri n) by
         simpa [Prod.dist_eq, sup_le_iff, mem_closedBall] using hx)
       simp only [mem_closedBall, Prod.dist_eq, sup_le_iff] at h2 ⊢
@@ -343,19 +347,19 @@ This instance is intended for use with finite products; the `Fintype ι` assumpt
 essential in typical proofs of spherical completeness for `Pi`-types.
 -/
 instance Pi.sphericallyCompleteSpace {ι : Type*} [Fintype ι] {E : ι → Type*}
-  [∀ i, PseudoMetricSpace (E i)]
-  [hh : ∀ i, SphericallyCompleteSpace (E i)] :
+    [∀ i, PseudoMetricSpace (E i)]
+    [hh : ∀ i, SphericallyCompleteSpace (E i)] :
     SphericallyCompleteSpace (∀ i, E i) where
   isSphericallyComplete := by
     intro ci ri hanti
-    have hE : ∀ i, Antitone (fun n => closedBall (ci n i) (ri n)) := by
+    have hE : ∀ i, Antitone (fun n ↦ closedBall (ci n i) (ri n)) := by
       intro i m n hmn
       simp only [Set.le_eq_subset]
       specialize hanti hmn
       simp only [Set.le_eq_subset] at hanti
       rw [closedBall_pi, closedBall_pi] at hanti
       · intro z hz
-        let Z : ((i : ι) → E i) := fun (j : ι) => if hij : j = i then hij ▸ z else (ci n j)
+        let Z : ((i : ι) → E i) := fun (j : ι) ↦ if hij : j = i then hij ▸ z else (ci n j)
         have : Z ∈ (Set.univ.pi fun b ↦ closedBall (ci n b) ↑(ri n)) := by
           simp only [Z, Set.mem_pi, Set.mem_univ]
           intro j _
@@ -388,6 +392,6 @@ instance instSphericallyCompleteSpaceComplex : SphericallyCompleteSpace ℂ  := 
 instance instSphericallyCompleteSpaceReal : SphericallyCompleteSpace ℝ  := inferInstance
 
 instance instSphericallyCompleteSpacePadic {p : ℕ} [Fact (Nat.Prime p)] :
-  SphericallyCompleteSpace (ℚ_[p]) := inferInstance
+    SphericallyCompleteSpace (ℚ_[p]) := inferInstance
 
 end SphericallyCompleteSpace

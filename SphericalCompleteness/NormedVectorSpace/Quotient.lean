@@ -3,7 +3,9 @@ Copyright (c) 2026 Yijun Yuan. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Yijun Yuan
 -/
-import SphericalCompleteness.Basic
+module
+
+public import SphericalCompleteness.Basic
 
 /-!
 # Spherical completeness of quotient spaces
@@ -12,18 +14,20 @@ This file proves that the quotient `E ⧸ F` of a spherically complete ultrametr
 space `E` by a submodule `F` is again spherically complete.
 -/
 
+@[expose] public section
+
 open Metric
 open Filter
 
-
 namespace SphericallyCompleteSpace
 
-private lemma lift_to_nearby_element (𝕜 : Type u_1) [inst : NontriviallyNormedField 𝕜]
-{E : Type u_2} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] {F : Submodule 𝕜 E}
-(un : E ⧸ F.toAddSubgroup) (en : NNReal) (unp1 : E ⧸ F.toAddSubgroup) (h : unp1 ∈ closedBall un en)
-(lun : E) (hlun : (QuotientAddGroup.mk' F.toAddSubgroup) lun = un)
-(ens1 : NNReal) (hens1 : ens1 > en) :
-  ∃ lup1 : E, (QuotientAddGroup.mk' F.toAddSubgroup) lup1 = unp1 ∧ ‖lup1 - lun‖ < ens1 := by
+private lemma lift_to_nearby_element (𝕜 : Type*) [NontriviallyNormedField 𝕜]
+    {E : Type*} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] {F : Submodule 𝕜 E}
+    (un : E ⧸ F.toAddSubgroup) (en : NNReal) (unp1 : E ⧸ F.toAddSubgroup)
+    (h : unp1 ∈ closedBall un en)
+    (lun : E) (hlun : (QuotientAddGroup.mk' F.toAddSubgroup) lun = un)
+    (ens1 : NNReal) (hens1 : ens1 > en) :
+    ∃ lup1 : E, (QuotientAddGroup.mk' F.toAddSubgroup) lup1 = unp1 ∧ ‖lup1 - lun‖ < ens1 := by
   subst hlun
   rw [mem_closedBall, dist_eq_norm] at h
   have hε : (0 : ℝ) < ens1 - ‖unp1 - (QuotientAddGroup.mk' F.toAddSubgroup) lun‖ := by
@@ -43,12 +47,12 @@ private lemma lift_to_nearby_element (𝕜 : Type u_1) [inst : NontriviallyNorme
       exact hm_norm
     exact_mod_cast hms
 
-private noncomputable def liftSequence (𝕜 : Type u_1) [inst : NontriviallyNormedField 𝕜]
-{E : Type u_2} [SeminormedAddCommGroup E]
-  [NormedSpace 𝕜 E] [IsUltrametricDist E]
-  {F : Submodule 𝕜 E} ⦃c : ℕ → E ⧸ F⦄
-  ⦃r : ℕ → NNReal⦄ (hr : StrictAnti r) (hanti : Antitone fun i ↦ closedBall (c i) ↑(r i)) :
-  (t : ℕ) → {x : E // (↑x : E ⧸ F.toAddSubgroup) = c t} := fun n =>
+private noncomputable def liftSequence (𝕜 : Type*) [inst : NontriviallyNormedField 𝕜]
+    {E : Type*} [SeminormedAddCommGroup E]
+    [NormedSpace 𝕜 E] [IsUltrametricDist E]
+    {F : Submodule 𝕜 E} ⦃c : ℕ → E ⧸ F⦄
+    ⦃r : ℕ → NNReal⦄ (hr : StrictAnti r) (hanti : Antitone fun i ↦ closedBall (c i) ↑(r i)) :
+    (t : ℕ) → {x : E // (↑x : E ⧸ F.toAddSubgroup) = c t} := fun n ↦
   match n with
   | 0 => ⟨(c 0).out, Quotient.out_eq' (c 0)⟩
   | 1 => ⟨(c 1).out, Quotient.out_eq' (c 1)⟩
@@ -62,12 +66,12 @@ private noncomputable def liftSequence (𝕜 : Type u_1) [inst : NontriviallyNor
     ) (r m) (hr <| lt_add_one m)
     exact ⟨this.choose, this.choose_spec.1⟩
 
-private lemma liftSequence_prop (𝕜 : Type u_1) [inst : NontriviallyNormedField 𝕜]
-{E : Type u_2} [SeminormedAddCommGroup E]
-  [NormedSpace 𝕜 E] [IsUltrametricDist E]
-  {F : Submodule 𝕜 E} ⦃c : ℕ → E ⧸ F⦄
-  ⦃r : ℕ → NNReal⦄ (hr : StrictAnti r) (hanti : Antitone fun i ↦ closedBall (c i) ↑(r i)) :
-  ∀ i' : ℕ, ‖(liftSequence 𝕜 hr hanti (i'+ 2)).val -
+private lemma liftSequence_prop (𝕜 : Type*) [inst : NontriviallyNormedField 𝕜]
+    {E : Type*} [SeminormedAddCommGroup E]
+    [NormedSpace 𝕜 E] [IsUltrametricDist E]
+    {F : Submodule 𝕜 E} ⦃c : ℕ → E ⧸ F⦄
+    ⦃r : ℕ → NNReal⦄ (hr : StrictAnti r) (hanti : Antitone fun i ↦ closedBall (c i) ↑(r i)) :
+    ∀ i' : ℕ, ‖(liftSequence 𝕜 hr hanti (i'+ 2)).val -
              (liftSequence 𝕜 hr hanti (i' + 1)).val‖ < ↑(r i') := by
   intro i'
   simp only [liftSequence, QuotientAddGroup.mk'_apply]
@@ -94,16 +98,16 @@ Conclusion:
   is spherically complete.
 -/
 theorem Quotient.sphericallyCompleteSpace
-(𝕜 : Type*) [NontriviallyNormedField 𝕜]
-{E : Type u_2} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E]
-[iud : IsUltrametricDist E] [scsk : SphericallyCompleteSpace E]
-{F : Submodule 𝕜 E} :
-SphericallyCompleteSpace (E ⧸ F) := by
+    (𝕜 : Type*) [NontriviallyNormedField 𝕜]
+    {E : Type*} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E]
+    [iud : IsUltrametricDist E] [scsk : SphericallyCompleteSpace E]
+    {F : Submodule 𝕜 E} :
+    SphericallyCompleteSpace (E ⧸ F) := by
   rw [sphericallyCompleteSpace_iff_strictAnti_radius]
   intro c r hr hanti
-  have := @scsk.isSphericallyComplete (fun n => (liftSequence 𝕜 hr hanti (n + 2)).val)
-    (fun n => r (n + 1)) (by
-    refine antitone_nat_of_succ_le fun n => ?_
+  have := @scsk.isSphericallyComplete (fun n ↦ (liftSequence 𝕜 hr hanti (n + 2)).val)
+    (fun n ↦ r (n + 1)) (by
+    refine antitone_nat_of_succ_le fun n ↦ ?_
     intro z hz
     simp only [mem_closedBall] at *
     have := iud.dist_triangle_max z ↑(liftSequence 𝕜 hr hanti (n + 1 + 2))

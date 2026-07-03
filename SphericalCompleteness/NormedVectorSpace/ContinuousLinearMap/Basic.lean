@@ -3,14 +3,18 @@ Copyright (c) 2026 Yijun Yuan. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Yijun Yuan
 -/
-import SphericalCompleteness.NormedVectorSpace.ContinuousLinearMap.SupportingResults
-import SphericalCompleteness.External.Sequence
+module
+
+public import SphericalCompleteness.External.Sequence
+public import SphericalCompleteness.NormedVectorSpace.ContinuousLinearMap.SupportingResults
 
 /-!
 # Spherical completeness of operator spaces
 
 Spherical completeness for spaces of continuous linear maps.
 -/
+
+@[expose] public section
 
 open Metric
 
@@ -32,10 +36,10 @@ This is useful for transferring spherical completeness to function-like spaces o
 enabling fixed point / completeness arguments in non-Archimedean functional analysis.
 -/
 instance instSphericallyCompleteSpaceContinuousLinearMap {𝕜 : Type*} [NontriviallyNormedField 𝕜]
-{E : Type*} [SeminormedAddCommGroup E] [IsUltrametricDist E] [NormedSpace 𝕜 E]
-{F : Type*} [SeminormedAddCommGroup F] [IsUltrametricDist F]
-[NormedSpace 𝕜 F] [SphericallyCompleteSpace F] :
-SphericallyCompleteSpace (E →L[𝕜] F) := by
+    {E : Type*} [SeminormedAddCommGroup E] [IsUltrametricDist E] [NormedSpace 𝕜 E]
+    {F : Type*} [SeminormedAddCommGroup F] [IsUltrametricDist F]
+    [NormedSpace 𝕜 F] [SphericallyCompleteSpace F] :
+    SphericallyCompleteSpace (E →L[𝕜] F) := by
   rw [sphericallyCompleteSpace_iff_strictAnti_radius]
   intro c' r' hsar' hanti'
   if hseq : ∀ n : ℕ, ∃ N, ∀ i > N, c' n ≠ c' i then
@@ -44,19 +48,19 @@ SphericallyCompleteSpace (E →L[𝕜] F) := by
   let r := r' ∘ φ
   have hsar : StrictAnti r := StrictAnti.comp_strictMono hsar' hφ.1
   have hanti : Antitone fun i ↦ closedBall (c i) ↑(r i) :=
-    fun m n hmn => hanti' <| hφ.1.monotone hmn
-  have hrnneg : ∀ i, 0 < r i := fun i =>
+    fun m n hmn ↦ hanti' <| hφ.1.monotone hmn
+  have hrnneg : ∀ i, 0 < r i := fun i ↦
     lt_of_le_of_lt zero_le <| hsar' (Nat.lt_succ_self (φ i))
   let 𝒰 := c '' Set.univ
   have := @exists_extension_opNorm_le 𝕜 _ E _ _ _ ⊥ F _ _ _ _
-    0 𝒰 ⟨c 0, 0, Set.mem_univ 0, rfl⟩ (fun U => r U.prop.out.choose) (fun _ => hrnneg _) (by
+    0 𝒰 ⟨c 0, 0, Set.mem_univ 0, rfl⟩ (fun U ↦ r U.prop.out.choose) (fun _ ↦ hrnneg _) (by
     intro U V
     set nu := U.prop.out.choose with hnu
     set nv := V.prop.out.choose with hnv
     have hU : U.val = c nu := by simpa [hnu] using U.prop.out.choose_spec.2.symm
     have hV : V.val = c nv := by simpa [hnv] using V.prop.out.choose_spec.2.symm
     rw [hU, hV]
-    rcases @trichotomous ℕ (fun a b => a < b) inferInstance nu nv with hlt | heq | hgt
+    rcases @trichotomous ℕ (fun a b ↦ a < b) inferInstance nu nv with hlt | heq | hgt
     · rw [show max (↑(r nu) : ℝ) ↑(r nv) = ↑(max (r nu) (r nv)) from rfl,
         max_eq_left <| le_of_lt (hsar hlt), ← dist_eq_norm, dist_comm, ← mem_closedBall]
       exact (hanti <| le_of_lt hlt) (by simp [mem_closedBall])

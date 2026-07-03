@@ -1,17 +1,35 @@
-import SphericalCompleteness.NormedVectorSpace.Orthogonal.Basic
-import Mathlib.LinearAlgebra.FiniteDimensional.Defs
-import Mathlib.LinearAlgebra.Dimension.RankNullity
-import Mathlib.LinearAlgebra.Dimension.DivisionRing
+/-
+Copyright (c) 2026 Yijun Yuan. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Yijun Yuan
+-/
+module
+
+public import Mathlib.LinearAlgebra.Dimension.DivisionRing
+public import Mathlib.LinearAlgebra.Dimension.RankNullity
+public import Mathlib.LinearAlgebra.FiniteDimensional.Defs
+public import SphericalCompleteness.NormedVectorSpace.Orthogonal.Basic
+
+/-!
+# Orthogonality: orthogonal decomposition and existence of orthogonal vectors
+
+Building on the definition of metric orthogonality `x ⟂ₘ F`, this file constructs the isometric
+direct-sum decomposition `(𝕜 ∙ x) × F ≃ₛₗᵢ (𝕜 ∙ x) + F` attached to a vector orthogonal to a
+subspace, and proves that in a finite-dimensional ultrametric normed space a spherically complete
+subspace of strictly smaller dimension always admits a nonzero vector orthogonal to it.
+-/
+
+@[expose] public section
 
 open Metric
 open Filter
 
 namespace SphericallyCompleteSpace
 
-private lemma smul_morth_of_morth' (𝕜 : Type*) [inst : NontriviallyNormedField 𝕜]
-{E : Type u_2} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
-(x : E) (F : Subspace 𝕜 E)
-  (hxF : x ⟂ₘ F) (a : E) (ha : a ∈ Submodule.span 𝕜 {x}) : a ⟂ₘ F := by
+private lemma smul_morth_of_morth' (𝕜 : Type*) [NontriviallyNormedField 𝕜]
+    {E : Type*} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
+    (x : E) (F : Subspace 𝕜 E)
+    (hxF : x ⟂ₘ F) (a : E) (ha : a ∈ Submodule.span 𝕜 {x}) : a ⟂ₘ F := by
   obtain ⟨r, rfl⟩ := Submodule.mem_span_singleton.mp ha
   exact smul_morth_of_morth r hxF
 
@@ -27,10 +45,10 @@ compatible with the norm, yielding an isometry.
 This is stated as an isometric linear equivalence (`≃ₛₗᵢ[RingHom.id 𝕜]`), i.e. a linear
 equivalence that preserves norms.
 -/
-noncomputable def direct_prod_iso_sum_of_orth (𝕜 : Type*) [NontriviallyNormedField 𝕜]
-{E : Type u_2} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
-(x : E) (F : Subspace 𝕜 E) (hxF : x ⟂ₘ F) :
-(Submodule.span 𝕜 {x}) × F≃ₛₗᵢ[RingHom.id 𝕜] (Submodule.span 𝕜 {x}) + F where
+noncomputable def directProdIsoSumOfOrth (𝕜 : Type*) [NontriviallyNormedField 𝕜]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
+    (x : E) (F : Subspace 𝕜 E) (hxF : x ⟂ₘ F) :
+    (Submodule.span 𝕜 {x}) × F ≃ₛₗᵢ[RingHom.id 𝕜] (Submodule.span 𝕜 {x}) + F where
   toFun z := ⟨z.1.val + z.2.val, by
     simp only [Submodule.add_eq_sup]
     exact Submodule.add_mem_sup z.1.prop z.2.prop
@@ -50,8 +68,8 @@ noncomputable def direct_prod_iso_sum_of_orth (𝕜 : Type*) [NontriviallyNormed
     intro a ha b hab
     if hh : a = 0 ∨ b = 0 then
       cases hh with
-      |inl hh => simp [hh]
-      |inr hh => simp [hh]
+      | inl hh => simp [hh]
+      | inr hh => simp [hh]
     else
       refine eq_of_le_of_not_lt (IsUltrametricDist.norm_add_le_max _ _) ?_
       by_contra hc
@@ -110,14 +128,17 @@ noncomputable def direct_prod_iso_sum_of_orth (𝕜 : Type*) [NontriviallyNormed
     simp only [Submodule.add_eq_sup, eq_mpr_eq_cast, cast_eq,
       (Submodule.mem_sup.mp t.prop).choose_spec.2.choose_spec.2, Subtype.coe_eta]
 
+universe u
+
 section
 variable (𝕜 : Type*) [NontriviallyNormedField 𝕜]
-  {E : Type*} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [iud : IsUltrametricDist E]
+  {E : Type u} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [iud : IsUltrametricDist E]
   (F : Subspace 𝕜 E) [sF : SphericallyCompleteSpace F] [FiniteDimensional 𝕜 E]
 
 omit sF [FiniteDimensional 𝕜 E] in
 private lemma res_ball (a : E) :
-∀ s > infDist a F, ∃ z : F, (closedBall a s) ∩ ↑F = ((fun x : F => (x : E)) '' closedBall z s) := by
+    ∀ s > infDist a F, ∃ z : F,
+      (closedBall a s) ∩ ↑F = ((fun x : F ↦ (x : E)) '' closedBall z s) := by
   intro s hs
   rcases (Metric.infDist_lt_iff (Submodule.nonempty F)).1 hs with ⟨y, hy⟩
   use ⟨y, hy.1⟩
@@ -125,7 +146,7 @@ private lemma res_ball (a : E) :
   simp only [Set.mem_inter_iff, mem_closedBall, SetLike.mem_coe, Set.mem_image, Subtype.exists,
     exists_and_right, exists_eq_right]
   constructor
-  · refine fun h => ⟨h.2, ?_⟩
+  · refine fun h ↦ ⟨h.2, ?_⟩
     rcases (le_sup_iff.1 <| iud.dist_triangle_max x a y) with hxy | hay
     · exact le_trans hxy h.1
     · exact le_of_lt <| lt_of_le_of_lt hay hy.2
@@ -141,13 +162,15 @@ Given a finite-dimensional ultrametric normed space `E` over a nontrivially norm
 and a subspace `F` which is spherically complete, if `F` has strictly smaller `finrank` than `E`,
 then there exists a nonzero vector `x : E` that is `M`-orthogonal to `F` (notation `x ⟂ₘ F`).
 
-The proof begins by coercing the strict inequality on `Module.finrank` from `Nat` to `Cardinal`
-to leverage cardinality-based dimension arguments in subsequent steps.
+This is the inductive step that lets one build an orthogonal complement one dimension at a time:
+as long as `F` does not exhaust `E`, spherical completeness of `F` guarantees a best approximation
+of any vector outside `F`, and the corresponding residual is a nonzero vector realizing its full
+norm as its distance to `F`.
 -/
 theorem exists_morth_vec_of_not_full_finrank
-(hF : Module.finrank 𝕜 F < Module.finrank 𝕜 E) :
-∃ (x : E), x ≠ 0 ∧ (x ⟂ₘ F) := by
-  replace hF : (↑(Module.finrank 𝕜 ↥F) : Cardinal.{u_2}) < ↑(Module.finrank 𝕜 E) :=
+    (hF : Module.finrank 𝕜 F < Module.finrank 𝕜 E) :
+    ∃ (x : E), x ≠ 0 ∧ (x ⟂ₘ F) := by
+  replace hF : (↑(Module.finrank 𝕜 ↥F) : Cardinal.{u}) < ↑(Module.finrank 𝕜 E) :=
     Nat.cast_lt.mpr hF
   repeat rw [Module.finrank_eq_rank'] at hF
   rcases Submodule.exists_smul_notMem_of_rank_lt hF with ⟨a, ha⟩
@@ -157,7 +180,7 @@ theorem exists_morth_vec_of_not_full_finrank
     rcases h with ⟨z, hz⟩
     use a - z
     simp only [MOrth, hz.2.1]
-    refine ⟨fun hc => ((sub_eq_zero.1 hc) ▸ ha) hz.1, eq_of_le_of_ge ?_ ?_⟩
+    refine ⟨fun hc ↦ ((sub_eq_zero.1 hc) ▸ ha) hz.1, eq_of_le_of_ge ?_ ?_⟩
     · rw [Metric.le_infDist <| Submodule.nonempty F]
       intro w hw
       rw [dist_eq_norm, (by simp only [sub_sub_sub_cancel_right] : a - w = (a - z) - (w - z)),
@@ -167,14 +190,14 @@ theorem exists_morth_vec_of_not_full_finrank
       intro w hw
       rw [dist_eq_norm, (sub_sub a z w : a - z - w = a - (z + w)), ← dist_eq_norm]
       exact infDist_le_dist_of_mem <| add_mem hz.1 hw
-  have := @sF.isSphericallyComplete (fun i => (res_ball 𝕜 F a (infDist a F + 1 / (i + 1))
+  have := @sF.isSphericallyComplete (fun i ↦ (res_ball 𝕜 F a (infDist a F + 1 / (i + 1))
     (by simp only [one_div, gt_iff_lt, lt_add_iff_pos_right, inv_pos, Nat.cast_add_one_pos]
-      )).choose) (fun i => ⟨infDist a F + 1 / (i + 1), by
+      )).choose) (fun i ↦ ⟨infDist a F + 1 / (i + 1), by
     refine add_nonneg infDist_nonneg ?_
     simp only [one_div, inv_nonneg]
     linarith
     ⟩) (by
-    refine antitone_nat_of_succ_le <| fun n => ?_
+    refine antitone_nat_of_succ_le <| fun n ↦ ?_
     simp only [Nat.cast_add, Nat.cast_one, one_div, Set.le_eq_subset]
     intro x hx
     have := (res_ball 𝕜 F a (infDist a F + 1 / (n + 1 + 1)) (by simp; linarith)).choose_spec
@@ -203,7 +226,7 @@ theorem exists_morth_vec_of_not_full_finrank
   simp only [hz, true_and]
   replace hfin : ∀ i : ℕ, z ∈ closedBall a (infDist a ↑F + 1 / (↑i + 1)) := by
     intro i
-    have : z ∈ ((fun x : F => (x : E)) '' closedBall ((res_ball 𝕜 F a (infDist a F + 1 / (i + 1))
+    have : z ∈ ((fun x : F ↦ (x : E)) '' closedBall ((res_ball 𝕜 F a (infDist a F + 1 / (i + 1))
     (by simp only [one_div, gt_iff_lt, lt_add_iff_pos_right, inv_pos,
       Nat.cast_add_one_pos])).choose) (infDist a ↑F + 1 / (i + 1))) := by
       simp only [mem_closedBall, one_div, Set.mem_image, Subtype.exists, exists_and_right,
@@ -213,13 +236,13 @@ theorem exists_morth_vec_of_not_full_finrank
       (by simp only [one_div, gt_iff_lt, lt_add_iff_pos_right,
         inv_pos, Nat.cast_add_one_pos])).choose_spec] at this
     exact Set.mem_of_mem_inter_left this
-  refine ⟨eq_of_le_of_ge ?_ ?_ , fun hc => ha <| (sub_eq_zero.1 hc) ▸ hz⟩
+  refine ⟨eq_of_le_of_ge ?_ ?_ , fun hc ↦ ha <| (sub_eq_zero.1 hc) ▸ hz⟩
   · simp only [one_div, mem_closedBall, dist_comm, dist_eq_norm] at hfin
-    refine le_of_forall_pos_le_add (fun ε hε => ?_)
+    refine le_of_forall_pos_le_add (fun ε hε ↦ ?_)
     refine le_trans (hfin (⌈1 / ε⌉₊ + 1)) ?_
     simp only [one_div, Nat.cast_add, Nat.cast_one, add_le_add_iff_left]
     field_simp
-    rw [mul_add,mul_add, add_assoc]
+    rw [mul_add, mul_add, add_assoc]
     have : ε * ↑⌈1 / ε⌉₊ ≥ 1 := by
       simpa only [one_div, ge_iff_le] using (inv_le_iff_one_le_mul₀' hε).mp <| Nat.le_ceil (ε⁻¹)
     linarith

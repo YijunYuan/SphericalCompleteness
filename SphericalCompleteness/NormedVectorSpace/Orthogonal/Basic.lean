@@ -3,13 +3,17 @@ Copyright (c) 2026 Yijun Yuan. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Yijun Yuan
 -/
-import SphericalCompleteness.NormedVectorSpace.Orthogonal.Defs
+module
+
+public import SphericalCompleteness.NormedVectorSpace.Orthogonal.Defs
 
 /-!
 # Orthogonality: basic results
 
 Basic results on (norm) orthogonality in ultrametric normed spaces.
 -/
+
+@[expose] public section
 
 open Metric
 
@@ -20,7 +24,7 @@ variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
   {E : Type*} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [iud : IsUltrametricDist E]
 
 private lemma orth_of_orth {x y : E}
-  (h : x ⟂[𝕜] y) : y ⟂[𝕜] x := by
+    (h : x ⟂[𝕜] y) : y ⟂[𝕜] x := by
   unfold Orth at *
   refine eq_of_le_of_not_lt ?_ ?_
   · have := @infDist_le_dist_of_mem E _ ↑(Submodule.span 𝕜 {x}) y 0 (by simp)
@@ -47,11 +51,11 @@ private lemma orth_of_orth {x y : E}
     linarith
 
 lemma orth_symm {x y : E} :
-  (x ⟂[𝕜] y) ↔ (y ⟂[𝕜] x) :=
+    (x ⟂[𝕜] y) ↔ (y ⟂[𝕜] x) :=
   ⟨orth_of_orth, orth_of_orth⟩
 
 lemma orth_iff_birkhoff_james_orth
-(x y : E) : (x ⟂[𝕜] y) ↔ ∀ c : 𝕜, ‖x‖ ≤ ‖x + c • y‖ := by
+    (x y : E) : (x ⟂[𝕜] y) ↔ ∀ c : 𝕜, ‖x‖ ≤ ‖x + c • y‖ := by
   constructor
   · intro h c
     have : x + c • y = x - (-c) • y := by simp only [neg_smul, sub_neg_eq_add]
@@ -74,7 +78,7 @@ lemma orth_iff_birkhoff_james_orth
       simp only [SetLike.mem_coe, zero_mem]
 
 lemma orth_iff {x y : E} :
-(x ⟂[𝕜] y) ↔ (∀ α β : 𝕜, ‖α • x + β • y‖ = max ‖α • x‖ ‖β • y‖) := by
+    (x ⟂[𝕜] y) ↔ (∀ α β : 𝕜, ‖α • x + β • y‖ = max ‖α • x‖ ‖β • y‖) := by
   constructor
   · intro h a b
     if hab : a = 0 ∨ b = 0 then
@@ -129,7 +133,7 @@ lemma orth_iff {x y : E} :
     simp only [h, le_sup_left]
 
 theorem smul_orth_of_orth {x y : E}
-(a : 𝕜) : (x ⟂[𝕜] y) → ((a • x) ⟂[𝕜] y) := by
+    (a : 𝕜) : (x ⟂[𝕜] y) → ((a • x) ⟂[𝕜] y) := by
   intro h
   unfold Orth at *
   if ha : a = 0 then
@@ -141,26 +145,26 @@ theorem smul_orth_of_orth {x y : E}
   rw [norm_smul, ← h, ← infDist_smul₀ ha, smul_submodule_eq_self ha]
 
 theorem smul_orth_iff_orth_of_nonzero {x y : E}
-{a : 𝕜} (ha : a ≠ 0) : (x ⟂[𝕜] y) ↔ ((a • x) ⟂[𝕜] y) := by
-  refine ⟨smul_orth_of_orth a, fun h => ?_⟩
+    {a : 𝕜} (ha : a ≠ 0) : (x ⟂[𝕜] y) ↔ ((a • x) ⟂[𝕜] y) := by
+  refine ⟨smul_orth_of_orth a, fun h ↦ ?_⟩
   apply smul_orth_of_orth a⁻¹ at h
   rwa [inv_smul_smul₀ ha x] at h
 
 theorem orth_smul_of_orth {x y : E}
-(a : 𝕜) : (x ⟂[𝕜] y) → (x ⟂[𝕜] (a • y)) := by
+    (a : 𝕜) : (x ⟂[𝕜] y) → (x ⟂[𝕜] (a • y)) := by
   intro h
   rw [orth_symm] at *
   exact smul_orth_of_orth a h
 
 theorem orth_smul_iff_orth_of_nonzero {x y : E}
-{a : 𝕜} (ha : a ≠ 0) : (x ⟂[𝕜] y) ↔ (x ⟂[𝕜] (a • y)) := by
+    {a : 𝕜} (ha : a ≠ 0) : (x ⟂[𝕜] y) ↔ (x ⟂[𝕜] (a • y)) := by
   nth_rw 1 [orth_symm]
   nth_rw 2 [orth_symm]
   exact smul_orth_iff_orth_of_nonzero ha
 
 lemma morth_iff_forall_orth
-(x : E) (F : Subspace 𝕜 E) :
-  (x ⟂ₘ F) ↔ ∀ y ∈ F, (x ⟂[𝕜] y) := by
+    (x : E) (F : Subspace 𝕜 E) :
+    (x ⟂ₘ F) ↔ ∀ y ∈ F, (x ⟂[𝕜] y) := by
   constructor
   · intro h y hy
     refine eq_of_le_of_not_lt ?_ ?_
@@ -183,32 +187,32 @@ end
 
 -- This is important, but it requires `NormedAddCommGroup` instead of `SeminormedAddCommGroup`
 theorem eq_zero_of_morth_of_mem {𝕜 : Type*} [NontriviallyNormedField 𝕜]
-{E : Type u_2} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
-{x : E} {F : Subspace 𝕜 E} : x ∈ F → (x ⟂ₘ F) → x = 0 :=
-  fun h1 h2 => norm_eq_zero.mp (infDist_zero_of_mem h1 ▸ h2 : (0 : ℝ) = ‖x‖).symm
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
+    {x : E} {F : Subspace 𝕜 E} : x ∈ F → (x ⟂ₘ F) → x = 0 :=
+  fun h1 h2 ↦ norm_eq_zero.mp (infDist_zero_of_mem h1 ▸ h2 : (0 : ℝ) = ‖x‖).symm
 
 section
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
   {E : Type*} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [iud : IsUltrametricDist E]
 
 theorem smul_morth_of_morth
-{x : E} {F : Subspace 𝕜 E} (a : 𝕜) :
-  (x ⟂ₘ F) → ((a • x) ⟂ₘ F) := by
+    {x : E} {F : Subspace 𝕜 E} (a : 𝕜) :
+    (x ⟂ₘ F) → ((a • x) ⟂ₘ F) := by
   intro h
   rw [morth_iff_forall_orth] at *
   intro y hy
   exact smul_orth_of_orth a (h y hy)
 
 theorem smul_morth_iff_morth_of_nonzero
-{x : E} {F : Subspace 𝕜 E} {a : 𝕜} (ha : a ≠ 0) :
-  (x ⟂ₘ F) ↔ ((a • x) ⟂ₘ F) := by
-  refine ⟨smul_morth_of_morth a, fun h => ?_⟩
+    {x : E} {F : Subspace 𝕜 E} {a : 𝕜} (ha : a ≠ 0) :
+    (x ⟂ₘ F) ↔ ((a • x) ⟂ₘ F) := by
+  refine ⟨smul_morth_of_morth a, fun h ↦ ?_⟩
   apply smul_morth_of_morth a⁻¹ at h
   rwa [inv_smul_smul₀ ha x] at h
 
 theorem not_morth_iff_exists_dist_lt_norm
-{x : E} {F : Subspace 𝕜 E} :
-  ¬ (x ⟂ₘ F) ↔ ∃ y ∈ F, dist x y < ‖x‖ := by
+    {x : E} {F : Subspace 𝕜 E} :
+    ¬ (x ⟂ₘ F) ↔ ∃ y ∈ F, dist x y < ‖x‖ := by
   unfold MOrth
   constructor
   · intro h
@@ -221,20 +225,20 @@ theorem not_morth_iff_exists_dist_lt_norm
     contrapose h
     push Not
     rw [← h]
-    exact fun z hz => infDist_le_dist_of_mem hz
+    exact fun z hz ↦ infDist_le_dist_of_mem hz
 
 theorem sorth_iff_forall_orth
-(F1 F2 : Subspace 𝕜 E) : (F1 ⟂ₛ F2) ↔ ∀ x ∈ F1, ∀ y ∈ F2, (x ⟂[𝕜] y) := by
+    (F1 F2 : Subspace 𝕜 E) : (F1 ⟂ₛ F2) ↔ ∀ x ∈ F1, ∀ y ∈ F2, (x ⟂[𝕜] y) := by
   simp only [SOrth, morth_iff_forall_orth]
 
 private lemma sorth_of_sorth
-{F1 F2 : Subspace 𝕜 E} : (F1 ⟂ₛ F2) → (F2 ⟂ₛ F1) := by
+    {F1 F2 : Subspace 𝕜 E} : (F1 ⟂ₛ F2) → (F2 ⟂ₛ F1) := by
   intro h
   simp only [SOrth, morth_iff_forall_orth] at *
-  exact fun x hx y hy => orth_of_orth (h y hy x hx)
+  exact fun x hx y hy ↦ orth_of_orth (h y hy x hx)
 
 theorem sorth_symm
-{F1 F2 : Subspace 𝕜 E} : (F1 ⟂ₛ F2) ↔ (F2 ⟂ₛ F1) :=
+    {F1 F2 : Subspace 𝕜 E} : (F1 ⟂ₛ F2) ↔ (F2 ⟂ₛ F1) :=
   ⟨sorth_of_sorth, sorth_of_sorth⟩
 
 end

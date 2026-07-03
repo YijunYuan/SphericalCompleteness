@@ -3,13 +3,17 @@ Copyright (c) 2026 Yijun Yuan. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Yijun Yuan
 -/
-import SphericalCompleteness.NormedVectorSpace.ContinuousLinearMap.HahnBanach
+module
+
+public import SphericalCompleteness.NormedVectorSpace.ContinuousLinearMap.HahnBanach
 
 /-!
 # Immediate extensions
 
 Results on immediate extensions of normed vector spaces.
 -/
+
+@[expose] public section
 
 open Metric
 
@@ -26,9 +30,9 @@ where `v ⟂ₘ S` is the predicate expressing metric orthogonality of `v` to th
 This rules out nontrivial orthogonal complements to `LinearMap.range f`.
 -/
 def IsImmediate {𝕜 : Type*} [NontriviallyNormedField 𝕜]
-{E : Type u} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
-{F : Type v} [SeminormedAddCommGroup F] [NormedSpace 𝕜 F] [IsUltrametricDist F]
-(f : E →ₗᵢ[𝕜] F) : Prop :=
+    {E : Type u} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
+    {F : Type v} [SeminormedAddCommGroup F] [NormedSpace 𝕜 F] [IsUltrametricDist F]
+    (f : E →ₗᵢ[𝕜] F) : Prop :=
 ∀ v : F, (v ⟂ₘ LinearMap.range f.toLinearMap) → v = 0
 
 /--
@@ -43,25 +47,25 @@ In other words, `E` admits no proper immediate continuous linear extensions: any
 continuous linear map out of `E` must hit all of its codomain.
 -/
 def MaximallyComplete (𝕜 : Type*) [NontriviallyNormedField 𝕜]
-(E : Type u) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E] : Prop :=
+    (E : Type u) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E] : Prop :=
 ∀ {F : Type u} [NormedAddCommGroup F] [NormedSpace 𝕜 F] [IsUltrametricDist F]
 (f : E →ₗᵢ[𝕜] F), IsImmediate f → Function.Surjective f
 
 private noncomputable def LinearIsometry.weakInv {𝕜 : Type*} [NontriviallyNormedField 𝕜]
-{E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
-{F : Type*} [NormedAddCommGroup F] [NormedSpace 𝕜 F]
-(f : E →ₗᵢ[𝕜] F) := f.equivRange.symm.toLinearIsometry
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
+    {F : Type*} [NormedAddCommGroup F] [NormedSpace 𝕜 F]
+    (f : E →ₗᵢ[𝕜] F) := f.equivRange.symm.toLinearIsometry
 
 private lemma norm_map_of_isImmediate {𝕜 : Type*}
-  [NontriviallyNormedField 𝕜] {E : Type u_2} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
-  [IsUltrametricDist E] {F : Type u_3} [NormedAddCommGroup F] [inst_5 : NormedSpace 𝕜 F]
-  [IsUltrametricDist F] {H : Type u_4} [NormedAddCommGroup H] [NormedSpace 𝕜 H]
-  [IsUltrametricDist H] [SphericallyCompleteSpace H] (f : E →ₗᵢ[𝕜] F) (hf : IsImmediate f)
-  (g : E →ₗᵢ[𝕜] H) (h : F →L[𝕜] H)
-  (hf2 : ‖h‖ = ‖g.toContinuousLinearMap.comp (LinearIsometry.weakInv f).toContinuousLinearMap‖)
-  (hf1 : ∀ (v : F) (x : E) (h_1 : f x = v), h v = g ((LinearIsometry.weakInv f) ⟨v, Exists.intro
+    [NontriviallyNormedField 𝕜] {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
+    [IsUltrametricDist E] {F : Type*} [NormedAddCommGroup F] [inst_5 : NormedSpace 𝕜 F]
+    [IsUltrametricDist F] {H : Type*} [NormedAddCommGroup H] [NormedSpace 𝕜 H]
+    [IsUltrametricDist H] [SphericallyCompleteSpace H] (f : E →ₗᵢ[𝕜] F) (hf : IsImmediate f)
+    (g : E →ₗᵢ[𝕜] H) (h : F →L[𝕜] H)
+    (hf2 : ‖h‖ = ‖g.toContinuousLinearMap.comp (LinearIsometry.weakInv f).toContinuousLinearMap‖)
+    (hf1 : ∀ (v : F) (x : E) (h_1 : f x = v), h v = g ((LinearIsometry.weakInv f) ⟨v, Exists.intro
     x h_1⟩))
-  (v : F) : ‖(↑h : F →ₗ[𝕜] H) v‖ = ‖v‖ := by
+    (v : F) : ‖(↑h : F →ₗ[𝕜] H) v‖ = ‖v‖ := by
   refine eq_of_le_of_ge ?_ ?_
   · suffices hh : ‖h‖ ≤ 1 by
       have := (ContinuousLinearMap.opNorm_le_iff zero_le_one).1 hh v
@@ -122,13 +126,13 @@ into a spherically complete target extends uniquely-existentially to an isometri
 The conclusion is stated using an explicit `@LinearIsometry.comp` to avoid elaboration issues.
 -/
 theorem exists_linearIsometry_comp_eq_of_isImmediate {𝕜 : Type*} [NontriviallyNormedField 𝕜]
-{E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
-{F : Type*} [NormedAddCommGroup F] [NormedSpace 𝕜 F] [IsUltrametricDist F]
-{H : Type*} [NormedAddCommGroup H] [NormedSpace 𝕜 H] [IsUltrametricDist H]
-[SphericallyCompleteSpace H]
-(f : E →ₗᵢ[𝕜] F) (hf : IsImmediate f)
-(g : E →ₗᵢ[𝕜] H) :
-∃ (h : F →ₗᵢ[𝕜] H), LinearIsometry.comp (h : F →ₗᵢ[𝕜] H) (f : E →ₗᵢ[𝕜] F) = g := by
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
+    {F : Type*} [NormedAddCommGroup F] [NormedSpace 𝕜 F] [IsUltrametricDist F]
+    {H : Type*} [NormedAddCommGroup H] [NormedSpace 𝕜 H] [IsUltrametricDist H]
+    [SphericallyCompleteSpace H]
+    (f : E →ₗᵢ[𝕜] F) (hf : IsImmediate f)
+    (g : E →ₗᵢ[𝕜] H) :
+    ∃ (h : F →ₗᵢ[𝕜] H), LinearIsometry.comp (h : F →ₗᵢ[𝕜] H) (f : E →ₗᵢ[𝕜] F) = g := by
   rcases hahn_banach' _
     (LinearIsometry.comp g (LinearIsometry.weakInv f)).toContinuousLinearMap with ⟨h, hf1, hf2⟩
   simp only [LinearMap.mem_range, forall_exists_index] at hf1
@@ -139,7 +143,7 @@ theorem exists_linearIsometry_comp_eq_of_isImmediate {𝕜 : Type*} [Nontriviall
     toFun := h.toFun,
     map_add' := h.map_add',
     map_smul' := h.map_smul',
-    norm_map' := fun v => norm_map_of_isImmediate f hf g h hf2' hf1 v
+    norm_map' := fun v ↦ norm_map_of_isImmediate f hf g h hf2' hf1 v
   }
   use h
   ext z

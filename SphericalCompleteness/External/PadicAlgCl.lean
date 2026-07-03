@@ -3,11 +3,13 @@ Copyright (c) 2026 Yijun Yuan. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Yijun Yuan
 -/
-import Mathlib.NumberTheory.Padics.Complex
-import Mathlib.Analysis.SpecialFunctions.Log.Base
-import Mathlib.Topology.Bases
-import Mathlib.Algebra.AlgebraicCard
-import Mathlib.Analysis.Normed.Field.Approximation
+module
+
+public import Mathlib.Algebra.AlgebraicCard
+public import Mathlib.Analysis.Normed.Field.Approximation
+public import Mathlib.Analysis.SpecialFunctions.Log.Base
+public import Mathlib.NumberTheory.Padics.Complex
+public import Mathlib.Topology.Bases
 
 /-!
 # Algebraic closure of the `p`-adics
@@ -15,14 +17,16 @@ import Mathlib.Analysis.Normed.Field.Approximation
 Auxiliary results on the algebraic closure of the `p`-adic numbers.
 -/
 
+@[expose] public section
+
 open PadicAlgCl
 open Polynomial
 
 variable (p : ℕ) [hp : Fact (Nat.Prime p)]
 
 private lemma exists_rat_pow_p_norm_between (a b : ℝ) (ha : 0 ≤ a) (hab : a < b) : ∃ c : ℚ,
-  a < ‖(p : (PadicAlgCl p))‖ ^ (c : ℝ) ∧
-  ‖(p : (PadicAlgCl p))‖ ^ (c : ℝ) < b := by
+    a < ‖(p : (PadicAlgCl p))‖ ^ (c : ℝ) ∧
+    ‖(p : (PadicAlgCl p))‖ ^ (c : ℝ) < b := by
   let a' := a + (b - a) / 2
   have ha' : 0 < a' := by unfold a'; linarith
   have ha'b : a' < b := by unfold a'; linarith
@@ -75,7 +79,7 @@ noncomputable instance instDenselyNormedFieldPadicAlgCl : DenselyNormedField (Pa
     replace hz' : ‖z‖ = ‖(p : PadicAlgCl p)‖ ^ (↑r : ℝ) := by
       rw [← Rat.num_div_den r]
       simp only [Rat.cast_div, Rat.cast_intCast, Rat.cast_natCast]
-      apply_fun (fun x => x ^ (r.den : ℝ)⁻¹) at hz'
+      apply_fun (fun x ↦ x ^ (r.den : ℝ)⁻¹) at hz'
       repeat rw [← Real.rpow_natCast] at hz'
       rw [Real.rpow_rpow_inv (norm_nonneg z) (by simp)] at hz'
       rw [hz', Real.rpow_inv_eq (zpow_nonneg (norm_nonneg _) r.num)
@@ -95,7 +99,7 @@ Such an instance is often used to enable results and constructions that require 
 instance instSeparableSpacePadicAlgCl : TopologicalSpace.SeparableSpace (PadicAlgCl p) where
   exists_countable_dense := by
     refine ⟨{z : PadicAlgCl p | IsAlgebraic ℚ z}, Algebraic.countable ℚ (PadicAlgCl p),
-      Metric.dense_iff.mpr <| fun α ε hε => ?_⟩
+      Metric.dense_iff.mpr <| fun α ε hε ↦ ?_⟩
     rcases (PadicAlgCl.isAlgebraic p).isAlgebraic α with ⟨f', hfne', hfz'⟩
     set f := f' * C (f'.leadingCoeff)⁻¹ with hf_def
     have hf : Monic f := monic_mul_leadingCoeff_inv hfne'
@@ -115,7 +119,7 @@ instance instSeparableSpacePadicAlgCl : TopologicalSpace.SeparableSpace (PadicAl
     rcases exists_aroots_norm_sub_lt_of_norm_coeff_sub_lt
       hδpos (f := f) (g := g.map (algebraMap ℚ ℚ_[p])) hfz hf (hgm.map _)
       (by rw [natDegree_map_eq_of_injective (algebraMap ℚ ℚ_[p]).injective]; omega)
-      (fun i => by simpa using hgcoeff i) (IsAlgClosed.splits _) with ⟨β, hβroot, hβnorm⟩
+      (fun i ↦ by simpa using hgcoeff i) (IsAlgClosed.splits _) with ⟨β, hβroot, hβnorm⟩
     refine ⟨β, ?_, ?_⟩
     · rw [Metric.mem_ball, dist_comm, dist_eq_norm]
       refine hβnorm.trans_le ?_

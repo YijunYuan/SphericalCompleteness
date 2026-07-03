@@ -3,13 +3,17 @@ Copyright (c) 2026 Yijun Yuan. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Yijun Yuan
 -/
-import SphericalCompleteness.NormedVectorSpace.Orthogonal.OrthComp
+module
+
+public import SphericalCompleteness.NormedVectorSpace.Orthogonal.OrthComp
 
 /-!
 # Non-Archimedean Hahn-Banach
 
 The non-Archimedean Hahn-Banach extension theorem.
 -/
+
+@[expose] public section
 
 open ContinuousLinearMap
 
@@ -36,20 +40,20 @@ This is a norm-preserving extension result (isometric on operator norm) for cont
 linear maps from a spherically complete subspace in a non-Archimedean (ultrametric) context.
 -/
 theorem hahn_banach [hd : SphericallyCompleteSpace D] (f : D →L[𝕜] F) :
-  ∃ f' : E →L[𝕜] F, (∀ v : E, (hv : v ∈ D) → f' v = f ⟨v, hv⟩) ∧ ‖f'‖ = ‖f‖ := by
-  use comp f (OrthProj 𝕜 D)
+    ∃ f' : E →L[𝕜] F, (∀ v : E, (hv : v ∈ D) → f' v = f ⟨v, hv⟩) ∧ ‖f'‖ = ‖f‖ := by
+  use comp f (orthProj 𝕜 D)
   constructor
   · intro v hv
-    rw [comp_apply, (SetLike.coe_eq_coe.mp <| OrthProj_id 𝕜 D v hv : ((OrthProj 𝕜 D) v) = ⟨v,hv⟩)]
+    rw [comp_apply, (SetLike.coe_eq_coe.mp <| orthProj_id 𝕜 D v hv : ((orthProj 𝕜 D) v) = ⟨v,hv⟩)]
   · apply le_antisymm
-    · calc ‖f.comp (OrthProj 𝕜 D)‖ ≤ ‖f‖ * ‖OrthProj 𝕜 D‖ := opNorm_comp_le f _
-        _ ≤ ‖f‖ * 1 := by gcongr; exact norm_OrthProj_le_one 𝕜 D
+    · calc ‖f.comp (orthProj 𝕜 D)‖ ≤ ‖f‖ * ‖orthProj 𝕜 D‖ := opNorm_comp_le f _
+        _ ≤ ‖f‖ * 1 := by gcongr; exact norm_orthProj_le_one 𝕜 D
         _ = ‖f‖ := mul_one _
-    · refine (opNorm_le_iff <| opNorm_nonneg (f.comp (OrthProj 𝕜 D))).mpr fun x => ?_
-      have hproj' : (OrthProj 𝕜 D) (x : E) = x :=
-        SetLike.coe_eq_coe.mp (OrthProj_id 𝕜 D x x.prop)
-      change ‖f x‖ ≤ ‖f.comp (OrthProj 𝕜 D)‖ * ‖(x : E)‖
-      simpa [ContinuousLinearMap.comp_apply, hproj'] using le_opNorm (f.comp (OrthProj 𝕜 D)) (x : E)
+    · refine (opNorm_le_iff <| opNorm_nonneg (f.comp (orthProj 𝕜 D))).mpr fun x ↦ ?_
+      have hproj' : (orthProj 𝕜 D) (x : E) = x :=
+        SetLike.coe_eq_coe.mp (orthProj_id 𝕜 D x x.prop)
+      change ‖f x‖ ≤ ‖f.comp (orthProj 𝕜 D)‖ * ‖(x : E)‖
+      simpa [ContinuousLinearMap.comp_apply, hproj'] using le_opNorm (f.comp (orthProj 𝕜 D)) (x : E)
 
 /--
 A Hahn–Banach style extension theorem for continuous linear maps between ultrametric normed spaces.
@@ -69,14 +73,14 @@ The extension property is stated pointwise: for any `v : E` with `hv : v ∈ D`,
 `f' v = f ⟨v, hv⟩`.
 -/
 theorem hahn_banach' [IsUltrametricDist F] [hf : SphericallyCompleteSpace F] (f : D →L[𝕜] F) :
-  ∃ f' : E →L[𝕜] F, (∀ v : E, (hv : v ∈ D) → f' v = f ⟨v, hv⟩) ∧ ‖f'‖ = ‖f‖ := by
-  if hf : f = 0 then exact ⟨0, ⟨fun v hv => by simp [hf], by simp [hf]⟩⟩
+    ∃ f' : E →L[𝕜] F, (∀ v : E, (hv : v ∈ D) → f' v = f ⟨v, hv⟩) ∧ ‖f'‖ = ‖f‖ := by
+  if hf : f = 0 then exact ⟨0, ⟨fun v hv ↦ by simp [hf], by simp [hf]⟩⟩
   else
     rcases @exists_extension_opNorm_le 𝕜 _ E _ _ _ D F _ _ _ _ f {0}
-      (by simp) (fun _ => ContinuousLinearMap.opNorm f)
+      (by simp) (fun _ ↦ ContinuousLinearMap.opNorm f)
       (by
         intro U
-        refine lt_of_le_of_ne (opNorm_nonneg f) fun hop => ?_
+        refine lt_of_le_of_ne (opNorm_nonneg f) fun hop ↦ ?_
         apply hf
         ext x
         have hle : ‖f x‖ ≤ ContinuousLinearMap.opNorm f * ‖x‖ := le_opNorm f x
@@ -98,8 +102,8 @@ theorem hahn_banach' [IsUltrametricDist F] [hf : SphericallyCompleteSpace F] (f 
       ) with ⟨f', hf1, hf2⟩
     use f'
     simp only [Subtype.forall, Set.mem_singleton_iff, forall_eq, sub_zero] at hf2
-    refine ⟨fun v hv => hf1 ⟨v, hv⟩, le_antisymm hf2 ?_⟩
-    refine (opNorm_le_iff <| opNorm_nonneg f').mpr fun a => ?_
+    refine ⟨fun v hv ↦ hf1 ⟨v, hv⟩, le_antisymm hf2 ?_⟩
+    refine (opNorm_le_iff <| opNorm_nonneg f').mpr fun a ↦ ?_
     simpa [AddSubgroupClass.coe_norm, hf1 a] using le_opNorm f' (a : E)
 
 end

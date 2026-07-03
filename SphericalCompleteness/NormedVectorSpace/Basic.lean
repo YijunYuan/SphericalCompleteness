@@ -3,8 +3,10 @@ Copyright (c) 2026 Yijun Yuan. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Yijun Yuan
 -/
-import SphericalCompleteness.NormedVectorSpace.Orthogonal.MOrth
-import Mathlib.Analysis.Normed.Module.FiniteDimension
+module
+
+public import Mathlib.Analysis.Normed.Module.FiniteDimension
+public import SphericalCompleteness.NormedVectorSpace.Orthogonal.MOrth
 
 /-!
 # Spherical completeness of normed vector spaces
@@ -12,6 +14,8 @@ import Mathlib.Analysis.Normed.Module.FiniteDimension
 Finite-dimensional ultrametric normed spaces over a spherically complete base are
 spherically complete.
 -/
+
+@[expose] public section
 
 open Metric
 
@@ -25,9 +29,9 @@ In this setting, local compactness (together with the nontriviality of the norm 
 is used to deduce spherical completeness of `E`.
 -/
 theorem SphericallyComplete.of_nontriviallyNormedField_of_weaklyLocallyCompactSpace
-(𝕜 : Type*) [NontriviallyNormedField 𝕜]
-{E : Type u_2} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [LocallyCompactSpace E] :
-SphericallyCompleteSpace E := by
+    (𝕜 : Type*) [NontriviallyNormedField 𝕜]
+    {E : Type*} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [LocallyCompactSpace E] :
+    SphericallyCompleteSpace E := by
   haveI : ProperSpace E := ProperSpace.of_locallyCompactSpace 𝕜
   infer_instance
 
@@ -41,9 +45,9 @@ completeness on the span of a single vector without explicitly transporting the
 structure from `𝕜`.
 -/
 instance instSubtypeMemSubmoduleSpanSingletonSet (𝕜 : Type*) [NontriviallyNormedField 𝕜]
-[scsk : SphericallyCompleteSpace 𝕜]
-{E : Type u_2} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
- (z : E) : SphericallyCompleteSpace (Submodule.span 𝕜 {z}) where
+    [scsk : SphericallyCompleteSpace 𝕜]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
+    (z : E) : SphericallyCompleteSpace (Submodule.span 𝕜 {z}) where
   isSphericallyComplete := by
     if h: z = 0 then
       rw [h, Submodule.span_zero_singleton]
@@ -55,8 +59,8 @@ instance instSubtypeMemSubmoduleSpanSingletonSet (𝕜 : Type*) [NontriviallyNor
     else
     intro ci ri hanti
     have := @scsk.isSphericallyComplete
-      (fun n => (Submodule.mem_span_singleton.1 (ci n).prop).choose)
-      (fun n => ⟨ri n / ‖z‖, div_nonneg NNReal.zero_le_coe <| norm_nonneg z⟩) (by
+      (fun n ↦ (Submodule.mem_span_singleton.1 (ci n).prop).choose)
+      (fun n ↦ ⟨ri n / ‖z‖, div_nonneg NNReal.zero_le_coe <| norm_nonneg z⟩) (by
       refine antitone_nat_of_succ_le ?_
       intro n x hx
       simp only [mem_closedBall] at *
@@ -86,17 +90,17 @@ instance instSubtypeMemSubmoduleSpanSingletonSet (𝕜 : Type*) [NontriviallyNor
       ← sub_smul, norm_smul, ← dist_eq_norm, ← le_div_iff₀ (norm_pos_iff.mpr h)]
 
 private lemma induction_sphericallyCompleteSpace_of_finiteDimensional
-(𝕜 : Type u_1) [NontriviallyNormedField 𝕜] [SphericallyCompleteSpace 𝕜]
-(E : Type u_2) [NormedAddCommGroup E]
-[NormedSpace 𝕜 E] [IsUltrametricDist E] [FiniteDimensional 𝕜 E] :
-∀ n < Module.finrank 𝕜 E,
-  (∃ M : Subspace 𝕜 E, Module.finrank 𝕜 M = n ∧ SphericallyCompleteSpace M)
-→ (∃ M' : Subspace 𝕜 E, Module.finrank 𝕜 M' = (n + 1) ∧ SphericallyCompleteSpace M')
-:= by
+    (𝕜 : Type*) [NontriviallyNormedField 𝕜] [SphericallyCompleteSpace 𝕜]
+    (E : Type*) [NormedAddCommGroup E]
+    [NormedSpace 𝕜 E] [IsUltrametricDist E] [FiniteDimensional 𝕜 E] :
+    ∀ n < Module.finrank 𝕜 E,
+    (∃ M : Subspace 𝕜 E, Module.finrank 𝕜 M = n ∧ SphericallyCompleteSpace M)
+    → (∃ M' : Subspace 𝕜 E, Module.finrank 𝕜 M' = (n + 1) ∧ SphericallyCompleteSpace M')
+    := by
   rintro n hn ⟨M, hM1, _⟩
   rcases exists_morth_vec_of_not_full_finrank 𝕜 M (by linarith) with ⟨z, hz', hz⟩
   use ((Submodule.span 𝕜 {z}) + M)
-  let φ := direct_prod_iso_sum_of_orth 𝕜 z M hz
+  let φ := directProdIsoSumOfOrth 𝕜 z M hz
   constructor
   · rw [← FiniteDimensional.nonempty_linearEquiv_iff_finrank_eq.1
       (Nonempty.intro φ.toLinearEquiv)]
@@ -119,17 +123,17 @@ This is the standard permanence result: spherical completeness descends from the
 finite-dimensional ultrametric normed `𝕜`-vector space.
 -/
 theorem sphericallyCompleteSpace_of_finiteDimensional
-(𝕜 : Type*) [NontriviallyNormedField 𝕜] [SphericallyCompleteSpace 𝕜]
-(E : Type*) [NormedAddCommGroup E] [NormedSpace 𝕜 E]
-[IsUltrametricDist E] [FiniteDimensional 𝕜 E] :
-SphericallyCompleteSpace E := by
+    (𝕜 : Type*) [NontriviallyNormedField 𝕜] [SphericallyCompleteSpace 𝕜]
+    (E : Type*) [NormedAddCommGroup E] [NormedSpace 𝕜 E]
+    [IsUltrametricDist E] [FiniteDimensional 𝕜 E] :
+    SphericallyCompleteSpace E := by
   suffices h : ∀ n ≤ Module.finrank 𝕜 E,
     (∃ M : Subspace 𝕜 E, Module.finrank 𝕜 M = n ∧ SphericallyCompleteSpace M) by
     rcases h (Module.finrank 𝕜 E) le_rfl with ⟨M, hM1, hM2⟩
     rw [Submodule.eq_top_of_finrank_eq hM1] at hM2
-    refine { isSphericallyComplete := fun ci ri h => ?_ }
-    rcases @hM2.isSphericallyComplete (fun i => ⟨ci i,trivial⟩) ri (
-      fun _ _ hab _ hz => (h hab) hz
+    refine { isSphericallyComplete := fun ci ri h ↦ ?_ }
+    rcases @hM2.isSphericallyComplete (fun i ↦ ⟨ci i,trivial⟩) ri (
+      fun _ _ hab _ hz ↦ (h hab) hz
     ) with ⟨x, hx⟩
     use x.val
     simp only [Set.mem_iInter, mem_closedBall, dist_le_coe] at hx ⊢

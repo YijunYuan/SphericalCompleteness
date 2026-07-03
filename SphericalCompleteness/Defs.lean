@@ -3,10 +3,12 @@ Copyright (c) 2026 Yijun Yuan. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Yijun Yuan
 -/
-import Mathlib.NumberTheory.Padics.ProperSpace
-import SphericalCompleteness.External.Complete
-import SphericalCompleteness.External.Sequence
-import SphericalCompleteness.External.Ultrametric
+module
+
+public import Mathlib.NumberTheory.Padics.ProperSpace
+public import SphericalCompleteness.External.Complete
+public import SphericalCompleteness.External.Sequence
+public import SphericalCompleteness.External.Ultrametric
 
 /-!
 # Spherical completeness: definitions
@@ -14,6 +16,8 @@ import SphericalCompleteness.External.Ultrametric
 Basic definitions and elementary consequences of spherical completeness for
 ultrametric (pseudo)metric spaces.
 -/
+
+@[expose] public section
 
 open Metric
 open Filter
@@ -32,7 +36,7 @@ but it is stated here for general pseudo-metric spaces.
 -/
 class SphericallyCompleteSpace (α : Type*) [PseudoMetricSpace α] : Prop where
   isSphericallyComplete : ∀ ⦃ci : ℕ → α⦄, ∀ ⦃ri : ℕ → NNReal⦄,
-    Antitone (fun i => closedBall (ci i) (ri i)) → (⋂ i, closedBall (ci i) (ri i)).Nonempty
+    Antitone (fun i ↦ closedBall (ci i) (ri i)) → (⋂ i, closedBall (ci i) (ri i)).Nonempty
 
 namespace SphericallyCompleteSpace
 
@@ -50,7 +54,7 @@ This instance is useful for transferring results stated for `CompleteSpace` to c
 spherical completeness is assumed.
 -/
 instance instCompleteOfSphericallyComplete (α : Type*)
-  [PseudoMetricSpace α] [sc : SphericallyCompleteSpace α] : CompleteSpace α := by
+    [PseudoMetricSpace α] [sc : SphericallyCompleteSpace α] : CompleteSpace α := by
   rw [completeSpace_iff_nested_ball_with_radius_tendsto_zero_has_nonempty_inter]
   exact fun _ _ hanti _ ↦ sc.isSphericallyComplete hanti
 
@@ -71,7 +75,7 @@ closed balls, using:
 * `isClosed_closedBall` for closedness of each ball.
 -/
 instance instSphericallyCompleteSpaceOfProperSpace (α : Type*)
-  [PseudoMetricSpace α] [ProperSpace α] : SphericallyCompleteSpace α where
+    [PseudoMetricSpace α] [ProperSpace α] : SphericallyCompleteSpace α where
   isSphericallyComplete := by
     intro ci ri hanti
     apply IsCompact.nonempty_iInter_of_sequence_nonempty_isCompact_isClosed
@@ -95,13 +99,13 @@ ball is preserved because `f` is an isometry.
 This is the standard “property invariant under isometric equivalence” argument.
 -/
 theorem sphericallyCompleteSpace_of_isometryEquiv {E F : Type*}
-  [PseudoMetricSpace E] [PseudoMetricSpace F]
-  [he : SphericallyCompleteSpace E]
-  (f : E ≃ᵢ F) : SphericallyCompleteSpace F where
+    [PseudoMetricSpace E] [PseudoMetricSpace F]
+    [he : SphericallyCompleteSpace E]
+    (f : E ≃ᵢ F) : SphericallyCompleteSpace F where
   isSphericallyComplete := by
     intro ci ri hanti
-    let ci' := fun n => f.symm (ci n)
-    have hanti' : Antitone (fun i => closedBall (ci' i) (ri i)) := by
+    let ci' := fun n ↦ f.symm (ci n)
+    have hanti' : Antitone (fun i ↦ closedBall (ci' i) (ri i)) := by
       intro m n hmn
       simp only [ci', Set.le_eq_subset, ← IsometryEquiv.preimage_closedBall f]
       exact Set.preimage_mono (hanti hmn)
@@ -120,8 +124,8 @@ The proof proceeds by first obtaining a `ProperSpace α` instance via
 resolution infer `SphericallyCompleteSpace α` from `ProperSpace α`.
 -/
 instance instSphericallyCompleteSpaceOfWeaklyLocallyCompactNormedField
-{α : Type*} [NontriviallyNormedField α] [WeaklyLocallyCompactSpace α] :
-SphericallyCompleteSpace α := by
+    {α : Type*} [NontriviallyNormedField α] [WeaklyLocallyCompactSpace α] :
+    SphericallyCompleteSpace α := by
   haveI := ProperSpace.of_nontriviallyNormedField_of_weaklyLocallyCompactSpace α
   infer_instance
 
