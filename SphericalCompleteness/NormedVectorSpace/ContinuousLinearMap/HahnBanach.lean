@@ -15,6 +15,12 @@ open ContinuousLinearMap
 
 namespace SphericallyCompleteSpace
 
+section
+variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+  {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
+  (D : Submodule 𝕜 E)
+  {F : Type*} [NormedAddCommGroup F] [NormedSpace 𝕜 F]
+
 /--
 Hahn–Banach extension theorem in the ultrametric setting, assuming spherical completeness.
 
@@ -29,11 +35,7 @@ this theorem produces an extension `f' : E →L[𝕜] F` such that:
 This is a norm-preserving extension result (isometric on operator norm) for continuous
 linear maps from a spherically complete subspace in a non-Archimedean (ultrametric) context.
 -/
-theorem hahn_banach {𝕜 : Type*} [NontriviallyNormedField 𝕜]
-{E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
-(D : Submodule 𝕜 E) [hd : SphericallyCompleteSpace D]
-{F : Type*} [NormedAddCommGroup F] [NormedSpace 𝕜 F] [IsUltrametricDist F]
-(f : D →L[𝕜] F) :
+theorem hahn_banach [hd : SphericallyCompleteSpace D] (f : D →L[𝕜] F) :
   ∃ f' : E →L[𝕜] F, (∀ v : E, (hv : v ∈ D) → f' v = f ⟨v, hv⟩) ∧ ‖f'‖ = ‖f‖ := by
   use comp f (OrthProj 𝕜 D)
   constructor
@@ -66,11 +68,7 @@ and preserving the operator norm: `‖f'‖ = ‖f‖`.
 The extension property is stated pointwise: for any `v : E` with `hv : v ∈ D`, we have
 `f' v = f ⟨v, hv⟩`.
 -/
-theorem hahn_banach' {𝕜 : Type*} [NontriviallyNormedField 𝕜]
-{E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
-(D : Submodule 𝕜 E)
-{F : Type*} [NormedAddCommGroup F] [NormedSpace 𝕜 F] [IsUltrametricDist F]
-[hf : SphericallyCompleteSpace F] (f : D →L[𝕜] F) :
+theorem hahn_banach' [IsUltrametricDist F] [hf : SphericallyCompleteSpace F] (f : D →L[𝕜] F) :
   ∃ f' : E →L[𝕜] F, (∀ v : E, (hv : v ∈ D) → f' v = f ⟨v, hv⟩) ∧ ‖f'‖ = ‖f‖ := by
   if hf : f = 0 then exact ⟨0, ⟨fun v hv => by simp [hf], by simp [hf]⟩⟩
   else
@@ -103,5 +101,7 @@ theorem hahn_banach' {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     refine ⟨fun v hv => hf1 ⟨v, hv⟩, le_antisymm hf2 ?_⟩
     refine (opNorm_le_iff <| opNorm_nonneg f').mpr fun a => ?_
     simpa [AddSubgroupClass.coe_norm, hf1 a] using le_opNorm f' (a : E)
+
+end
 
 end SphericallyCompleteSpace

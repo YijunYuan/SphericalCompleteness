@@ -196,6 +196,12 @@ SphericallyCompleteSpace M → M = ⊤ := by
   rw [morth_iff_forall_orth] at *
   exact fun y hy => hb1 y <| hM hy
 
+section
+variable (𝕜 : Type*) [NontriviallyNormedField 𝕜]
+  {E : Type u} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
+  {F : Type v} [NormedAddCommGroup F] [NormedSpace 𝕜 F] [IsUltrametricDist F]
+  [SphericallyCompleteSpace F]
+
 /--
 Uniqueness of the spherical completion.
 
@@ -203,10 +209,7 @@ If `F` is spherically complete and `f : E →ₗᵢ[𝕜] F` is such that every 
 `𝕜`-submodule of `F` containing `range f` is the whole space, then `F` is (linearly) isometric to
 `SphericalCompletion 𝕜 E`.
 -/
-theorem sphericalCompletion_unique (𝕜 : Type*) [NontriviallyNormedField 𝕜]
-{E : Type u} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
-{F : Type v} [NormedAddCommGroup F] [NormedSpace 𝕜 F] [IsUltrametricDist F]
-[SphericallyCompleteSpace F]
+theorem sphericalCompletion_unique
 {f : E →ₗᵢ[𝕜] F}
 (hf : ∀ M : Submodule 𝕜 F, LinearMap.range f.toLinearMap ≤ M → SphericallyCompleteSpace M → M = ⊤) :
 Nonempty (SphericalCompletion 𝕜 E ≃ₗᵢ[𝕜] F) := by
@@ -227,10 +230,7 @@ linearly isometric to `SphericalCompletion 𝕜 E`.
 This is a streamlined version of `sphericalCompletion_unique` where the minimality hypothesis is
 replaced by the assumption `IsImmediate f`.
 -/
-theorem sphericalCompletion_unique' (𝕜 : Type*) [NontriviallyNormedField 𝕜]
-{E : Type u} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
-{F : Type v} [NormedAddCommGroup F] [NormedSpace 𝕜 F] [IsUltrametricDist F]
-[SphericallyCompleteSpace F]
+theorem sphericalCompletion_unique'
 {f : E →ₗᵢ[𝕜] F} (hf : IsImmediate f) :
 Nonempty (SphericalCompletion 𝕜 E ≃ₗᵢ[𝕜] F) := by
   rcases exists_linearIsometry_comp_eq_of_isImmediate f hf
@@ -249,14 +249,13 @@ Any linear isometry `f : E →ₗᵢ[𝕜] F` into a spherically complete ultram
 extends along the canonical embedding `SphericalCompletionEmbedding 𝕜 E` to a linear isometry
 `T : SphericalCompletion 𝕜 E →ₗᵢ[𝕜] F`.
 -/
-theorem sphericalCompletion_universal_property (𝕜 : Type*) [NontriviallyNormedField 𝕜]
-{E : Type u} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
-{F : Type v} [NormedAddCommGroup F] [NormedSpace 𝕜 F] [IsUltrametricDist F]
-[SphericallyCompleteSpace F]
+theorem sphericalCompletion_universal_property
 (f : E →ₗᵢ[𝕜] F) :
 ∃ (T : SphericalCompletion 𝕜 E →ₗᵢ[𝕜] F), T.comp (SphericalCompletionEmbedding 𝕜 E) = f :=
   exists_linearIsometry_comp_eq_of_isImmediate (SphericalCompletionEmbedding 𝕜 E)
     (SphericalCompletionEmbedding_isImmediate 𝕜 E) f
+
+end
 
 /--
 `E` is spherically complete if and only if it is maximally complete.

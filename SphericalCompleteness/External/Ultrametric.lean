@@ -21,6 +21,9 @@ quotients, submodules, operator spaces and `lp` spaces.
 open Metric
 open NNReal
 
+section
+variable {α : Type*} [PseudoMetricSpace α] [hiud : IsUltrametricDist α]
+
 /--
 In an ultrametric (pseudo)metric space, the diameter of a closed ball is bounded by its radius.
 
@@ -28,8 +31,7 @@ More precisely, assuming `IsUltrametricDist α`, for any center `z : α` and rad
 the set `closedBall z r` has `diam (closedBall z r) ≤ r`. This is a characteristic feature of
 ultrametrics: any two points in the same ball are at distance at most the ball's radius.
 -/
-theorem diam_le_radius_of_ultrametric {α : Type*}
-[PseudoMetricSpace α] [hiud : IsUltrametricDist α]
+theorem diam_le_radius_of_ultrametric
 (z : α) (r : ℝ≥0) :
 diam (closedBall z r) ≤ r :=
   diam_le_of_forall_dist_le r.prop fun _ hx _ hy =>
@@ -47,7 +49,6 @@ More precisely, assuming `IsUltrametricDist α`, `r1 ≤ r2`, and
 This is a standard “nesting of intersecting balls” property characteristic of ultrametric spaces.
 -/
 theorem closedBall_subset_closedBall_of_le_radius_of_nonempty_intersection_of_ultrametric
-{α : Type*} [PseudoMetricSpace α] [hiud : IsUltrametricDist α]
 {z1 z2 : α} {r1 r2 : ℝ≥0}
 (hle : r1 ≤ r2)
 (hne : (closedBall z1 r1 ∩ closedBall z2 r2).Nonempty) :
@@ -59,6 +60,8 @@ closedBall z1 r1 ⊆ closedBall z2 r2 := by
   refine le_trans (hiud.dist_triangle_max x z1 y) <| sup_le_iff.2 ⟨le_trans hx hle, ?_⟩
   rw [dist_comm]
   exact le_trans hy1 hle
+
+end
 
 /--
 Transfers an ultrametric distance from a seminormed `𝕜`-normed space `E` to the quotient `E ⧸ F`.
@@ -148,6 +151,9 @@ dist_triangle_max a b c := by
   · rw [dist_eq_norm, show ‖b j - c j‖ = ‖(↑(b - c) : (i : ι) → E i) j‖ from rfl]
     exact lp.norm_apply_le_norm ENNReal.top_ne_zero _ j
 
+section
+variable {S : Type*} [SeminormedAddGroup S] [IsUltrametricDist S] {x y : S}
+
 /--
 Lemmas about equality of norms in an ultrametric seminormed additive group.
 
@@ -166,22 +172,20 @@ The proofs are straightforward wrappers around
 `IsUltrametricDist.norm_eq_of_add_norm_lt_max`, using simple rewriting
 to convert between subtraction and addition and to manage negations.
 -/
-theorem norm_eq_of_norm_add_lt_left {S : Type*} [SeminormedAddGroup S] [IsUltrametricDist S]
-{x y : S} (h : ‖x + y‖ < ‖x‖) : ‖x‖ = ‖y‖ :=
+theorem norm_eq_of_norm_add_lt_left (h : ‖x + y‖ < ‖x‖) : ‖x‖ = ‖y‖ :=
   IsUltrametricDist.norm_eq_of_add_norm_lt_max <| by simp_all [lt_sup_iff, true_or]
 
-theorem norm_eq_of_norm_add_lt_right {S : Type*} [SeminormedAddGroup S] [IsUltrametricDist S]
-{x y : S} (h : ‖x + y‖ < ‖y‖) : ‖x‖ = ‖y‖ :=
+theorem norm_eq_of_norm_add_lt_right (h : ‖x + y‖ < ‖y‖) : ‖x‖ = ‖y‖ :=
   IsUltrametricDist.norm_eq_of_add_norm_lt_max <| by simp_all [lt_sup_iff, or_true]
 
-theorem norm_eq_of_norm_sub_lt_left {S : Type*} [SeminormedAddGroup S] [IsUltrametricDist S]
-{x y : S} (h : ‖x - y‖ < ‖x‖) : ‖x‖ = ‖y‖ := by
+theorem norm_eq_of_norm_sub_lt_left (h : ‖x - y‖ < ‖x‖) : ‖x‖ = ‖y‖ := by
   rw [← norm_neg y]
   exact norm_eq_of_norm_add_lt_left (by rwa [sub_eq_add_neg] at h)
 
-theorem norm_eq_of_norm_sub_lt_right {S : Type*} [SeminormedAddGroup S] [IsUltrametricDist S]
-{x y : S} (h : ‖x - y‖ < ‖y‖) : ‖x‖ = ‖y‖ :=
+theorem norm_eq_of_norm_sub_lt_right (h : ‖x - y‖ < ‖y‖) : ‖x‖ = ‖y‖ :=
   (norm_eq_of_norm_sub_lt_left (by rwa [← norm_neg, neg_sub])).symm
+
+end
 
 /--
 Lifts the ultrametric inequality on distances from `𝕜` to its uniform completion.

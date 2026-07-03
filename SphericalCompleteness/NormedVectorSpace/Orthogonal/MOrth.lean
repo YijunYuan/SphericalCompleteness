@@ -110,11 +110,13 @@ noncomputable def direct_prod_iso_sum_of_orth (𝕜 : Type*) [NontriviallyNormed
     simp only [Submodule.add_eq_sup, eq_mpr_eq_cast, cast_eq,
       (Submodule.mem_sup.mp t.prop).choose_spec.2.choose_spec.2, Subtype.coe_eta]
 
-private lemma res_ball (𝕜 : Type*) [NontriviallyNormedField 𝕜]
-{E : Type*} [SeminormedAddCommGroup E]
-[NormedSpace 𝕜 E] [iud : IsUltrametricDist E]
-(F : Subspace 𝕜 E) [SphericallyCompleteSpace F]
-[FiniteDimensional 𝕜 E] (a : E) :
+section
+variable (𝕜 : Type*) [NontriviallyNormedField 𝕜]
+  {E : Type*} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [iud : IsUltrametricDist E]
+  (F : Subspace 𝕜 E) [sF : SphericallyCompleteSpace F] [FiniteDimensional 𝕜 E]
+
+omit sF [FiniteDimensional 𝕜 E] in
+private lemma res_ball (a : E) :
 ∀ s > infDist a F, ∃ z : F, (closedBall a s) ∩ ↑F = ((fun x : F => (x : E)) '' closedBall z s) := by
   intro s hs
   rcases (Metric.infDist_lt_iff (Submodule.nonempty F)).1 hs with ⟨y, hy⟩
@@ -142,11 +144,7 @@ then there exists a nonzero vector `x : E` that is `M`-orthogonal to `F` (notati
 The proof begins by coercing the strict inequality on `Module.finrank` from `Nat` to `Cardinal`
 to leverage cardinality-based dimension arguments in subsequent steps.
 -/
-theorem exists_morth_vec_of_not_full_finrank (𝕜 : Type*) [NontriviallyNormedField 𝕜]
-{E : Type*} [SeminormedAddCommGroup E]
-[NormedSpace 𝕜 E] [IsUltrametricDist E]
-(F : Subspace 𝕜 E) [sF : SphericallyCompleteSpace F]
-[FiniteDimensional 𝕜 E]
+theorem exists_morth_vec_of_not_full_finrank
 (hF : Module.finrank 𝕜 F < Module.finrank 𝕜 E) :
 ∃ (x : E), x ≠ 0 ∧ (x ⟂ₘ F) := by
   replace hF : (↑(Module.finrank 𝕜 ↥F) : Cardinal.{u_2}) < ↑(Module.finrank 𝕜 E) :=
@@ -226,5 +224,7 @@ theorem exists_morth_vec_of_not_full_finrank (𝕜 : Type*) [NontriviallyNormedF
       simpa only [one_div, ge_iff_le] using (inv_le_iff_one_le_mul₀' hε).mp <| Nat.le_ceil (ε⁻¹)
     linarith
   · simpa [← dist_eq_norm] using infDist_le_dist_of_mem hz
+
+end
 
 end SphericallyCompleteSpace

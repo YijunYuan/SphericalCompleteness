@@ -18,6 +18,9 @@ open Filter
 
 namespace SphericallyCompleteSpace
 
+section
+variable (α : Type*) [PseudoMetricSpace α] [iud : IsUltrametricDist α]
+
 /--
 Characterizes spherical completeness of an ultrametric (pseudo)metric space in terms of
 nested closed balls with antitone radii.
@@ -35,8 +38,7 @@ the intersection `⋂ i, closedBall (ci i) (ri i)` is nonempty.
 This is the standard “Cantor intersection” formulation of spherical completeness for
 ultrametric spaces, expressed for sequences indexed by `ℕ`.
 -/
-theorem sphericallyCompleteSpace_iff_antitone_radius
-(α : Type*) [PseudoMetricSpace α] [iud : IsUltrametricDist α] :
+theorem sphericallyCompleteSpace_iff_antitone_radius :
   SphericallyCompleteSpace α ↔
   ∀ ⦃ci : ℕ → α⦄, ∀ ⦃ri : ℕ → NNReal⦄,
     Antitone ri →
@@ -92,8 +94,7 @@ then the intersection `⋂ i, closedBall (ci i) (ri i)` is nonempty.
 This provides a convenient reformulation of spherical completeness when working with
 chains of balls indexed by `ℕ` whose radii shrink strictly.
 -/
-theorem sphericallyCompleteSpace_iff_strictAnti_radius
-(α : Type*) [PseudoMetricSpace α] [iud : IsUltrametricDist α] :
+theorem sphericallyCompleteSpace_iff_strictAnti_radius :
   SphericallyCompleteSpace α ↔
   ∀ ⦃ci : ℕ → α⦄, ∀ ⦃ri : ℕ → NNReal⦄,
     StrictAnti ri →
@@ -126,6 +127,8 @@ theorem sphericallyCompleteSpace_iff_strictAnti_radius
       rw [Filter.tendsto_atTop_atTop_iff_of_monotone <| StrictMono.monotone hφ1] at this
       rcases this i with ⟨N, hN⟩
       exact (hanti hN) <| hz N
+
+end
 
 private lemma smaller_radius {α : Type*} [PseudoMetricSpace α]
   {S : Set (α × NNReal)} [hS : Nonempty ↑S]
@@ -203,6 +206,9 @@ private lemma cofinal_of_countable_chain_of_ball {α : Type*}
         (countable_chain_of_ball hw n)).choose_spec.2 inf_le_left
   · exact hS' (countable_chain_of_ball hw n) ⟨s, hs⟩
 
+section
+variable (α : Type*) [PseudoMetricSpace α] [iud : IsUltrametricDist α]
+
 /--
 Characterization of spherical completeness using only pairwise intersection of closed balls.
 
@@ -220,8 +226,7 @@ In contrast to the usual definition of spherical completeness (often phrased in 
 of nested balls), this formulation replaces nesting by a pairwise intersection hypothesis,
 which is sufficient in the ultrametric setting.
 -/
-theorem sphericallyCompleteSpace_iff_pairwise_inter_nonempty
-(α : Type*) [PseudoMetricSpace α] [iud : IsUltrametricDist α] :
+theorem sphericallyCompleteSpace_iff_pairwise_inter_nonempty :
   SphericallyCompleteSpace α ↔ (
   ∀ S : Set (α × NNReal), S.Nonempty →
   (∀ w1 w2 : ↑S, (closedBall w1.val.1 w1.val.2 ∩ closedBall w2.val.1 w2.val.2).Nonempty) →
@@ -274,8 +279,7 @@ theorem sphericallyCompleteSpace_iff_pairwise_inter_nonempty
     exact ⟨z, Set.mem_iInter.2 <| fun i => hz ⟨(c i, r i), Exists.intro i (Eq.refl (c i, r i))⟩⟩
 
 open List in
-theorem sphericallyCompleteSpace_equiv
-(α : Type*) [PseudoMetricSpace α] [iud : IsUltrametricDist α] :
+theorem sphericallyCompleteSpace_equiv :
 TFAE [
   SphericallyCompleteSpace α,
   ∀ ⦃ci : ℕ → α⦄, ∀ ⦃ri : ℕ → NNReal⦄,
@@ -292,6 +296,8 @@ TFAE [
   tfae_have 1 ↔ 3 := sphericallyCompleteSpace_iff_strictAnti_radius α
   tfae_have 1 ↔ 4 := sphericallyCompleteSpace_iff_pairwise_inter_nonempty α
   tfae_finish
+
+end
 
 /--
 `SphericallyCompleteSpace` is stable under binary products.

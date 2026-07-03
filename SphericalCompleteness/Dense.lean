@@ -192,10 +192,13 @@ private noncomputable def nestedBallChain {α : Type*} [PseudoMetricSpace α]
       (shrinkingRadius α (n + 1)) <| shrinkingRadius_strictanti α (lt_add_one n))
         (hα'.ofNat hsep.exists_countable_dense.choose n)).choose, shrinkingRadius α (n+1)⟩
 
-private lemma nestedBallChain_decreasing (α : Type*) [PseudoMetricSpace α]
-[hiud : IsUltrametricDist α] [hα : IsSphericallyDense α]
-[nemp : Nonempty α] [hsep : SeparableSpace α]
-(hα' : Denumerable hsep.exists_countable_dense.choose) :
+section
+variable (α : Type*) [PseudoMetricSpace α]
+  [hiud : IsUltrametricDist α] [hα : IsSphericallyDense α]
+  [nemp : Nonempty α] [hsep : SeparableSpace α]
+  (hα' : Denumerable hsep.exists_countable_dense.choose)
+
+private lemma nestedBallChain_decreasing :
 Antitone (fun n => closedBall (nestedBallChain hα' n).1 (nestedBallChain hα' n).2) := by
   refine antitone_nat_of_succ_le <| fun n ↦ ?_
   simp only [nestedBallChain, mem_closedBall, dist_le_coe, not_le, Set.le_eq_subset]
@@ -207,23 +210,19 @@ Antitone (fun n => closedBall (nestedBallChain hα' n).1 (nestedBallChain hα' n
   · simp only [zero_add, mem_closedBall, dist_le_coe, not_le] at *
     exact this
 
-private lemma not_in_nestedBallChain (α : Type*) [PseudoMetricSpace α]
-[hiud : IsUltrametricDist α] [hα : IsSphericallyDense α]
-[nemp : Nonempty α] [hsep : SeparableSpace α]
-(hα' : Denumerable hsep.exists_countable_dense.choose) (n : ℕ) :
+private lemma not_in_nestedBallChain (n : ℕ) :
 (hα'.ofNat hsep.exists_countable_dense.choose n).val ∉
 closedBall (nestedBallChain hα' (n + 1)).1 (nestedBallChain hα' (n + 1)).2 :=
   ((exists_disjoint_subball (nestedBallChain hα' n).1 (shrinkingRadius α n)
       (shrinkingRadius α (n + 1)) <| shrinkingRadius_strictanti α (lt_add_one n))
         (hα'.ofNat hsep.exists_countable_dense.choose n)).choose_spec.2
 
-private lemma nestedBallChain_radius_eq (α : Type*) [PseudoMetricSpace α]
-[hiud : IsUltrametricDist α] [hα : IsSphericallyDense α]
-[nemp : Nonempty α] [hsep : SeparableSpace α]
-(hα' : Denumerable hsep.exists_countable_dense.choose) (n : ℕ) :
+private lemma nestedBallChain_radius_eq (n : ℕ) :
 (nestedBallChain hα' n).2 = (shrinkingRadius α n):= by
   unfold nestedBallChain
   cases n <;> simp only
+
+end
 
 /--
 Shows that a separable ultrametric space which is *spherically dense* cannot be spherically

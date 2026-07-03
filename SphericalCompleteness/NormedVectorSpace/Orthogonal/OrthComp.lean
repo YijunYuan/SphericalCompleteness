@@ -55,6 +55,11 @@ theorem orth_of_orthcomp
     refine Submodule.add_mem_sup (T x).prop <| LinearMap.sub_mem_ker_iff.mpr ?_
     simp only [ContinuousLinearMap.coe_coe, SetLike.coe_mem, hT1, Subtype.coe_eta]
 
+section
+variable (𝕜 : Type*) [NontriviallyNormedField 𝕜]
+  {E : Type*} [NormedAddCommGroup E] [iud : IsUltrametricDist E] [NormedSpace 𝕜 E]
+  (F : Submodule 𝕜 E) [SphericallyCompleteSpace ↥F]
+
 /--
 Existence of a norm-nonincreasing continuous linear projection onto a spherically complete subspace.
 
@@ -70,11 +75,7 @@ complete (as a normed space), this theorem produces a continuous linear map
 In other words, in the ultrametric setting, spherical completeness of `F` ensures the existence of
 a bounded linear projection of operator norm at most `1` from `E` onto `F`.
 -/
-theorem exists_orthproj_of_spherically_complete_space
-(𝕜 : Type*) [NontriviallyNormedField 𝕜]
-{E : Type*} [NormedAddCommGroup E] [iud : IsUltrametricDist E]
-[NormedSpace 𝕜 E]
-(F : Submodule 𝕜 E) [SphericallyCompleteSpace ↥F] :
+theorem exists_orthproj_of_spherically_complete_space :
 ∃ T : E →L[𝕜] ↥F, (∀ a ∈ F, T a = a) ∧ ContinuousLinearMap.opNorm T ≤ 1 := by
   have := @exists_extension_opNorm_le 𝕜 _ E _ _ _ F ↥F _ _ _ _
     (ContinuousLinearMap.id 𝕜 ↥F) {0} (by simp) (fun _ => 1) (fun _ => by simp)
@@ -96,10 +97,7 @@ In particular, `x ∈ OrthComp 𝕜 F` iff the chosen orthogonal projection send
 so elements of `OrthComp 𝕜 F` are exactly those “orthogonal to `F`” with respect to that
 projection.
 -/
-noncomputable def OrthComp (𝕜 : Type*) [NontriviallyNormedField 𝕜]
-{E : Type*} [NormedAddCommGroup E] [iud : IsUltrametricDist E]
-[NormedSpace 𝕜 E]
-(F : Submodule 𝕜 E) [SphericallyCompleteSpace ↥F]
+noncomputable def OrthComp
 : Submodule 𝕜 E :=
 LinearMap.ker (exists_orthproj_of_spherically_complete_space 𝕜 F).choose.toLinearMap
 
@@ -115,10 +113,7 @@ More precisely, it produces an `IsCompl` decomposition:
 This is the ultrametric analogue of the standard orthogonal decomposition result, with spherical
 completeness providing the completeness hypothesis needed to construct the complement.
 -/
-theorem isCompl_orthcomp (𝕜 : Type*) [NontriviallyNormedField 𝕜]
-{E : Type*} [NormedAddCommGroup E] [iud : IsUltrametricDist E]
-[NormedSpace 𝕜 E]
-(F : Submodule 𝕜 E) [SphericallyCompleteSpace ↥F] :
+theorem isCompl_orthcomp :
 IsCompl F (OrthComp 𝕜 F) := by
   unfold OrthComp
   apply orth_of_orthcomp
@@ -132,10 +127,7 @@ In a nontrivially normed field `𝕜`, for an ultrametric normed space `E` over 
 assuming `F : Submodule 𝕜 E` is spherically complete, this theorem asserts the
 orthogonality relation `F ⟂ₛ OrthComp 𝕜 F`.
 -/
-theorem sorth_orthcomp (𝕜 : Type*) [NontriviallyNormedField 𝕜]
-{E : Type*} [NormedAddCommGroup E] [iud : IsUltrametricDist E]
-[NormedSpace 𝕜 E]
-(F : Submodule 𝕜 E) [SphericallyCompleteSpace ↥F] :
+theorem sorth_orthcomp :
 (F ⟂ₛ (OrthComp 𝕜 F)) := by
   unfold OrthComp
   let T := (exists_orthproj_of_spherically_complete_space 𝕜 F).choose
@@ -171,10 +163,7 @@ This lemma provides the forward direction from membership in `OrthComp` to metri
 under the assumptions that `E` is an ultrametric normed space over a nontrivially normed field `𝕜`
 and that the submodule `F` is spherically complete.
 -/
-lemma morth_of_mem_orthComp (𝕜 : Type*) [NontriviallyNormedField 𝕜]
-{E : Type*} [NormedAddCommGroup E] [iud : IsUltrametricDist E]
-[NormedSpace 𝕜 E]
-(F : Submodule 𝕜 E) [SphericallyCompleteSpace ↥F]
+lemma morth_of_mem_orthComp
 {x : E} (hx : x ∈ OrthComp 𝕜 F) :
 (x ⟂ₘ F) :=
   (sorth_symm.1 <| sorth_orthcomp 𝕜 F) x hx
@@ -195,10 +184,7 @@ data in the non-Archimedean context. The resulting map is packaged as a continuo
 This definition is marked `noncomputable` because its construction relies on classical choice and
 existence results rather than an algorithm.
 -/
-noncomputable def OrthProj (𝕜 : Type*) [NontriviallyNormedField 𝕜]
-{E : Type*} [NormedAddCommGroup E] [iud : IsUltrametricDist E]
-[NormedSpace 𝕜 E]
-(F : Submodule 𝕜 E) [SphericallyCompleteSpace ↥F] :
+noncomputable def OrthProj :
 E →L[𝕜] ↥F :=
   (exists_orthproj_of_spherically_complete_space 𝕜 F).choose
 
@@ -209,10 +195,7 @@ This is an immediate consequence of the construction of `OrthProj` via
 `exists_orthproj_of_spherically_complete_space`, which provides a continuous linear
 projection onto `F` satisfying `‖T‖ ≤ 1`.
 -/
-theorem norm_OrthProj_le_one (𝕜 : Type*) [NontriviallyNormedField 𝕜]
-{E : Type*} [NormedAddCommGroup E] [iud : IsUltrametricDist E]
-[NormedSpace 𝕜 E]
-(F : Submodule 𝕜 E) [SphericallyCompleteSpace ↥F] :
+theorem norm_OrthProj_le_one :
 ContinuousLinearMap.opNorm (OrthProj 𝕜 F) ≤ 1 :=
   (exists_orthproj_of_spherically_complete_space 𝕜 F).choose_spec.2
 
@@ -225,10 +208,7 @@ returns `a`.
 This is inherited from the choice of `OrthProj` in
 `exists_orthproj_of_spherically_complete_space`.
 -/
-theorem OrthProj_id (𝕜 : Type*) [NontriviallyNormedField 𝕜]
-{E : Type*} [NormedAddCommGroup E] [iud : IsUltrametricDist E]
-[NormedSpace 𝕜 E]
-(F : Submodule 𝕜 E) [SphericallyCompleteSpace ↥F] :
+theorem OrthProj_id :
 ∀ a ∈ F, (OrthProj 𝕜 F) a = a :=
   (exists_orthproj_of_spherically_complete_space 𝕜 F).choose_spec.1
 
@@ -239,10 +219,7 @@ This lemma is just an unfolding of the noncomputable definitions:
 * `OrthComp 𝕜 F := ker (exists_orthproj_of_spherically_complete_space 𝕜 F).choose`,
 * `OrthProj 𝕜 F := (exists_orthproj_of_spherically_complete_space 𝕜 F).choose`.
 -/
-theorem orthcomp_eq_ker_OrthProj (𝕜 : Type*) [NontriviallyNormedField 𝕜]
-{E : Type*} [NormedAddCommGroup E] [iud : IsUltrametricDist E]
-[NormedSpace 𝕜 E]
-(F : Submodule 𝕜 E) [SphericallyCompleteSpace ↥F] :
+theorem orthcomp_eq_ker_OrthProj :
 OrthComp 𝕜 F = LinearMap.ker (OrthProj 𝕜 F).toLinearMap :=
   rfl
 
@@ -255,11 +232,10 @@ More precisely, for every `x : E` we have
 This follows from the fact that `OrthProj 𝕜 F` restricts to the identity on `F`, and
 `OrthProj 𝕜 F x` is by definition an element of `F`.
 -/
-theorem orthproj_idempotent (𝕜 : Type*) [NontriviallyNormedField 𝕜]
-{E : Type*} [NormedAddCommGroup E] [iud : IsUltrametricDist E]
-[NormedSpace 𝕜 E]
-(F : Submodule 𝕜 E) [SphericallyCompleteSpace F] :
+theorem orthproj_idempotent :
 ∀ x : E, (OrthProj 𝕜 F) ((OrthProj 𝕜 F) x) = (OrthProj 𝕜 F) x :=
   fun x => SetLike.coe_eq_coe.mp <| OrthProj_id 𝕜 F ((OrthProj 𝕜 F) x) (OrthProj 𝕜 F x).prop
+
+end
 
 end SphericallyCompleteSpace
