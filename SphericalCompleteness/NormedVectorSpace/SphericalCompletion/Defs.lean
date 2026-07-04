@@ -62,7 +62,7 @@ private lemma range_inclusionᵢ_image {𝕜 : Type*} [NontriviallyNormedField �
 /-- Metric orthogonality of `x : q` to the range of the inclusion `p ≤ q`, computed inside `q`,
 is the same as metric orthogonality of `(x : E₀)` to `p` in the ambient space. This is the key
 transport principle for immediate extensions built from submodule inclusions. -/
-lemma morth_range_inclusionᵢ_iff {𝕜 : Type*} [NontriviallyNormedField 𝕜] {E₀ : Type*}
+lemma isMOrtho_range_inclusionᵢ_iff {𝕜 : Type*} [NontriviallyNormedField 𝕜] {E₀ : Type*}
     [SeminormedAddCommGroup E₀] [NormedSpace 𝕜 E₀] [IsUltrametricDist E₀]
     {p q : Submodule 𝕜 E₀} (h : p ≤ q) (x : q) :
     (IsMOrtho 𝕜 x (LinearMap.range (inclusionᵢ h).toLinearMap)) ↔
@@ -106,7 +106,7 @@ lemma mem_immediateExtensionSubmodules_iff
         ∀ v : M, Metric.infDist (v : E₀) f.range = ‖(v : E₀)‖ → v = 0 := by
   simp only [immediateExtensionSubmodules, Set.mem_setOf_eq, IsImmediate]
   refine exists_congr fun hc ↦ forall_congr' fun v ↦ ?_
-  rw [morth_range_inclusionᵢ_iff]
+  rw [isMOrtho_range_inclusionᵢ_iff]
 
 
 /--
@@ -160,7 +160,7 @@ theorem exists_maximal_immediateExtensionSubmodule
   have hf_le : f.range ≤ ⨆ i, (fun x ↦ x.val : C → Submodule 𝕜 E₀) i := fun z hz ↦
     Submodule.mem_iSup _ |>.2 fun N hN ↦ (hN ⟨hC.some, hC.some_mem⟩) ((hC1 hC.some_mem).1 hz)
   refine ⟨mem_immediateExtensionSubmodules_iff.2
-    ⟨hf_le, fun x horth ↦ ?_⟩, fun M hM z hz ↦
+    ⟨hf_le, fun x hIsMOrtho ↦ ?_⟩, fun M hM z hz ↦
     Submodule.mem_iSup _ |>.2 fun N hN ↦ (hN ⟨M, hM⟩) hz⟩
   haveI : Nonempty ↑C := hC.to_subtype
   have hxmem : (x : E₀) ∈ ⨆ i, (fun x ↦ x.val : C → Submodule 𝕜 E₀) i := x.2
@@ -168,7 +168,7 @@ theorem exists_maximal_immediateExtensionSubmodule
   rcases hxmem with ⟨N, hxN⟩
   obtain ⟨hc, himm⟩ := mem_immediateExtensionSubmodules_iff.1 (hC1 N.2)
   apply Subtype.ext
-  have := himm ⟨(x : E₀), hxN⟩ (by simpa using horth)
+  have := himm ⟨(x : E₀), hxN⟩ (by simpa using hIsMOrtho)
   simpa using congrArg Subtype.val this
 
 end SphericalCompletion

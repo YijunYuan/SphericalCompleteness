@@ -177,7 +177,7 @@ as long as `F` does not exhaust `E`, spherical completeness of `F` guarantees a 
 of any vector outside `F`, and the corresponding residual is a nonzero vector realizing its full
 norm as its distance to `F`.
 -/
-theorem exists_morth_vec_of_finrank_lt
+theorem exists_isMOrtho_vec_of_finrank_lt
     (hF : Module.finrank 𝕜 F < Module.finrank 𝕜 E) :
     ∃ (x : E), x ≠ 0 ∧ (x ⟂ₘ F) := by
   replace hF : (↑(Module.finrank 𝕜 ↥F) : Cardinal.{u}) < ↑(Module.finrank 𝕜 E) :=

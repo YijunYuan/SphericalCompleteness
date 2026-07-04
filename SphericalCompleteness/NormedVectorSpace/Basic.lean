@@ -122,7 +122,7 @@ private lemma induction_sphericallyCompleteSpace_of_finiteDimensional
     → (∃ M' : Subspace 𝕜 E, Module.finrank 𝕜 M' = (n + 1) ∧ SphericallyCompleteSpace M')
     := by
   rintro n hn ⟨M, hM1, _⟩
-  rcases exists_morth_vec_of_finrank_lt 𝕜 M (by linarith) with ⟨z, hz', hz⟩
+  rcases exists_isMOrtho_vec_of_finrank_lt 𝕜 M (by linarith) with ⟨z, hz', hz⟩
   use ((Submodule.span 𝕜 {z}) + M)
   let φ := IsMOrtho.directProdIsoSum 𝕜 z M hz
   constructor

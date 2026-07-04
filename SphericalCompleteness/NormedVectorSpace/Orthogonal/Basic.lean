@@ -24,8 +24,8 @@ Basic results on (norm) orthogonality in ultrametric normed spaces, building on 
   (`IsVOrtho.smul_left_iff`, `IsVOrtho.smul_right_iff`,
   `IsMOrtho.smul_iff`).
 * Metric orthogonality to a subspace is orthogonality to each of its vectors
-  (`IsMOrtho.iff_forall_orth`); subspace orthogonality unfolds to orthogonality of all pairs of
-  vectors (`IsOrtho.iff_forall_orth`) and is symmetric (`IsOrtho.symm`).
+  (`IsMOrtho.iff_forall_isVOrtho`); subspace orthogonality unfolds to orthogonality of all pairs of
+  vectors (`IsOrtho.iff_forall_isVOrtho`) and is symmetric (`IsOrtho.symm`).
 * A vector that both lies in `F` and is orthogonal to `F` is zero (`IsMOrtho.eq_zero_of_mem`).
 -/
 
@@ -47,7 +47,7 @@ namespace IsVOrtho
 technical direction from which the symmetry equivalence `IsVOrtho.symm` is assembled; the argument
 uses the strong triangle inequality to rule out any point of `𝕜 ∙ x` approximating `y` better
 than `0` does. -/
-private lemma of_orth {x y : E}
+private lemma of_isVOrtho {x y : E}
     (h : x ⟂[𝕜] y) : y ⟂[𝕜] x := by
   unfold SphericallyCompleteSpace.IsVOrtho at *
   refine eq_of_le_of_not_lt ?_ ?_
@@ -79,7 +79,7 @@ is defined asymmetrically (as a distance to the line spanned by the second vecto
 does not depend on the order of its arguments. -/
 lemma symm {x y : E} :
     (x ⟂[𝕜] y) ↔ (y ⟂[𝕜] x) :=
-  ⟨of_orth, of_orth⟩
+  ⟨of_isVOrtho, of_isVOrtho⟩
 
 /-- **Birkhoff–James characterization of orthogonality**: `x ⟂[𝕜] y` if and only if `x` is a
 best approximation of itself along the line `𝕜 ∙ y`, i.e. `‖x‖ ≤ ‖x + c • y‖` for every scalar
@@ -213,7 +213,7 @@ namespace IsMOrtho
 /-- Metric orthogonality to a subspace reduces to orthogonality to each of its vectors: `x ⟂ₘ F`
 if and only if `x ⟂[𝕜] y` for every `y ∈ F`. This links the subspace notion `IsMOrtho` to the
 vector notion `IsVOrtho`. -/
-lemma iff_forall_orth
+lemma iff_forall_isVOrtho
     (x : E) (F : Subspace 𝕜 E) :
     (x ⟂ₘ F) ↔ ∀ y ∈ F, (x ⟂[𝕜] y) := by
   constructor
@@ -265,7 +265,7 @@ theorem smul
     {x : E} {F : Subspace 𝕜 E} (a : 𝕜) :
     (x ⟂ₘ F) → ((a • x) ⟂ₘ F) := by
   intro h
-  rw [iff_forall_orth] at *
+  rw [iff_forall_isVOrtho] at *
   intro y hy
   exact IsVOrtho.smul_left a (h y hy)
 
@@ -306,25 +306,25 @@ namespace IsOrtho
 
 /-- Subspace orthogonality unfolds to orthogonality of all pairs of vectors: `F₁ ⟂ₛ F₂` if and
 only if `x ⟂[𝕜] y` for every `x ∈ F₁` and every `y ∈ F₂`. -/
-theorem iff_forall_orth
+theorem iff_forall_isVOrtho
     (F1 F2 : Subspace 𝕜 E) : (F1 ⟂ₛ F2) ↔ ∀ x ∈ F1, ∀ y ∈ F2, (x ⟂[𝕜] y) := by
-  simp only [SphericallyCompleteSpace.IsOrtho, IsMOrtho.iff_forall_orth]
+  simp only [SphericallyCompleteSpace.IsOrtho, IsMOrtho.iff_forall_isVOrtho]
 
 /-- Subspace orthogonality is symmetric: if `F₁ ⟂ₛ F₂` then `F₂ ⟂ₛ F₁`. This is the technical
 direction underlying the symmetry equivalence `IsOrtho.symm`, obtained by swapping the roles of the
 two subspaces and applying symmetry of vector orthogonality. -/
-private lemma of_sorth
+private lemma of_isOrtho
     {F1 F2 : Subspace 𝕜 E} : (F1 ⟂ₛ F2) → (F2 ⟂ₛ F1) := by
   intro h
-  simp only [SphericallyCompleteSpace.IsOrtho, IsMOrtho.iff_forall_orth] at *
-  exact fun x hx y hy ↦ IsVOrtho.of_orth (h y hy x hx)
+  simp only [SphericallyCompleteSpace.IsOrtho, IsMOrtho.iff_forall_isVOrtho] at *
+  exact fun x hx y hy ↦ IsVOrtho.of_isVOrtho (h y hy x hx)
 
 /-- Subspace orthogonality is symmetric: `F₁ ⟂ₛ F₂` if and only if `F₂ ⟂ₛ F₁`. Despite the
 asymmetric definition of `IsOrtho` (quantifying over vectors of the first subspace only), the
 relation is independent of the order of its arguments. -/
 theorem symm
     {F1 F2 : Subspace 𝕜 E} : (F1 ⟂ₛ F2) ↔ (F2 ⟂ₛ F1) :=
-  ⟨of_sorth, of_sorth⟩
+  ⟨of_isOrtho, of_isOrtho⟩
 
 end IsOrtho
 

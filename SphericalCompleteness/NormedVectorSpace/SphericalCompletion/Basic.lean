@@ -110,7 +110,7 @@ instance {𝕜 : Type*} [NontriviallyNormedField 𝕜]
   have hb'1' : IsMOrtho 𝕜 b' (LinearMap.range (inclusionᵢ (le_sup_of_le_left
       (SphericalCompletion.exists_maximal_immediateExtensionSubmodule 𝕜 E E₀
         f).choose_spec.1.choose)).toLinearMap) :=
-    (morth_range_inclusionᵢ_iff _ b').2 hb'1
+    (isMOrtho_range_inclusionᵢ_iff _ b').2 hb'1
   have hb1 := @IsMOrtho.smul 𝕜 _ _ _ _ inferInstance b' _ s⁻¹ hb'1'
   replace hb1 : IsMOrtho 𝕜 b.val K := by
     by_contra hc
@@ -127,10 +127,10 @@ instance {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     have hChooseSpec :=
       (SphericalCompletion.exists_maximal_immediateExtensionSubmodule 𝕜 E E₀
         f).choose_spec.1.choose_spec
-    have hNMorth := mt (hChooseSpec ⟨g, hg1⟩)
+    have hNIsMOrtho := mt (hChooseSpec ⟨g, hg1⟩)
         (fun h ↦ hgg (congrArg Subtype.val h))
     rcases @IsMOrtho.not_iff_exists_dist_lt_norm 𝕜 _ (↥K)
-        _ _ inferInstance (⟨g, hg1⟩) _ |>.1 hNMorth with ⟨e, he1, he2⟩
+        _ _ inferInstance (⟨g, hg1⟩) _ |>.1 hNIsMOrtho with ⟨e, he1, he2⟩
     simp only [Submodule.coe_norm, ← hg2', dist_eq_norm, AddSubgroupClass.coe_sub] at he2
     suffices hh : ‖b.val - e.val‖ < ‖b.val‖ by
       contrapose hb1
@@ -234,7 +234,7 @@ theorem minimal (𝕜 : Type*) [NontriviallyNormedField 𝕜]
   rcases hMo with ⟨b, hb1, hb2⟩
   apply IsMOrtho.of_mem_orthComp at hb1
   refine hb2 (embedding_isImmediate 𝕜 E b ?_)
-  rw [IsMOrtho.iff_forall_orth] at *
+  rw [IsMOrtho.iff_forall_isVOrtho] at *
   exact fun y hy ↦ hb1 y <| hM hy
 
 section
