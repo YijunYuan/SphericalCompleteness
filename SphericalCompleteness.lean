@@ -22,7 +22,7 @@ public import SphericalCompleteness.NormedVectorSpace.ContinuousLinearMap.Extens
 public import SphericalCompleteness.NormedVectorSpace.Immediate
 public import SphericalCompleteness.NormedVectorSpace.Orthogonal.Basic
 public import SphericalCompleteness.NormedVectorSpace.Orthogonal.Defs
-public import SphericalCompleteness.NormedVectorSpace.Orthogonal.MOrth
+public import SphericalCompleteness.NormedVectorSpace.Orthogonal.IsMOrtho
 public import SphericalCompleteness.NormedVectorSpace.Orthogonal.OrthComp
 public import SphericalCompleteness.NormedVectorSpace.Quotient
 public import SphericalCompleteness.NormedVectorSpace.SphericalCompletion.Basic

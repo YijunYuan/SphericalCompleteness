@@ -26,7 +26,7 @@ open Filter
 
 namespace SphericallyCompleteSpace
 
-namespace MOrth
+namespace IsMOrtho
 
 /-- Metric orthogonality to `F` passes from `x` to every scalar multiple of `x`: any element of
 the line `𝕜 ∙ x` is again metrically orthogonal to `F`. -/
@@ -132,7 +132,7 @@ noncomputable def directProdIsoSum (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     simp only [Submodule.add_eq_sup, eq_mpr_eq_cast, cast_eq,
       (Submodule.mem_sup.mp t.prop).choose_spec.2.choose_spec.2, Subtype.coe_eta]
 
-end MOrth
+end IsMOrtho
 
 universe u
 
@@ -189,7 +189,7 @@ theorem exists_morth_vec_of_finrank_lt
   suffices h : ∃ z : E, z ∈ F ∧ ‖a - z‖ = infDist a F ∧ (a - z) ≠ 0 by
     rcases h with ⟨z, hz⟩
     use a - z
-    simp only [MOrth, hz.2.1]
+    simp only [IsMOrtho, hz.2.1]
     refine ⟨fun hc ↦ ((sub_eq_zero.1 hc) ▸ ha) hz.1, eq_of_le_of_ge ?_ ?_⟩
     · rw [Metric.le_infDist <| Submodule.nonempty F]
       intro w hw

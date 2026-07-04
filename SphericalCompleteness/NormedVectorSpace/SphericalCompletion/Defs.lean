@@ -65,9 +65,9 @@ transport principle for immediate extensions built from submodule inclusions. -/
 lemma morth_range_inclusionᵢ_iff {𝕜 : Type*} [NontriviallyNormedField 𝕜] {E₀ : Type*}
     [SeminormedAddCommGroup E₀] [NormedSpace 𝕜 E₀] [IsUltrametricDist E₀]
     {p q : Submodule 𝕜 E₀} (h : p ≤ q) (x : q) :
-    (MOrth 𝕜 x (LinearMap.range (inclusionᵢ h).toLinearMap)) ↔
+    (IsMOrtho 𝕜 x (LinearMap.range (inclusionᵢ h).toLinearMap)) ↔
       Metric.infDist (x : E₀) p = ‖(x : E₀)‖ := by
-  rw [MOrth, ← range_inclusionᵢ_image h,
+  rw [IsMOrtho, ← range_inclusionᵢ_image h,
     Metric.infDist_image (Φ := ((↑) : q → E₀)) isometry_subtype_coe (x := x)]
   exact Iff.rfl
 

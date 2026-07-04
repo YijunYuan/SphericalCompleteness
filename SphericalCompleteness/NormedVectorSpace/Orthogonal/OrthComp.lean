@@ -124,7 +124,7 @@ theorem isCompl_orthComp :
   have := (exists_orthProj_of_sphericallyComplete 𝕜 F).choose_spec.1
   exact fun a ha ↦ SetLike.coe_eq_coe.mp <| this a ha
 
-namespace SOrth
+namespace IsOrtho
 
 /--
 `F` is *sphere-orthogonal* to its orthogonal complement `orthComp 𝕜 F`.
@@ -138,7 +138,7 @@ theorem orthComp :
   unfold SphericallyCompleteSpace.orthComp
   let T := (exists_orthProj_of_sphericallyComplete 𝕜 F).choose
   let hT2 := (exists_orthProj_of_sphericallyComplete 𝕜 F).choose_spec.2
-  rw [SOrth.symm]
+  rw [IsOrtho.symm]
   intro x hx
   simp only [LinearMap.mem_ker] at hx
   refine eq_of_le_of_ge ?_ ?_
@@ -161,9 +161,9 @@ theorem orthComp :
     refine le_trans (iud.norm_add_le_max _ _) ?_
     simp only [this, sup_of_le_left, le_refl]
 
-end SOrth
+end IsOrtho
 
-namespace MOrth
+namespace IsMOrtho
 
 /--
 If `x` lies in the orthogonal complement `orthComp 𝕜 F`, then `x` is metrically orthogonal to `F`
@@ -176,9 +176,9 @@ and that the submodule `F` is spherically complete.
 lemma of_mem_orthComp
     {x : E} (hx : x ∈ orthComp 𝕜 F) :
     (x ⟂ₘ F) :=
-  (SOrth.symm.1 <| SOrth.orthComp 𝕜 F) x hx
+  (IsOrtho.symm.1 <| IsOrtho.orthComp 𝕜 F) x hx
 
-end MOrth
+end IsMOrtho
 
 /--
 `orthProj 𝕜 F` is the (noncomputable) continuous `𝕜`-linear map from `E` to the submodule `F`,

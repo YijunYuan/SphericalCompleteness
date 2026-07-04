@@ -111,11 +111,11 @@ The library is organized in layers.
 ### Orthogonality theory
 
 - `Orthogonal/Defs.lean`
-  - Definitions of `MOrth`, `Orth`, `SOrth`.
+  - Definitions of `IsMOrtho`, `IsVOrtho`, `IsOrtho`.
 - `Orthogonal/Basic.lean`
   - Fundamental properties and equivalent formulations of orthogonality.
-- `Orthogonal/MOrth.lean`
-  - Existence and decomposition statements involving `MOrth`.
+- `Orthogonal/IsMOrtho.lean`
+  - Existence and decomposition statements involving `IsMOrtho`.
 - `Orthogonal/OrthComp.lean`
   - Construction of `OrthComp` and `OrthProj`; complement decomposition results.
 

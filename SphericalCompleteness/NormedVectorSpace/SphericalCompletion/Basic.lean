@@ -107,20 +107,20 @@ instance {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     simp only [SetLike.val_smul, ← hx'v', smul_add, neg_smul, sub_neg_eq_add, b, x]
     rw [add_comm]
     simpa only [add_left_inj] using inv_smul_smul₀ hhs a
-  have hb'1' : MOrth 𝕜 b' (LinearMap.range (inclusionᵢ (le_sup_of_le_left
+  have hb'1' : IsMOrtho 𝕜 b' (LinearMap.range (inclusionᵢ (le_sup_of_le_left
       (SphericalCompletion.exists_maximal_immediateExtensionSubmodule 𝕜 E E₀
         f).choose_spec.1.choose)).toLinearMap) :=
     (morth_range_inclusionᵢ_iff _ b').2 hb'1
-  have hb1 := @MOrth.smul 𝕜 _ _ _ _ inferInstance b' _ s⁻¹ hb'1'
-  replace hb1 : MOrth 𝕜 b.val K := by
+  have hb1 := @IsMOrtho.smul 𝕜 _ _ _ _ inferInstance b' _ s⁻¹ hb'1'
+  replace hb1 : IsMOrtho 𝕜 b.val K := by
     by_contra hc
-    rcases MOrth.not_iff_exists_dist_lt_norm.1 hc with ⟨g, hg1, hg2⟩
+    rcases IsMOrtho.not_iff_exists_dist_lt_norm.1 hc with ⟨g, hg1, hg2⟩
     rw [dist_eq_norm] at hg2
     have hg2' := IsUltrametricDist.norm_eq_of_norm_sub_lt_left hg2
     have hgg : g ≠ 0 := by
       by_contra hc
       simp only [hc, norm_zero, norm_eq_zero, ZeroMemClass.coe_eq_zero] at hg2'
-      simp only [dist_le_coe, MOrth, ne_eq,
+      simp only [dist_le_coe, IsMOrtho, ne_eq,
         hg2', ZeroMemClass.coe_zero, norm_zero] at *
       contrapose hc
       exact infDist_zero_of_mem <| by simp only [SetLike.mem_coe, zero_mem]
@@ -129,12 +129,12 @@ instance {𝕜 : Type*} [NontriviallyNormedField 𝕜]
         f).choose_spec.1.choose_spec
     have hNMorth := mt (hChooseSpec ⟨g, hg1⟩)
         (fun h ↦ hgg (congrArg Subtype.val h))
-    rcases @MOrth.not_iff_exists_dist_lt_norm 𝕜 _ (↥K)
+    rcases @IsMOrtho.not_iff_exists_dist_lt_norm 𝕜 _ (↥K)
         _ _ inferInstance (⟨g, hg1⟩) _ |>.1 hNMorth with ⟨e, he1, he2⟩
     simp only [Submodule.coe_norm, ← hg2', dist_eq_norm, AddSubgroupClass.coe_sub] at he2
     suffices hh : ‖b.val - e.val‖ < ‖b.val‖ by
       contrapose hb1
-      apply @MOrth.not_iff_exists_dist_lt_norm 𝕜 _ _ _ _ inferInstance |>.2
+      apply @IsMOrtho.not_iff_exists_dist_lt_norm 𝕜 _ _ _ _ inferInstance |>.2
       use ⟨e.val, Submodule.mem_sup_left e.prop⟩
       simp only [LinearMap.mem_range, LinearMap.coe_mk, AddHom.coe_mk,
         inclusionᵢ, Subtype.exists] at he1
@@ -193,8 +193,8 @@ theorem embedding_isImmediate (𝕜 : Type*) [NontriviallyNormedField 𝕜]
   unfold IsImmediate at himm ⊢
   intro v hv
   apply himm v
-  -- Convert hv : MOrth 𝕜 v (range embedding) to
-  -- MOrth 𝕜 v (range gChoose) by showing the ranges are equal
+  -- Convert hv : IsMOrtho 𝕜 v (range embedding) to
+  -- IsMOrtho 𝕜 v (range gChoose) by showing the ranges are equal
   convert hv using 2 <;> try rfl
   apply Submodule.ext_iff.mpr
   intro z
@@ -232,9 +232,9 @@ theorem minimal (𝕜 : Type*) [NontriviallyNormedField 𝕜]
   replace hMo := (Submodule.eq_bot_iff (orthComp 𝕜 M)).not.1 hMo
   push Not at hMo
   rcases hMo with ⟨b, hb1, hb2⟩
-  apply MOrth.of_mem_orthComp at hb1
+  apply IsMOrtho.of_mem_orthComp at hb1
   refine hb2 (embedding_isImmediate 𝕜 E b ?_)
-  rw [MOrth.iff_forall_orth] at *
+  rw [IsMOrtho.iff_forall_orth] at *
   exact fun y hy ↦ hb1 y <| hM hy
 
 section
@@ -351,7 +351,7 @@ theorem iff_maximallyComplete (𝕜 : Type*) [NontriviallyNormedField 𝕜]
       simp only [hc', bot_le, sup_of_le_left] at this
       simp only [this, lt_self_iff_false] at hf2
     rcases (Submodule.ne_bot_iff _).1 this with ⟨v, hv⟩
-    exact hv.2 <| hf1 v (MOrth.of_mem_orthComp _ _ hv.1)
+    exact hv.2 <| hf1 v (IsMOrtho.of_mem_orthComp _ _ hv.1)
   · intro h
     specialize h (SphericalCompletion.embedding 𝕜 E) (SphericalCompletion.embedding_isImmediate 𝕜 E)
     exact of_isometryEquiv

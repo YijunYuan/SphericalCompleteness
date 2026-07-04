@@ -123,7 +123,7 @@ private lemma norm_map {𝕜 : Type*}
     else
     simp only [IsImmediate] at hf
     specialize hf v
-    simp only [MOrth, hv, imp_false] at hf
+    simp only [IsMOrtho, hv, imp_false] at hf
     replace hf : infDist v ↑(LinearMap.range f.toLinearMap) < ‖v‖ := by
       refine lt_of_le_of_ne ?_ hf
       rw [← dist_zero_right v]

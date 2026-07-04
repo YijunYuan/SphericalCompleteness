@@ -6,7 +6,7 @@ Authors: Yijun Yuan
 module
 
 public import Mathlib.Analysis.Normed.Module.FiniteDimension
-public import SphericalCompleteness.NormedVectorSpace.Orthogonal.MOrth
+public import SphericalCompleteness.NormedVectorSpace.Orthogonal.IsMOrtho
 
 /-!
 # Spherical completeness of normed vector spaces
@@ -124,7 +124,7 @@ private lemma induction_sphericallyCompleteSpace_of_finiteDimensional
   rintro n hn ⟨M, hM1, _⟩
   rcases exists_morth_vec_of_finrank_lt 𝕜 M (by linarith) with ⟨z, hz', hz⟩
   use ((Submodule.span 𝕜 {z}) + M)
-  let φ := MOrth.directProdIsoSum 𝕜 z M hz
+  let φ := IsMOrtho.directProdIsoSum 𝕜 z M hz
   constructor
   · rw [← FiniteDimensional.nonempty_linearEquiv_iff_finrank_eq.1
       (Nonempty.intro φ.toLinearEquiv)]

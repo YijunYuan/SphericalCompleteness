@@ -29,33 +29,33 @@ approximation of it than the origin does. All three notions below are phrased wi
 
 Notation:
 
-* `x ⟂ₘ F` for `MOrth _ x F`
-* `F ⟂ₛ G` for `SOrth _ F G`
-* `x ⟂[𝕜] y` for `Orth 𝕜 x y`
+* `x ⟂ₘ F` for `IsMOrtho _ x F`
+* `F ⟂ₛ G` for `IsOrtho _ F G`
+* `x ⟂[𝕜] y` for `IsVOrtho 𝕜 x y`
 -/
 
-/-- `MOrth 𝕜 x F` is *metric orthogonality* of a vector to a subspace: the distance from `x`
+/-- `IsMOrtho 𝕜 x F` is *metric orthogonality* of a vector to a subspace: the distance from `x`
 to `F` equals `‖x‖`, i.e. no point of `F` approximates `x` better than `0` does. This is the
 non-Archimedean substitute for "`x` has no component along `F`". -/
-def MOrth (𝕜 : Type*) [NontriviallyNormedField 𝕜]
+def IsMOrtho (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     {E : Type*} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
     (x : E) (F : Subspace 𝕜 E) := Metric.infDist x F = ‖x‖
 
-/-- `Orth 𝕜 x y` is orthogonality of two vectors: `x` is metrically orthogonal to the line
+/-- `IsVOrtho 𝕜 x y` is orthogonality of two vectors: `x` is metrically orthogonal to the line
 `𝕜 ∙ y` spanned by `y`. Despite the asymmetric definition this relation is symmetric
-(see `Orth.symm`). -/
-def Orth (𝕜 : Type*) [NontriviallyNormedField 𝕜]
+(see `IsVOrtho.symm`). -/
+def IsVOrtho (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     {E : Type*} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
     (x y : E) := Metric.infDist x (𝕜 ∙ y) = ‖x‖
 
-/-- `SOrth 𝕜 F₁ F₂` is orthogonality of two subspaces: every vector of `F₁` is metrically
-orthogonal to `F₂`. Like `Orth`, this relation is in fact symmetric (see `SOrth.symm`). -/
-def SOrth (𝕜 : Type*) [NontriviallyNormedField 𝕜]
+/-- `IsOrtho 𝕜 F₁ F₂` is orthogonality of two subspaces: every vector of `F₁` is metrically
+orthogonal to `F₂`. Like `IsVOrtho`, this relation is in fact symmetric (see `IsOrtho.symm`). -/
+def IsOrtho (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     {E : Type*} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
-    (F1 : Subspace 𝕜 E) (F2 : Subspace 𝕜 E) := ∀ x ∈ F1, MOrth 𝕜 x F2
+    (F1 : Subspace 𝕜 E) (F2 : Subspace 𝕜 E) := ∀ x ∈ F1, IsMOrtho 𝕜 x F2
 
-notation:50 x " ⟂ₘ " F => MOrth _ x F
-notation:50 F " ⟂ₛ " G => SOrth _ F G
-notation:50 x " ⟂[" 𝕜 "] " y => Orth 𝕜 x y
+notation:50 x " ⟂ₘ " F => IsMOrtho _ x F
+notation:50 F " ⟂ₛ " G => IsOrtho _ F G
+notation:50 x " ⟂[" 𝕜 "] " y => IsVOrtho 𝕜 x y
 
 end SphericallyCompleteSpace
