@@ -129,6 +129,8 @@ private lemma liftSequence_prop (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     ) (r i') (hr <| lt_add_one i')).choose_spec.2
 end SphericallyCompleteSpace
 
+namespace Quotient
+
 open SphericallyCompleteSpace in
 /--
 Establishes spherical completeness of the quotient `E ⧸ F`.
@@ -144,7 +146,7 @@ Conclusion:
 - The quotient space `E ⧸ F`, endowed with the induced seminorm/normed space structure,
   is spherically complete.
 -/
-theorem Quotient.sphericallyCompleteSpace
+theorem sphericallyCompleteSpace
     (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     {E : Type*} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E]
     [iud : IsUltrametricDist E] [scsk : SphericallyCompleteSpace E]
@@ -187,3 +189,5 @@ theorem Quotient.sphericallyCompleteSpace
       _ ≤ ↑(r i) := htemp
   · refine (hanti <| Nat.le_add_right i 2) ?_
     simp only [mem_closedBall, dist_self, NNReal.zero_le_coe]
+
+end Quotient

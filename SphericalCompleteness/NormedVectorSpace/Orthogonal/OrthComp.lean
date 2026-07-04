@@ -124,6 +124,8 @@ theorem isCompl_orthComp :
   have := (exists_orthProj_of_sphericallyComplete 𝕜 F).choose_spec.1
   exact fun a ha ↦ SetLike.coe_eq_coe.mp <| this a ha
 
+namespace SOrth
+
 /--
 `F` is *sphere-orthogonal* to its orthogonal complement `orthComp 𝕜 F`.
 
@@ -131,7 +133,7 @@ In a nontrivially normed field `𝕜`, for an ultrametric normed space `E` over 
 assuming `F : Submodule 𝕜 E` is spherically complete, this theorem asserts the
 orthogonality relation `F ⟂ₛ orthComp 𝕜 F`.
 -/
-theorem SOrth.orthComp :
+theorem orthComp :
     (F ⟂ₛ (orthComp 𝕜 F)) := by
   unfold SphericallyCompleteSpace.orthComp
   let T := (exists_orthProj_of_sphericallyComplete 𝕜 F).choose
@@ -159,6 +161,10 @@ theorem SOrth.orthComp :
     refine le_trans (iud.norm_add_le_max _ _) ?_
     simp only [this, sup_of_le_left, le_refl]
 
+end SOrth
+
+namespace MOrth
+
 /--
 If `x` lies in the orthogonal complement `orthComp 𝕜 F`, then `x` is metrically orthogonal to `F`
 (i.e. `x ⟂ₘ F`).
@@ -167,10 +173,12 @@ This lemma provides the forward direction from membership in `orthComp` to metri
 under the assumptions that `E` is an ultrametric normed space over a nontrivially normed field `𝕜`
 and that the submodule `F` is spherically complete.
 -/
-lemma MOrth.of_mem_orthComp
+lemma of_mem_orthComp
     {x : E} (hx : x ∈ orthComp 𝕜 F) :
     (x ⟂ₘ F) :=
   (SOrth.symm.1 <| SOrth.orthComp 𝕜 F) x hx
+
+end MOrth
 
 /--
 `orthProj 𝕜 F` is the (noncomputable) continuous `𝕜`-linear map from `E` to the submodule `F`,

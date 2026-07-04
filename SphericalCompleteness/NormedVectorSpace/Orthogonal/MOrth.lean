@@ -26,14 +26,16 @@ open Filter
 
 namespace SphericallyCompleteSpace
 
+namespace MOrth
+
 /-- Metric orthogonality to `F` passes from `x` to every scalar multiple of `x`: any element of
 the line `𝕜 ∙ x` is again metrically orthogonal to `F`. -/
-private lemma MOrth.of_mem_span_singleton (𝕜 : Type*) [NontriviallyNormedField 𝕜]
+private lemma of_mem_span_singleton (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     {E : Type*} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
     (x : E) (F : Subspace 𝕜 E)
     (hxF : x ⟂ₘ F) (a : E) (ha : a ∈ Submodule.span 𝕜 {x}) : a ⟂ₘ F := by
   obtain ⟨r, rfl⟩ := Submodule.mem_span_singleton.mp ha
-  exact MOrth.smul r hxF
+  exact smul r hxF
 
 /--
 Constructs a `𝕜`-linear isometric equivalence between the direct product
@@ -47,7 +49,7 @@ compatible with the norm, yielding an isometry.
 This is stated as an isometric linear equivalence (`≃ₛₗᵢ[RingHom.id 𝕜]`), i.e. a linear
 equivalence that preserves norms.
 -/
-noncomputable def MOrth.directProdIsoSum (𝕜 : Type*) [NontriviallyNormedField 𝕜]
+noncomputable def directProdIsoSum (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
     (x : E) (F : Subspace 𝕜 E) (hxF : x ⟂ₘ F) :
     (Submodule.span 𝕜 {x}) × F ≃ₛₗᵢ[RingHom.id 𝕜] (Submodule.span 𝕜 {x}) + F where
@@ -80,7 +82,7 @@ noncomputable def MOrth.directProdIsoSum (𝕜 : Type*) [NontriviallyNormedField
       if h : ‖b‖ ≤ ‖a‖ then
         rw [sup_of_le_left h] at hc
         have : dist a (-b) = ‖a + b‖ := by simp only [dist_eq_norm, sub_neg_eq_add]
-        rw [← this, ← MOrth.of_mem_span_singleton 𝕜 x F hxF a ha] at hc
+        rw [← this, ← of_mem_span_singleton 𝕜 x F hxF a ha] at hc
         exact (notMem_of_dist_lt_infDist hc) <| neg_mem hab
       else
         simp only [not_le] at h
@@ -120,7 +122,7 @@ noncomputable def MOrth.directProdIsoSum (𝕜 : Type*) [NontriviallyNormedField
       simp only [Set.mem_inter_iff, SetLike.mem_coe, Set.mem_singleton_iff]
       constructor
       · rintro ⟨hw1, hw2⟩
-        exact MOrth.eq_zero_of_mem hw2 <| MOrth.of_mem_span_singleton 𝕜 x F hxF w hw1
+        exact eq_zero_of_mem hw2 <| of_mem_span_singleton 𝕜 x F hxF w hw1
       · intro h
         simp only [h, zero_mem, and_self]
     simp only [hh, Set.mem_singleton_iff, sub_eq_zero] at h1' h2'
@@ -129,6 +131,8 @@ noncomputable def MOrth.directProdIsoSum (𝕜 : Type*) [NontriviallyNormedField
     intro t
     simp only [Submodule.add_eq_sup, eq_mpr_eq_cast, cast_eq,
       (Submodule.mem_sup.mp t.prop).choose_spec.2.choose_spec.2, Subtype.coe_eta]
+
+end MOrth
 
 universe u
 

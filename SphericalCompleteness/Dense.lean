@@ -89,6 +89,8 @@ instance instIsSphericallyDenseOfDenselyNormedField (α : Type*)
     simp only [dist_self_add_left] at this
     linarith
 
+namespace IsSphericallyDense
+
 /--
 From spherical density, any closed ball of positive radius has (at least) two points whose
 distance is strictly larger than any prescribed `r' < r` while still remaining `≤ r`.
@@ -100,7 +102,7 @@ More precisely, assuming `IsSphericallyDense α`, for any center `z : α` and ra
 This provides a convenient way to extract "almost diameter-realizing" pairs inside a ball,
 with a quantitative lower bound on their separation.
 -/
-lemma IsSphericallyDense.exists_dist_lt_diam {α : Type*} [PseudoMetricSpace α]
+lemma exists_dist_lt_diam {α : Type*} [PseudoMetricSpace α]
     : IsSphericallyDense α →
     ∀ (z : α), ∀ ⦃r r' : ℝ≥0⦄, r' < r →
     ∃ x y : α, x ∈ closedBall z r ∧ y ∈ closedBall z r ∧ nndist x y ∈ Set.Ioc r' r := by
@@ -121,6 +123,8 @@ lemma IsSphericallyDense.exists_dist_lt_diam {α : Type*} [PseudoMetricSpace α]
         suffices h : dist x y ≤ ↑r by exact h
         rw [← isd]
         exact dist_le_diam_of_mem isBounded_closedBall hx hy)
+
+end IsSphericallyDense
 
 /--
 Characterization of spherical density via existence of pairs of points with controlled distance.

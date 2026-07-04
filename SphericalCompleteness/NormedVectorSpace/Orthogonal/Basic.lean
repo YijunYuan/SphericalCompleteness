@@ -41,13 +41,15 @@ variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 
 /-! ### Orthogonality of vectors -/
 
+namespace Orth
+
 /-- Orthogonality of two vectors is symmetric: if `x ⟂[𝕜] y` then `y ⟂[𝕜] x`. This is the
 technical direction from which the symmetry equivalence `Orth.symm` is assembled; the argument
 uses the strong triangle inequality to rule out any point of `𝕜 ∙ x` approximating `y` better
 than `0` does. -/
-private lemma Orth.of_orth {x y : E}
+private lemma of_orth {x y : E}
     (h : x ⟂[𝕜] y) : y ⟂[𝕜] x := by
-  unfold Orth at *
+  unfold SphericallyCompleteSpace.Orth at *
   refine eq_of_le_of_not_lt ?_ ?_
   · have := @infDist_le_dist_of_mem E _ ↑(Submodule.span 𝕜 {x}) y 0 (by simp)
     simpa only [ge_iff_le, dist_zero_right] using this
@@ -75,14 +77,14 @@ private lemma Orth.of_orth {x y : E}
 /-- Orthogonality of vectors is symmetric: `x ⟂[𝕜] y` if and only if `y ⟂[𝕜] x`. Although `Orth`
 is defined asymmetrically (as a distance to the line spanned by the second vector), the relation
 does not depend on the order of its arguments. -/
-lemma Orth.symm {x y : E} :
+lemma symm {x y : E} :
     (x ⟂[𝕜] y) ↔ (y ⟂[𝕜] x) :=
-  ⟨Orth.of_orth, Orth.of_orth⟩
+  ⟨of_orth, of_orth⟩
 
 /-- **Birkhoff–James characterization of orthogonality**: `x ⟂[𝕜] y` if and only if `x` is a
 best approximation of itself along the line `𝕜 ∙ y`, i.e. `‖x‖ ≤ ‖x + c • y‖` for every scalar
 `c`. This rephrases the `infDist`-based definition of `Orth` as a norm-minimality condition. -/
-lemma Orth.iff_birkhoffJames
+lemma iff_birkhoffJames
     (x y : E) : (x ⟂[𝕜] y) ↔ ∀ c : 𝕜, ‖x‖ ≤ ‖x + c • y‖ := by
   constructor
   · intro h c
@@ -109,7 +111,7 @@ lemma Orth.iff_birkhoffJames
 of the norms" identity on the spanned plane: `x ⟂[𝕜] y` if and only if
 `‖α • x + β • y‖ = max ‖α • x‖ ‖β • y‖` for all scalars `α` and `β`. In particular `x` and `y`
 then span a plane on which the norm is completely determined by the norms of the two axes. -/
-lemma Orth.iff_norm_add_eq_max {x y : E} :
+lemma iff_norm_add_eq_max {x y : E} :
     (x ⟂[𝕜] y) ↔ (∀ α β : 𝕜, ‖α • x + β • y‖ = max ‖α • x‖ ‖β • y‖) := by
   constructor
   · intro h a b
@@ -138,10 +140,10 @@ lemma Orth.iff_norm_add_eq_max {x y : E} :
       have := infDist_smul₀ hab.2 (Submodule.span 𝕜 {x} : Set E) y
       rw [Submodule.smul_coe_eq_self hab.2] at this
       rw [this, norm_smul, mul_le_mul_iff_right₀ (norm_pos_iff.mpr hab.2)]
-      rw [Orth.symm] at h
+      rw [symm] at h
       simpa only using le_of_eq (Eq.symm h)
   · intro h
-    unfold Orth
+    unfold SphericallyCompleteSpace.Orth
     suffices hh : ∀ y' ∈ ↑(Submodule.span 𝕜 {y}), dist x y' ≥ ‖x‖ by
       refine eq_of_le_of_ge ?_ ?_
       · rw [← dist_zero, dist_comm]
@@ -166,10 +168,10 @@ lemma Orth.iff_norm_add_eq_max {x y : E} :
 
 /-- Orthogonality is preserved by scaling the first vector: if `x ⟂[𝕜] y` then `(a • x) ⟂[𝕜] y`
 for every scalar `a` (including `a = 0`, since `0` is orthogonal to everything). -/
-theorem Orth.smul_left {x y : E}
+theorem smul_left {x y : E}
     (a : 𝕜) : (x ⟂[𝕜] y) → ((a • x) ⟂[𝕜] y) := by
   intro h
-  unfold Orth at *
+  unfold SphericallyCompleteSpace.Orth at *
   if ha : a = 0 then
     subst ha
     simp only [zero_smul, norm_zero]
@@ -180,34 +182,38 @@ theorem Orth.smul_left {x y : E}
 
 /-- For a nonzero scalar `a`, scaling the first vector preserves and reflects orthogonality:
 `x ⟂[𝕜] y` if and only if `(a • x) ⟂[𝕜] y`. -/
-theorem Orth.smul_left_iff {x y : E}
+theorem smul_left_iff {x y : E}
     {a : 𝕜} (ha : a ≠ 0) : (x ⟂[𝕜] y) ↔ ((a • x) ⟂[𝕜] y) := by
-  refine ⟨Orth.smul_left a, fun h ↦ ?_⟩
-  apply Orth.smul_left a⁻¹ at h
+  refine ⟨smul_left a, fun h ↦ ?_⟩
+  apply smul_left a⁻¹ at h
   rwa [inv_smul_smul₀ ha x] at h
 
 /-- Orthogonality is preserved by scaling the second vector: if `x ⟂[𝕜] y` then `x ⟂[𝕜] (a • y)`
 for every scalar `a`. This is the counterpart of `Orth.smul_left` obtained through symmetry. -/
-theorem Orth.smul_right {x y : E}
+theorem smul_right {x y : E}
     (a : 𝕜) : (x ⟂[𝕜] y) → (x ⟂[𝕜] (a • y)) := by
   intro h
-  rw [Orth.symm] at *
-  exact Orth.smul_left a h
+  rw [symm] at *
+  exact smul_left a h
 
 /-- For a nonzero scalar `a`, scaling the second vector preserves and reflects orthogonality:
 `x ⟂[𝕜] y` if and only if `x ⟂[𝕜] (a • y)`. -/
-theorem Orth.smul_right_iff {x y : E}
+theorem smul_right_iff {x y : E}
     {a : 𝕜} (ha : a ≠ 0) : (x ⟂[𝕜] y) ↔ (x ⟂[𝕜] (a • y)) := by
-  nth_rw 1 [Orth.symm]
-  nth_rw 2 [Orth.symm]
-  exact Orth.smul_left_iff ha
+  nth_rw 1 [symm]
+  nth_rw 2 [symm]
+  exact smul_left_iff ha
+
+end Orth
 
 /-! ### Metric orthogonality to a subspace -/
+
+namespace MOrth
 
 /-- Metric orthogonality to a subspace reduces to orthogonality to each of its vectors: `x ⟂ₘ F`
 if and only if `x ⟂[𝕜] y` for every `y ∈ F`. This links the subspace notion `MOrth` to the
 vector notion `Orth`. -/
-lemma MOrth.iff_forall_orth
+lemma iff_forall_orth
     (x : E) (F : Subspace 𝕜 E) :
     (x ⟂ₘ F) ↔ ∀ y ∈ F, (x ⟂[𝕜] y) := by
   constructor
@@ -228,7 +234,11 @@ lemma MOrth.iff_forall_orth
         (h y hy.1) ▸ (le_infDist (Submodule.nonempty (Submodule.span 𝕜 {y}))).1
           le_rfl (Submodule.mem_span_singleton_self y)
 
+end MOrth
+
 end
+
+namespace MOrth
 
 /-- A vector that both lies in a subspace `F` and is metrically orthogonal to `F` must be zero:
 `x ∈ F` and `x ⟂ₘ F` force `x = 0`. Membership makes the distance from `x` to `F` vanish, so
@@ -236,41 +246,45 @@ end
 
 Unlike the surrounding results this requires the genuine `NormedAddCommGroup E` (rather than only
 `SeminormedAddCommGroup E`), since it is where `‖x‖ = 0` is upgraded to `x = 0`. -/
-theorem MOrth.eq_zero_of_mem {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+theorem eq_zero_of_mem {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
     {x : E} {F : Subspace 𝕜 E} : x ∈ F → (x ⟂ₘ F) → x = 0 :=
   fun h1 h2 ↦ norm_eq_zero.mp (infDist_zero_of_mem h1 ▸ h2 : (0 : ℝ) = ‖x‖).symm
+
+end MOrth
 
 section
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
   {E : Type*} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [iud : IsUltrametricDist E]
 
+namespace MOrth
+
 /-- Metric orthogonality to a subspace is preserved by scaling: if `x ⟂ₘ F` then `(a • x) ⟂ₘ F`
 for every scalar `a`. -/
-theorem MOrth.smul
+theorem smul
     {x : E} {F : Subspace 𝕜 E} (a : 𝕜) :
     (x ⟂ₘ F) → ((a • x) ⟂ₘ F) := by
   intro h
-  rw [MOrth.iff_forall_orth] at *
+  rw [iff_forall_orth] at *
   intro y hy
   exact Orth.smul_left a (h y hy)
 
 /-- For a nonzero scalar `a`, scaling preserves and reflects metric orthogonality to a subspace:
 `x ⟂ₘ F` if and only if `(a • x) ⟂ₘ F`. -/
-theorem MOrth.smul_iff
+theorem smul_iff
     {x : E} {F : Subspace 𝕜 E} {a : 𝕜} (ha : a ≠ 0) :
     (x ⟂ₘ F) ↔ ((a • x) ⟂ₘ F) := by
-  refine ⟨MOrth.smul a, fun h ↦ ?_⟩
-  apply MOrth.smul a⁻¹ at h
+  refine ⟨smul a, fun h ↦ ?_⟩
+  apply smul a⁻¹ at h
   rwa [inv_smul_smul₀ ha x] at h
 
 /-- Failure of metric orthogonality is witnessed by a strictly better approximation: `x` is *not*
 metrically orthogonal to `F` if and only if some `y ∈ F` satisfies `dist x y < ‖x‖`. This is the
 negation of `MOrth` phrased as the existence of a point of `F` closer to `x` than `0` is. -/
-theorem MOrth.not_iff_exists_dist_lt_norm
+theorem not_iff_exists_dist_lt_norm
     {x : E} {F : Subspace 𝕜 E} :
     ¬ (x ⟂ₘ F) ↔ ∃ y ∈ F, dist x y < ‖x‖ := by
-  unfold MOrth
+  unfold SphericallyCompleteSpace.MOrth
   constructor
   · intro h
     contrapose h
@@ -284,29 +298,35 @@ theorem MOrth.not_iff_exists_dist_lt_norm
     rw [← h]
     exact fun z hz ↦ infDist_le_dist_of_mem hz
 
+end MOrth
+
 /-! ### Orthogonality of subspaces -/
+
+namespace SOrth
 
 /-- Subspace orthogonality unfolds to orthogonality of all pairs of vectors: `F₁ ⟂ₛ F₂` if and
 only if `x ⟂[𝕜] y` for every `x ∈ F₁` and every `y ∈ F₂`. -/
-theorem SOrth.iff_forall_orth
+theorem iff_forall_orth
     (F1 F2 : Subspace 𝕜 E) : (F1 ⟂ₛ F2) ↔ ∀ x ∈ F1, ∀ y ∈ F2, (x ⟂[𝕜] y) := by
-  simp only [SOrth, MOrth.iff_forall_orth]
+  simp only [SphericallyCompleteSpace.SOrth, MOrth.iff_forall_orth]
 
 /-- Subspace orthogonality is symmetric: if `F₁ ⟂ₛ F₂` then `F₂ ⟂ₛ F₁`. This is the technical
 direction underlying the symmetry equivalence `SOrth.symm`, obtained by swapping the roles of the
 two subspaces and applying symmetry of vector orthogonality. -/
-private lemma SOrth.of_sorth
+private lemma of_sorth
     {F1 F2 : Subspace 𝕜 E} : (F1 ⟂ₛ F2) → (F2 ⟂ₛ F1) := by
   intro h
-  simp only [SOrth, MOrth.iff_forall_orth] at *
+  simp only [SphericallyCompleteSpace.SOrth, MOrth.iff_forall_orth] at *
   exact fun x hx y hy ↦ Orth.of_orth (h y hy x hx)
 
 /-- Subspace orthogonality is symmetric: `F₁ ⟂ₛ F₂` if and only if `F₂ ⟂ₛ F₁`. Despite the
 asymmetric definition of `SOrth` (quantifying over vectors of the first subspace only), the
 relation is independent of the order of its arguments. -/
-theorem SOrth.symm
+theorem symm
     {F1 F2 : Subspace 𝕜 E} : (F1 ⟂ₛ F2) ↔ (F2 ⟂ₛ F1) :=
-  ⟨SOrth.of_sorth, SOrth.of_sorth⟩
+  ⟨of_sorth, of_sorth⟩
+
+end SOrth
 
 end
 
