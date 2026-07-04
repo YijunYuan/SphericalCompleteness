@@ -127,7 +127,9 @@ private lemma liftSequence_prop (𝕜 : Type*) [NontriviallyNormedField 𝕜]
         NNReal.zero_le_coe]) (liftSequence 𝕜 hr hanti (i' + 1)).val (by
       simp only [QuotientAddGroup.mk'_apply, (liftSequence 𝕜 hr hanti (i' + 1)).prop]
     ) (r i') (hr <| lt_add_one i')).choose_spec.2
+end SphericallyCompleteSpace
 
+open SphericallyCompleteSpace in
 /--
 Establishes spherical completeness of the quotient `E ⧸ F`.
 
@@ -148,7 +150,7 @@ theorem Quotient.sphericallyCompleteSpace
     [iud : IsUltrametricDist E] [scsk : SphericallyCompleteSpace E]
     {F : Submodule 𝕜 E} :
     SphericallyCompleteSpace (E ⧸ F) := by
-  rw [sphericallyCompleteSpace_iff_strictAnti_radius]
+  rw [iff_strictAnti_radius]
   intro c r hr hanti
   have := @scsk.isSphericallyComplete (fun n ↦ (liftSequence 𝕜 hr hanti (n + 2)).val)
     (fun n ↦ r (n + 1)) (by
@@ -185,5 +187,3 @@ theorem Quotient.sphericallyCompleteSpace
       _ ≤ ↑(r i) := htemp
   · refine (hanti <| Nat.le_add_right i 2) ?_
     simp only [mem_closedBall, dist_self, NNReal.zero_le_coe]
-
-end SphericallyCompleteSpace

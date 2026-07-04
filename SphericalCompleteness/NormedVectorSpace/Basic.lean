@@ -22,7 +22,7 @@ enlarged subspace with a product of spherically complete spaces.
 
 * `SphericallyCompleteSpace.of_locallyCompactSpace`: a locally compact normed vector space over a
   nontrivially normed field is spherically complete.
-* `SphericallyCompleteSpace.sphericallyCompleteSpace_of_finiteDimensional`: a finite-dimensional
+* `SphericallyCompleteSpace.of_finiteDimensional`: a finite-dimensional
   ultrametric normed `𝕜`-vector space over a spherically complete, nontrivially normed field is
   spherically complete.
 -/
@@ -101,7 +101,7 @@ instance instSphericallyCompleteSpaceSpanSingleton (𝕜 : Type*) [NontriviallyN
       ← sub_smul, norm_smul, ← dist_eq_norm, ← le_div_iff₀ (norm_pos_iff.mpr h)]
 
 /--
-The inductive step for `sphericallyCompleteSpace_of_finiteDimensional`.
+The inductive step for `of_finiteDimensional`.
 
 If `E` is a finite-dimensional ultrametric normed space over a spherically complete, nontrivially
 normed field `𝕜`, then for every `n < Module.finrank 𝕜 E`, the existence of an
@@ -122,9 +122,9 @@ private lemma induction_sphericallyCompleteSpace_of_finiteDimensional
     → (∃ M' : Subspace 𝕜 E, Module.finrank 𝕜 M' = (n + 1) ∧ SphericallyCompleteSpace M')
     := by
   rintro n hn ⟨M, hM1, _⟩
-  rcases exists_morth_vec_of_not_full_finrank 𝕜 M (by linarith) with ⟨z, hz', hz⟩
+  rcases exists_morth_vec_of_finrank_lt 𝕜 M (by linarith) with ⟨z, hz', hz⟩
   use ((Submodule.span 𝕜 {z}) + M)
-  let φ := directProdIsoSumOfOrth 𝕜 z M hz
+  let φ := MOrth.directProdIsoSum 𝕜 z M hz
   constructor
   · rw [← FiniteDimensional.nonempty_linearEquiv_iff_finrank_eq.1
       (Nonempty.intro φ.toLinearEquiv)]
@@ -136,7 +136,7 @@ private lemma induction_sphericallyCompleteSpace_of_finiteDimensional
     let hsProd : SphericallyCompleteSpace ((Submodule.span 𝕜 {z}) × M) := by
       letI : SphericallyCompleteSpace (Submodule.span 𝕜 {z}) := hsSpan
       infer_instance
-    exact sphericallyCompleteSpace_of_isometryEquiv
+    exact of_isometryEquiv
       (E := (Submodule.span 𝕜 {z}) × M) (he := hsProd) φ.toIsometryEquiv
 
 /--
@@ -146,7 +146,7 @@ field `𝕜`, and the metric on `E` is ultrametric, then `E` is spherically comp
 This is the standard permanence result: spherical completeness descends from the base field to any
 finite-dimensional ultrametric normed `𝕜`-vector space.
 -/
-theorem sphericallyCompleteSpace_of_finiteDimensional
+theorem of_finiteDimensional
     (𝕜 : Type*) [NontriviallyNormedField 𝕜] [SphericallyCompleteSpace 𝕜]
     (E : Type*) [NormedAddCommGroup E] [NormedSpace 𝕜 E]
     [IsUltrametricDist E] [FiniteDimensional 𝕜 E] :

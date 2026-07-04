@@ -25,6 +25,8 @@ quotients, submodules, operator spaces and `lp` spaces.
 open Metric
 open NNReal
 
+namespace IsUltrametricDist
+
 section
 variable {α : Type*} [PseudoMetricSpace α] [hiud : IsUltrametricDist α]
 
@@ -35,7 +37,7 @@ More precisely, assuming `IsUltrametricDist α`, for any center `z : α` and rad
 the set `closedBall z r` has `diam (closedBall z r) ≤ r`. This is a characteristic feature of
 ultrametrics: any two points in the same ball are at distance at most the ball's radius.
 -/
-theorem diam_le_radius_of_ultrametric
+theorem diam_le_radius
     (z : α) (r : ℝ≥0) :
     diam (closedBall z r) ≤ r :=
   diam_le_of_forall_dist_le r.prop fun _ hx _ hy ↦
@@ -52,7 +54,7 @@ More precisely, assuming `IsUltrametricDist α`, `r1 ≤ r2`, and
 
 This is a standard “nesting of intersecting balls” property characteristic of ultrametric spaces.
 -/
-theorem closedBall_subset_closedBall_of_le_radius_of_nonempty_intersection_of_ultrametric
+theorem closedBall_subset_closedBall_of_le_radius_of_nonempty_inter
     {z1 z2 : α} {r1 r2 : ℝ≥0}
     (hle : r1 ≤ r2)
     (hne : (closedBall z1 r1 ∩ closedBall z2 r2).Nonempty) :
@@ -221,3 +223,5 @@ the strong triangle inequality is trivial. It lets the one-point space serve as 
 as a witness that the hypotheses of the ultrametric development are satisfiable. -/
 instance instIsUltrametricDistPUnit : IsUltrametricDist PUnit where
   dist_triangle_max x y z := by simp
+
+end IsUltrametricDist

@@ -16,6 +16,8 @@ Supporting lemmas on submodules.
 
 @[expose] public section
 
+namespace Submodule
+
 /--
 If `a ∉ D`, then the sum decomposition of an element of the form `d + l`
 with `d ∈ D` and `l ∈ span 𝕜 {a}` is unique.
@@ -65,7 +67,7 @@ Parameters:
 Result:
 - `a • M = M`.
 -/
-theorem smul_submodule_eq_self {𝕜 : Type*} [Field 𝕜]
+theorem smul_coe_eq_self {𝕜 : Type*} [Field 𝕜]
     {E : Type*} [AddCommMonoid E] [Module 𝕜 E] {a : 𝕜} (ha : a ≠ 0) (M : Submodule 𝕜 E) :
     (@HSMul.hSMul 𝕜 (Set E) (Set E) (@instHSMul 𝕜 (Set E) Set.smulSet) a ↑M)
       = ↑M := by
@@ -73,3 +75,5 @@ theorem smul_submodule_eq_self {𝕜 : Type*} [Field 𝕜]
   refine ⟨?_, fun h ↦ ⟨a⁻¹ • z, SMulMemClass.smul_mem a⁻¹ h, smul_inv_smul₀ ha z⟩⟩
   rintro ⟨c, hc, rfl⟩
   exact SMulMemClass.smul_mem a hc
+
+end Submodule

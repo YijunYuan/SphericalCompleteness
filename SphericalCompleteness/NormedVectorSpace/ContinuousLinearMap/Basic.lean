@@ -40,7 +40,7 @@ instance instSphericallyCompleteSpaceContinuousLinearMap {𝕜 : Type*} [Nontriv
     {F : Type*} [SeminormedAddCommGroup F] [IsUltrametricDist F]
     [NormedSpace 𝕜 F] [SphericallyCompleteSpace F] :
     SphericallyCompleteSpace (E →L[𝕜] F) := by
-  rw [sphericallyCompleteSpace_iff_strictAnti_radius]
+  rw [iff_strictAnti_radius]
   intro c' r' hsar' hanti'
   if hseq : ∀ n : ℕ, ∃ N, ∀ i > N, c' n ≠ c' i then
   rcases exists_injective_subseq_of_finite_duplication c' hseq with ⟨φ, hφ⟩

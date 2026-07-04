@@ -72,7 +72,7 @@ lemma exists_extensionValue_norm_le {𝕜 : Type*}
     {ε : ↑𝒰 → ℝ} (hε1 : ∀ (T : ↑𝒰), 0 < ε T) (hε2 : ∀ (U V : ↑𝒰), ‖U.val - V.val‖ ≤ max (ε U) (ε V))
     (hε3 : ∀ (U : ↑𝒰) (x : ↥D), ‖S x - U.val ↑x‖ ≤ ε U * ‖x‖) :
     ∃ z0 : F, ∀ (x : ↥D) (U : ↑𝒰), ‖S x + z0 - U.val (↑x + a)‖ ≤ ε U * ‖↑x + a‖ := by
-  rw [sphericallyCompleteSpace_iff_pairwise_inter_nonempty] at hsc
+  rw [iff_pairwise_inter_nonempty] at hsc
   let 𝒮 : Set (F × NNReal) := {(U.val x + U.val a - S x,
     ⟨(ε U) * ‖x + a‖, mul_nonneg (le_of_lt (hε1 _)) (norm_nonneg _)⟩) | (x : ↑D) (U : ↑𝒰)}
   have h𝒮ne : 𝒮.Nonempty := by
@@ -256,7 +256,7 @@ lemma codimOneExtension_eq {𝕜 : Type*}
   have hpeq : (p.choose : E) + l • a = (M : E) := by
     rw [hl, (Submodule.mem_span_singleton.1 p.choose_spec.2.choose_spec.1).choose_spec,
       p.choose_spec.2.choose_spec.2]
-  have hdecomp := eq_and_eq_of_add_eq_add_of_notMem ha1
+  have hdecomp := Submodule.eq_and_eq_of_add_eq_add_of_notMem ha1
     p.choose p.choose_spec.1 (l • a) (Submodule.mem_span_singleton.2 ⟨l, rfl⟩)
     (spanSupDecomp ha1 M).1 (spanSupDecomp ha1 M).1.2 ((spanSupDecomp ha1 M).2 • a)
     (Submodule.mem_span_singleton.2 ⟨_, rfl⟩) (hpeq.trans hMeq)

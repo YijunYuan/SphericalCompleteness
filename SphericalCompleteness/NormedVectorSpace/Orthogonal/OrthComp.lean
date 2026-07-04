@@ -79,7 +79,7 @@ complete (as a normed space), this theorem produces a continuous linear map
 In other words, in the ultrametric setting, spherical completeness of `F` ensures the existence of
 a bounded linear projection of operator norm at most `1` from `E` onto `F`.
 -/
-theorem exists_orthproj_of_spherically_complete_space :
+theorem exists_orthProj_of_sphericallyComplete :
     ∃ T : E →L[𝕜] ↥F, (∀ a ∈ F, T a = a) ∧ ContinuousLinearMap.opNorm T ≤ 1 := by
   have := @exists_extension_opNorm_le 𝕜 _ E _ _ _ F ↥F _ _ _ _
     (ContinuousLinearMap.id 𝕜 ↥F) {0} (by simp) (fun _ ↦ 1) (fun _ ↦ by simp)
@@ -95,7 +95,7 @@ normed space over a nontrivially normed field, assuming `E` carries an ultrametr
 distance and that `F` is spherically complete.
 
 It is defined as the kernel of an orthogonal projection onto `F` whose existence is
-guaranteed by spherical completeness (`exists_orthproj_of_spherically_complete_space`).
+guaranteed by spherical completeness (`exists_orthProj_of_sphericallyComplete`).
 
 In particular, `x ∈ orthComp 𝕜 F` iff the chosen orthogonal projection sends `x` to `0`,
 so elements of `orthComp 𝕜 F` are exactly those “orthogonal to `F`” with respect to that
@@ -103,7 +103,7 @@ projection.
 -/
 noncomputable def orthComp
     : Submodule 𝕜 E :=
-LinearMap.ker (exists_orthproj_of_spherically_complete_space 𝕜 F).choose.toLinearMap
+LinearMap.ker (exists_orthProj_of_sphericallyComplete 𝕜 F).choose.toLinearMap
 
 /--
 `isCompl_orthComp` shows that, over a nontrivially normed field `𝕜`, in a normed `𝕜`-vector space
@@ -121,7 +121,7 @@ theorem isCompl_orthComp :
     IsCompl F (orthComp 𝕜 F) := by
   unfold orthComp
   apply isCompl_ker_of_forall_apply_eq
-  have := (exists_orthproj_of_spherically_complete_space 𝕜 F).choose_spec.1
+  have := (exists_orthProj_of_sphericallyComplete 𝕜 F).choose_spec.1
   exact fun a ha ↦ SetLike.coe_eq_coe.mp <| this a ha
 
 /--
@@ -131,12 +131,12 @@ In a nontrivially normed field `𝕜`, for an ultrametric normed space `E` over 
 assuming `F : Submodule 𝕜 E` is spherically complete, this theorem asserts the
 orthogonality relation `F ⟂ₛ orthComp 𝕜 F`.
 -/
-theorem sorth_orthComp :
+theorem SOrth.orthComp :
     (F ⟂ₛ (orthComp 𝕜 F)) := by
-  unfold orthComp
-  let T := (exists_orthproj_of_spherically_complete_space 𝕜 F).choose
-  let hT2 := (exists_orthproj_of_spherically_complete_space 𝕜 F).choose_spec.2
-  rw [sorth_symm]
+  unfold SphericallyCompleteSpace.orthComp
+  let T := (exists_orthProj_of_sphericallyComplete 𝕜 F).choose
+  let hT2 := (exists_orthProj_of_sphericallyComplete 𝕜 F).choose_spec.2
+  rw [SOrth.symm]
   intro x hx
   simp only [LinearMap.mem_ker] at hx
   refine eq_of_le_of_ge ?_ ?_
@@ -150,7 +150,7 @@ theorem sorth_orthComp :
         simp only [map_sub, AddSubgroupClass.coe_sub, T]
         simp only [ContinuousLinearMap.coe_coe] at hx
         simp only [hx, ZeroMemClass.coe_zero, zero_sub, neg_inj]
-        apply (exists_orthproj_of_spherically_complete_space 𝕜 F).choose_spec.1
+        apply (exists_orthProj_of_sphericallyComplete 𝕜 F).choose_spec.1
         exact (Submodule.mem_toAddSubgroup F).mp hy
       rw [← norm_neg, ← this]
       have := (ContinuousLinearMap.opNorm_le_iff zero_le_one).1 hT2 (x - y)
@@ -167,10 +167,10 @@ This lemma provides the forward direction from membership in `orthComp` to metri
 under the assumptions that `E` is an ultrametric normed space over a nontrivially normed field `𝕜`
 and that the submodule `F` is spherically complete.
 -/
-lemma morth_of_mem_orthComp
+lemma MOrth.of_mem_orthComp
     {x : E} (hx : x ∈ orthComp 𝕜 F) :
     (x ⟂ₘ F) :=
-  (sorth_symm.1 <| sorth_orthComp 𝕜 F) x hx
+  (SOrth.symm.1 <| SOrth.orthComp 𝕜 F) x hx
 
 /--
 `orthProj 𝕜 F` is the (noncomputable) continuous `𝕜`-linear map from `E` to the submodule `F`,
@@ -190,18 +190,18 @@ existence results rather than an algorithm.
 -/
 noncomputable def orthProj :
     E →L[𝕜] ↥F :=
-  (exists_orthproj_of_spherically_complete_space 𝕜 F).choose
+  (exists_orthProj_of_sphericallyComplete 𝕜 F).choose
 
 /--
 The orthogonal projection `orthProj 𝕜 F` has operator norm at most `1`.
 
 This is an immediate consequence of the construction of `orthProj` via
-`exists_orthproj_of_spherically_complete_space`, which provides a continuous linear
+`exists_orthProj_of_sphericallyComplete`, which provides a continuous linear
 projection onto `F` satisfying `‖T‖ ≤ 1`.
 -/
 theorem norm_orthProj_le_one :
     ContinuousLinearMap.opNorm (orthProj 𝕜 F) ≤ 1 :=
-  (exists_orthproj_of_spherically_complete_space 𝕜 F).choose_spec.2
+  (exists_orthProj_of_sphericallyComplete 𝕜 F).choose_spec.2
 
 /--
 `orthProj 𝕜 F` restricts to the identity on the submodule `F`.
@@ -210,18 +210,18 @@ Concretely, if `a : E` satisfies `a ∈ F`, then applying the orthogonal project
 returns `a`.
 
 This is inherited from the choice of `orthProj` in
-`exists_orthproj_of_spherically_complete_space`.
+`exists_orthProj_of_sphericallyComplete`.
 -/
 theorem orthProj_id :
     ∀ a ∈ F, (orthProj 𝕜 F) a = a :=
-  (exists_orthproj_of_spherically_complete_space 𝕜 F).choose_spec.1
+  (exists_orthProj_of_sphericallyComplete 𝕜 F).choose_spec.1
 
 /--
 `orthComp 𝕜 F` is definitionally the kernel of the chosen orthogonal projection `orthProj 𝕜 F`.
 
 This lemma is just an unfolding of the noncomputable definitions:
-* `orthComp 𝕜 F := ker (exists_orthproj_of_spherically_complete_space 𝕜 F).choose`,
-* `orthProj 𝕜 F := (exists_orthproj_of_spherically_complete_space 𝕜 F).choose`.
+* `orthComp 𝕜 F := ker (exists_orthProj_of_sphericallyComplete 𝕜 F).choose`,
+* `orthProj 𝕜 F := (exists_orthProj_of_sphericallyComplete 𝕜 F).choose`.
 -/
 theorem orthComp_eq_ker_orthProj :
     orthComp 𝕜 F = LinearMap.ker (orthProj 𝕜 F).toLinearMap :=

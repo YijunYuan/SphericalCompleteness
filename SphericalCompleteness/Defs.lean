@@ -98,7 +98,7 @@ ball is preserved because `f` is an isometry.
 
 This is the standard “property invariant under isometric equivalence” argument.
 -/
-theorem sphericallyCompleteSpace_of_isometryEquiv {E F : Type*}
+theorem of_isometryEquiv {E F : Type*}
     [PseudoMetricSpace E] [PseudoMetricSpace F]
     [he : SphericallyCompleteSpace E]
     (f : E ≃ᵢ F) : SphericallyCompleteSpace F where

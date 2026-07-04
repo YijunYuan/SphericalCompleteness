@@ -79,7 +79,7 @@ instance instIsSphericallyDenseOfDenselyNormedField (α : Type*)
     [dnf : DenselyNormedField α] [hiud : IsUltrametricDist α] :
     IsSphericallyDense α where
   spherically_dense := by
-    refine fun z r ↦ eq_of_le_of_ge (diam_le_radius_of_ultrametric _ _) ?_
+    refine fun z r ↦ eq_of_le_of_ge (IsUltrametricDist.diam_le_radius _ _) ?_
     by_contra hc
     simp only [not_le] at hc
     rcases dnf.lt_norm_lt (diam (closedBall z ↑r)) ↑r diam_nonneg hc with ⟨δ, _, hδ2⟩
@@ -100,7 +100,7 @@ More precisely, assuming `IsSphericallyDense α`, for any center `z : α` and ra
 This provides a convenient way to extract "almost diameter-realizing" pairs inside a ball,
 with a quantitative lower bound on their separation.
 -/
-lemma exists_dist_lt_diam_of_isSphericallyDense {α : Type*} [PseudoMetricSpace α]
+lemma IsSphericallyDense.exists_dist_lt_diam {α : Type*} [PseudoMetricSpace α]
     : IsSphericallyDense α →
     ∀ (z : α), ∀ ⦃r r' : ℝ≥0⦄, r' < r →
     ∃ x y : α, x ∈ closedBall z r ∧ y ∈ closedBall z r ∧ nndist x y ∈ Set.Ioc r' r := by
@@ -142,9 +142,9 @@ theorem exists_dist_lt_diam_iff_isSphericallyDense
     : IsSphericallyDense α ↔
     ∀ (z : α), ∀ ⦃r r' : ℝ≥0⦄, r' < r →
     ∃ x y : α, x ∈ closedBall z r ∧ y ∈ closedBall z r ∧ nndist x y ∈ Set.Ioc r' r := by
-  refine ⟨exists_dist_lt_diam_of_isSphericallyDense, ?_⟩
+  refine ⟨IsSphericallyDense.exists_dist_lt_diam, ?_⟩
   intro h
-  refine {spherically_dense := fun z r ↦ eq_of_le_of_ge (diam_le_radius_of_ultrametric _ _) ?_}
+  refine {spherically_dense := fun z r ↦ eq_of_le_of_ge (IsUltrametricDist.diam_le_radius _ _) ?_}
   by_contra hc
   simp only [not_le] at hc
   rcases h z hc with ⟨x, y, hx, hy, hxy⟩
@@ -169,7 +169,7 @@ private lemma exists_disjoint_subball {α : Type*}
     closedBall c₁ r₁ ⊆ closedBall c₀ r₀ ∧
     z ∉ closedBall c₁ r₁
     := by
-  apply exists_dist_lt_diam_of_isSphericallyDense at hα
+  apply IsSphericallyDense.exists_dist_lt_diam at hα
   rcases hα c₀ hr with ⟨x, y, hx, hy, hxy⟩
   have : Disjoint (closedBall x r₁) (closedBall y r₁) := by
     refine (IsUltrametricDist.closedBall_eq_or_disjoint x y ↑r₁).resolve_left ?_
@@ -193,16 +193,16 @@ private lemma exists_disjoint_subball {α : Type*}
 /--
 A nonempty spherically dense space contains two points at strictly positive distance.
 
-Applying `exists_dist_lt_diam_of_isSphericallyDense` to the ball of radius `2` about an arbitrary
+Applying `IsSphericallyDense.exists_dist_lt_diam` to the ball of radius `2` about an arbitrary
 point (using `1 < 2`) yields a pair `z.1, z.2` with `nndist z.1 z.2 > 1 > 0`. This furnishes the
 strictly positive base scale used to define `shrinkingRadius`.
 -/
 private lemma exists_pair_with_pos_dist (α : Type*)
     [PseudoMetricSpace α] [hα : IsSphericallyDense α] [nemp : Nonempty α] :
     ∃ z : α × α, nndist z.1 z.2 > 0 := by
-  use ((exists_dist_lt_diam_of_isSphericallyDense hα nemp.some one_lt_two).choose,
-  (exists_dist_lt_diam_of_isSphericallyDense hα nemp.some one_lt_two).choose_spec.choose)
-  exact lt_trans zero_lt_one (exists_dist_lt_diam_of_isSphericallyDense
+  use ((IsSphericallyDense.exists_dist_lt_diam hα nemp.some one_lt_two).choose,
+  (IsSphericallyDense.exists_dist_lt_diam hα nemp.some one_lt_two).choose_spec.choose)
+  exact lt_trans zero_lt_one (IsSphericallyDense.exists_dist_lt_diam
     hα nemp.some one_lt_two).choose_spec.choose_spec.2.2.out.1
 
 /--
@@ -460,7 +460,7 @@ interval from `0` to the ball diameter.
 
 The proof combines:
 * an upper bound (`dist x y ≤ diam (closedBall z r)`), and
-* approximation from below using `exists_dist_lt_diam_of_isSphericallyDense`.
+* approximation from below using `IsSphericallyDense.exists_dist_lt_diam`.
 -/
 instance instIsDenseMetricOfIsSphericallyDense (α : Type*)
     [MetricSpace α] [IsUltrametricDist α] [IsSphericallyDense α] :
@@ -485,7 +485,7 @@ instance instIsDenseMetricOfIsSphericallyDense (α : Type*)
         · let tNN : ℝ≥0 := ⟨t, le_of_lt ht0'⟩
           let r' : ℝ≥0 := ⟨t - e, by linarith [lt_of_not_ge he]⟩
           have hr'lt : r' < tNN := sub_lt_self _ (by change 0 < ε / 2; nlinarith [hε])
-          rcases exists_dist_lt_diam_of_isSphericallyDense (α := α) inferInstance z hr'lt with
+          rcases IsSphericallyDense.exists_dist_lt_diam (α := α) inferInstance z hr'lt with
             ⟨x, y, hx, hy, hxy⟩
           have hx' : x ∈ closedBall z r := by
             simpa [mem_closedBall] using (le_trans (le_of_eq_of_le rfl hx) htr)

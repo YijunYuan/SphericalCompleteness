@@ -341,7 +341,7 @@ instance sphericallyCompleteSpace_lp_quotient_c₀ {𝕜 : Type*} [NontriviallyN
     (E : ℕ → Type*) [∀ i, NormedAddCommGroup (E i)]
     [∀ i, NormedSpace 𝕜 (E i)] [∀ i, IsUltrametricDist (E i)] :
     SphericallyCompleteSpace ((lp E ⊤)⧸ c₀ 𝕜 E) := by
-  rw [sphericallyCompleteSpace_iff_strictAnti_radius]
+  rw [iff_strictAnti_radius]
   intro c r hsr hanti
   let f : ∀ i, E i := fun i ↦ (quotientMkSection E hsr hanti i).val i
   have hf_mem : ↑(f) ∈ lp E ⊤ := by

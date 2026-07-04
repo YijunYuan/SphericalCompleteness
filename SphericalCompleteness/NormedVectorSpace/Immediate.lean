@@ -68,8 +68,9 @@ def MaximallyComplete (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 ∀ {F : Type u} [NormedAddCommGroup F] [NormedSpace 𝕜 F] [IsUltrametricDist F]
 (f : E →ₗᵢ[𝕜] F), IsImmediate f → Function.Surjective f
 
+namespace IsImmediate
 /--
-`LinearIsometry.weakInv f` is the (weak, partial) inverse of a linear isometry
+`weakInv f` is the (weak, partial) inverse of a linear isometry
 `f : E →ₗᵢ[𝕜] F`.
 
 Since `f` is an isometry it is injective, hence a linear isometric isomorphism onto its range
@@ -77,13 +78,13 @@ Since `f` is an isometry it is injective, hence a linear isometric isomorphism o
 `weakInv f : ↥f.range →ₗᵢ[𝕜] E`, defined on the range of `f` rather than on all of `F` — whence
 "weak". It satisfies `weakInv f ⟨f x, _⟩ = x` for every `x : E`, i.e. it undoes `f` on its image.
 -/
-private noncomputable def LinearIsometry.weakInv {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+private noncomputable def weakInv {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
     {F : Type*} [NormedAddCommGroup F] [NormedSpace 𝕜 F]
     (f : E →ₗᵢ[𝕜] F) := f.equivRange.symm.toLinearIsometry
 
 /--
-Key norm-preservation step behind `exists_linearIsometry_comp_eq_of_isImmediate`.
+Key norm-preservation step behind `IsImmediate.exists_linearIsometry_comp_eq`.
 
 Suppose `f : E →ₗᵢ[𝕜] F` is immediate (`IsImmediate f`), `g : E →ₗᵢ[𝕜] H` is a linear isometry into
 a spherically complete ultrametric normed space `H`, and `h : F →L[𝕜] H` is a continuous linear map
@@ -95,14 +96,14 @@ The upper bound `‖h v‖ ≤ ‖v‖` follows from `‖h‖ ≤ 1`, while the 
 any `v` can be approximated within distance `< ‖v‖` by a vector in the range of `f`, on which `h`
 already preserves norms. This is what promotes the continuous linear map `h` to a linear isometry.
 -/
-private lemma norm_map_of_isImmediate {𝕜 : Type*}
+private lemma norm_map {𝕜 : Type*}
     [NontriviallyNormedField 𝕜] {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
     [IsUltrametricDist E] {F : Type*} [NormedAddCommGroup F] [NormedSpace 𝕜 F]
     [IsUltrametricDist F] {H : Type*} [NormedAddCommGroup H] [NormedSpace 𝕜 H]
     [IsUltrametricDist H] [SphericallyCompleteSpace H] (f : E →ₗᵢ[𝕜] F) (hf : IsImmediate f)
     (g : E →ₗᵢ[𝕜] H) (h : F →L[𝕜] H)
-    (hf2 : ‖h‖ = ‖g.toContinuousLinearMap.comp (LinearIsometry.weakInv f).toContinuousLinearMap‖)
-    (hf1 : ∀ (v : F) (x : E) (h_1 : f x = v), h v = g ((LinearIsometry.weakInv f) ⟨v, Exists.intro
+    (hf2 : ‖h‖ = ‖g.toContinuousLinearMap.comp (weakInv f).toContinuousLinearMap‖)
+    (hf1 : ∀ (v : F) (x : E) (h_1 : f x = v), h v = g ((weakInv f) ⟨v, Exists.intro
     x h_1⟩))
     (v : F) : ‖(↑h : F →ₗ[𝕜] H) v‖ = ‖v‖ := by
   refine eq_of_le_of_ge ?_ ?_
@@ -112,7 +113,7 @@ private lemma norm_map_of_isImmediate {𝕜 : Type*}
     rw [hf2]
     apply (ContinuousLinearMap.opNorm_le_iff zero_le_one).2
     intro x
-    have : ‖(LinearIsometry.weakInv f).toContinuousLinearMap x‖ = ‖x‖ := by
+    have : ‖(weakInv f).toContinuousLinearMap x‖ = ‖x‖ := by
       simp only [LinearIsometry.coe_toContinuousLinearMap, LinearIsometry.norm_map]
     rw [← this]
     simp only [ContinuousLinearMap.coe_comp, LinearIsometry.coe_toContinuousLinearMap,
@@ -139,19 +140,19 @@ private lemma norm_map_of_isImmediate {𝕜 : Type*}
         simp only [hx.1, sub_zero, lt_self_iff_false, and_false] at hx
       else
       have : ‖h‖ = 1 := by
-        have : ‖(g.comp (LinearIsometry.weakInv f)).toContinuousLinearMap‖ =
-          ‖ (g.toContinuousLinearMap).comp (LinearIsometry.weakInv f).toContinuousLinearMap‖ := rfl
+        have : ‖(g.comp (weakInv f)).toContinuousLinearMap‖ =
+          ‖ (g.toContinuousLinearMap).comp (weakInv f).toContinuousLinearMap‖ := rfl
         rw [← this] at hf2
         rw [hf2]
         haveI := not_not.1 hrf
         exact LinearIsometry.norm_toContinuousLinearMap _
       rw [this, one_mul, norm_sub_rev]
       exact hx.2
-    have hx' := norm_eq_of_norm_sub_lt_left hx.2
+    have hx' := IsUltrametricDist.norm_eq_of_norm_sub_lt_left hx.2
     have t : ‖h x‖ = ‖x‖ := by
       obtain ⟨z, hz⟩ := hx.1; rw [hf1 x z hz]; simp
     rw [hx', ← t] at this
-    apply norm_eq_of_norm_sub_lt_left at this
+    apply IsUltrametricDist.norm_eq_of_norm_sub_lt_left at this
     simp only [hx', ContinuousLinearMap.coe_coe, ← this, t, le_refl]
 
 /--
@@ -164,7 +165,7 @@ into a spherically complete target extends to an isometric map out of `F`.
 
 The conclusion is stated using an explicit `@LinearIsometry.comp` to avoid elaboration issues.
 -/
-theorem exists_linearIsometry_comp_eq_of_isImmediate {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+theorem exists_linearIsometry_comp_eq {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
     {F : Type*} [NormedAddCommGroup F] [NormedSpace 𝕜 F] [IsUltrametricDist F]
     {H : Type*} [NormedAddCommGroup H] [NormedSpace 𝕜 H] [IsUltrametricDist H]
@@ -173,25 +174,26 @@ theorem exists_linearIsometry_comp_eq_of_isImmediate {𝕜 : Type*} [Nontriviall
     (g : E →ₗᵢ[𝕜] H) :
     ∃ (h : F →ₗᵢ[𝕜] H), LinearIsometry.comp (h : F →ₗᵢ[𝕜] H) (f : E →ₗᵢ[𝕜] F) = g := by
   rcases hahn_banach' _
-    (LinearIsometry.comp g (LinearIsometry.weakInv f)).toContinuousLinearMap with ⟨h, hf1, hf2⟩
+    (LinearIsometry.comp g (weakInv f)).toContinuousLinearMap with ⟨h, hf1, hf2⟩
   simp only [LinearMap.mem_range, forall_exists_index] at hf1
   have hf2' : ‖h‖ =
-      ‖g.toContinuousLinearMap.comp (LinearIsometry.weakInv f).toContinuousLinearMap‖ := by
+      ‖g.toContinuousLinearMap.comp (weakInv f).toContinuousLinearMap‖ := by
     rw [hf2]; rfl
   let h : F →ₗᵢ[𝕜] H := {
     toFun := h.toFun,
     map_add' := h.map_add',
     map_smul' := h.map_smul',
-    norm_map' := fun v ↦ norm_map_of_isImmediate f hf g h hf2' hf1 v
+    norm_map' := fun v ↦ IsImmediate.norm_map f hf g h hf2' hf1 v
   }
   use h
   ext z
   simp only [LinearIsometry.coe_comp, LinearIsometry.coe_mk, ContinuousLinearMap.coe_coe,
     Function.comp_apply, h]
-  have : (LinearIsometry.weakInv f) ⟨f z, LinearMap.mem_range_self f.toLinearMap z⟩ = z :=
+  have : (weakInv f) ⟨f z, LinearMap.mem_range_self f.toLinearMap z⟩ = z :=
     f.equivRange.symm_apply_apply z
   rw [hf1 (f z) z rfl]
-  change g ((LinearIsometry.weakInv f) ⟨f z, LinearMap.mem_range_self f.toLinearMap z⟩) = g z
+  change g ((weakInv f) ⟨f z, LinearMap.mem_range_self f.toLinearMap z⟩) = g z
   rw [this]
 
+end IsImmediate
 end SphericallyCompleteSpace

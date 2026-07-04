@@ -17,7 +17,7 @@ stability under products and the basic examples.
 For an ultrametric (pseudo)metric space, spherical completeness can be reformulated as an
 intersection property in several equivalent ways: for nested closed balls with *antitone* radii,
 for nested closed balls with *strictly decreasing* radii, and for an arbitrary family of closed
-balls that merely intersect *pairwise*. These are collected in `sphericallyCompleteSpace_tfae`.
+balls that merely intersect *pairwise*. These are collected in `tfae`.
 
 The file also shows that spherical completeness passes to binary and finite products, and records
 that `PUnit`, `ℂ`, `ℝ` and the `p`-adic numbers `ℚ_[p]` are spherically complete (each being
@@ -25,9 +25,9 @@ proper, i.e. having compact closed balls).
 
 ## Main statements
 
-* `sphericallyCompleteSpace_iff_antitone_radius`, `sphericallyCompleteSpace_iff_strictAnti_radius`,
-  `sphericallyCompleteSpace_iff_pairwise_inter_nonempty`: the three reformulations.
-* `sphericallyCompleteSpace_tfae`: the reformulations bundled as a `TFAE` list.
+* `iff_antitone_radius`, `iff_strictAnti_radius`,
+  `iff_pairwise_inter_nonempty`: the three reformulations.
+* `tfae`: the reformulations bundled as a `TFAE` list.
 * `Prod.sphericallyCompleteSpace`, `Pi.sphericallyCompleteSpace`: stability under products.
 -/
 
@@ -58,7 +58,7 @@ the intersection `⋂ i, closedBall (ci i) (ri i)` is nonempty.
 This is the standard “Cantor intersection” formulation of spherical completeness for
 ultrametric spaces, expressed for sequences indexed by `ℕ`.
 -/
-theorem sphericallyCompleteSpace_iff_antitone_radius :
+theorem iff_antitone_radius :
     SphericallyCompleteSpace α ↔
     ∀ ⦃ci : ℕ → α⦄, ∀ ⦃ri : ℕ → NNReal⦄,
     Antitone ri →
@@ -81,7 +81,7 @@ theorem sphericallyCompleteSpace_iff_antitone_radius :
         specialize hx (r k) ⟨k, ⟨by linarith, rfl⟩⟩
         rw [← dist_le_coe] at *
         refine le_trans (iud.dist_triangle_max x (c (n + 1)) (c n)) <| max_le_iff.2 ⟨hx, ?_⟩
-        refine le_trans ?_ <| diam_le_radius_of_ultrametric (c k) (r k)
+        refine le_trans ?_ <| IsUltrametricDist.diam_le_radius (c k) (r k)
         apply dist_le_diam_of_mem isBounded_closedBall
         · refine (hanti (by linarith : k ≤ n + 1)) ?_
           simp only [mem_closedBall, dist_self, NNReal.zero_le_coe]
@@ -114,13 +114,13 @@ then the intersection `⋂ i, closedBall (ci i) (ri i)` is nonempty.
 This provides a convenient reformulation of spherical completeness when working with
 chains of balls indexed by `ℕ` whose radii shrink strictly.
 -/
-theorem sphericallyCompleteSpace_iff_strictAnti_radius :
+theorem iff_strictAnti_radius :
     SphericallyCompleteSpace α ↔
     ∀ ⦃ci : ℕ → α⦄, ∀ ⦃ri : ℕ → NNReal⦄,
     StrictAnti ri →
     Antitone (fun i ↦ closedBall (ci i) (ri i)) → (⋂ i, closedBall (ci i) (ri i)).Nonempty := by
   refine ⟨fun h ci ri hri hanti ↦ h.isSphericallyComplete hanti, ?_⟩
-  · rw [sphericallyCompleteSpace_iff_antitone_radius α]
+  · rw [iff_antitone_radius α]
     intro h ci ri hri hanti
     rcases eventually_stable_or_exists_strictAnti_of_antitone hri with hc | hc
     · rcases hc with ⟨N, hN⟩
@@ -219,7 +219,7 @@ private lemma antitone_of_countableChainOfBall {α : Type*}
     (countableChainOfBall hw n).val.1
     (countableChainOfBall hw n).val.2) := by
   refine antitone_nat_of_succ_le fun n ↦ ?_
-  apply closedBall_subset_closedBall_of_le_radius_of_nonempty_intersection_of_ultrametric
+  apply IsUltrametricDist.closedBall_subset_closedBall_of_le_radius_of_nonempty_inter
   · conv => arg 1; unfold countableChainOfBall
     rw [((smaller_radius hw (n + 1)
       (countableChainOfBall hw n))).choose_spec.1.out.choose_spec.2]
@@ -251,7 +251,7 @@ private lemma cofinal_of_countableChainOfBall {α : Type*}
     exists_pow_lt_of_lt_one (tsub_pos_of_lt (hw s hs)) (by norm_num : (1 / 2 : NNReal) < 1)
   replace hn := lt_tsub_iff_left.mp (by rwa [div_pow, one_pow] at hn)
   use n
-  apply closedBall_subset_closedBall_of_le_radius_of_nonempty_intersection_of_ultrametric
+  apply IsUltrametricDist.closedBall_subset_closedBall_of_le_radius_of_nonempty_inter
   · refine le_of_lt <| lt_of_le_of_lt ?_ hn
     conv => arg 1; unfold countableChainOfBall
     cases n
@@ -284,7 +284,7 @@ In contrast to the usual definition of spherical completeness (often phrased in 
 of nested balls), this formulation replaces nesting by a pairwise intersection hypothesis,
 which is sufficient in the ultrametric setting.
 -/
-theorem sphericallyCompleteSpace_iff_pairwise_inter_nonempty :
+theorem iff_pairwise_inter_nonempty :
     SphericallyCompleteSpace α ↔ (
     ∀ S : Set (α × NNReal), S.Nonempty →
     (∀ w1 w2 : ↑S, (closedBall w1.val.1 w1.val.2 ∩ closedBall w2.val.1 w2.val.2).Nonempty) →
@@ -294,7 +294,7 @@ theorem sphericallyCompleteSpace_iff_pairwise_inter_nonempty :
       rcases hw with ⟨w, hwS, hwr⟩
       have : ∀ w' ∈ S, closedBall w.1 w.2 ⊆ closedBall w'.1 w'.2 := by
         intro w' hw'
-        apply closedBall_subset_closedBall_of_le_radius_of_nonempty_intersection_of_ultrametric
+        apply IsUltrametricDist.closedBall_subset_closedBall_of_le_radius_of_nonempty_inter
         · rw [hwr]
           apply csInf_le
           · simp only [Prod.exists, exists_eq_right, OrderBot.bddBelow]
@@ -346,12 +346,12 @@ For an ultrametric pseudometric space the following are equivalent:
 3. the intersection property for nested balls with *strictly decreasing* radii;
 4. the pairwise-intersection property for an arbitrary family of closed balls.
 
-This packages `sphericallyCompleteSpace_iff_antitone_radius`,
-`sphericallyCompleteSpace_iff_strictAnti_radius` and
-`sphericallyCompleteSpace_iff_pairwise_inter_nonempty` into a single statement, so that any one
+This packages `iff_antitone_radius`,
+`iff_strictAnti_radius` and
+`iff_pairwise_inter_nonempty` into a single statement, so that any one
 form can be obtained from any other via `List.TFAE.out`.
 -/
-theorem sphericallyCompleteSpace_tfae :
+theorem tfae :
     TFAE [
     SphericallyCompleteSpace α,
     ∀ ⦃ci : ℕ → α⦄, ∀ ⦃ri : ℕ → NNReal⦄,
@@ -364,9 +364,9 @@ theorem sphericallyCompleteSpace_tfae :
     (∀ w1 w2 : ↑S, (closedBall w1.val.1 w1.val.2 ∩ closedBall w2.val.1 w2.val.2).Nonempty) →
     (⋂ w : ↑S, closedBall w.val.1 w.val.2).Nonempty
     ] := by
-  tfae_have 1 ↔ 2 := sphericallyCompleteSpace_iff_antitone_radius α
-  tfae_have 1 ↔ 3 := sphericallyCompleteSpace_iff_strictAnti_radius α
-  tfae_have 1 ↔ 4 := sphericallyCompleteSpace_iff_pairwise_inter_nonempty α
+  tfae_have 1 ↔ 2 := iff_antitone_radius α
+  tfae_have 1 ↔ 3 := iff_strictAnti_radius α
+  tfae_have 1 ↔ 4 := iff_pairwise_inter_nonempty α
   tfae_finish
 
 end
@@ -377,7 +377,7 @@ end
 This instance equips `E × F` with a `SphericallyCompleteSpace` structure assuming both
 factors `E` and `F` are spherically complete pseudo-metric spaces.
 -/
-instance Prod.sphericallyCompleteSpace {E F : Type*}
+instance _root_.Prod.sphericallyCompleteSpace {E F : Type*}
     [PseudoMetricSpace E] [PseudoMetricSpace F]
     [hse : SphericallyCompleteSpace E] [hsf : SphericallyCompleteSpace F] :
     SphericallyCompleteSpace (E × F) where
@@ -414,7 +414,7 @@ dependent function space `∀ i, E i` inherits a `SphericallyCompleteSpace` stru
 This instance is intended for use with finite products; the `Fintype ι` assumption is
 essential in typical proofs of spherical completeness for `Pi`-types.
 -/
-instance Pi.sphericallyCompleteSpace {ι : Type*} [Fintype ι] {E : ι → Type*}
+instance _root_.Pi.sphericallyCompleteSpace {ι : Type*} [Fintype ι] {E : ι → Type*}
     [∀ i, PseudoMetricSpace (E i)]
     [hh : ∀ i, SphericallyCompleteSpace (E i)] :
     SphericallyCompleteSpace (∀ i, E i) where
