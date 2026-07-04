@@ -18,7 +18,7 @@ public import SphericalCompleteness.External.Ultrametric
 public import SphericalCompleteness.NormedVectorSpace.Basic
 public import SphericalCompleteness.NormedVectorSpace.ContinuousLinearMap.Basic
 public import SphericalCompleteness.NormedVectorSpace.ContinuousLinearMap.HahnBanach
-public import SphericalCompleteness.NormedVectorSpace.ContinuousLinearMap.SupportingResults
+public import SphericalCompleteness.NormedVectorSpace.ContinuousLinearMap.Extension
 public import SphericalCompleteness.NormedVectorSpace.Immediate
 public import SphericalCompleteness.NormedVectorSpace.Orthogonal.Basic
 public import SphericalCompleteness.NormedVectorSpace.Orthogonal.Defs

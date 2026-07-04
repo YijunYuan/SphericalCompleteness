@@ -103,7 +103,7 @@ The library is organized in layers.
 
 - `ContinuousLinearMap/Basic.lean`
   - Spherical completeness of `E →L[𝕜] F` when codomain hypotheses hold.
-- `ContinuousLinearMap/SupportingResults.lean`
+- `ContinuousLinearMap/Extension.lean`
   - Technical extension machinery (van Rooij-style supporting lemmas).
 - `ContinuousLinearMap/HahnBanach.lean`
   - Main non-Archimedean Hahn-Banach theorems.

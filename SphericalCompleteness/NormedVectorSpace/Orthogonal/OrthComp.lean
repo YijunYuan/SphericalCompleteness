@@ -8,7 +8,7 @@ module
 public import Mathlib.Algebra.Module.Submodule.Ker
 public import Mathlib.Analysis.Normed.Group.Submodule
 public import SphericalCompleteness.External.Ultrametric
-public import SphericalCompleteness.NormedVectorSpace.ContinuousLinearMap.SupportingResults
+public import SphericalCompleteness.NormedVectorSpace.ContinuousLinearMap.Extension
 public import SphericalCompleteness.NormedVectorSpace.Orthogonal.Basic
 
 /-!

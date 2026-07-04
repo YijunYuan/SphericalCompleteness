@@ -6,7 +6,7 @@ Authors: Yijun Yuan
 module
 
 public import SphericalCompleteness.External.Sequence
-public import SphericalCompleteness.NormedVectorSpace.ContinuousLinearMap.SupportingResults
+public import SphericalCompleteness.NormedVectorSpace.ContinuousLinearMap.Extension
 
 /-!
 # Spherical completeness of operator spaces
