@@ -18,6 +18,15 @@ Subsequence selection principles used in descending-chain arguments.
 
 @[expose] public section
 
+/--
+The index sequence backing `eventually_stable_or_exists_strictAnti_of_antitone`.
+
+Given an antitone `f : ℕ → α` together with the non-stabilization hypothesis
+`h : ∀ N, ∃ n ≥ N, f n ≠ f N`, this recursively builds an index map `φ : ℕ → ℕ`: set `φ 0 = 0`, and
+let `φ (m + 1)` be a chosen index `n ≥ φ m` with `f n ≠ f (φ m)`. Since `f` is antitone, `n ≥ φ m`
+gives `f n ≤ f (φ m)`, so in fact `f n < f (φ m)` and `n > φ m`; hence `φ` is strictly increasing
+and `f ∘ φ` is strictly decreasing.
+-/
 private noncomputable def extractStrictAntiSubseq {α : Type*} [PartialOrder α]
     {f : ℕ → α} (hanti : Antitone f) (h : ∀ (N : ℕ), ∃ n ≥ N, f n ≠ f N) : ℕ → ℕ := fun n ↦
   match n with
@@ -55,6 +64,15 @@ theorem eventually_stable_or_exists_strictAnti_of_antitone {α : Type*} [Partial
         exact (h (extractStrictAntiSubseq hanti h n)).choose_spec.1
       · exact (h (extractStrictAntiSubseq hanti h n)).choose_spec.2
 
+/--
+The index sequence backing `exists_injective_subseq_of_finite_duplication`.
+
+Given `seq : ℕ → α` whose values duplicate only finitely often, encoded as
+`hseq : ∀ n, ∃ N, ∀ i > N, seq n ≠ seq i`, this recursively builds an index map `φ : ℕ → ℕ`: set
+`φ 0 = 0`, and `φ (n + 1) = max (φ n + 1) (N + 1)`, where `N` is a threshold past which `seq (φ n)`
+never recurs. The `φ n + 1` term keeps `φ` strictly increasing, while exceeding `N` forces
+`seq (φ n)` to differ from every later selected value, making `seq ∘ φ` injective.
+-/
 private noncomputable def extractInjectiveSubseq {α : Type*} (seq : ℕ → α)
     (hseq : ∀ n : ℕ, ∃ N, ∀ i > N, seq n ≠ seq i) : ℕ → ℕ
   | 0 => 0

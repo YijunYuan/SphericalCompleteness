@@ -10,7 +10,29 @@ public import SphericalCompleteness.NormedVectorSpace.SphericalCompletion.Defs
 /-!
 # Spherical completion: basic results
 
-Basic results on the spherical completion of a normed vector space.
+This file develops the fundamental properties of the spherical completion
+`SphericalCompletion 𝕜 E` of an ultrametric normed vector space `E`, constructed in
+`SphericalCompleteness.NormedVectorSpace.SphericalCompletion.Defs`.
+
+The central facts are that `SphericalCompletion 𝕜 E` is itself spherically complete
+(`instSphericallyCompleteSpaceSphericalCompletion`), that the canonical embedding
+`sphericalCompletionEmbedding 𝕜 E` is an immediate extension
+(`sphericalCompletionEmbedding_isImmediate`), and that these two properties characterise the
+spherical completion up to linear isometry. From these we obtain the **universal property**
+(`sphericalCompletion_universal_property`): every linear isometry from `E` into a spherically
+complete space factors through the completion. We also derive uniqueness statements
+(`sphericalCompletion_unique`, `sphericalCompletion_unique_of_isImmediate`) and characterisations of
+spherical completeness in terms of maximal completeness and of the embedding being surjective.
+
+## Main statements
+
+* `instSphericallyCompleteSpaceSphericalCompletion` — the completion is spherically complete.
+* `sphericalCompletionEmbedding_isImmediate` — the embedding is an immediate extension.
+* `sphericalCompletion_minimal` — no proper spherically complete space sits between `E` and its
+  completion.
+* `sphericalCompletion_universal_property` — the universal factorization property.
+* `sphericallyComplete_iff_maximallyComplete`, `sphericallyComplete_iff_eq_sphericalCompletion` —
+  characterisations of spherical completeness.
 -/
 
 @[expose] public section
@@ -261,6 +283,28 @@ theorem sphericalCompletion_unique_of_isImmediate
 Any linear isometry `f : E →ₗᵢ[𝕜] F` into a spherically complete ultrametric space `F` uniquely
 extends along the canonical embedding `sphericalCompletionEmbedding 𝕜 E` to a linear isometry
 `T : SphericalCompletion 𝕜 E →ₗᵢ[𝕜] F`.
+-/
+/--
+**Universal property of the spherical completion.**
+
+The spherical completion `SphericalCompletion 𝕜 E` is the universal spherically complete ultrametric
+extension of `E`: every linear isometry from `E` into a spherically complete ultrametric normed
+space factors through the canonical embedding `sphericalCompletionEmbedding 𝕜 E`.
+
+Concretely, let `𝕜` be a nontrivially normed field, `E` an ultrametric normed `𝕜`-vector space, and
+`F` an ultrametric normed `𝕜`-vector space that is *spherically complete*
+(`[SphericallyCompleteSpace F]`). Then for any linear isometry `f : E →ₗᵢ[𝕜] F` there exists a
+linear isometry `T : SphericalCompletion 𝕜 E →ₗᵢ[𝕜] F` making the triangle commute, i.e.
+`T.comp (sphericalCompletionEmbedding 𝕜 E) = f`. In other words `f` extends along the embedding
+`E ↪ SphericalCompletion 𝕜 E` to a norm-preserving map `T` on the whole completion, and `T`
+restricts back to `f` on the image of `E`.
+
+This is the defining factorization property one expects of a completion. The extension `T` is in
+fact uniquely determined: since `sphericalCompletionEmbedding 𝕜 E` is an *immediate* extension
+(`sphericalCompletionEmbedding_isImmediate`), any two linear isometries agreeing with `f` on the
+image of `E` must coincide, so the factorization recorded here is essentially unique. The proof is
+a direct application of `exists_linearIsometry_comp_eq_of_isImmediate` to the immediate embedding,
+using that the target `F` is spherically complete.
 -/
 theorem sphericalCompletion_universal_property
     (f : E →ₗᵢ[𝕜] F) :

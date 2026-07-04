@@ -11,7 +11,36 @@ public import SphericalCompleteness.External.PadicComplex
 /-!
 # A non-spherical-completeness mechanism
 
-Results exhibiting spaces that fail to be spherically complete.
+A mechanism for exhibiting ultrametric spaces that fail to be spherically complete, driven by
+*spherical density*.
+
+A space is *spherically dense* (`IsSphericallyDense`) when every closed ball realizes its radius as
+its diameter; equivalently one can always find points inside a ball separated by almost the full
+radius. In such a space one can, starting from any ball, pass to a strictly smaller subball that
+avoids any prescribed point (`exists_disjoint_subball`). Iterating this against an enumeration of a
+countable dense set produces a nested chain of closed balls (`nestedBallChain`) whose radii stay
+bounded away from `0` yet which excludes every point of the dense set. When the space is separable
+this chain has empty intersection, so the space cannot be spherically complete
+(`not_sphericallyCompleteSpace_of_isSphericallyDense_separable_ultrametric`). The main application
+is that the `p`-adic complex numbers `ℂ_[p]` are not spherically complete.
+
+The final `SchikhofCounterexample` namespace records a related density condition
+(`IsDenseMetric`) and shows, via `PUnit`, that separability and the ultrametric hypothesis cannot
+simply be dropped.
+
+## Main definitions
+
+* `IsSphericallyDense`: closed balls realize their radius as their diameter.
+* `SchikhofCounterexample.IsDenseMetric`: inside every ball, the realized distances are dense in
+  `[0, diam]`.
+
+## Main statements
+
+* `exists_dist_lt_diam_iff_isSphericallyDense`: characterization of spherical density via
+  almost-diameter-realizing pairs.
+* `not_sphericallyCompleteSpace_of_isSphericallyDense_separable_ultrametric`: a separable,
+  spherically dense ultrametric space is not spherically complete.
+* `not_sphericallyCompleteSpace_padicComplex`: `ℂ_[p]` is not spherically complete.
 -/
 
 @[expose] public section
@@ -123,6 +152,16 @@ theorem exists_dist_lt_diam_iff_isSphericallyDense
   have := dist_le_diam_of_mem isBounded_closedBall hx hy
   linarith
 
+/--
+In a spherically dense ultrametric space, any closed ball has a strictly smaller subball avoiding a
+prescribed point.
+
+Given a ball `closedBall c₀ r₀`, a smaller radius `r₁ < r₀` and any point `z : α`, there is a centre
+`c₁` with `closedBall c₁ r₁ ⊆ closedBall c₀ r₀` and `z ∉ closedBall c₁ r₁`. The construction takes
+two points of `closedBall c₀ r₀` separated by more than `r₁` (available by spherical density); the
+two radius-`r₁` balls around them are disjoint (ultrametric balls are equal or disjoint), so at
+least one misses `z`. This is the inductive step behind `nestedBallChain`.
+-/
 private lemma exists_disjoint_subball {α : Type*}
     [PseudoMetricSpace α] [hiud : IsUltrametricDist α] [hα : IsSphericallyDense α]
     (c₀ : α) (r₀ : ℝ≥0) (r₁ : ℝ≥0) (hr : r₁ < r₀) (z : α) :
@@ -151,6 +190,13 @@ private lemma exists_disjoint_subball {α : Type*}
     simp only [sup_le_iff]
     exact ⟨le_of_lt <| lt_of_le_of_lt ha hr, hx⟩
 
+/--
+A nonempty spherically dense space contains two points at strictly positive distance.
+
+Applying `exists_dist_lt_diam_of_isSphericallyDense` to the ball of radius `2` about an arbitrary
+point (using `1 < 2`) yields a pair `z.1, z.2` with `nndist z.1 z.2 > 1 > 0`. This furnishes the
+strictly positive base scale used to define `shrinkingRadius`.
+-/
 private lemma exists_pair_with_pos_dist (α : Type*)
     [PseudoMetricSpace α] [hα : IsSphericallyDense α] [nemp : Nonempty α] :
     ∃ z : α × α, nndist z.1 z.2 > 0 := by
@@ -159,11 +205,21 @@ private lemma exists_pair_with_pos_dist (α : Type*)
   exact lt_trans zero_lt_one (exists_dist_lt_diam_of_isSphericallyDense
     hα nemp.some one_lt_two).choose_spec.choose_spec.2.2.out.1
 
+/--
+A strictly decreasing sequence of radii that stays bounded away from `0`.
+
+Writing `d` for the positive base distance from `exists_pair_with_pos_dist`, this is
+`shrinkingRadius α n = d * (1 + 1 / (n + 1))`. It starts at `2 * d` (for `n = 0`) and decreases
+strictly towards `d`, so it never drops to half of its initial value. These are the radii of the
+balls in `nestedBallChain`; the fact that they do not tend to `0` is exactly what makes the
+resulting empty-intersection chain contradict spherical completeness.
+-/
 private noncomputable def shrinkingRadius (α : Type*)
     [PseudoMetricSpace α] [hα : IsSphericallyDense α] [nemp : Nonempty α] (n : ℕ) : ℝ≥0 :=
 (nndist (exists_pair_with_pos_dist α).choose.1 (exists_pair_with_pos_dist α).choose.2)
   * (1 + 1 / (n + 1))
 
+/-- The radius sequence `shrinkingRadius α` is strictly decreasing. -/
 private lemma shrinkingRadius_strictAnti (α : Type*)
     [PseudoMetricSpace α] [hα : IsSphericallyDense α] [nemp : Nonempty α] :
     StrictAnti (fun n ↦ shrinkingRadius α n) := by
@@ -176,6 +232,10 @@ private lemma shrinkingRadius_strictAnti (α : Type*)
   field_simp
   norm_num
 
+/-- Every term of `shrinkingRadius α` exceeds half of its initial value: for all `n`,
+`shrinkingRadius α n > shrinkingRadius α 0 / 2`. In particular the radii stay bounded away from `0`,
+so the balls of `nestedBallChain` all contain the fixed ball of radius `shrinkingRadius α 0 / 2`
+about a common point. -/
 private lemma shrinkingRadius_range (α : Type*)
     [PseudoMetricSpace α] [hα : IsSphericallyDense α] [nemp : Nonempty α] (n : ℕ) :
     (shrinkingRadius α n) > (shrinkingRadius α 0) / 2 := by
@@ -186,6 +246,17 @@ private lemma shrinkingRadius_range (α : Type*)
     add_self_div_two, one_div, lt_add_iff_pos_right, inv_pos, add_pos_iff, Nat.cast_pos,
     zero_lt_one, or_true]
 
+/--
+The nested chain of closed balls that witnesses failure of spherical completeness.
+
+Fixing an enumeration `hα'` of a countable dense subset of `α`, this returns centre/radius pairs
+`(cₙ, shrinkingRadius α n)` defined by recursion: `c₀` is one endpoint of the base pair, and each
+`cₙ₊₁` is obtained from `exists_disjoint_subball`, so that the ball
+`closedBall cₙ₊₁ (shrinkingRadius α (n+1))` sits inside `closedBall cₙ (shrinkingRadius α n)` while
+excluding the `n`-th enumerated dense point. The balls therefore shrink but keep radius bounded away
+from `0`, and every point of the dense set is eventually excluded — so in a separable space their
+intersection is empty.
+-/
 private noncomputable def nestedBallChain {α : Type*} [PseudoMetricSpace α]
     [hiud : IsUltrametricDist α] [hα : IsSphericallyDense α]
     [nemp : Nonempty α] [hsep : SeparableSpace α]
@@ -202,6 +273,9 @@ variable (α : Type*) [PseudoMetricSpace α]
   [nemp : Nonempty α] [hsep : SeparableSpace α]
   (hα' : Denumerable hsep.exists_countable_dense.choose)
 
+/-- The closed balls of `nestedBallChain` form a nested (antitone) chain, each contained in its
+predecessor by construction via `exists_disjoint_subball`. This is the antitone family fed to
+spherical completeness in the main theorem. -/
 private lemma nestedBallChain_decreasing :
     Antitone (fun n ↦ closedBall (nestedBallChain hα' n).1 (nestedBallChain hα' n).2) := by
   refine antitone_nat_of_succ_le <| fun n ↦ ?_
@@ -214,6 +288,9 @@ private lemma nestedBallChain_decreasing :
   · simp only [zero_add, mem_closedBall, dist_le_coe, not_le] at *
     exact this
 
+/-- The `n`-th enumerated dense point is excluded from the `(n+1)`-st ball of `nestedBallChain`.
+Thus no point of the dense set lies in the whole chain, which is the key to the empty intersection.
+-/
 private lemma notMem_nestedBallChain (n : ℕ) :
     (hα'.ofNat hsep.exists_countable_dense.choose n).val ∉
     closedBall (nestedBallChain hα' (n + 1)).1 (nestedBallChain hα' (n + 1)).2 :=
@@ -221,6 +298,9 @@ private lemma notMem_nestedBallChain (n : ℕ) :
       (shrinkingRadius α (n + 1)) <| shrinkingRadius_strictAnti α (lt_add_one n))
         (hα'.ofNat hsep.exists_countable_dense.choose n)).choose_spec.2
 
+/-- The radius of the `n`-th ball of `nestedBallChain` is exactly `shrinkingRadius α n`. This
+records the radius bookkeeping used to transfer the lower bound `shrinkingRadius_range` to the
+chain. -/
 private lemma nestedBallChain_radius_eq (n : ℕ) :
     (nestedBallChain hα' n).2 = (shrinkingRadius α n) := by
   unfold nestedBallChain
@@ -235,8 +315,7 @@ complete.
 More precisely, assuming:
 * `MetricSpace α`,
 * `IsUltrametricDist α` (the metric satisfies the strong triangle inequality),
-* `IsSphericallyDense α` (every closed ball properly contains a strictly smaller nonempty closed
-  ball),
+* `IsSphericallyDense α` (every closed ball realizes its radius as its diameter),
 * `Nonempty α`,
 * `SeparableSpace α`,
 

@@ -12,6 +12,18 @@ public import SphericalCompleteness.Basic
 
 This file proves that the quotient `E ⧸ F` of a spherically complete ultrametric normed
 space `E` by a submodule `F` is again spherically complete.
+
+Given a strictly nested chain of closed balls in `E ⧸ F`, the strategy is to lift a
+representative of each ball centre back to `E`, choosing the lifts so that consecutive
+representatives are close (`liftSequence`). The quotient metric guarantees these lifts can be
+taken with controlled error, so they form the centres of a nested chain of closed balls in `E`.
+Spherical completeness of `E` provides a common point, whose image in `E ⧸ F` lies in every ball
+of the original chain.
+
+## Main statements
+
+* `SphericallyCompleteSpace.Quotient.sphericallyCompleteSpace`: the quotient of a spherically
+  complete ultrametric normed space by a submodule is spherically complete.
 -/
 
 @[expose] public section
@@ -21,6 +33,17 @@ open Filter
 
 namespace SphericallyCompleteSpace
 
+/--
+Lifts a nearby quotient element to a nearby representative in `E`.
+
+Suppose `unp1` lies in the closed ball of radius `en` around `un` in the quotient
+`E ⧸ F`, and `lun : E` is a chosen representative of `un`. Then for any radius `ens1 > en`,
+there is a representative `lup1 : E` of `unp1` with `‖lup1 - lun‖ < ens1`.
+
+This is the basic lifting step: the quotient norm lets us realize the small quotient distance
+between `un` and `unp1` by genuinely close representatives in `E`, with a strictly larger tolerance
+`ens1` to absorb the infimum in the definition of the quotient norm.
+-/
 private lemma lift_to_nearby_element (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     {E : Type*} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] {F : Submodule 𝕜 E}
     (un : E ⧸ F.toAddSubgroup) (en : NNReal) (unp1 : E ⧸ F.toAddSubgroup)
@@ -47,6 +70,18 @@ private lemma lift_to_nearby_element (𝕜 : Type*) [NontriviallyNormedField �
       exact hm_norm
     exact_mod_cast hms
 
+/--
+Lifts a nested chain of closed balls in `E ⧸ F` to a sequence of representatives in `E`.
+
+Given ball centres `c : ℕ → E ⧸ F` with strictly decreasing radii `r` whose closed balls are
+nested (`hanti`), `liftSequence` produces for each `t` a representative `x : E` of `c t`. The first
+two terms are arbitrary representatives (`Quotient.out`); each later term `c (m + 2)` is lifted via
+`lift_to_nearby_element` so that its representative stays within `r m` of the representative of
+`c (m + 1)`. Consecutive representatives are therefore close enough that they form the centres of a
+nested chain of closed balls in `E`.
+
+The precise closeness guarantee is recorded separately in `liftSequence_prop`.
+-/
 private noncomputable def liftSequence (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     {E : Type*} [SeminormedAddCommGroup E]
     [NormedSpace 𝕜 E] [IsUltrametricDist E]
@@ -66,6 +101,16 @@ private noncomputable def liftSequence (𝕜 : Type*) [NontriviallyNormedField �
     ) (r m) (hr <| lt_add_one m)
     exact ⟨this.choose, this.choose_spec.1⟩
 
+/--
+The consecutive representatives produced by `liftSequence` are close.
+
+For every `i'`, the representatives of `c (i' + 2)` and `c (i' + 1)` satisfy
+`‖liftSequence … (i' + 2) - liftSequence … (i' + 1)‖ < r i'`.
+
+This is exactly the norm bound guaranteed by the `lift_to_nearby_element` step used to construct
+`liftSequence`, and it is what makes the lifted representatives the centres of a nested chain of
+closed balls in `E`.
+-/
 private lemma liftSequence_prop (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     {E : Type*} [SeminormedAddCommGroup E]
     [NormedSpace 𝕜 E] [IsUltrametricDist E]

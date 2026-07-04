@@ -12,7 +12,23 @@ public import SphericalCompleteness.NormedVectorSpace.SphericalCompletion.Spheri
 /-!
 # Spherical completion: definitions
 
-Definitions for the spherical completion of a normed vector space.
+This file constructs the *spherical completion* `SphericalCompletion 𝕜 E` of an ultrametric
+normed vector space `E` over a nontrivially normed field `𝕜`, together with its canonical
+isometric embedding `sphericalCompletionEmbedding 𝕜 E : E →ₗᵢ[𝕜] SphericalCompletion 𝕜 E`.
+
+The construction proceeds in two steps. First, `sphericallyCompleteExtension 𝕜 E` embeds `E`
+isometrically into a fixed spherically complete ambient space (a quotient of an `ℓ∞`-type space).
+Second, among the submodules of that ambient space which contain the image of `E` and form an
+*immediate* extension of it, `exists_maximal_immediateExtensionSubmodule` selects a maximal one via
+Zorn's lemma; the underlying type of that submodule is `SphericalCompletion 𝕜 E`. The auxiliary
+predicate `immediateExtensionSubmodules` and the transport lemmas around `inclusionᵢ` set up this
+Zorn argument.
+
+## Main definitions
+
+* `immediateExtensionSubmodules` — the collection of candidate immediate intermediate submodules.
+* `SphericalCompletion 𝕜 E` — the underlying type of a chosen maximal immediate extension of `E`.
+* `sphericalCompletionEmbedding 𝕜 E` — the canonical isometric embedding of `E` into it.
 -/
 
 @[expose] public section
@@ -158,6 +174,12 @@ noncomputable abbrev SphericalCompletion (𝕜 : Type*) [NontriviallyNormedField
   ↥(exists_maximal_immediateExtensionSubmodule 𝕜 E
       _ (sphericallyCompleteExtension 𝕜 E)).choose
 
+/-- The `NormedAddCommGroup` structure on `SphericalCompletion 𝕜 E`.
+
+Since `SphericalCompletion 𝕜 E` is by definition the subtype of a chosen submodule of the ambient
+spherically complete space, it inherits the additive normed group structure of that ambient space.
+This instance simply re-exposes that inherited structure through the `SphericalCompletion`
+abbreviation so that typeclass inference finds it on the `SphericalCompletion 𝕜 E` spelling. -/
 noncomputable instance instNormedAddCommGroupSphericalCompletionAbbrev
     {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     (E : Type*) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E] :
@@ -166,6 +188,11 @@ noncomputable instance instNormedAddCommGroupSphericalCompletionAbbrev
       ↥(exists_maximal_immediateExtensionSubmodule 𝕜 E _ (sphericallyCompleteExtension 𝕜 E)).choose
     from inferInstance
 
+/-- The `NormedSpace 𝕜` structure on `SphericalCompletion 𝕜 E`.
+
+The chosen maximal submodule is a `𝕜`-submodule of the ambient space, so its subtype
+`SphericalCompletion 𝕜 E` inherits a `𝕜`-normed space structure. This instance re-exposes that
+inherited structure through the `SphericalCompletion` abbreviation. -/
 noncomputable instance instNormedSpaceSphericalCompletionAbbrev
     {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     (E : Type*) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E] :
@@ -174,6 +201,11 @@ noncomputable instance instNormedSpaceSphericalCompletionAbbrev
       ↥(exists_maximal_immediateExtensionSubmodule 𝕜 E _ (sphericallyCompleteExtension 𝕜 E)).choose
     from inferInstance
 
+/-- The `IsUltrametricDist` structure on `SphericalCompletion 𝕜 E`.
+
+The ambient space into which `E` is embedded is ultrametric, and this property is inherited by the
+subtype of any submodule. This instance re-exposes the ultrametric distance of
+`SphericalCompletion 𝕜 E` through the `SphericalCompletion` abbreviation. -/
 noncomputable instance instIsUltrametricDistSphericalCompletionAbbrev
     {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     (E : Type*) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E] :
@@ -182,6 +214,14 @@ noncomputable instance instIsUltrametricDistSphericalCompletionAbbrev
       ↥(exists_maximal_immediateExtensionSubmodule 𝕜 E _ (sphericallyCompleteExtension 𝕜 E)).choose
     from inferInstance
 
+/-- The `NormedAddCommGroup` structure on the maximal immediate extension submodule associated to a
+general linear isometry `f : E →ₗᵢ[𝕜] E₀` into a spherically complete ambient space `E₀`.
+
+Unlike `instNormedAddCommGroupSphericalCompletionAbbrev`, this instance is stated directly on the
+subtype `↥(exists_maximal_immediateExtensionSubmodule 𝕜 E E₀ f).choose` for an arbitrary `E₀` and
+`f`, rather than for the specific ambient space and embedding fixed in the `SphericalCompletion`
+abbreviation. The structure is inherited from `E₀` because the chosen maximal element is a submodule
+of `E₀`. -/
 noncomputable instance instNormedAddCommGroupSphericalCompletion
     {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     (E : Type*) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
@@ -191,6 +231,13 @@ noncomputable instance instNormedAddCommGroupSphericalCompletion
     NormedAddCommGroup (↥(exists_maximal_immediateExtensionSubmodule 𝕜 E E₀ f).choose) :=
   inferInstance
 
+/-- The `NormedSpace 𝕜` structure on the maximal immediate extension submodule associated to a
+general linear isometry `f : E →ₗᵢ[𝕜] E₀` into a spherically complete ambient space `E₀`.
+
+As with `instNormedAddCommGroupSphericalCompletion`, this is the general-`E₀`, general-`f`
+counterpart of `instNormedSpaceSphericalCompletionAbbrev`: the `𝕜`-normed space structure on
+`↥(exists_maximal_immediateExtensionSubmodule 𝕜 E E₀ f).choose` inherited from the ambient space
+`E₀`. -/
 noncomputable instance instNormedSpaceSphericalCompletion
     {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     (E : Type*) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
@@ -200,6 +247,13 @@ noncomputable instance instNormedSpaceSphericalCompletion
     NormedSpace 𝕜 (↥(exists_maximal_immediateExtensionSubmodule 𝕜 E E₀ f).choose) :=
   inferInstance
 
+/-- The `IsUltrametricDist` structure on the maximal immediate extension submodule associated to a
+general linear isometry `f : E →ₗᵢ[𝕜] E₀` into a spherically complete ambient space `E₀`.
+
+This is the general-`E₀`, general-`f` counterpart of
+`instIsUltrametricDistSphericalCompletionAbbrev`: the ultrametric distance on
+`↥(exists_maximal_immediateExtensionSubmodule 𝕜 E E₀ f).choose` inherited from the ambient
+ultrametric space `E₀`. -/
 instance instIsUltrametricDistSphericalCompletion
     {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     (E : Type*) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]

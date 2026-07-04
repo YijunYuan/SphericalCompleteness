@@ -13,7 +13,27 @@ public import SphericalCompleteness.NormedVectorSpace.Quotient
 /-!
 # Spherically complete extensions
 
-Results on spherically complete extensions of normed vector spaces.
+This file exhibits, for an arbitrary normed `𝕜`-vector space `E`, a linear isometric embedding of
+`E` into a *spherically complete* ultrametric normed space. This is the starting point of the
+spherical completion construction: it realises every normed space inside a spherically complete one,
+so that a maximal immediate extension can subsequently be carved out.
+
+The ambient spherically complete space is a quotient of an `ℓ∞`-type space. Given a family of
+ultrametric normed spaces `E : ℕ → Type*`, the space `lp E ⊤` of bounded sequences carries the
+submodule `c₀ 𝕜 E` of sequences tending to `0` in norm, and the quotient `lp E ⊤ ⧸ c₀ 𝕜 E` is shown
+to be spherically complete (`sphericallyCompleteSpace_lp_quotient_c₀`). Specialising to the constant
+family `fun _ ↦ E`, the constant-sequence map `x ↦ [x, x, …]` gives the desired embedding
+`sphericallyCompleteExtension 𝕜 E`.
+
+## Main definitions
+
+* `c₀ 𝕜 E` — the submodule of null sequences inside `lp E ⊤`.
+* `sphericallyCompleteExtension 𝕜 E` — the isometric embedding of `E` into `lp E ⊤ ⧸ c₀ 𝕜 E`.
+
+## Main statements
+
+* `sphericallyCompleteSpace_lp_quotient_c₀` — the quotient `lp E ⊤ ⧸ c₀ 𝕜 E` is spherically
+  complete.
 -/
 
 @[expose] public section
@@ -81,6 +101,13 @@ def c₀ (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     rw [norm_smul]
     exact (le_mul_inv_iff₀' <| norm_pos_iff.mpr hc).mp <| hN n hn
 
+/-- Inductive step for lifting a nested family of balls to coherent representatives. Given a
+strictly decreasing radius sequence `r`, an antitone family of closed balls
+`closedBall (c i) (r i)` in the quotient `lp E ⊤ ⧸ c₀ 𝕜 E`, and a representative `aip1` of the
+center `c (i + 1)`, this produces a representative `aip2` of the next center `c (i + 2)` whose
+distance to `aip1` is controlled: `‖aip2 - aip1‖ < r i`. Iterating this step (see
+`quotientMkSection`) yields a sequence of lifts whose successive differences shrink like `r`, which
+is what lets a diagonal sequence be assembled in `lp E ⊤`. -/
 private lemma exists_norm_sub_lt {𝕜 : Type*} [inst : NontriviallyNormedField 𝕜]
     (E : ℕ → Type*) [(i : ℕ) → NormedAddCommGroup (E i)] [(i : ℕ) → NormedSpace 𝕜 (E i)]
     [∀ (i : ℕ), IsUltrametricDist (E i)]
@@ -145,6 +172,12 @@ private lemma exists_norm_sub_lt {𝕜 : Type*} [inst : NontriviallyNormedField 
     exact lp.norm_nonneg' _
   · exact Set.Nonempty.of_subtype
 
+/-- A coherent choice of representatives for a nested family of balls in the quotient
+`lp E ⊤ ⧸ c₀ 𝕜 E`. For each index `k`, `quotientMkSection E hsr hanti k` is an element of `lp E ⊤`
+whose class modulo `c₀ 𝕜 E` is the center `c k`. The representatives for `k = 0, 1` are arbitrary
+`Quotient.out` lifts, and each subsequent representative is chosen by `exists_norm_sub_lt` so that
+its distance to the previous one is smaller than `r (k - 2)`. This recursively defined section is
+the source of the diagonal sequence used to prove spherical completeness of the quotient. -/
 private noncomputable def quotientMkSection {𝕜 : Type*} [inst : NontriviallyNormedField 𝕜]
     (E : ℕ → Type*) [(i : ℕ) → NormedAddCommGroup (E i)] [(i : ℕ) → NormedSpace 𝕜 (E i)]
     [∀ (i : ℕ), IsUltrametricDist (E i)]
@@ -162,6 +195,14 @@ private noncomputable def quotientMkSection {𝕜 : Type*} [inst : NontriviallyN
             (quotientMkSection E hsr hanti (m + 1)).val
             (quotientMkSection E hsr hanti (m + 1)).prop).choose_spec.1⟩
 
+/-- The two defining properties of `quotientMkSection`, packaged together. For every index `i`:
+
+* `(quotientMkSection E hsr hanti i)` really is a representative of the center `c i`, i.e. its class
+  in `lp E ⊤ ⧸ c₀ 𝕜 E` is `c i`; and
+* consecutive representatives are close, `‖section (i + 2) - section (i + 1)‖ < r i`.
+
+These are read off directly from the recursive construction and the guarantee provided by
+`exists_norm_sub_lt`. -/
 private lemma mk_eq_and_norm_sub_lt {𝕜 : Type*} [inst : NontriviallyNormedField 𝕜]
     (E : ℕ → Type*) [(i : ℕ) → NormedAddCommGroup (E i)] [(i : ℕ) → NormedSpace 𝕜 (E i)]
     [∀ (i : ℕ), IsUltrametricDist (E i)]
@@ -179,6 +220,13 @@ private lemma mk_eq_and_norm_sub_lt {𝕜 : Type*} [inst : NontriviallyNormedFie
           (quotientMkSection E hsr hanti (m + 1)).val
           (quotientMkSection E hsr hanti (m + 1)).prop).choose_spec.2
 
+/-- A uniform bound on the diagonal entries of the representatives `quotientMkSection`. For every
+`n`, the `n`-th coordinate of the `n`-th representative is bounded, in the ultrametric sense, by
+`max ‖section 0‖ (max ‖section 1‖ (r 0))`, independently of `n`. This uniform bound is exactly what
+guarantees that the diagonal sequence `fun n ↦ (quotientMkSection E hsr hanti n).val n` is bounded
+and hence defines an element of `lp E ⊤`. The proof telescopes `section n - section 1` through the
+consecutive differences controlled by `mk_eq_and_norm_sub_lt` and uses the strong (ultrametric)
+triangle inequality. -/
 private lemma quotientMkSection_norm_apply_self_le_max {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     (E : ℕ → Type*) [(i : ℕ) → NormedAddCommGroup (E i)] [(i : ℕ) → NormedSpace 𝕜 (E i)]
     [iiud : ∀ (i : ℕ), IsUltrametricDist (E i)]
@@ -220,6 +268,12 @@ private lemma quotientMkSection_norm_apply_self_le_max {𝕜 : Type*} [Nontrivia
     have := (mk_eq_and_norm_sub_lt E hsr hanti (m - 1)).2
     rwa [(by omega : m - 1 + 2 = m + 1), (by omega : m - 1 + 1 = m)] at this
 
+/-- An eventual coordinatewise bound descends to a bound on the quotient norm. If `A : lp E ⊤`
+satisfies `‖A n‖ ≤ C` for all `n ≥ N` (with `C > 0`), then the norm of its class in
+`lp E ⊤ ⧸ c₀ 𝕜 E` is at most `C`. The point is that the finitely many early coordinates `n < N`,
+which are unconstrained, can be cancelled by subtracting a suitable null sequence in `c₀ 𝕜 E`, so
+they do not affect the quotient norm; the remaining coordinates already obey the bound `C`. This is
+the estimate used to show the assembled diagonal element lies in every ball of the nested family. -/
 lemma quotient_norm_mk_le_of_eventually_norm_le {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     (E : ℕ → Type*) [(i : ℕ) → NormedAddCommGroup (E i)] [(i : ℕ) → NormedSpace 𝕜 (E i)]
     [∀ (i : ℕ), IsUltrametricDist (E i)]
@@ -403,6 +457,14 @@ noncomputable def sphericallyCompleteExtension (𝕜 : Type*) [NontriviallyNorme
           linarith
         · exact le_of_eq_of_le (by rfl) (lp.norm_apply_le_norm ENNReal.top_ne_zero _ N)
 
+/-- The `NormedAddCommGroup` structure on the quotient `lp (fun _ ↦ E) ⊤ ⧸ c₀ 𝕜 (fun _ ↦ E)`.
+
+A quotient by a submodule only carries a genuine *norm* (rather than a mere seminorm) once the
+submodule is topologically closed. This instance supplies the missing ingredient: it proves that the
+null-sequence submodule `c₀ 𝕜 (fun _ ↦ E)` is a closed subset of `lp (fun _ ↦ E) ⊤` (via
+`IsSeqClosed.isClosed`, using an `ε/2` argument on the `ℓ∞` norm), and then lets typeclass inference
+upgrade the quotient seminorm to a `NormedAddCommGroup`. This is what makes
+`sphericallyCompleteExtension 𝕜 E` land in a normed—not merely seminormed—space. -/
 noncomputable instance (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     (E : Type*) [NormedAddCommGroup E] [NormedSpace 𝕜 E] :
     NormedAddCommGroup (↥(lp (fun _ ↦ E) ⊤) ⧸ c₀ 𝕜 fun _ ↦ E) := by
@@ -446,7 +508,11 @@ noncomputable instance (𝕜 : Type*) [NontriviallyNormedField 𝕜]
   simp only [Submodule.carrier_eq_coe] at this
   infer_instance
 
--- Any non-Archimedean normed field 𝕜 has a spherically complete Banach space over it
+/-- Every non-Archimedean (ultrametric) nontrivially normed field `𝕜` embeds into a spherically
+complete Banach space over itself: the quotient `lp (fun _ ↦ 𝕜) ⊤ ⧸ c₀ 𝕜 (fun _ ↦ 𝕜)` is
+`SphericallyCompleteSpace`. This is the constant-scalar-family specialisation of
+`sphericallyCompleteSpace_lp_quotient_c₀`, recorded as an instance so that spherical completeness of
+this concrete space is available to typeclass inference. -/
 instance {𝕜 : Type*} [NontriviallyNormedField 𝕜] [IsUltrametricDist 𝕜] :
     SphericallyCompleteSpace ((lp (fun _ ↦ 𝕜) ⊤)⧸ c₀ 𝕜 (fun _ ↦ 𝕜)) := by
   simpa only using sphericallyCompleteSpace_lp_quotient_c₀ (fun _ ↦ 𝕜)

@@ -11,8 +11,24 @@ public import SphericalCompleteness.Defs
 /-!
 # Spherical completeness: characterizations
 
-Equivalent characterizations of spherical completeness and the implication that
-spherically complete spaces are complete.
+Equivalent characterizations of spherical completeness for ultrametric spaces, together with its
+stability under products and the basic examples.
+
+For an ultrametric (pseudo)metric space, spherical completeness can be reformulated as an
+intersection property in several equivalent ways: for nested closed balls with *antitone* radii,
+for nested closed balls with *strictly decreasing* radii, and for an arbitrary family of closed
+balls that merely intersect *pairwise*. These are collected in `sphericallyCompleteSpace_tfae`.
+
+The file also shows that spherical completeness passes to binary and finite products, and records
+that `PUnit`, `ℂ`, `ℝ` and the `p`-adic numbers `ℚ_[p]` are spherically complete (each being
+proper, i.e. having compact closed balls).
+
+## Main statements
+
+* `sphericallyCompleteSpace_iff_antitone_radius`, `sphericallyCompleteSpace_iff_strictAnti_radius`,
+  `sphericallyCompleteSpace_iff_pairwise_inter_nonempty`: the three reformulations.
+* `sphericallyCompleteSpace_tfae`: the reformulations bundled as a `TFAE` list.
+* `Prod.sphericallyCompleteSpace`, `Pi.sphericallyCompleteSpace`: stability under products.
 -/
 
 @[expose] public section
@@ -134,6 +150,16 @@ theorem sphericallyCompleteSpace_iff_strictAnti_radius :
 
 end
 
+/--
+From a nonempty family `S` of centre/radius pairs whose radii never attain their infimum, one can
+always find a strictly smaller admissible radius.
+
+Concretely, if every `w ∈ S` has radius strictly above `sInf {w.2 | w ∈ S}`, then for each `n : ℕ`
+and each chosen element `s : S` there is a radius `b` occurring in `S` with
+`b < min (sInf {radii} + 1 / 2 ^ n) s.2`. The `1 / 2 ^ n` term forces `b` towards the infimum as
+`n` grows, while the `s.2` term keeps `b` below the current radius; this is the key step used to
+build a strictly shrinking chain of balls in `countableChainOfBall`.
+-/
 private lemma smaller_radius {α : Type*} [PseudoMetricSpace α]
     {S : Set (α × NNReal)} [hS : Nonempty ↑S]
     (hw : (∀ w ∈ S, sInf {x | ∃ w ∈ S, w.2 = x} < w.2)) :
@@ -154,6 +180,16 @@ private lemma smaller_radius {α : Type*} [PseudoMetricSpace α]
       min (sInf {x | ∃ w ∈ S, w.2 = x} + 1 / 2 ^ m)
         s.val.2))
 
+/--
+Recursively selects a sequence in `S` whose radii shrink towards `sInf {radii}`.
+
+Assuming the radii of the family `S` never reach their infimum (`hw`), this builds a function
+`ℕ → S` where the `n`-th term is chosen, via `smaller_radius`, to have radius strictly below both
+`sInf {radii} + 1 / 2 ^ n` and the radius of the previous term. Together with
+`antitone_of_countableChainOfBall` and `cofinal_of_countableChainOfBall`, this countable chain
+reduces the pairwise-intersection characterization of spherical completeness to the definitional
+one for `ℕ`-indexed nested balls.
+-/
 private noncomputable def countableChainOfBall {α : Type*}
     [PseudoMetricSpace α]
     {S : Set (α × NNReal)} [hS : Nonempty S]
@@ -165,6 +201,14 @@ private noncomputable def countableChainOfBall {α : Type*}
     ⟨(smaller_radius hw (m + 1) (countableChainOfBall hw m)).choose_spec.1.out.choose,
      (smaller_radius hw (m + 1) (countableChainOfBall hw m)).choose_spec.1.out.choose_spec.1⟩
 
+/--
+The closed balls along `countableChainOfBall` form a nested (antitone) chain.
+
+If any two balls of the family `S` intersect (`hS'`), then in the ultrametric setting each ball of
+the chain is contained in its predecessor, because a ball of smaller radius that meets a larger one
+is contained in it. This supplies the antitone hypothesis needed to apply spherical completeness to
+the chain.
+-/
 private lemma antitone_of_countableChainOfBall {α : Type*}
     [PseudoMetricSpace α] [iud : IsUltrametricDist α]
     [SphericallyCompleteSpace α]
@@ -184,6 +228,16 @@ private lemma antitone_of_countableChainOfBall {α : Type*}
     simp only [inf_le_right]
   · apply hS'
 
+/--
+The chain `countableChainOfBall` is cofinal among the balls of `S`.
+
+For every `s ∈ S` there is an index `n` with
+`closedBall (chain n).1 (chain n).2 ⊆ closedBall s.1 s.2`: since the chain radii converge to
+`sInf {radii}` (strictly below `s.2` by `hw`), some chain ball has radius below `s.2`, and pairwise
+intersection (`hS'`) then forces containment. Consequently a point common to the whole chain lies
+in every ball of `S`, which is what turns the chain's nonempty intersection into the pairwise
+characterization of spherical completeness.
+-/
 private lemma cofinal_of_countableChainOfBall {α : Type*}
     [PseudoMetricSpace α] [IsUltrametricDist α]
     [SphericallyCompleteSpace α]
@@ -399,12 +453,23 @@ instance Pi.sphericallyCompleteSpace {ι : Type*} [Fintype ι] {E : ι → Type*
       exact Set.mem_iInter.1 ((hh j).isSphericallyComplete (hE j)).choose_spec i
     · exact (ri i).prop
 
+/-- The one-point space `PUnit` is spherically complete. Being trivially proper (its closed balls
+are compact), it inherits spherical completeness from
+`instSphericallyCompleteSpaceOfProperSpace`. -/
 instance instSphericallyCompleteSpacePUnit : SphericallyCompleteSpace PUnit := inferInstance
 
+/-- The complex numbers `ℂ` are spherically complete. As a finite-dimensional normed field `ℂ` is
+proper (closed balls are compact), so spherical completeness follows from
+`instSphericallyCompleteSpaceOfProperSpace`. -/
 instance instSphericallyCompleteSpaceComplex : SphericallyCompleteSpace ℂ := inferInstance
 
+/-- The real numbers `ℝ` are spherically complete. Being locally compact, hence proper, `ℝ` inherits
+spherical completeness from `instSphericallyCompleteSpaceOfProperSpace`. -/
 instance instSphericallyCompleteSpaceReal : SphericallyCompleteSpace ℝ := inferInstance
 
+/-- For a prime `p`, the field of `p`-adic numbers `ℚ_[p]` is spherically complete. `ℚ_[p]` is
+locally compact, hence proper, so its closed balls are compact and spherical completeness follows
+from `instSphericallyCompleteSpaceOfProperSpace`. -/
 instance instSphericallyCompleteSpacePadic {p : ℕ} [Fact (Nat.Prime p)] :
     SphericallyCompleteSpace (ℚ_[p]) := inferInstance
 

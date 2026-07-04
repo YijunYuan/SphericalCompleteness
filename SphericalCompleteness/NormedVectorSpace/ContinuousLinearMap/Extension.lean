@@ -10,9 +10,44 @@ public import SphericalCompleteness.External.Submodule
 public import SphericalCompleteness.NormedVectorSpace.Basic
 
 /-!
-# Supporting results for continuous linear maps
+# The ultrametric Hahn–Banach extension via Zorn's lemma
 
-Auxiliary results used in the Hahn-Banach development.
+This file constructs the extension theorem underlying the non-Archimedean Hahn–Banach theorem for
+continuous linear maps valued in a spherically complete space over a nontrivially normed field.
+
+Given a continuous linear map `S : D →L[𝕜] F` on a submodule `D` of an ultrametric normed space `E`,
+together with a family `𝒰` of continuous linear maps on `E` that approximate `S` on `D` within
+tolerances `ε`, the main result `exists_extension_opNorm_le` produces a continuous linear map
+`T : E →L[𝕜] F` extending `S` and still lying within the same tolerances of every member of `𝒰`.
+Specializing the family `𝒰` recovers the norm-preserving Hahn–Banach extension.
+
+The construction proceeds in two layers.
+
+* **Codimension-one step.** `exists_extension_codimOne` extends `S` across a single vector `a ∉ D`
+  to `D + 𝕜 ∙ a`. Spherical completeness of `F` supplies, through `exists_extensionValue_norm_le`,
+  a value to assign to `a` that keeps every approximation bound intact; the resulting function is
+  `codimOneExtension`.
+* **Zorn's lemma.** `PartialExtension` is the poset of partial extensions of `S` that respect the
+  tolerances, ordered by domain inclusion together with agreement on the smaller domain. Every
+  nonempty chain is bounded above by the glued map `gluedMap` on the union of its domains
+  (`bddAbove_of_chain_of_partial_extension`), so `zorn_le_nonempty` yields a maximal element. The
+  codimension-one step forbids its domain from being proper, so the maximal domain is all of `E`.
+
+## Main definitions
+
+* `codimOneExtension`: the underlying function of the codimension-one extension of `S`.
+* `spanSupDecomp`: the coordinate isomorphism `↥(D + 𝕜 ∙ a) ≃ₗ[𝕜] D × 𝕜`.
+* `PartialExtension`: the poset of tolerance-respecting partial extensions used by Zorn's lemma.
+* `gluedMap`: the map obtained by gluing a chain of partial extensions over the union of domains.
+
+## Main statements
+
+* `exists_extension_codimOne`: the codimension-one Hahn–Banach step.
+* `exists_extension_opNorm_le`: the full extension with operator-norm control.
+
+## References
+
+* A. C. M. van Rooij, *Non-Archimedean Functional Analysis*.
 -/
 
 @[expose] public section
@@ -187,6 +222,10 @@ noncomputable def spanSupDecomp {𝕜 : Type*} [NontriviallyNormedField 𝕜] {E
     Submodule.range_subtype, LinearMap.span_singleton_eq_range])).symm.trans
     (LinearEquiv.ofInjective _ hinj).symm
 
+/-- The inverse of `spanSupDecomp` sends the coordinates `(d, l)` back to the vector
+`d + l • a`. This is the defining computation of the decomposition, phrased as a `simp` lemma so
+that downstream proofs can rewrite an element of `D + 𝕜 ∙ a` into its `D`-part plus its
+`𝕜 ∙ a`-part. -/
 @[simp] lemma spanSupDecomp_symm_apply {𝕜 : Type*} [NontriviallyNormedField 𝕜] {E : Type*}
     [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] {D : Submodule 𝕜 E} {a : E} (ha : a ∉ D)
     (d : D) (l : 𝕜) : (((spanSupDecomp ha).symm (d, l)) : E) = (d : E) + l • a := rfl
@@ -323,6 +362,11 @@ lemma exists_extension_codimOne
       (norm_smul_extensionValue_le ha1 S h𝒰 hε1 hε2 hε3)
         (spanSupDecomp ha1 ⟨x, hx⟩).1 (spanSupDecomp ha1 ⟨x, hx⟩).2 U
 
+/-- A partial extension of `S` compatible with the approximating family `𝒰`. It records a submodule
+`M` of `E` containing `D`, together with a continuous linear map `T : M →L[𝕜] F` that restricts to
+`S` on `D` and stays within each tolerance `ε U` of the corresponding `U ∈ 𝒰`. These objects form
+the poset over which Zorn's lemma is run in `exists_extension_opNorm_le`; a maximal element has
+domain `M = ⊤`, giving the full extension. -/
 @[ext]
 private structure PartialExtension (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     (E : Type*) [SeminormedAddCommGroup E] [IsUltrametricDist E] [NormedSpace 𝕜 E]
@@ -331,12 +375,21 @@ private structure PartialExtension (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     [NormedSpace 𝕜 F] [SphericallyCompleteSpace F]
     (S : D →L[𝕜] F) (𝒰 : Set (E →L[𝕜] F)) (h𝒰 : 𝒰.Nonempty)
     (ε : ↑𝒰 → ℝ) where
+  /-- The domain of the partial extension, a submodule of `E`. -/
   M : Submodule 𝕜 E
+  /-- The domain `M` contains the original domain `D`. -/
   hDM : D ≤ M
+  /-- The continuous linear map on the enlarged domain `M`. -/
   T : M →L[𝕜] F
+  /-- `T` extends `S`: it agrees with `S` on the original domain `D`. -/
   hT : ∀ x : D, T ⟨x, hDM x.prop⟩ = S x
+  /-- `T` stays within the tolerance `ε U` of every member `U` of the approximating family `𝒰`,
+  i.e. `‖T x - U x‖ ≤ ε U * ‖x‖` for all `x : M`. -/
   hU : ∀ U : ↑𝒰, ∀ x : M, ‖T x- U.val x‖ ≤ (ε U) * ‖x‖
 
+/-- The poset of partial extensions is nonempty: `S` itself, defined on `D`, is a partial extension
+(its tolerance bounds are exactly the hypothesis `hε3`). This provides the base point required to
+start Zorn's lemma. -/
 private lemma instNonemptyPartialExtension
     (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     (E : Type*) [SeminormedAddCommGroup E] [IsUltrametricDist E] [NormedSpace 𝕜 E]
@@ -349,6 +402,9 @@ private lemma instNonemptyPartialExtension
     : Nonempty (PartialExtension 𝕜 E F S 𝒰 h𝒰 ε) :=
   Nonempty.intro { M := D, hDM := fun ⦃x⦄ a ↦ a, T := S, hT := by simp, hU := hε3 }
 
+/-- The extension order on `PartialExtension`: `a ≤ b` when the domain of `a` is contained in that
+of `b` and `b.T` restricts to `a.T` on `a.M`. In other words, `b` extends `a`. This is the order
+along which Zorn's lemma builds ever-larger extensions of `S`. -/
 private instance instPartialOrderPartialExtension (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     (E : Type*) [SeminormedAddCommGroup E] [IsUltrametricDist E] [NormedSpace 𝕜 E]
     {D : Submodule 𝕜 E}
@@ -367,6 +423,10 @@ private instance instPartialOrderPartialExtension (𝕜 : Type*) [NontriviallyNo
     have hM : a.M = b.M := le_antisymm hab hba
     cases a; cases b; subst hM; congr; ext z; rw [← habT]
 
+/-- Along any chain `P` of partial extensions, the family of domains `p ↦ p.val.M` is directed
+under inclusion. This directedness lets `gluedMap` compute the value at a point by descending to a
+single chain member whose domain already contains that point (via `Submodule.mem_iSup_of_directed`),
+and is the mechanism that turns a chain into a well-defined map on the union of its domains. -/
 private lemma directed_chain (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     {E : Type*} [SeminormedAddCommGroup E] [IsUltrametricDist E] [NormedSpace 𝕜 E]
     {D : Submodule 𝕜 E} {F : Type*} [SeminormedAddCommGroup F] [IsUltrametricDist F]
@@ -376,6 +436,12 @@ private lemma directed_chain (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     : Directed (fun x1 x2 ↦ x1 ≤ x2) fun p : P ↦ p.val.M := fun a b ↦
   (hP.directed a b).imp fun _ h ↦ ⟨h.1.1, h.2.1⟩
 
+/-- The map obtained by gluing a nonempty chain `P` of partial extensions over the union
+`⨆ p, p.val.M` of their domains. At a point `x` of the union, directedness of the chain
+(`directed_chain`) provides some member `p ∈ P` whose domain contains `x`, and the glued map returns
+`p.T x`. Independence of the chosen member is the content of `gluedMap_eq`; linearity, boundedness
+and the extension/tolerance properties are then established in the following lemmas, making this the
+upper bound of the chain used by Zorn's lemma. -/
 private noncomputable def gluedMap (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     {E : Type*} [SeminormedAddCommGroup E] [IsUltrametricDist E] [NormedSpace 𝕜 E]
     {D : Submodule 𝕜 E} {F : Type*} [SeminormedAddCommGroup F] [IsUltrametricDist F]
@@ -407,6 +473,9 @@ private lemma gluedMap_eq (𝕜 : Type*) [NontriviallyNormedField 𝕜]
   simp only [Subtype.coe_le_coe] at hRQ hRp
   rw [← hRQ.choose_spec ⟨x.val, _⟩, ← hRp.choose_spec ⟨x.val, hp⟩]
 
+/-- The glued map `gluedMap` is `𝕜`-linear. Additivity and homogeneity are checked by pulling the
+relevant points down into a common chain member (using directedness) and invoking the linearity of
+that member's continuous linear map `p.T`, via `gluedMap_eq`. -/
 private def isLinearMap_of_gluedMap (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     {E : Type*} [SeminormedAddCommGroup E] [IsUltrametricDist E] [NormedSpace 𝕜 E]
     {D : Submodule 𝕜 E} {F : Type*} [SeminormedAddCommGroup F] [IsUltrametricDist F]
@@ -435,6 +504,11 @@ private def isLinearMap_of_gluedMap (𝕜 : Type*) [NontriviallyNormedField 𝕜
         gluedMap_eq 𝕜 h𝒰 ε P hP hhP (k • a) p (Submodule.smul_mem _ k hpa), ← p.val.T.map_smul]
       simp only [SetLike.val_smul, SetLike.mk_smul_mk]
 
+/-- The glued map `gluedMap` is a bounded linear map. On top of linearity
+(`isLinearMap_of_gluedMap`), the ultrametric estimate bounds `‖gluedMap x‖` by
+`max (ε U₀) ‖U₀‖ * ‖x‖` for a fixed member `U₀` of the family `𝒰`, using the tolerance bound
+`p.hU` carried by each partial extension. This packaging as `IsBoundedLinearMap` lets the chain's
+upper bound be promoted to a continuous linear map in `bddAbove_of_chain_of_partial_extension`. -/
 private def isBoundedLinearMap_of_gluedMap (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     {E : Type*} [SeminormedAddCommGroup E] [IsUltrametricDist E] [NormedSpace 𝕜 E]
     {D : Submodule 𝕜 E} {F : Type*} [SeminormedAddCommGroup F] [iudf : IsUltrametricDist F]
@@ -460,6 +534,11 @@ private def isBoundedLinearMap_of_gluedMap (𝕜 : Type*) [NontriviallyNormedFie
       exact max_le_max (p.val.hU ⟨h𝒰.some, h𝒰.some_mem⟩ ⟨x.val, hp⟩)
         (ContinuousLinearMap.le_opNorm h𝒰.some ↑x)
 
+/-- Every nonempty chain `P` of partial extensions is bounded above. The witness is the partial
+extension whose domain is the union `⨆ p, p.val.M` and whose map is the continuous linear map coming
+from `gluedMap` (packaged via `isBoundedLinearMap_of_gluedMap`); `gluedMap_eq` shows it extends `S`
+and respects the tolerances, and that it dominates every member of the chain. This is the `BddAbove`
+hypothesis feeding `zorn_le_nonempty` in `exists_extension_opNorm_le`. -/
 private lemma bddAbove_of_chain_of_partial_extension (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     {E : Type*} [SeminormedAddCommGroup E] [IsUltrametricDist E] [NormedSpace 𝕜 E]
     {D : Submodule 𝕜 E} {F : Type*} [SeminormedAddCommGroup F] [IsUltrametricDist F]

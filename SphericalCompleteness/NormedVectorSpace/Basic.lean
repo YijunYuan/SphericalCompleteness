@@ -11,8 +11,20 @@ public import SphericalCompleteness.NormedVectorSpace.Orthogonal.MOrth
 /-!
 # Spherical completeness of normed vector spaces
 
-Finite-dimensional ultrametric normed spaces over a spherically complete base are
-spherically complete.
+This file establishes that finite-dimensional ultrametric normed spaces over a spherically
+complete base field are spherically complete.
+
+The proof proceeds by induction on the dimension: starting from the trivial subspace, one
+repeatedly adjoins a vector metrically orthogonal to the current subspace, identifying the
+enlarged subspace with a product of spherically complete spaces.
+
+## Main statements
+
+* `SphericallyCompleteSpace.of_locallyCompactSpace`: a locally compact normed vector space over a
+  nontrivially normed field is spherically complete.
+* `SphericallyCompleteSpace.sphericallyCompleteSpace_of_finiteDimensional`: a finite-dimensional
+  ultrametric normed `𝕜`-vector space over a spherically complete, nontrivially normed field is
+  spherically complete.
 -/
 
 @[expose] public section
@@ -88,6 +100,19 @@ instance instSphericallyCompleteSpaceSpanSingleton (𝕜 : Type*) [NontriviallyN
     rwa [Subtype.dist_eq, dist_eq_norm, ← (Submodule.mem_span_singleton.1 (ci i).prop).choose_spec,
       ← sub_smul, norm_smul, ← dist_eq_norm, ← le_div_iff₀ (norm_pos_iff.mpr h)]
 
+/--
+The inductive step for `sphericallyCompleteSpace_of_finiteDimensional`.
+
+If `E` is a finite-dimensional ultrametric normed space over a spherically complete, nontrivially
+normed field `𝕜`, then for every `n < Module.finrank 𝕜 E`, the existence of an
+`n`-dimensional spherically complete subspace `M` of `E` yields an `(n + 1)`-dimensional
+spherically complete subspace `M'`.
+
+The larger subspace is obtained as `Submodule.span 𝕜 {z} + M`, where `z` is a nonzero vector
+metrically orthogonal to `M` (which exists since `M` is not the whole space). This sum is
+isometrically isomorphic to the product `Submodule.span 𝕜 {z} × M` of two spherically complete
+spaces, and spherical completeness transfers along the isometry.
+-/
 private lemma induction_sphericallyCompleteSpace_of_finiteDimensional
     (𝕜 : Type*) [NontriviallyNormedField 𝕜] [SphericallyCompleteSpace 𝕜]
     (E : Type*) [NormedAddCommGroup E]
