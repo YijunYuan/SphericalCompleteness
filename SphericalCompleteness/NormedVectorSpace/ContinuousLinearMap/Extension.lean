@@ -127,8 +127,7 @@ lemma exists_extensionValue_norm_le {𝕜 : Type*}
               max_eq_left (le_trans hy_le (le_max_left _ _))
       rcases le_sup_iff.1 this with hc | hc
       · use U.val ↑x + U.val a - S x
-        simp only [Set.mem_inter_iff]
-        constructor
+        refine ⟨?_, ?_⟩
         · rw [← hxU]
           unfold U x
           simp only [Subtype.exists, mem_closedBall, dist_self]
@@ -136,8 +135,7 @@ lemma exists_extensionValue_norm_le {𝕜 : Type*}
         · rw [← dist_eq_norm, ← mem_closedBall] at hc
           rwa [← hyV]
       · use V.val ↑y + V.val a - S y
-        simp only [Set.mem_inter_iff]
-        constructor
+        refine ⟨?_, ?_⟩
         · rw [← dist_eq_norm, dist_comm, ← mem_closedBall] at hc
           rwa [← hxU]
         · rw [← hyV]
@@ -180,8 +178,8 @@ lemma norm_smul_extensionValue_le {𝕜 : Type*}
   · simp only [hl, zero_smul, add_zero, map_add]; exact hε3 U x
   · have : x = l • (l⁻¹ • x) := by simp [smul_smul, mul_inv_cancel₀ hl]
     rw [this, S.map_smul, show ↑(l • l⁻¹ • x) + l • a = l • ((l⁻¹ • x) + a) by simp [smul_add]]
-    rw [U.val.map_smul, ← smul_add, ← smul_sub, norm_smul, norm_smul, ← mul_assoc, mul_comm (ε U)]
-    rw [mul_assoc, mul_le_mul_iff_of_pos_left <| norm_pos_iff.mpr hl]
+    rw [U.val.map_smul, ← smul_add, ← smul_sub, norm_smul, norm_smul, ← mul_assoc, mul_comm (ε U),
+      mul_assoc, mul_le_mul_iff_of_pos_left <| norm_pos_iff.mpr hl]
     exact (exists_extensionValue_norm_le ha1 S h𝒰 hε1 hε2 hε3).choose_spec (l⁻¹ • x) U
 
 /-- The underlying function of the codimension-one extension of `S` to `D + 𝕜 ∙ a`. On the unique
@@ -452,7 +450,7 @@ private noncomputable def gluedMap (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     ↥(iSup (fun p : P ↦ p.val.M)) → F := fun x ↦ by
     haveI : Nonempty ↑P := Set.Nonempty.to_subtype hhP
     have := (Submodule.mem_iSup_of_directed (fun p : P ↦ p.val.M)
-      (by apply directed_chain; repeat assumption)).1 x.2
+      (directed_chain 𝕜 h𝒰 ε P hP)).1 x.2
     exact this.choose.val.T ⟨x.val,this.choose_spec⟩
 
 /-- `gluedMap` agrees with `p.T` on any chain member `p` whose module contains the point.
@@ -469,7 +467,7 @@ private lemma gluedMap_eq (𝕜 : Type*) [NontriviallyNormedField 𝕜]
   haveI : Nonempty ↑P := Set.Nonempty.to_subtype hhP
   simp only [gluedMap]
   rcases hP.directed (((Submodule.mem_iSup_of_directed (fun p : P ↦ p.val.M)
-    (by apply directed_chain; repeat assumption)).1 x.2).choose) p with ⟨R, hRQ, hRp⟩
+    (directed_chain 𝕜 h𝒰 ε P hP)).1 x.2).choose) p with ⟨R, hRQ, hRp⟩
   simp only [Subtype.coe_le_coe] at hRQ hRp
   rw [← hRQ.choose_spec ⟨x.val, _⟩, ← hRp.choose_spec ⟨x.val, hp⟩]
 
@@ -615,36 +613,24 @@ lemma exists_extension_opNorm_le
     ∃ (T : E →L[𝕜] F), (∀ x : D, T x = S x) ∧ (∀ U : ↑𝒰, ‖T - U.val‖ ≤ ε U)
     := by
   rcases @zorn_le_nonempty (PartialExtension 𝕜 E F S 𝒰 h𝒰 ε) _
-    (instNonemptyPartialExtension 𝕜 E F S 𝒰 h𝒰 ε hε3) (by
-    intro P hP hhP
-    apply bddAbove_of_chain_of_partial_extension
-    repeat assumption
-  ) with ⟨W, hW⟩
+    (instNonemptyPartialExtension 𝕜 E F S 𝒰 h𝒰 ε hε3) (fun P hP hhP ↦
+      bddAbove_of_chain_of_partial_extension 𝕜 h𝒰 ε hε1 P hP hhP) with ⟨W, hW⟩
   have : W.M = ⊤ := by
     by_contra hc
-    have : W.M < ⊤ := Ne.lt_top' fun a ↦ hc (id (Eq.symm a))
+    have : W.M < ⊤ := lt_top_iff_ne_top.mpr hc
     rcases Set.exists_of_ssubset this with ⟨a, ha⟩
     rcases exists_extension_codimOne 𝕜 E W.M a ha.2 F W.T 𝒰 h𝒰 ε hε1 hε2 W.hU with ⟨L, hL1, hL2⟩
     let W' : PartialExtension 𝕜 E F S 𝒰 h𝒰 ε :=
       { M := W.M + Submodule.span 𝕜 {a}
         T := L
-        hDM := by
-          refine le_trans W.hDM ?_
-          simp only [Submodule.add_eq_sup, le_sup_left]
-        hT := by
-          intro x
-          specialize hL1 ⟨x, W.hDM x.prop⟩
-          rwa [← W.hT x]
+        hDM := W.hDM.trans le_sup_left
+        hT := fun x ↦ (hL1 ⟨x, W.hDM x.prop⟩).trans (W.hT x)
         hU := fun U x ↦ hL2 U x.val x.prop
       }
     have : W' > W := by
       apply lt_of_le_of_ne ?_ ?_
       · unfold LE.le instPartialOrderPartialExtension
-        use (by
-          have : W'.M = W.M + Submodule.span 𝕜 {a} := rfl
-          rw [this]
-          simp only [Submodule.add_eq_sup, le_sup_left]
-        )
+        use le_sup_left
       · by_contra hc
         have : W'.M = W.M + Submodule.span 𝕜 {a} := rfl
         replace := this ▸ congrArg PartialExtension.M hc
@@ -662,9 +648,7 @@ lemma exists_extension_opNorm_le
   constructor
   · intro D
     change f ↑D = S D
-    unfold f
-    simp only [Function.comp_apply, LinearEquiv.ofTop_symm_apply]
-    exact W.hT D
+    simpa only [f, Function.comp_apply, LinearEquiv.ofTop_symm_apply] using W.hT D
   · intro U
     have tt : ∀ x : E, ‖(fiblm.toContinuousLinearMap - ↑U) x‖
       = ‖W.T ⟨x, this ▸ Submodule.mem_top⟩ - U.val x‖ := by

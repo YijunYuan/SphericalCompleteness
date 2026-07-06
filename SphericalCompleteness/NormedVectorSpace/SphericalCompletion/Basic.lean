@@ -229,9 +229,7 @@ theorem minimal (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     have := (isCompl_orthComp 𝕜 M).sup_eq_top
     simp only [hc', bot_le, sup_of_le_left] at this
     exact hc this
-  replace hMo := (Submodule.eq_bot_iff (orthComp 𝕜 M)).not.1 hMo
-  push Not at hMo
-  rcases hMo with ⟨b, hb1, hb2⟩
+  rcases (Submodule.ne_bot_iff _).1 hMo with ⟨b, hb1, hb2⟩
   apply IsMOrtho.of_mem_orthComp at hb1
   refine hb2 (embedding_isImmediate 𝕜 E b ?_)
   rw [IsMOrtho.iff_forall_isVOrtho] at *

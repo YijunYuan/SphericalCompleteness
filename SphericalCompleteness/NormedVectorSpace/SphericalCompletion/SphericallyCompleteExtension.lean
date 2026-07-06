@@ -74,22 +74,12 @@ def c₀ (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     specialize hNb n (by linarith)
     refine le_trans (norm_add_le _ _) ?_
     linarith
-  zero_mem' := by
-    simp only [gt_iff_lt, ge_iff_le, Set.mem_setOf_eq, ZeroMemClass.coe_zero]
-    intro e he
-    use 0
-    intro n hn
-    change ‖(0 : E n)‖ ≤ e
-    simpa using (le_of_lt he : (0 : ℝ) ≤ e)
+  zero_mem' := fun e he ↦ ⟨0, fun n _ ↦ by simp [he.le]⟩
   smul_mem' := by
     intro c x hx
     if hc : c = 0 then
       simp only [gt_iff_lt, ge_iff_le, hc, zero_smul, Set.mem_setOf_eq, ZeroMemClass.coe_zero]
-      intro e he
-      use 0
-      intro n hn
-      change ‖(0 : E n)‖ ≤ e
-      simpa using (le_of_lt he : (0 : ℝ) ≤ e)
+      exact fun e he ↦ ⟨0, fun n _ ↦ by simp [he.le]⟩
     else
     simp only [gt_iff_lt, ge_iff_le, Set.mem_setOf_eq, lp.coeFn_smul, Pi.smul_apply] at *
     intro ε hε
@@ -320,13 +310,9 @@ lemma quotient_norm_mk_le_of_eventually_norm_le {𝕜 : Type*} [NontriviallyNorm
   refine ciSup_le <| fun k ↦ ?_
   simp only [dite_eq_ite, AddSubgroup.coe_add, u]
   if hk : k < N then
-    change ‖A k + (if k < N then -A k else 0)‖ ≤ C
-    have hzero : A k + -A k = 0 := by abel
-    rw [if_pos hk, hzero, norm_zero]
-    exact le_of_lt hC
+    simp [if_pos hk, hC.le]
   else
-    change ‖A k + (if k < N then -A k else 0)‖ ≤ C
-    simpa only [if_neg hk, add_zero] using hN k (Nat.le_of_not_lt hk)
+    simpa [if_neg hk] using hN k (Nat.le_of_not_lt hk)
 
 /--
 The quotient `lp E ⊤ ⧸ c₀ 𝕜 E` is spherically complete whenever each `E i` is ultrametric.
@@ -455,7 +441,7 @@ noncomputable def sphericallyCompleteExtension (𝕜 : Type*) [NontriviallyNorme
           refine le_trans ?_ (norm_sub_norm_le _ _)
           rw [norm_neg]
           linarith
-        · exact le_of_eq_of_le (by rfl) (lp.norm_apply_le_norm ENNReal.top_ne_zero _ N)
+        · exact lp.norm_apply_le_norm ENNReal.top_ne_zero (v + ⟨p, hp⟩) N
 
 /-- The `NormedAddCommGroup` structure on the quotient `lp (fun _ ↦ E) ⊤ ⧸ c₀ 𝕜 (fun _ ↦ E)`.
 

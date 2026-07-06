@@ -44,14 +44,12 @@ theorem isCompl_ker_of_forall_apply_eq
   refine IsCompl.of_eq ?_ ?_
   · ext x
     simp only [Submodule.mem_inf, LinearMap.mem_ker, Submodule.mem_bot]
-    constructor
-    · intro h
-      specialize hT1 x h.1
+    refine ⟨fun h ↦ ?_, fun h ↦ ?_⟩
+    · specialize hT1 x h.1
       simp only [ContinuousLinearMap.coe_coe] at h
       simp only [h.2] at hT1
-      exact (AddSubmonoid.mk_eq_zero F.toAddSubmonoid).mp (id (Eq.symm hT1))
-    · intro h
-      rw [h]
+      exact (AddSubmonoid.mk_eq_zero F.toAddSubmonoid).mp hT1.symm
+    · rw [h]
       simp only [zero_mem, map_zero, and_self]
   · ext x
     simp only [Submodule.mem_top, iff_true]

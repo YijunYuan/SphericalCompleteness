@@ -83,10 +83,8 @@ theorem iff_antitone_radius :
         refine le_trans (iud.dist_triangle_max x (c (n + 1)) (c n)) <| max_le_iff.2 ⟨hx, ?_⟩
         refine le_trans ?_ <| IsUltrametricDist.diam_le_radius (c k) (r k)
         apply dist_le_diam_of_mem isBounded_closedBall
-        · refine (hanti (by linarith : k ≤ n + 1)) ?_
-          simp only [mem_closedBall, dist_self, NNReal.zero_le_coe]
-        · refine (hanti hk1) ?_
-          simp only [mem_closedBall, dist_self, NNReal.zero_le_coe]
+        · exact hanti (by linarith : k ≤ n + 1) (mem_closedBall_self NNReal.zero_le_coe)
+        · exact hanti hk1 (mem_closedBall_self NNReal.zero_le_coe)
       · use r (n + 1), n + 1
       · use r n, n
     specialize h hr'_Antitone this
@@ -96,7 +94,7 @@ theorem iff_antitone_radius :
     simp only [Set.mem_iInter, mem_closedBall]
     refine fun i ↦ le_trans (hz i) ?_
     simp only [NNReal.coe_le_coe, r']
-    exact csInf_le (OrderBot.bddBelow _) (by use i)
+    exact csInf_le' ⟨i, le_rfl, rfl⟩
 
 /--
 Characterization of spherical completeness in an ultrametric (pseudo)metric space via
@@ -128,13 +126,11 @@ theorem iff_strictAnti_radius :
       simp only [Set.mem_iInter]
       intro i
       if hiN : i ≤ N then
-        refine (hanti hiN) ?_
-        simp only [mem_closedBall, dist_self, NNReal.zero_le_coe]
+        exact hanti hiN (mem_closedBall_self NNReal.zero_le_coe)
       else
         simp only [not_le] at hiN
         rw [mem_closedBall, dist_comm,← mem_closedBall, hN i (by linarith)]
-        refine (hanti (by linarith : N ≤ i)) ?_
-        simp only [mem_closedBall, dist_self, NNReal.zero_le_coe]
+        exact hanti (by linarith : N ≤ i) (mem_closedBall_self NNReal.zero_le_coe)
     · rcases hc with ⟨φ, hφ1, hφ2⟩
       have := @h (ci ∘ φ) (ri ∘ φ) hφ2
         (antitone_nat_of_succ_le fun n ↦ hanti <| le_of_lt <| hφ1 (by linarith : n < n + 1))
@@ -142,11 +138,7 @@ theorem iff_strictAnti_radius :
       rcases this with ⟨z, hz⟩
       use z
       simp only [Set.mem_iInter]
-      intro i
-      have := StrictMono.tendsto_atTop hφ1
-      rw [Filter.tendsto_atTop_atTop_iff_of_monotone <| StrictMono.monotone hφ1] at this
-      rcases this i with ⟨N, hN⟩
-      exact (hanti hN) <| hz N
+      exact fun i ↦ hanti hφ1.le_apply <| hz i
 
 end
 
@@ -296,22 +288,19 @@ theorem iff_pairwise_inter_nonempty :
         intro w' hw'
         apply IsUltrametricDist.closedBall_subset_closedBall_of_le_radius_of_nonempty_inter
         · rw [hwr]
-          apply csInf_le
-          · simp only [Prod.exists, exists_eq_right, OrderBot.bddBelow]
-          · simp only [Prod.exists, exists_eq_right, Set.mem_setOf_eq]
-            use w'.1
+          refine csInf_le' ?_
+          simp only [Prod.exists, exists_eq_right, Set.mem_setOf_eq]
+          use w'.1
         · exact h' ⟨w,hwS⟩ ⟨w',hw'⟩
       use w.1
       simp only [Set.iInter_coe_set, Set.mem_iInter]
-      refine fun v hv ↦ this v hv ?_
-      simp only [mem_closedBall, dist_self, NNReal.zero_le_coe]
+      exact fun v hv ↦ this v hv (mem_closedBall_self NNReal.zero_le_coe)
     else
       push Not at hw
       replace hw : ∀ w ∈ S, sInf {x | ∃ w ∈ S, w.2 = x} < w.2 := by
-        refine fun w hw' ↦ lt_of_le_of_ne (csInf_le ?_ ?_) <| Ne.symm <| hw w hw'
-        · simp only [Prod.exists, exists_eq_right, OrderBot.bddBelow]
-        · simp only [Prod.exists, exists_eq_right, Set.mem_setOf_eq]
-          use w.1
+        refine fun w hw' ↦ lt_of_le_of_ne (csInf_le' ?_) <| Ne.symm <| hw w hw'
+        simp only [Prod.exists, exists_eq_right, Set.mem_setOf_eq]
+        use w.1
       haveI := Set.Nonempty.to_subtype hSne
       rcases h.isSphericallyComplete (antitone_of_countableChainOfBall h' hw) with ⟨u, hu⟩
       use u
@@ -334,7 +323,7 @@ theorem iff_pairwise_inter_nonempty :
         exact nonempty_closedBall.mpr NNReal.zero_le_coe)
     simp only [Set.coe_setOf, Set.mem_setOf_eq, Set.nonempty_iInter] at h
     rcases h with ⟨z, hz⟩
-    exact ⟨z, Set.mem_iInter.2 <| fun i ↦ hz ⟨(c i, r i), Exists.intro i (Eq.refl (c i, r i))⟩⟩
+    exact ⟨z, Set.mem_iInter.2 <| fun i ↦ hz ⟨(c i, r i), i, rfl⟩⟩
 
 open List in
 /--

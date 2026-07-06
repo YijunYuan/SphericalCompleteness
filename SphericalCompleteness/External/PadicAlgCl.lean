@@ -50,8 +50,7 @@ private lemma exists_rat_pow_p_norm_between (a b : ℝ) (ha : 0 ≤ a) (hab : a 
     rw [Real.rpow_neg_eq_inv_rpow] at hc2
     exact lt_trans (by simpa [a']) hc2
   · simp only [Real.logb_inv_base] at hc1
-    replace hc1 : Real.logb (↑p) b > -↑c := neg_lt_of_neg_lt hc1
-    simp only [gt_iff_lt] at hc1
+    replace hc1 : -↑c < Real.logb (↑p) b := neg_lt_of_neg_lt hc1
     rw [Real.lt_logb_iff_rpow_lt
       (by simpa only [Nat.one_lt_cast] using hp.out.one_lt) (lt_trans ha' ha'b)] at hc1
     rwa [Real.rpow_neg_eq_inv_rpow] at hc1
@@ -74,11 +73,9 @@ noncomputable instance instDenselyNormedFieldPadicAlgCl : DenselyNormedField (Pa
     have hf : f.degree ≠ 0 := by simp [f, Polynomial.degree_X_pow_sub_C r.den_pos]
     rcases IsAlgClosed.exists_root f hf with ⟨z, hz⟩
     have hz' : z ^ r.den - (p : PadicAlgCl p) ^ r.num = 0 := by
-      rw [← hz]; simp only [f, eval_sub, eval_pow, eval_X, eval_C]
+      simpa [f, eval_sub, eval_pow, eval_X, eval_C] using hz
     replace hz' : ‖z‖ ^ r.den = ‖(p : PadicAlgCl p)‖ ^ r.num := by
-      apply eq_of_sub_eq_zero at hz'
-      repeat rw [← norm_pow]
-      simp only [hz', norm_zpow]
+      rw [← norm_pow, eq_of_sub_eq_zero hz', norm_zpow]
     replace hz' : ‖z‖ = ‖(p : PadicAlgCl p)‖ ^ (↑r : ℝ) := by
       rw [← Rat.num_div_den r]
       simp only [Rat.cast_div, Rat.cast_intCast, Rat.cast_natCast]
@@ -107,9 +104,7 @@ instance instSeparableSpacePadicAlgCl : TopologicalSpace.SeparableSpace (PadicAl
     set f := f' * C (f'.leadingCoeff)⁻¹ with hf_def
     have hf : Monic f := monic_mul_leadingCoeff_inv hfne'
     have hfz : aeval α f = 0 := by rw [hf_def, aeval_mul, hfz', zero_mul]
-    have hdense : DenseRange (algebraMap ℚ ℚ_[p]) := by
-      have : (algebraMap ℚ ℚ_[p] : ℚ → ℚ_[p]) = Rat.cast := by ext q; simp [Rat.cast_def]
-      rw [this]; exact Padic.denseRange_ratCast p
+    have hdense : DenseRange (algebraMap ℚ ℚ_[p]) := Padic.denseRange_ratCast p
     set n := f.natDegree with hn
     have hnpos : 0 < n := natDegree_pos_of_monic_of_aeval_eq_zero hf hfz
     set M := max ‖α‖ 1 with hM
@@ -129,8 +124,5 @@ instance instSeparableSpacePadicAlgCl : TopologicalSpace.SeparableSpace (PadicAl
       rw [← hn, ← hM, show ((↑n + 1) * δ) = (ε / M) ^ (n : ℝ) by rw [hδ_def]; field_simp,
         ← Real.rpow_mul (by positivity), mul_inv_cancel₀ (by positivity : (n : ℝ) ≠ 0),
         Real.rpow_one, div_mul_cancel₀ _ (ne_of_gt hMpos)]
-    · simp only [Set.mem_setOf_eq]
-      rw [mem_aroots] at hβroot
-      refine ⟨g, hgm.ne_zero, ?_⟩
-      have hβ := hβroot.2
-      rwa [aeval_map_algebraMap] at hβ
+    · rw [mem_aroots, aeval_map_algebraMap] at hβroot
+      exact ⟨g, hgm.ne_zero, hβroot.2⟩

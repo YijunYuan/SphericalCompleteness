@@ -6,6 +6,7 @@ Authors: Yijun Yuan
 module
 
 public import SphericalCompleteness.NormedVectorSpace.Orthogonal.Defs
+public import Mathlib.LinearAlgebra.Span.Defs
 
 /-!
 # Orthogonality: basic results
@@ -51,11 +52,9 @@ private lemma of_isVOrtho {x y : E}
     (h : x ⟂[𝕜] y) : y ⟂[𝕜] x := by
   unfold SphericallyCompleteSpace.IsVOrtho at *
   refine eq_of_le_of_not_lt ?_ ?_
-  · have := @infDist_le_dist_of_mem E _ ↑(Submodule.span 𝕜 {x}) y 0 (by simp)
-    simpa only [ge_iff_le, dist_zero_right] using this
+  · simpa only [dist_zero_right] using infDist_le_dist_of_mem (by simp : (0 : E) ∈ 𝕜 ∙ x)
   · by_contra hc
-    rcases (infDist_lt_iff (by use 0; simp)).1 hc with ⟨z, hz1, hz2⟩
-    simp only [SetLike.mem_coe] at hz1
+    rcases (infDist_lt_iff ⟨0, by simp⟩).1 hc with ⟨z, hz1, hz2⟩
     rcases Submodule.mem_span_singleton.1 hz1 with ⟨a, ha⟩
     rw [← ha] at hz2
     if ha' : a = 0 then
@@ -86,26 +85,17 @@ best approximation of itself along the line `𝕜 ∙ y`, i.e. `‖x‖ ≤ ‖x
 `c`. This rephrases the `infDist`-based definition of `IsVOrtho` as a norm-minimality condition. -/
 lemma iff_birkhoffJames
     (x y : E) : (x ⟂[𝕜] y) ↔ ∀ c : 𝕜, ‖x‖ ≤ ‖x + c • y‖ := by
-  constructor
-  · intro h c
-    have : x + c • y = x - (-c) • y := by simp only [neg_smul, sub_neg_eq_add]
-    rw [← h, this, ← dist_eq_norm]
-    refine infDist_le_dist_of_mem ?_
-    simp only [neg_smul, SetLike.mem_coe, neg_mem_iff]
-    exact Submodule.mem_span_singleton.mpr ⟨c, by simp⟩
-  · intro h
-    by_contra hc
-    replace hc := lt_of_le_of_ne ?_ hc
-    · replace hc := (infDist_lt_iff ?_).1 hc
-      · rcases hc with ⟨y', hy', hy''⟩
-        rcases Submodule.mem_span_singleton.1 hy' with ⟨c, hc⟩
-        rw [← hc, dist_eq_norm, sub_eq_add_neg, ← neg_smul] at hy''
-        specialize h (-c); linarith
-      · use 0; simp only [SetLike.mem_coe, zero_mem]
-    · nth_rw 2 [← sub_zero x]
-      rw [← dist_eq_norm]
-      refine infDist_le_dist_of_mem ?_
-      simp only [SetLike.mem_coe, zero_mem]
+  refine ⟨fun h c ↦ ?_, fun h ↦ ?_⟩
+  · rw [← sub_neg_eq_add, ← neg_smul, ← h, ← dist_eq_norm]
+    exact infDist_le_dist_of_mem (Submodule.mem_span_singleton.mpr ⟨-c, by simp⟩)
+  · by_contra hc
+    have hd : infDist x ↑(𝕜 ∙ y) ≤ ‖x‖ := by
+      rw [← dist_zero, dist_comm]
+      exact infDist_le_dist_of_mem (by simp)
+    obtain ⟨y', hy', hy''⟩ := (infDist_lt_iff ⟨0, by simp⟩).1 (lt_of_le_of_ne hd hc)
+    rcases Submodule.mem_span_singleton.1 hy' with ⟨c, hc⟩
+    rw [← hc, dist_eq_norm, sub_eq_add_neg, ← neg_smul] at hy''
+    specialize h (-c); linarith
 
 /-- Orthogonality of vectors is equivalent to the ultrametric "norm of a sum equals the maximum
 of the norms" identity on the spanned plane: `x ⟂[𝕜] y` if and only if
@@ -124,47 +114,25 @@ lemma iff_norm_add_eq_max {x y : E} :
     refine eq_of_le_of_ge (iud.norm_add_le_max _ _) ?_
     apply max_le
     · rw [← sub_neg_eq_add, ← dist_eq_norm]
-      refine le_trans ?_ <| infDist_le_dist_of_mem (by
-        simp only [neg_mem_iff]
-        refine Submodule.mem_span_singleton.mpr ?_
-        use b : - (b • y) ∈ 𝕜 ∙ y)
+      refine le_trans ?_ <|
+        infDist_le_dist_of_mem (neg_mem (Submodule.mem_span_singleton.mpr ⟨b, rfl⟩))
       have := infDist_smul₀ hab.1 (Submodule.span 𝕜 {y} : Set E) x
       rw [Submodule.smul_coe_eq_self hab.1] at this
       rw [this, h, norm_smul]
-    · have : a • x + b • y = b • y - - (a • x) := by abel
-      rw [this, ← dist_eq_norm]
-      refine le_trans ?_ <| infDist_le_dist_of_mem (by
-        simp only [neg_mem_iff]
-        refine Submodule.mem_span_singleton.mpr ?_
-        use a : - (a • x) ∈ 𝕜 ∙ x)
+    · rw [(by abel : a • x + b • y = b • y - - (a • x)), ← dist_eq_norm]
+      refine le_trans ?_ <|
+        infDist_le_dist_of_mem (neg_mem (Submodule.mem_span_singleton.mpr ⟨a, rfl⟩))
       have := infDist_smul₀ hab.2 (Submodule.span 𝕜 {x} : Set E) y
       rw [Submodule.smul_coe_eq_self hab.2] at this
       rw [this, norm_smul, mul_le_mul_iff_right₀ (norm_pos_iff.mpr hab.2)]
       rw [symm] at h
       simpa only using le_of_eq (Eq.symm h)
-  · intro h
-    unfold SphericallyCompleteSpace.IsVOrtho
-    suffices hh : ∀ y' ∈ ↑(Submodule.span 𝕜 {y}), dist x y' ≥ ‖x‖ by
-      refine eq_of_le_of_ge ?_ ?_
-      · rw [← dist_zero, dist_comm]
-        apply infDist_le_dist_of_mem
-        simp only [SetLike.mem_coe, zero_mem]
-      · rw [infDist_eq_iInf]
-        refine (le_ciInf_set_iff ?_ ?_).mpr hh
-        · use 0
-          simp only [SetLike.mem_coe, zero_mem]
-        · use ‖x‖
-          simpa only [lowerBounds, Set.mem_image, SetLike.mem_coe, forall_exists_index, and_imp,
-            forall_apply_eq_imp_iff₂, Set.mem_setOf_eq, ge_iff_le] using hh
-    intro y' hy'
-    rcases Submodule.mem_span_singleton.1 hy' with ⟨s, hs⟩
-    rw [← hs, dist_eq_norm, sub_eq_add_neg, ← one_nsmul x,← neg_one_zsmul]
-    have : -1 • s • y = (-1 * s) • y := by simp only [Int.reduceNeg, neg_smul, one_smul,
-      neg_mul, one_mul]
+  · rw [iff_birkhoffJames]
+    intro h c
+    have := h 1 c
+    simp only [one_smul] at this
     rw [this]
-    specialize h 1 (-1 * s)
-    simp only [Int.reduceNeg, neg_smul, one_smul, neg_mul, one_mul, norm_neg] at *
-    simp only [h, le_sup_left]
+    exact le_max_left _ _
 
 /-- Orthogonality is preserved by scaling the first vector: if `x ⟂[𝕜] y` then `(a • x) ⟂[𝕜] y`
 for every scalar `a` (including `a = 0`, since `0` is orthogonal to everything). -/
@@ -175,8 +143,7 @@ theorem smul_left {x y : E}
   if ha : a = 0 then
     subst ha
     simp only [zero_smul, norm_zero]
-    refine infDist_zero_of_mem ?_
-    simp only [SetLike.mem_coe, zero_mem]
+    exact infDist_zero_of_mem (by simp)
   else
   rw [norm_smul, ← h, ← infDist_smul₀ ha, Submodule.smul_coe_eq_self ha]
 
@@ -220,7 +187,7 @@ lemma iff_forall_isVOrtho
   · intro h y hy
     refine eq_of_le_of_not_lt ?_ ?_
     · simpa only [dist_zero_right] using
-        @infDist_le_dist_of_mem E _ _ x 0 (Submodule.zero_mem (Submodule.span 𝕜 {y}))
+        infDist_le_dist_of_mem (Submodule.zero_mem (Submodule.span 𝕜 {y}))
     · by_contra hc
       rcases (infDist_lt_iff (Submodule.nonempty (Submodule.span 𝕜 {y}))).1 hc with ⟨y', hy'⟩
       exact lt_iff_not_ge.1 hy'.2 <| (le_infDist (Submodule.nonempty F)).1

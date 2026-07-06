@@ -62,10 +62,9 @@ theorem closedBall_subset_closedBall_of_le_radius_of_nonempty_inter
   intro x hx
   rcases hne with ⟨y, hy1, hy2⟩
   simp only [mem_closedBall] at *
-  refine le_trans (hiud.dist_triangle_max x y z2) <| sup_le_iff.2 ⟨?_, hy2⟩
-  refine le_trans (hiud.dist_triangle_max x z1 y) <| sup_le_iff.2 ⟨le_trans hx hle, ?_⟩
-  rw [dist_comm]
-  exact le_trans hy1 hle
+  refine (hiud.dist_triangle_max x y z2).trans (max_le ?_ hy2)
+  exact (hiud.dist_triangle_max x z1 y).trans
+    (max_le (hx.trans hle) ((dist_comm y z1 ▸ hy1).trans hle))
 
 end
 
@@ -152,10 +151,8 @@ instance instIsUltrametricDistLp
     refine ciSup_le fun j ↦ ?_
     rw [show ‖(↑(a - c) : (i : ι) → E i) j‖ = ‖a j - c j‖ from rfl, ← dist_eq_norm]
     refine ((iiud j).dist_triangle_max (a j) (b j) (c j)).trans (max_le_max ?_ ?_)
-    · rw [dist_eq_norm, show ‖a j - b j‖ = ‖(↑(a - b) : (i : ι) → E i) j‖ from rfl]
-      exact lp.norm_apply_le_norm ENNReal.top_ne_zero _ j
-    · rw [dist_eq_norm, show ‖b j - c j‖ = ‖(↑(b - c) : (i : ι) → E i) j‖ from rfl]
-      exact lp.norm_apply_le_norm ENNReal.top_ne_zero _ j
+    · exact (dist_eq_norm _ _).trans_le (lp.norm_apply_le_norm ENNReal.top_ne_zero (a - b) j)
+    · exact (dist_eq_norm _ _).trans_le (lp.norm_apply_le_norm ENNReal.top_ne_zero (b - c) j)
 
 section
 variable {S : Type*} [SeminormedAddGroup S] [IsUltrametricDist S] {x y : S}
@@ -181,9 +178,8 @@ theorem norm_eq_of_norm_add_lt_right (h : ‖x + y‖ < ‖y‖) : ‖x‖ = ‖
   IsUltrametricDist.norm_eq_of_add_norm_lt_max <| by simp_all [lt_sup_iff, or_true]
 
 /-- If `‖x - y‖ < ‖x‖` then `‖x‖ = ‖y‖`: the difference form of `norm_eq_of_norm_add_lt_left`. -/
-theorem norm_eq_of_norm_sub_lt_left (h : ‖x - y‖ < ‖x‖) : ‖x‖ = ‖y‖ := by
-  rw [← norm_neg y]
-  exact norm_eq_of_norm_add_lt_left (by rwa [sub_eq_add_neg] at h)
+theorem norm_eq_of_norm_sub_lt_left (h : ‖x - y‖ < ‖x‖) : ‖x‖ = ‖y‖ :=
+  norm_neg y ▸ norm_eq_of_norm_add_lt_left (sub_eq_add_neg x y ▸ h)
 
 /-- If `‖x - y‖ < ‖y‖` then `‖x‖ = ‖y‖`, the right-hand companion of
 `norm_eq_of_norm_sub_lt_left`. -/
@@ -208,10 +204,8 @@ instance instIsUltrametricDistCompletion {𝕜 : Type*} [PseudoMetricSpace 𝕜]
     IsUltrametricDist (UniformSpace.Completion 𝕜) where
   dist_triangle_max x y z := by
     refine UniformSpace.Completion.induction_on₃ x y z (isClosed_le ?_ ?_) fun a b c ↦ ?_
-    · exact UniformSpace.Completion.continuous_dist (by fun_prop) (by fun_prop)
-    · exact Continuous.max
-        (UniformSpace.Completion.continuous_dist (by fun_prop) (by fun_prop))
-        (UniformSpace.Completion.continuous_dist (by fun_prop) (by fun_prop))
+    · fun_prop
+    · fun_prop
     · simp_rw [UniformSpace.Completion.dist_eq]
       exact IsUltrametricDist.dist_triangle_max a b c
 

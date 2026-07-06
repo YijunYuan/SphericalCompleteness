@@ -69,15 +69,14 @@ instance instSphericallyCompleteSpaceContinuousLinearMap {𝕜 : Type*} [Nontriv
         max_eq_right <| le_of_lt (hsar hgt), ← dist_eq_norm, ← mem_closedBall]
       exact (hanti <| le_of_lt hgt) (by simp [mem_closedBall])) (by
     intro U x
-    have hx : x = 0 := Subsingleton.elim _ _
-    subst x; simp)
+    rw [Subsingleton.elim x 0]; simp)
   rcases this with ⟨T, _, hT2⟩
   use T
   simp only [Set.mem_iInter]
   suffices hh : ∀ (i : ℕ), T ∈ closedBall (c i) ↑(r i) by
     intro i
-    have := (Filter.tendsto_atTop_atTop_iff_of_monotone hφ.1.monotone).1
-    rcases this (StrictMono.tendsto_atTop hφ.1) i with ⟨N, hN⟩
+    obtain ⟨N, hN⟩ := (Filter.tendsto_atTop_atTop_iff_of_monotone hφ.1.monotone).1
+      (StrictMono.tendsto_atTop hφ.1) i
     specialize hh N
     simp only [c, r, Function.comp_apply] at hh
     exact (hanti' hN) hh

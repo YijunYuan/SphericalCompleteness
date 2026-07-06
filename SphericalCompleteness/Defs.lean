@@ -78,12 +78,10 @@ instance instSphericallyCompleteSpaceOfProperSpace (α : Type*)
     [PseudoMetricSpace α] [ProperSpace α] : SphericallyCompleteSpace α where
   isSphericallyComplete := by
     intro ci ri hanti
-    apply IsCompact.nonempty_iInter_of_sequence_nonempty_isCompact_isClosed
-    <| fun i ↦ closedBall (ci i) ↑(ri i)
-    · exact fun _ ↦ hanti (by linarith)
-    · exact fun h ↦ nonempty_closedBall.mpr (ri h).prop
-    · exact isCompact_closedBall (ci 0) ↑(ri 0)
-    · exact fun i ↦ isClosed_closedBall
+    exact IsCompact.nonempty_iInter_of_sequence_nonempty_isCompact_isClosed
+      (fun i ↦ closedBall (ci i) ↑(ri i)) (fun _ ↦ hanti (by linarith))
+      (fun h ↦ nonempty_closedBall.mpr (ri h).prop) (isCompact_closedBall (ci 0) ↑(ri 0))
+      fun _ ↦ isClosed_closedBall
 
 /--
 Transport spherical completeness across an isometric equivalence.

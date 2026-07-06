@@ -37,10 +37,8 @@ lemma eq_and_eq_of_add_eq_add_of_notMem {𝕜 : Type*} [Field 𝕜]
       d₁ + l₁ = d₂ + l₂ → d₁ = d₂ ∧ l₁ = l₂ := by
   intro d₁ hd₁ l₁ hl₁ d₂ hd₂ l₂ hl₂ heq
   rw [add_comm, ← sub_eq_sub_iff_add_eq_add] at heq
-  have : d₂ - d₁ ∈ Submodule.span 𝕜 {a} := by
-    rw [← heq]
-    exact (Submodule.sub_mem_iff_left (Submodule.span 𝕜 {a}) hl₂).mpr hl₁
-  rcases Submodule.mem_span_singleton.1 this with ⟨r, hr⟩
+  rcases Submodule.mem_span_singleton.1
+    (heq ▸ (Submodule.sub_mem_iff_left (Submodule.span 𝕜 {a}) hl₂).mpr hl₁) with ⟨r, hr⟩
   if hr' : r = 0 then
     simp only [hr', zero_smul] at hr
     rw [← hr] at heq

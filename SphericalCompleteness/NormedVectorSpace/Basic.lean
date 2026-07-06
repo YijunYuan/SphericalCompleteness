@@ -63,9 +63,7 @@ instance instSphericallyCompleteSpaceSpanSingleton (𝕜 : Type*) [NontriviallyN
     if h: z = 0 then
       rw [h, Submodule.span_zero_singleton]
       intro ci ri hanti
-      use 0
-      simp only [Set.mem_iInter, mem_closedBall]
-      intro i
+      refine ⟨0, Set.mem_iInter.2 fun i ↦ ?_⟩
       simp [(Submodule.eq_zero_of_bot_submodule (ci i) : ci i = 0)]
     else
     intro ci ri hanti
@@ -130,14 +128,10 @@ private lemma induction_sphericallyCompleteSpace_of_finiteDimensional
       (Nonempty.intro φ.toLinearEquiv)]
     simp only [Module.finrank_prod, hM1, add_comm, Nat.add_left_cancel_iff]
     exact finrank_span_singleton hz'
-  · letI : SphericallyCompleteSpace M := ‹SphericallyCompleteSpace M›
-    let hsSpan : SphericallyCompleteSpace (Submodule.span 𝕜 {z}) :=
+  · haveI : SphericallyCompleteSpace M := ‹SphericallyCompleteSpace M›
+    haveI : SphericallyCompleteSpace (Submodule.span 𝕜 {z}) :=
       instSphericallyCompleteSpaceSpanSingleton 𝕜 z
-    let hsProd : SphericallyCompleteSpace ((Submodule.span 𝕜 {z}) × M) := by
-      letI : SphericallyCompleteSpace (Submodule.span 𝕜 {z}) := hsSpan
-      infer_instance
-    exact of_isometryEquiv
-      (E := (Submodule.span 𝕜 {z}) × M) (he := hsProd) φ.toIsometryEquiv
+    exact of_isometryEquiv φ.toIsometryEquiv
 
 /--
 If `E` is a finite-dimensional normed vector space over a spherically complete, nontrivially normed

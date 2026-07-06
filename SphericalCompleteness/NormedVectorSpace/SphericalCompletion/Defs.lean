@@ -310,9 +310,6 @@ noncomputable def embedding (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     map_add' _ _ := rfl
     map_smul' _ _ := rfl
     norm_map' x := by
-      change ‖(⟨(sphericallyCompleteExtension 𝕜 E) x, _⟩ :
-        ↥(exists_maximal_immediateExtensionSubmodule 𝕜 E _
-          (sphericallyCompleteExtension 𝕜 E)).choose)‖ = ‖x‖
       simp
   }
 

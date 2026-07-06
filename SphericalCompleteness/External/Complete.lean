@@ -56,8 +56,7 @@ theorem completeSpace_iff_nonempty_iInter_closedBall_of_tendsto_zero
     · refine fun N ↦ ⟨ci N, Set.mem_iInter.2 fun n ↦ Set.mem_iInter.2 fun hn ↦ ?_⟩
       exact hanti hn (mem_closedBall_self (by positivity))
     · have h2 : Tendsto (fun n ↦ 2 * (ri n : ℝ)) atTop (nhds 0) := by
-        rw [← NNReal.tendsto_coe] at hri
-        simpa using (hri.comp tendsto_id).const_mul 2
+        simpa using (NNReal.tendsto_coe.2 hri).const_mul 2
       exact squeeze_zero (fun n ↦ Metric.diam_nonneg) (fun n ↦ Metric.diam_closedBall
         (ri n).coe_nonneg) h2
   · refine fun hballs ↦ Metric.complete_of_cauchySeq_tendsto fun u hu ↦ ?_
@@ -68,7 +67,7 @@ theorem completeSpace_iff_nonempty_iInter_closedBall_of_tendsto_zero
     have hφ_strict : StrictMono φ := strictMono_nat_of_lt_succ fun n ↦ by simp [φ]
     let ri : ℕ → NNReal := fun n ↦ 2 * (1 / 2 : NNReal) ^ n
     have hanti : Antitone fun n ↦ closedBall (u (φ n)) (ri n) := by
-      refine antitone_nat_of_succ_le fun n ↦ fun x hx ↦ ?_
+      refine antitone_nat_of_succ_le fun n x hx ↦ ?_
       simp only [mem_closedBall] at hx ⊢
       have htail : dist (u (φ (n + 1))) (u (φ n)) < (((1 / 2 : NNReal) ^ n : NNReal) : ℝ) :=
         hN n (φ (n + 1)) (le_trans (hN_le_φ n) (le_of_lt (hφ_strict (Nat.lt_succ_self n))))

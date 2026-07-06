@@ -120,8 +120,7 @@ lemma exists_dist_lt_diam {α : Type*} [PseudoMetricSpace α]
     hc.resolve_right
       (by
         simp only [not_le, not_lt]
-        suffices h : dist x y ≤ ↑r by exact h
-        rw [← isd]
+        rw [← dist_le_coe, ← isd]
         exact dist_le_diam_of_mem isBounded_closedBall hx hy)
 
 end IsSphericallyDense
@@ -178,7 +177,7 @@ private lemma exists_disjoint_subball {α : Type*}
   have : Disjoint (closedBall x r₁) (closedBall y r₁) := by
     refine (IsUltrametricDist.closedBall_eq_or_disjoint x y ↑r₁).resolve_left ?_
     by_contra hc
-    have : x ∈ closedBall x ↑r₁ := by simp only [mem_closedBall, dist_self, zero_le_coe]
+    have : x ∈ closedBall x ↑r₁ := mem_closedBall_self zero_le_coe
     simp only [hc, mem_closedBall, dist_le_coe] at this
     exact (lt_self_iff_false (nndist x y)).mp <| lt_of_le_of_lt this hxy.out.1
   if hzx : z ∈ closedBall x r₁ then
@@ -204,10 +203,8 @@ strictly positive base scale used to define `shrinkingRadius`.
 private lemma exists_pair_with_pos_dist (α : Type*)
     [PseudoMetricSpace α] [hα : IsSphericallyDense α] [nemp : Nonempty α] :
     ∃ z : α × α, nndist z.1 z.2 > 0 := by
-  use ((IsSphericallyDense.exists_dist_lt_diam hα nemp.some one_lt_two).choose,
-  (IsSphericallyDense.exists_dist_lt_diam hα nemp.some one_lt_two).choose_spec.choose)
-  exact lt_trans zero_lt_one (IsSphericallyDense.exists_dist_lt_diam
-    hα nemp.some one_lt_two).choose_spec.choose_spec.2.2.out.1
+  obtain ⟨x, y, _, _, hxy⟩ := IsSphericallyDense.exists_dist_lt_diam hα nemp.some one_lt_two
+  exact ⟨(x, y), lt_trans zero_lt_one hxy.out.1⟩
 
 /--
 A strictly decreasing sequence of radii that stays bounded away from `0`.
@@ -394,9 +391,7 @@ theorem not_sphericallyCompleteSpace_of_isSphericallyDense_separable_ultrametric
       simpa only [gt_iff_lt, not_lt, nonpos_iff_eq_zero, nndist_eq_zero] using hneq
     have : diam (closedBall nemp.some r₀) = 0 :=by
       refine diam_subsingleton ?_
-      rw [Set.subsingleton_iff_singleton (by
-      refine mem_closedBall.mpr ?_
-      simp only [dist_self, zero_le_coe]
+      rw [Set.subsingleton_iff_singleton (mem_closedBall_self zero_le_coe
       : nemp.some ∈ closedBall nemp.some r₀)]
       ext x
       refine ⟨fun h ↦ ?_, fun h ↦ ?_⟩
@@ -492,9 +487,9 @@ instance instIsDenseMetricOfIsSphericallyDense (α : Type*)
           rcases IsSphericallyDense.exists_dist_lt_diam (α := α) inferInstance z hr'lt with
             ⟨x, y, hx, hy, hxy⟩
           have hx' : x ∈ closedBall z r := by
-            simpa [mem_closedBall] using (le_trans (le_of_eq_of_le rfl hx) htr)
+            simpa [mem_closedBall] using le_trans hx htr
           have hy' : y ∈ closedBall z r := by
-            simpa [mem_closedBall] using (le_trans (le_of_eq_of_le rfl hy) htr)
+            simpa [mem_closedBall] using le_trans hy htr
           refine ⟨dist x y, Set.mem_image2.mpr ⟨x, hx', y, hy', rfl⟩, ?_⟩
           have hlow : (r' : ℝ) < dist x y := hxy.1
           have hupp : dist x y ≤ t := by exact_mod_cast hxy.2

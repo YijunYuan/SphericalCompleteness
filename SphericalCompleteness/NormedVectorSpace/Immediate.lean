@@ -106,18 +106,11 @@ private lemma norm_map {𝕜 : Type*}
     (hf1 : ∀ (v : F) (x : E) (h_1 : f x = v), h v = g ((weakInv f) ⟨v, Exists.intro
     x h_1⟩))
     (v : F) : ‖(↑h : F →ₗ[𝕜] H) v‖ = ‖v‖ := by
+  have hh : ‖h‖ ≤ 1 := by
+    rw [hf2]; exact (g.comp (weakInv f)).norm_toContinuousLinearMap_le
   refine eq_of_le_of_ge ?_ ?_
-  · suffices hh : ‖h‖ ≤ 1 by
-      have := (ContinuousLinearMap.opNorm_le_iff zero_le_one).1 hh v
-      simpa only [one_mul]
-    rw [hf2]
-    apply (ContinuousLinearMap.opNorm_le_iff zero_le_one).2
-    intro x
-    have : ‖(weakInv f).toContinuousLinearMap x‖ = ‖x‖ := by
-      simp only [LinearIsometry.coe_toContinuousLinearMap, LinearIsometry.norm_map]
-    rw [← this]
-    simp only [ContinuousLinearMap.coe_comp, LinearIsometry.coe_toContinuousLinearMap,
-      Function.comp_apply, LinearIsometry.norm_map, one_mul, le_refl]
+  · have := (ContinuousLinearMap.opNorm_le_iff zero_le_one).1 hh v
+    simpa only [one_mul]
   · if hv : v = 0 then
       simp [hv]
     else
@@ -132,22 +125,9 @@ private lemma norm_map {𝕜 : Type*}
     rw [dist_eq_norm] at hx
     have : ‖h x - h v‖ < ‖v‖ := by
       rw [(by simp : h x - h v = h (x - v))]
-      refine lt_of_le_of_lt (ContinuousLinearMap.le_opNorm h (x - v)) ?_
-      if hrf : ¬ Nontrivial (LinearMap.range f.toLinearMap) then
-        rw [Submodule.nontrivial_iff_ne_bot] at hrf
-        push Not at hrf
-        simp only [hrf, Submodule.bot_coe, Set.mem_singleton_iff] at hx
-        simp only [hx.1, sub_zero, lt_self_iff_false, and_false] at hx
-      else
-      have : ‖h‖ = 1 := by
-        have : ‖(g.comp (weakInv f)).toContinuousLinearMap‖ =
-          ‖ (g.toContinuousLinearMap).comp (weakInv f).toContinuousLinearMap‖ := rfl
-        rw [← this] at hf2
-        rw [hf2]
-        haveI := not_not.1 hrf
-        exact LinearIsometry.norm_toContinuousLinearMap _
-      rw [this, one_mul, norm_sub_rev]
-      exact hx.2
+      refine (ContinuousLinearMap.le_opNorm h (x - v)).trans_lt ?_
+      refine (mul_le_of_le_one_left (norm_nonneg _) hh).trans_lt ?_
+      rw [norm_sub_rev]; exact hx.2
     have hx' := IsUltrametricDist.norm_eq_of_norm_sub_lt_left hx.2
     have t : ‖h x‖ = ‖x‖ := by
       obtain ⟨z, hz⟩ := hx.1; rw [hf1 x z hz]; simp
@@ -189,11 +169,8 @@ theorem exists_linearIsometry_comp_eq {𝕜 : Type*} [NontriviallyNormedField �
   ext z
   simp only [LinearIsometry.coe_comp, LinearIsometry.coe_mk, ContinuousLinearMap.coe_coe,
     Function.comp_apply, h]
-  have : (weakInv f) ⟨f z, LinearMap.mem_range_self f.toLinearMap z⟩ = z :=
-    f.equivRange.symm_apply_apply z
   rw [hf1 (f z) z rfl]
-  change g ((weakInv f) ⟨f z, LinearMap.mem_range_self f.toLinearMap z⟩) = g z
-  rw [this]
+  exact congrArg g (f.equivRange.symm_apply_apply z)
 
 end IsImmediate
 end SphericallyCompleteSpace

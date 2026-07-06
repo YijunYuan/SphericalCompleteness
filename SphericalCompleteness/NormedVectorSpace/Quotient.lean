@@ -53,10 +53,8 @@ private lemma lift_to_nearby_element (𝕜 : Type*) [NontriviallyNormedField �
     ∃ lup1 : E, (QuotientAddGroup.mk' F.toAddSubgroup) lup1 = unp1 ∧ ‖lup1 - lun‖ < ens1 := by
   subst hlun
   rw [mem_closedBall, dist_eq_norm] at h
-  have hε : (0 : ℝ) < ens1 - ‖unp1 - (QuotientAddGroup.mk' F.toAddSubgroup) lun‖ := by
-    have : ‖unp1 - (QuotientAddGroup.mk' F.toAddSubgroup) lun‖ < (ens1 : ℝ) :=
-      lt_of_le_of_lt h (by exact_mod_cast hens1)
-    linarith
+  have hε : (0 : ℝ) < ens1 - ‖unp1 - (QuotientAddGroup.mk' F.toAddSubgroup) lun‖ :=
+    sub_pos.2 (lt_of_le_of_lt h (by exact_mod_cast hens1))
   obtain ⟨m, hm_eq, hm_norm⟩ :=
     Submodule.Quotient.norm_mk_lt (S := F) (unp1 - (QuotientAddGroup.mk' F.toAddSubgroup) lun) hε
   refine ⟨lun + m, ?_, ?_⟩
