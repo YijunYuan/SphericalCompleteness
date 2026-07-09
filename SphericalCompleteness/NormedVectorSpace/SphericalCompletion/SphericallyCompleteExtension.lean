@@ -38,7 +38,7 @@ family `fun _ ↦ E`, the constant-sequence map `x ↦ [x, x, …]` gives the de
 
 @[expose] public section
 
-open Metric
+open Metric Filter Topology
 
 namespace SphericallyCompleteSpace
 
@@ -48,48 +48,32 @@ namespace SphericallyCompleteSpace
 In the `ℓ∞`-type space `lp E ⊤`, the submodule `c₀ 𝕜 E` consists of those bounded
 sequences `f` with values in `E n` that *tend to `0` in norm*, i.e.
 
-`∀ ε > 0, ∃ N, ∀ n ≥ N, ‖f n‖ ≤ ε`.
+`Tendsto (fun n ↦ ‖f n‖) atTop (𝓝 0)`.
 
 This is the natural analogue of the classical Banach space `c₀` of scalar-valued
 sequences, but for a family of normed spaces `E : ℕ → Type*`.
 -/
 
 /-- The submodule `c₀ 𝕜 E` of `lp E ⊤` consisting of the bounded sequences that tend to `0` in
-norm: `∀ ε > 0, ∃ N, ∀ n ≥ N, ‖f n‖ ≤ ε`. Quotienting `lp E ⊤` by `c₀` glues together sequences
+norm: `Tendsto (fun n ↦ ‖f n‖) atTop (𝓝 0)`. Quotienting `lp E ⊤` by `c₀` glues together sequences
 with the same asymptotic behaviour; this quotient is the spherically complete space into which
 `sphericallyCompleteExtension` embeds an arbitrary normed space. -/
 def c₀ (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     (E : ℕ → Type*) [∀ i, NormedAddCommGroup (E i)]
     [∀ i, NormedSpace 𝕜 (E i)] : Submodule 𝕜 ↥(lp E ⊤) where
-  carrier := {f : lp E ⊤ | ∀ ε : ℝ, ε > 0 → ∃ N : ℕ, ∀ n ≥ N, ‖f n‖ ≤ ε}
+  carrier := {f : lp E ⊤ | Tendsto (fun n ↦ ‖f n‖) atTop (𝓝 0)}
   add_mem' := by
     intro a b ha hb
-    simp only [ge_iff_le, Set.mem_setOf_eq, AddSubgroup.coe_add] at *
-    intro ε hε
-    rcases ha (ε / 2) (by linarith) with ⟨Na, hNa⟩
-    rcases hb (ε / 2) (by linarith) with ⟨Nb, hNb⟩
-    use Na + Nb
-    intro n hn
-    specialize hNa n (by linarith)
-    specialize hNb n (by linarith)
-    refine le_trans (norm_add_le _ _) ?_
-    linarith
-  zero_mem' := fun e he ↦ ⟨0, fun n _ ↦ by simp [he.le]⟩
+    simp only [Set.mem_setOf_eq, lp.coeFn_add, Pi.add_apply] at *
+    refine squeeze_zero (fun n ↦ norm_nonneg _) (fun n ↦ norm_add_le _ _) ?_
+    simpa using ha.add hb
+  zero_mem' := by
+    simp only [Set.mem_setOf_eq, lp.coeFn_zero, Pi.zero_apply, norm_zero]
+    exact tendsto_const_nhds
   smul_mem' := by
     intro c x hx
-    if hc : c = 0 then
-      simp only [gt_iff_lt, ge_iff_le, hc, zero_smul, Set.mem_setOf_eq, ZeroMemClass.coe_zero]
-      exact fun e he ↦ ⟨0, fun n _ ↦ by simp [he.le]⟩
-    else
-    simp only [gt_iff_lt, ge_iff_le, Set.mem_setOf_eq, lp.coeFn_smul, Pi.smul_apply] at *
-    intro ε hε
-    rcases hx (ε / ‖c‖) (by
-      simp_all only [norm_pos_iff, ne_eq, not_false_eq_true, div_pos_iff_of_pos_left]
-      ) with ⟨N, hN⟩
-    use N
-    intro n hn
-    rw [norm_smul]
-    exact (le_mul_inv_iff₀' <| norm_pos_iff.mpr hc).mp <| hN n hn
+    simp only [Set.mem_setOf_eq, lp.coeFn_smul, Pi.smul_apply, norm_smul] at *
+    simpa using hx.const_mul ‖c‖
 
 /-- Inductive step for lifting a nested family of balls to coherent representatives. Given a
 strictly decreasing radius sequence `r`, an antitone family of closed balls
@@ -291,12 +275,8 @@ lemma quotient_norm_mk_le_of_eventually_norm_le {𝕜 : Type*} [NontriviallyNorm
     · simpa only [hiN, ↓reduceIte, norm_zero] using
       le_trans (norm_nonneg _) <| this ‖A 0‖ (by simp)
   have hu_mem2 : ⟨u, hu_mem1⟩ ∈ (c₀ 𝕜 E) := by
-    simp only [c₀, gt_iff_lt, ge_iff_le, Submodule.mem_mk, AddSubmonoid.mem_mk,
-      AddSubsemigroup.mem_mk, Set.mem_setOf_eq]
-    intro ε hε
-    use N
-    intro n hn
-    simpa only [dite_eq_ite, Nat.not_lt.mpr hn, ↓reduceIte, norm_zero, u] using le_of_lt hε
+    refine tendsto_const_nhds.congr' <| Filter.eventually_atTop.2 ⟨N, fun n hn ↦ ?_⟩
+    simp only [dite_eq_ite, Nat.not_lt.mpr hn, ↓reduceIte, norm_zero, u]
   have : sInf ((fun x ↦ ‖A + x‖) '' ↑(c₀ 𝕜 E).toAddSubgroup) ≤ ‖A + ⟨u, hu_mem1⟩‖ := by
     apply csInf_le
     · refine ⟨0, mem_lowerBounds.2 <| fun x hx ↦ ?_⟩
@@ -432,12 +412,9 @@ noncomputable def sphericallyCompleteExtension (𝕜 : Type*) [NontriviallyNorme
         rw [← h]
         apply le_of_forall_pos_sub_le
         intro ε hε
-        simp only [c₀, gt_iff_lt, ge_iff_le, Submodule.mem_mk, AddSubmonoid.mem_mk,
-          AddSubsemigroup.mem_mk, Set.mem_setOf_eq] at hp'
-        rcases hp' ε hε with ⟨N, hN⟩
+        obtain ⟨N, hN⟩ := (hp'.eventually_lt_const hε).exists
         refine le_trans (?_: _ ≤ ‖x + p N‖) ?_
-        · specialize hN N (le_refl N)
-          rw [← sub_neg_eq_add x (p N)]
+        · rw [← sub_neg_eq_add x (p N)]
           refine le_trans ?_ (norm_sub_norm_le _ _)
           rw [norm_neg]
           linarith
@@ -459,38 +436,25 @@ noncomputable instance (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     simp only [IsSeqClosed, Submodule.carrier_eq_coe, SetLike.mem_coe, Subtype.forall]
     intro seq lim hlim hseq htend
     rw [NormedAddCommGroup.tendsto_atTop] at htend
-    intro ε hε
-    specialize htend (ε / 2) (by linarith)
-    rcases htend with ⟨N, hN⟩
+    refine Metric.tendsto_atTop.2 fun ε hε ↦ ?_
+    obtain ⟨N, hN⟩ := htend (ε / 2) (by linarith)
     specialize hN N (le_refl N)
     rw [lp.norm_eq_ciSup] at hN
-    specialize hseq N
-    simp only [c₀, gt_iff_lt, ge_iff_le, Submodule.mem_mk, AddSubmonoid.mem_mk,
-      AddSubsemigroup.mem_mk, Set.mem_setOf_eq] at hseq
-    specialize hseq (ε / 2) (by linarith)
-    rcases hseq with ⟨M, hM⟩
-    use M.max N
-    intro n hn
-    specialize hM n (by simp_all only
-      [gt_iff_lt, AddSubgroupClass.coe_sub, ge_iff_le, sup_le_iff])
-    have := (ciSup_le_iff (by
-      use ‖seq N - ⟨lim, hlim⟩‖
-      simp only [upperBounds,  Set.mem_range,
-        forall_exists_index, forall_apply_eq_imp_iff, Set.mem_setOf_eq]
-      intro a
-      refine lp.norm_apply_le_norm ?_ (seq N - ⟨lim, hlim⟩) a
-      exact ENNReal.top_ne_zero
-      )).1 (le_of_lt hN) n
-    simp only [AddSubgroupClass.coe_sub] at this
-    replace := add_le_add hM this
-    have htriangle : ‖lim n‖ ≤ ‖seq N n - lim n‖ + ‖seq N n‖ := by
-      calc
-        ‖lim n‖ = ‖(lim n - seq N n) + seq N n‖ := by abel_nf
-        _ ≤ ‖lim n - seq N n‖ + ‖seq N n‖ := norm_add_le _ _
-        _ = ‖seq N n - lim n‖ + ‖seq N n‖ := by rw [norm_sub_rev]
-    have hsum : ‖seq N n - lim n‖ + ‖seq N n‖ ≤ ε := by
-      simpa [add_comm, add_left_comm, add_assoc, add_halves] using this
-    exact le_trans htriangle hsum
+    obtain ⟨M, hM⟩ := Metric.tendsto_atTop.1 (hseq N) (ε / 2) (by linarith)
+    refine ⟨M.max N, fun n hn ↦ ?_⟩
+    rw [Real.dist_eq, sub_zero, abs_of_nonneg (norm_nonneg _)]
+    have hbdd : BddAbove (Set.range fun i ↦ ‖(seq N - ⟨lim, hlim⟩) i‖) :=
+      ⟨‖seq N - ⟨lim, hlim⟩‖, by
+        rintro _ ⟨a, rfl⟩; exact lp.norm_apply_le_norm ENNReal.top_ne_zero _ a⟩
+    have h1 : ‖seq N n - lim n‖ < ε / 2 := by
+      simpa only [lp.coeFn_sub, Pi.sub_apply] using lt_of_le_of_lt (le_ciSup hbdd n) hN
+    have h2 : ‖seq N n‖ < ε / 2 := by
+      simpa only [Real.dist_eq, sub_zero, abs_of_nonneg (norm_nonneg _)] using
+        hM n (le_trans (le_max_left M N) hn)
+    calc ‖lim n‖ = ‖(lim n - seq N n) + seq N n‖ := by abel_nf
+      _ ≤ ‖lim n - seq N n‖ + ‖seq N n‖ := norm_add_le _ _
+      _ = ‖seq N n - lim n‖ + ‖seq N n‖ := by rw [norm_sub_rev]
+      _ < ε := by linarith
   simp only [Submodule.carrier_eq_coe] at this
   infer_instance
 
