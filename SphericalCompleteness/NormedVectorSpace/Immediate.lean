@@ -153,7 +153,7 @@ theorem exists_linearIsometry_comp_eq {𝕜 : Type*} [NontriviallyNormedField �
     (f : E →ₗᵢ[𝕜] F) (hf : IsImmediate f)
     (g : E →ₗᵢ[𝕜] H) :
     ∃ (h : F →ₗᵢ[𝕜] H), LinearIsometry.comp (h : F →ₗᵢ[𝕜] H) (f : E →ₗᵢ[𝕜] F) = g := by
-  rcases hahn_banach' _
+  rcases hahn_banach (D := LinearMap.range f.toLinearMap) (F := H)
     (LinearIsometry.comp g (weakInv f)).toContinuousLinearMap with ⟨h, hf1, hf2⟩
   simp only [LinearMap.mem_range, forall_exists_index] at hf1
   have hf2' : ‖h‖ =
