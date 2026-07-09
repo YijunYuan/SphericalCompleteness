@@ -78,7 +78,7 @@ In other words, in the ultrametric setting, spherical completeness of `F` ensure
 a bounded linear projection of operator norm at most `1` from `E` onto `F`.
 -/
 theorem exists_orthProj_of_sphericallyComplete :
-    ∃ T : E →L[𝕜] ↥F, (∀ a ∈ F, T a = a) ∧ ContinuousLinearMap.opNorm T ≤ 1 := by
+    ∃ T : E →L[𝕜] ↥F, (∀ a ∈ F, T a = a) ∧ ‖T‖ ≤ 1 := by
   have := @exists_extension_opNorm_le 𝕜 _ E _ _ _ F ↥F _ _ _ _
     (ContinuousLinearMap.id 𝕜 ↥F) {0} (by simp) (fun _ ↦ 1) (fun _ ↦ by simp)
     (fun U V ↦ by rw [congrArg Subtype.val (Subsingleton.elim U V)]; simp)
@@ -206,7 +206,7 @@ This is an immediate consequence of the construction of `orthProj` via
 projection onto `F` satisfying `‖T‖ ≤ 1`.
 -/
 theorem norm_orthProj_le_one :
-    ContinuousLinearMap.opNorm (orthProj 𝕜 F) ≤ 1 :=
+    ‖orthProj 𝕜 F‖ ≤ 1 :=
   (exists_orthProj_of_sphericallyComplete 𝕜 F).choose_spec.2
 
 /--

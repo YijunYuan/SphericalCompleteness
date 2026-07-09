@@ -107,12 +107,12 @@ instance {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     simp only [SetLike.val_smul, ← hx'v', smul_add, neg_smul, sub_neg_eq_add, b, x]
     rw [add_comm]
     simpa only [add_left_inj] using inv_smul_smul₀ hhs a
-  have hb'1' : IsMOrtho 𝕜 b' (LinearMap.range (inclusionᵢ (le_sup_of_le_left
+  have hb'1' : IsMOrtho b' (LinearMap.range (inclusionᵢ (le_sup_of_le_left
       (SphericalCompletion.exists_maximal_immediateExtensionSubmodule 𝕜 E E₀
         f).choose_spec.1.choose)).toLinearMap) :=
     (isMOrtho_range_inclusionᵢ_iff _ b').2 hb'1
   have hb1 := @IsMOrtho.smul 𝕜 _ _ _ _ inferInstance b' _ s⁻¹ hb'1'
-  replace hb1 : IsMOrtho 𝕜 b.val K := by
+  replace hb1 : IsMOrtho b.val K := by
     by_contra hc
     rcases IsMOrtho.not_iff_exists_dist_lt_norm.1 hc with ⟨g, hg1, hg2⟩
     rw [dist_eq_norm] at hg2
