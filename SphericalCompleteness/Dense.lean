@@ -165,7 +165,7 @@ two points of `closedBall c₀ r₀` separated by more than `r₁` (available by
 two radius-`r₁` balls around them are disjoint (ultrametric balls are equal or disjoint), so at
 least one misses `z`. This is the inductive step behind `nestedBallChain`.
 -/
-private lemma exists_disjoint_subball {α : Type*}
+private lemma exists_sub_closedBall_not_mem {α : Type*}
     [PseudoMetricSpace α] [hiud : IsUltrametricDist α] [hα : IsSphericallyDense α]
     (c₀ : α) (r₀ : ℝ≥0) (r₁ : ℝ≥0) (hr : r₁ < r₀) (z : α) :
     ∃ c₁ : α,
@@ -264,7 +264,7 @@ private noncomputable def nestedBallChain {α : Type*} [PseudoMetricSpace α]
     (hα' : Denumerable hsep.exists_countable_dense.choose) (n : ℕ) : α × ℝ≥0 :=
   match n with
   | 0 => ((exists_pair_with_pos_dist α).choose.1, shrinkingRadius α 0)
-  | n + 1 => ⟨((exists_disjoint_subball (nestedBallChain hα' n).1 (shrinkingRadius α n)
+  | n + 1 => ⟨((exists_sub_closedBall_not_mem (nestedBallChain hα' n).1 (shrinkingRadius α n)
       (shrinkingRadius α (n + 1)) <| shrinkingRadius_strictAnti α (lt_add_one n))
         (hα'.ofNat hsep.exists_countable_dense.choose n)).choose, shrinkingRadius α (n+1)⟩
 
@@ -281,7 +281,7 @@ private lemma nestedBallChain_decreasing :
     Antitone (fun n ↦ closedBall (nestedBallChain hα' n).1 (nestedBallChain hα' n).2) := by
   refine antitone_nat_of_succ_le <| fun n ↦ ?_
   simp only [nestedBallChain, mem_closedBall, dist_le_coe, not_le, Set.le_eq_subset]
-  have := ((exists_disjoint_subball (nestedBallChain hα' n).1 (shrinkingRadius α n)
+  have := ((exists_sub_closedBall_not_mem (nestedBallChain hα' n).1 (shrinkingRadius α n)
       (shrinkingRadius α (n + 1)) <| shrinkingRadius_strictAnti α (lt_add_one n))
         (hα'.ofNat hsep.exists_countable_dense.choose n)).choose_spec.1
   conv => arg 2; arg 2; unfold nestedBallChain
@@ -295,7 +295,7 @@ Thus no point of the dense set lies in the whole chain, which is the key to the 
 private lemma notMem_nestedBallChain (n : ℕ) :
     (hα'.ofNat hsep.exists_countable_dense.choose n).val ∉
     closedBall (nestedBallChain hα' (n + 1)).1 (nestedBallChain hα' (n + 1)).2 :=
-  ((exists_disjoint_subball (nestedBallChain hα' n).1 (shrinkingRadius α n)
+  ((exists_sub_closedBall_not_mem (nestedBallChain hα' n).1 (shrinkingRadius α n)
       (shrinkingRadius α (n + 1)) <| shrinkingRadius_strictAnti α (lt_add_one n))
         (hα'.ofNat hsep.exists_countable_dense.choose n)).choose_spec.2
 
