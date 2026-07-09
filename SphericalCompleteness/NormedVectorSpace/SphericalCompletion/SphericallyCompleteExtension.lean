@@ -242,58 +242,6 @@ private lemma quotientMkSection_norm_apply_self_le_max {𝕜 : Type*} [Nontrivia
     have := (mk_eq_and_norm_sub_lt E hsr hanti (m - 1)).2
     rwa [(by omega : m - 1 + 2 = m + 1), (by omega : m - 1 + 1 = m)] at this
 
-/-- An eventual coordinatewise bound descends to a bound on the quotient norm. If `A : lp E ⊤`
-satisfies `‖A n‖ ≤ C` for all `n ≥ N` (with `C > 0`), then the norm of its class in
-`lp E ⊤ ⧸ c₀ 𝕜 E` is at most `C`. The point is that the finitely many early coordinates `n < N`,
-which are unconstrained, can be cancelled by subtracting a suitable null sequence in `c₀ 𝕜 E`, so
-they do not affect the quotient norm; the remaining coordinates already obey the bound `C`. This is
-the estimate used to show the assembled diagonal element lies in every ball of the nested family. -/
-lemma quotient_norm_mk_le_of_eventually_norm_le {𝕜 : Type*} [NontriviallyNormedField 𝕜]
-    (E : ℕ → Type*) [(i : ℕ) → NormedAddCommGroup (E i)] [(i : ℕ) → NormedSpace 𝕜 (E i)]
-    [∀ (i : ℕ), IsUltrametricDist (E i)]
-    (A : lp E ⊤) (C : ℝ) (hC : C > 0)
-    (N : ℕ) (hN : ∀ n ≥ N, ‖A n‖ ≤ C)
-    :
-    ‖(QuotientAddGroup.mk' (c₀ 𝕜 E).toAddSubgroup) A‖ ≤ C
-    := by
-  rw [quotient_norm_mk_eq]
-  let u : ∀ i, E i := fun i ↦
-    if _ : i < N then - (A i)
-    else 0
-  have hu_mem1 : ↑(u) ∈ lp E ⊤ := by
-    simp only [dite_eq_ite, u]
-    apply memℓp_infty
-    use (memℓp_infty_iff.1 A.prop).some
-    have := mem_upperBounds.1 (memℓp_infty_iff.1 A.prop).some_mem
-    apply mem_upperBounds.2
-    intro z hz
-    simp only [Set.mem_range] at hz
-    rcases hz with ⟨i, hi⟩
-    rw [← hi]
-    by_cases hiN : i < N
-    · simpa only [hiN, ↓reduceIte, norm_neg] using this ‖A i‖ (by simp)
-    · simpa only [hiN, ↓reduceIte, norm_zero] using
-      le_trans (norm_nonneg _) <| this ‖A 0‖ (by simp)
-  have hu_mem2 : ⟨u, hu_mem1⟩ ∈ (c₀ 𝕜 E) := by
-    refine tendsto_const_nhds.congr' <| Filter.eventually_atTop.2 ⟨N, fun n hn ↦ ?_⟩
-    simp only [dite_eq_ite, Nat.not_lt.mpr hn, ↓reduceIte, norm_zero, u]
-  have : sInf ((fun x ↦ ‖A + x‖) '' ↑(c₀ 𝕜 E).toAddSubgroup) ≤ ‖A + ⟨u, hu_mem1⟩‖ := by
-    apply csInf_le
-    · refine ⟨0, mem_lowerBounds.2 <| fun x hx ↦ ?_⟩
-      simp only [Submodule.coe_toAddSubgroup, Set.mem_image, SetLike.mem_coe, Subtype.exists] at hx
-      rw [← hx.choose_spec.choose_spec.2]
-      exact norm_nonneg _
-    · rw [Set.mem_image]
-      exact ⟨⟨u, hu_mem1⟩, ⟨hu_mem2, rfl⟩⟩
-  refine le_trans this ?_
-  rw [lp.norm_eq_ciSup]
-  refine ciSup_le <| fun k ↦ ?_
-  simp only [dite_eq_ite, AddSubgroup.coe_add, u]
-  if hk : k < N then
-    simp [if_pos hk, hC.le]
-  else
-    simpa [if_neg hk] using hN k (Nat.le_of_not_lt hk)
-
 /--
 The quotient `lp E ⊤ ⧸ c₀ 𝕜 E` is spherically complete whenever each `E i` is ultrametric.
 
@@ -327,22 +275,23 @@ instance sphericallyCompleteSpace_lp_quotient_c₀ {𝕜 : Type*} [NontriviallyN
     rw [← (mk_eq_and_norm_sub_lt E hsr hanti (n + 1)).1]
     change ‖(QuotientAddGroup.mk' (c₀ 𝕜 E).toAddSubgroup)
       (⟨f, hf_mem⟩ - ↑(quotientMkSection E hsr hanti (n + 1)))‖ ≤ ↑(r n)
-    have := @quotient_norm_mk_le_of_eventually_norm_le 𝕜 _ E _ _ _
-      (⟨f, hf_mem⟩ - ↑(quotientMkSection E hsr hanti (n + 1))) (r n).val ?_ (n + 1) ?_
-    · exact this
-    · exact lt_of_le_of_lt (r (n + 1)).prop <| hsr <| lt_add_one n
-    · intro m hm
-      simp only [QuotientAddGroup.mk'_apply, AddSubgroupClass.coe_sub,
-        NNReal.val_eq_coe, f]
+    set A : lp E ⊤ := ⟨f, hf_mem⟩ - ↑(quotientMkSection E hsr hanti (n + 1)) with hA_def
+    -- The `m`-th coordinate of `A` is bounded by `r n` for every `m ≥ n + 1`: telescope
+    -- `section m - section (n + 1)` through the consecutive differences controlled by
+    -- `mk_eq_and_norm_sub_lt` using the strong (ultrametric) triangle inequality.
+    have hev : ∀ m ≥ n + 1, ‖A m‖ ≤ (r n : ℝ) := by
+      intro m hm
+      rw [hA_def]
+      simp only [QuotientAddGroup.mk'_apply, AddSubgroupClass.coe_sub, f]
       have h : ‖(quotientMkSection E hsr hanti m).val -
         (quotientMkSection E hsr hanti (n + 1)).val‖
-        ≤ (r n).val := by
+        ≤ (r n : ℝ) := by
         induction m with
         | zero => linarith
         | succ k hk =>
           if hkn : k = n then
             rw [hkn]
-            simp only [QuotientAddGroup.mk'_apply, sub_self, norm_zero, NNReal.val_eq_coe,
+            simp only [QuotientAddGroup.mk'_apply, sub_self, norm_zero,
               NNReal.zero_le_coe]
           else
           specialize hk (by omega)
@@ -356,6 +305,46 @@ instance sphericallyCompleteSpace_lp_quotient_c₀ {𝕜 : Type*} [NontriviallyN
       simpa [f] using lp.norm_apply_le_norm ENNReal.top_ne_zero
         ((quotientMkSection E hsr hanti m).val -
           (quotientMkSection E hsr hanti (n + 1)).val) m
+    -- The eventual coordinatewise bound descends to the quotient norm: the finitely many early
+    -- coordinates `m < n + 1` are cancelled by subtracting the null sequence `u ∈ c₀ 𝕜 E`, and the
+    -- remaining coordinates already obey the bound `r n`.
+    rw [quotient_norm_mk_eq]
+    have hC0 : (0 : ℝ) ≤ (r n : ℝ) := le_trans (norm_nonneg _) (hev (n + 1) le_rfl)
+    let u : ∀ i, E i := fun i ↦ if _ : i < n + 1 then - (A i) else 0
+    have hu_mem1 : ↑(u) ∈ lp E ⊤ := by
+      simp only [dite_eq_ite, u]
+      apply memℓp_infty
+      use (memℓp_infty_iff.1 A.prop).some
+      have := mem_upperBounds.1 (memℓp_infty_iff.1 A.prop).some_mem
+      apply mem_upperBounds.2
+      intro z hz
+      simp only [Set.mem_range] at hz
+      rcases hz with ⟨i, hi⟩
+      rw [← hi]
+      by_cases hiN : i < n + 1
+      · simpa only [hiN, ↓reduceIte, norm_neg] using this ‖A i‖ (by simp)
+      · simpa only [hiN, ↓reduceIte, norm_zero] using
+        le_trans (norm_nonneg _) <| this ‖A 0‖ (by simp)
+    have hu_mem2 : ⟨u, hu_mem1⟩ ∈ (c₀ 𝕜 E) := by
+      refine tendsto_const_nhds.congr' <| Filter.eventually_atTop.2 ⟨n + 1, fun m hm ↦ ?_⟩
+      simp only [dite_eq_ite, Nat.not_lt.mpr hm, ↓reduceIte, norm_zero, u]
+    have hle : sInf ((fun y ↦ ‖A + y‖) '' ↑(c₀ 𝕜 E).toAddSubgroup) ≤ ‖A + ⟨u, hu_mem1⟩‖ := by
+      apply csInf_le
+      · refine ⟨0, mem_lowerBounds.2 <| fun y hy ↦ ?_⟩
+        simp only [Submodule.coe_toAddSubgroup, Set.mem_image, SetLike.mem_coe,
+          Subtype.exists] at hy
+        rw [← hy.choose_spec.choose_spec.2]
+        exact norm_nonneg _
+      · rw [Set.mem_image]
+        exact ⟨⟨u, hu_mem1⟩, ⟨hu_mem2, rfl⟩⟩
+    refine le_trans hle ?_
+    rw [lp.norm_eq_ciSup]
+    refine ciSup_le <| fun k ↦ ?_
+    simp only [dite_eq_ite, AddSubgroup.coe_add, u]
+    if hk : k ≤ n then
+      simp [if_pos hk, hC0]
+    else
+      simpa [if_neg hk] using hev k (by omega)
   simp only [Set.mem_iInter]
   suffices h : ∀ i ≥ 1, x ∈ closedBall (c i) (r i) by
     exact fun i ↦ (hanti <| Nat.le_add_right i 1) <| h (i + 1) (Nat.le_add_left 1 i)
@@ -410,15 +399,17 @@ noncomputable def sphericallyCompleteExtension (𝕜 : Type*) [NontriviallyNorme
           Subtype.exists] at hb
         rcases hb with ⟨p, hp, hp', h⟩
         rw [← h]
-        apply le_of_forall_pos_sub_le
-        intro ε hε
-        obtain ⟨N, hN⟩ := (hp'.eventually_lt_const hε).exists
-        refine le_trans (?_: _ ≤ ‖x + p N‖) ?_
-        · rw [← sub_neg_eq_add x (p N)]
-          refine le_trans ?_ (norm_sub_norm_le _ _)
-          rw [norm_neg]
-          linarith
-        · exact lp.norm_apply_le_norm ENNReal.top_ne_zero (v + ⟨p, hp⟩) N
+        -- `p ∈ c₀` means `p n → 0`, so the coordinates `(v + p) n = x + p n` tend to `x` and their
+        -- norms tend to `‖x‖`; since every coordinate norm is `≤ ‖v + p‖`, the limit `‖x‖` is too.
+        have hp0 : Tendsto (fun n ↦ (p : ∀ _ : ℕ, E) n) atTop (𝓝 0) :=
+          tendsto_zero_iff_norm_tendsto_zero.2 hp'
+        have key : Tendsto (fun n ↦ ‖(v + ⟨p, hp⟩ : lp (fun _ ↦ E) ⊤) n‖) atTop (𝓝 ‖x‖) := by
+          have hvp : ∀ n, (v + ⟨p, hp⟩ : lp (fun _ ↦ E) ⊤) n = x + p n := fun n ↦ by
+            rw [lp.coeFn_add, Pi.add_apply]
+          simp only [hvp]
+          simpa using ((tendsto_const_nhds (x := x)).add hp0).norm
+        exact le_of_tendsto' key
+          (fun n ↦ lp.norm_apply_le_norm ENNReal.top_ne_zero (v + ⟨p, hp⟩) n)
 
 /-- The `NormedAddCommGroup` structure on the quotient `lp (fun _ ↦ E) ⊤ ⧸ c₀ 𝕜 (fun _ ↦ E)`.
 
@@ -435,26 +426,23 @@ noncomputable instance (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     apply IsSeqClosed.isClosed
     simp only [IsSeqClosed, Submodule.carrier_eq_coe, SetLike.mem_coe, Subtype.forall]
     intro seq lim hlim hseq htend
-    rw [NormedAddCommGroup.tendsto_atTop] at htend
-    refine Metric.tendsto_atTop.2 fun ε hε ↦ ?_
-    obtain ⟨N, hN⟩ := htend (ε / 2) (by linarith)
-    specialize hN N (le_refl N)
-    rw [lp.norm_eq_ciSup] at hN
-    obtain ⟨M, hM⟩ := Metric.tendsto_atTop.1 (hseq N) (ε / 2) (by linarith)
-    refine ⟨M.max N, fun n hn ↦ ?_⟩
-    rw [Real.dist_eq, sub_zero, abs_of_nonneg (norm_nonneg _)]
-    have hbdd : BddAbove (Set.range fun i ↦ ‖(seq N - ⟨lim, hlim⟩) i‖) :=
-      ⟨‖seq N - ⟨lim, hlim⟩‖, by
-        rintro _ ⟨a, rfl⟩; exact lp.norm_apply_le_norm ENNReal.top_ne_zero _ a⟩
-    have h1 : ‖seq N n - lim n‖ < ε / 2 := by
-      simpa only [lp.coeFn_sub, Pi.sub_apply] using lt_of_le_of_lt (le_ciSup hbdd n) hN
-    have h2 : ‖seq N n‖ < ε / 2 := by
-      simpa only [Real.dist_eq, sub_zero, abs_of_nonneg (norm_nonneg _)] using
-        hM n (le_trans (le_max_left M N) hn)
-    calc ‖lim n‖ = ‖(lim n - seq N n) + seq N n‖ := by abel_nf
-      _ ≤ ‖lim n - seq N n‖ + ‖seq N n‖ := norm_add_le _ _
-      _ = ‖seq N n - lim n‖ + ‖seq N n‖ := by rw [norm_sub_rev]
-      _ < ε := by linarith
+    -- `seq n → ⟨lim, hlim⟩` in the `ℓ∞` norm forces the coordinate norms `‖seq n ·‖` to converge
+    -- *uniformly* to `‖lim ·‖`; a uniform limit of null sequences is again null, so `lim ∈ c₀`.
+    have huniform : TendstoUniformly (fun n k ↦ ‖(seq n) k‖)
+        (fun k ↦ ‖(⟨lim, hlim⟩ : lp (fun _ ↦ E) ⊤) k‖) atTop := by
+      rw [Metric.tendstoUniformly_iff]
+      intro ε hε
+      filter_upwards [eventually_atTop.2 (Metric.tendsto_atTop.1 htend ε hε)] with n hn k
+      calc dist ‖(⟨lim, hlim⟩ : lp (fun _ ↦ E) ⊤) k‖ ‖(seq n) k‖
+            ≤ ‖(⟨lim, hlim⟩ : lp (fun _ ↦ E) ⊤) k - seq n k‖ := by
+              rw [Real.dist_eq]; exact abs_norm_sub_norm_le _ _
+        _ ≤ ‖(⟨lim, hlim⟩ : lp (fun _ ↦ E) ⊤) - seq n‖ := by
+              have := lp.norm_apply_le_norm ENNReal.top_ne_zero
+                ((⟨lim, hlim⟩ : lp (fun _ ↦ E) ⊤) - seq n) k
+              rwa [lp.coeFn_sub, Pi.sub_apply] at this
+        _ = dist (seq n) ⟨lim, hlim⟩ := by rw [dist_eq_norm, norm_sub_rev]
+        _ < ε := hn
+    exact huniform.tendsto_of_eventually_tendsto (Eventually.of_forall hseq) tendsto_const_nhds
   simp only [Submodule.carrier_eq_coe] at this
   infer_instance
 
