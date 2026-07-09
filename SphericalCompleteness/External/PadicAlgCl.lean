@@ -27,7 +27,7 @@ variable (p : ℕ) [hp : Fact (Nat.Prime p)]
 /-- Between any two nonnegative reals `a < b` there is a rational power of `‖p‖` (the `p`-adic norm
 of the prime `p` in `PadicAlgCl p`). This is the density input that makes `PadicAlgCl p` a densely
 normed field: the norm attains values `‖p‖ ^ (c : ℝ)` for `c : ℚ`, which are dense in `ℝ≥0`. -/
-private lemma exists_rat_pow_p_norm_between (a b : ℝ) (ha : 0 ≤ a) (hab : a < b) : ∃ c : ℚ,
+private lemma exists_rat_pow_p_norm_between {a b : ℝ} (ha : 0 ≤ a) (hab : a < b) : ∃ c : ℚ,
     a < ‖(p : (PadicAlgCl p))‖ ^ (c : ℝ) ∧
     ‖(p : (PadicAlgCl p))‖ ^ (c : ℝ) < b := by
   let a' := a + (b - a) / 2
@@ -68,7 +68,7 @@ than an algorithm.
 -/
 noncomputable instance instDenselyNormedFieldPadicAlgCl : DenselyNormedField (PadicAlgCl p) where
   lt_norm_lt a b ha hab := by
-    rcases exists_rat_pow_p_norm_between p a b ha hab with ⟨r, hr1, hr2⟩
+    rcases exists_rat_pow_p_norm_between p ha hab with ⟨r, hr1, hr2⟩
     let f : Polynomial (PadicAlgCl p) := X ^ r.den - Polynomial.C ((p : PadicAlgCl p) ^ r.num)
     have hf : f.degree ≠ 0 := by simp [f, Polynomial.degree_X_pow_sub_C r.den_pos]
     rcases IsAlgClosed.exists_root f hf with ⟨z, hz⟩
