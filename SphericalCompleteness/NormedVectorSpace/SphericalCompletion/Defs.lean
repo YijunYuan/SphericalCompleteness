@@ -18,10 +18,10 @@ complete ultrametric normed space `F` is a *spherical completion* of an ultramet
 
 A spherical completion of `E` is a spherically complete space `F` into which `E` embeds
 isometrically and which is *minimal* with this property: among the `𝕜`-submodules of `F`, the only
-spherically complete one containing the image of `E` is `F` itself. Concretely,
-`IsSphericalCompletion 𝕜 E F` — with `F` already carrying a `SphericallyCompleteSpace` instance —
-asserts that there is a linear isometry `ι : E →ₗᵢ[𝕜] F` such that every spherically complete
-submodule `D ≤ F` with `ι.range ≤ D` equals `⊤`.
+spherically complete one containing the image of `E` is `F` itself. The class
+`IsSphericalCompletion 𝕜 E F` bundles the spherical completeness of `F` (it `extends
+SphericallyCompleteSpace F`) with the assertion that there is a linear isometry `ι : E →ₗᵢ[𝕜] F`
+such that every spherically complete submodule `D ≤ F` with `ι.range ≤ D` equals `⊤`.
 
 Existence of such an `F` for every `E`, its uniqueness up to linear isometry, the universal
 property, and the equivalence with maximal completeness are established in the companion file
@@ -42,24 +42,25 @@ constant-sequence embedding of `E` into a spherically complete `ℓ∞`-quotient
 namespace SphericallyCompleteSpace
 
 /--
-`IsSphericalCompletion 𝕜 E F` states that the spherically complete ultrametric normed `𝕜`-vector
-space `F` is a *spherical completion* of `E`.
+`IsSphericalCompletion 𝕜 E F` states that the ultrametric normed `𝕜`-vector space `F` is a
+*spherical completion* of `E`.
 
-It holds when there is a linear isometric embedding `ι : E →ₗᵢ[𝕜] F` that is *minimal* among
-spherically complete spaces: the only spherically complete submodule `D ≤ F` containing the image
+The class `extends SphericallyCompleteSpace F`, so it bundles the fact that `F` is itself
+spherically complete together with a *minimality* condition: there is a linear isometric embedding
+`ι : E →ₗᵢ[𝕜] F` for which the only spherically complete submodule `D ≤ F` containing the image
 `ι.range` of `E` is `F` itself, i.e. `D = ⊤`.
 
 Intuitively, $F$ is the smallest spherically complete space containing an isometric copy of $E$:
-no proper spherically complete subspace of $F$ still contains $E$. The ambient
-`[SphericallyCompleteSpace F]` instance records that `F` is itself spherically complete, so the
-class pins down *which* spherically complete extension counts as a completion. That such an `F` is
-in addition an immediate extension of `E`, and is unique up to linear isometry, is proved in
-`Basic`.
+no proper spherically complete subspace of $F$ still contains $E$. Because spherical completeness
+is carried by the class, any `[IsSphericalCompletion 𝕜 E F]` instance automatically yields
+`SphericallyCompleteSpace F` (through the parent projection `toSphericallyCompleteSpace`), so call
+sites need not assume it separately. That such an `F` is in addition an immediate extension of `E`,
+and is unique up to linear isometry, is proved in `Basic`.
 -/
 class IsSphericalCompletion (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     (E : Type*) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
     (F : Type*) [NormedAddCommGroup F] [NormedSpace 𝕜 F] [IsUltrametricDist F]
-    [SphericallyCompleteSpace F] : Prop where
+    extends SphericallyCompleteSpace F where
   /-- There is a linear isometry `ι : E →ₗᵢ[𝕜] F` that is minimal among spherically complete
   extensions: every spherically complete submodule `D ≤ F` containing `ι.range` is all of `F`. -/
   is_sph_comp : ∃ ι : E →ₗᵢ[𝕜] F,

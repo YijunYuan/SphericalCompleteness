@@ -105,8 +105,9 @@ instance {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 
 /--
 Every ultrametric normed `𝕜`-vector space `E` admits a spherical completion: there is a type `E₀`
-carrying an ultrametric normed `𝕜`-vector-space structure that is spherically complete and for which
-`IsSphericalCompletion 𝕜 E E₀` holds.
+carrying an ultrametric normed `𝕜`-vector-space structure for which `IsSphericalCompletion 𝕜 E E₀`
+holds. Since that class `extends SphericallyCompleteSpace`, `E₀` is in particular spherically
+complete.
 
 The witness is the maximal immediate extension carved out of the canonical spherically complete
 extension `canonicalSphericallyCompleteExtension 𝕜 E` (a quotient of an `ℓ∞`-type space): the
@@ -120,11 +121,10 @@ theorem exists_isSphericalCompletion (𝕜 : Type*) [NontriviallyNormedField �
       ∃ _ : NormedAddCommGroup E₀,
       ∃ _ : NormedSpace 𝕜 E₀,
       ∃ _ : IsUltrametricDist E₀,
-      ∃ _ : SphericallyCompleteSpace E₀,
         IsSphericalCompletion 𝕜 E E₀ := by
   let E₀ := ↥(exists_maximal_immediateExtensionSubmodule 𝕜 E _
     (canonicalSphericallyCompleteExtension 𝕜 E)).choose
-  exact ⟨E₀, inferInstance, inferInstance, inferInstance, inferInstance, inferInstance⟩
+  exact ⟨E₀, inferInstance, inferInstance, inferInstance, inferInstance⟩
 
 /--
 The canonical embedding of `E` into any spherical completion `F` (i.e. any `F` carrying an
@@ -140,7 +140,7 @@ immediacy of `ι`.
 theorem embedding_isImmediate {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
     {F : Type*} [NormedAddCommGroup F] [NormedSpace 𝕜 F] [IsUltrametricDist F]
-    [SphericallyCompleteSpace F] (hF : IsSphericalCompletion 𝕜 E F) :
+    (hF : IsSphericalCompletion 𝕜 E F) :
     IsImmediate hF.is_sph_comp.choose := by
   obtain ⟨hSle, hSimm⟩ := mem_immediateExtensionSubmodules_iff.1
     (exists_maximal_immediateExtensionSubmodule 𝕜 E F hF.is_sph_comp.choose).choose_spec.1
@@ -167,7 +167,7 @@ theorem nonempty_linearIsometryEquiv_of_isImmediate
     {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
     (F₁ : Type*) [NormedAddCommGroup F₁] [NormedSpace 𝕜 F₁] [IsUltrametricDist F₁]
-    [SphericallyCompleteSpace F₁] (hF₁ : IsSphericalCompletion 𝕜 E F₁)
+    (hF₁ : IsSphericalCompletion 𝕜 E F₁)
     {F₂ : Type*} [NormedAddCommGroup F₂] [NormedSpace 𝕜 F₂] [IsUltrametricDist F₂]
     [SphericallyCompleteSpace F₂]
     {f : E →ₗᵢ[𝕜] F₂} (hf : IsImmediate f) : Nonempty (F₁ ≃ₗᵢ[𝕜] F₂) := by
@@ -189,12 +189,11 @@ equivalence.
 theorem unique (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
     (F₁ : Type*) [NormedAddCommGroup F₁] [NormedSpace 𝕜 F₁] [IsUltrametricDist F₁]
-    [SphericallyCompleteSpace F₁]
-    (F₂ : Type*) [NormedAddCommGroup F₂] [NormedSpace 𝕜 F₂] [IsUltrametricDist F₂]
-    [SphericallyCompleteSpace F₂] :
+    (F₂ : Type*) [NormedAddCommGroup F₂] [NormedSpace 𝕜 F₂] [IsUltrametricDist F₂] :
     IsSphericalCompletion 𝕜 E F₁ → IsSphericalCompletion 𝕜 E F₂ →
     Nonempty (F₁ ≃ₗᵢ[𝕜] F₂) := by
   intro hF₁ hF₂
+  haveI := hF₂.toSphericallyCompleteSpace
   exact nonempty_linearIsometryEquiv_of_isImmediate F₁ hF₁
     (embedding_isImmediate hF₂)
 
@@ -209,7 +208,7 @@ immediate embedding (`embedding_isImmediate`) into the spherically complete targ
 theorem universal_property {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
     {F : Type*} [NormedAddCommGroup F] [NormedSpace 𝕜 F] [IsUltrametricDist F]
-    [SphericallyCompleteSpace F] (hF : IsSphericalCompletion 𝕜 E F)
+    (hF : IsSphericalCompletion 𝕜 E F)
     {F' : Type*} [NormedAddCommGroup F'] [NormedSpace 𝕜 F'] [IsUltrametricDist F']
     [SphericallyCompleteSpace F'] (f : E →ₗᵢ[𝕜] F') :
     ∃ T : F →ₗᵢ[𝕜] F', T.comp (hF.is_sph_comp.choose) = f :=
@@ -228,8 +227,9 @@ theorem sphericallyCompleteSpace_iff_embedding_to_sphericalCompletion_surjective
     {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
     {F : Type*} [NormedAddCommGroup F] [NormedSpace 𝕜 F] [IsUltrametricDist F]
-    [SphericallyCompleteSpace F] (hF : IsSphericalCompletion 𝕜 E F) :
+    (hF : IsSphericalCompletion 𝕜 E F) :
     SphericallyCompleteSpace E ↔ Function.Surjective (hF.is_sph_comp.choose) := by
+  haveI := hF.toSphericallyCompleteSpace
   constructor
   · intro h
     exact LinearMap.range_eq_top.mp (hF.is_sph_comp.choose_spec
