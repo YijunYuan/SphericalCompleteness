@@ -109,13 +109,11 @@ private lemma norm_map {𝕜 : Type*}
   have hh : ‖h‖ ≤ 1 := by
     rw [hf2]; exact (g.comp (weakInv f)).norm_toContinuousLinearMap_le
   refine eq_of_le_of_ge ?_ ?_
-  · have := (ContinuousLinearMap.opNorm_le_iff zero_le_one).1 hh v
-    simpa only [one_mul]
+  · simpa only [one_mul, ContinuousLinearMap.coe_coe] using h.le_of_opNorm_le hh v
   · if hv : v = 0 then
       simp [hv]
     else
-    simp only [IsImmediate] at hf
-    specialize hf v
+    replace hf := hf v
     simp only [IsMOrtho, hv, imp_false] at hf
     replace hf : infDist v ↑(LinearMap.range f.toLinearMap) < ‖v‖ := by
       refine lt_of_le_of_ne ?_ hf
@@ -124,7 +122,7 @@ private lemma norm_map {𝕜 : Type*}
     rcases(infDist_lt_iff <| Submodule.nonempty (LinearMap.range f.toLinearMap)).1 hf with ⟨x, hx⟩
     rw [dist_eq_norm] at hx
     have : ‖h x - h v‖ < ‖v‖ := by
-      rw [(by simp : h x - h v = h (x - v))]
+      rw [← map_sub]
       refine (ContinuousLinearMap.le_opNorm h (x - v)).trans_lt ?_
       refine (mul_le_of_le_one_left (norm_nonneg _) hh).trans_lt ?_
       rw [norm_sub_rev]; exact hx.2
@@ -156,14 +154,11 @@ theorem exists_linearIsometry_comp_eq {𝕜 : Type*} [NontriviallyNormedField �
   rcases hahn_banach (D := LinearMap.range f.toLinearMap) (F := H)
     (LinearIsometry.comp g (weakInv f)).toContinuousLinearMap with ⟨h, hf1, hf2⟩
   simp only [LinearMap.mem_range, forall_exists_index] at hf1
-  have hf2' : ‖h‖ =
-      ‖g.toContinuousLinearMap.comp (weakInv f).toContinuousLinearMap‖ := by
-    rw [hf2]; rfl
   let h : F →ₗᵢ[𝕜] H := {
     toFun := h.toFun,
     map_add' := h.map_add',
     map_smul' := h.map_smul',
-    norm_map' := fun v ↦ IsImmediate.norm_map f hf g h hf2' hf1 v
+    norm_map' := fun v ↦ IsImmediate.norm_map f hf g h hf2 hf1 v
   }
   use h
   ext z
@@ -171,16 +166,6 @@ theorem exists_linearIsometry_comp_eq {𝕜 : Type*} [NontriviallyNormedField �
     Function.comp_apply, h]
   rw [hf1 (f z) z rfl]
   exact congrArg g (f.equivRange.symm_apply_apply z)
-
-/-- The image in the ambient space of the range of `Submodule.inclusion h` is `p`. -/
-private lemma range_inclusion_image {𝕜 : Type*} [NontriviallyNormedField 𝕜] {E₀ : Type*}
-    [SeminormedAddCommGroup E₀] [NormedSpace 𝕜 E₀] {p q : Submodule 𝕜 E₀} (h : p ≤ q) :
-    ((↑) : q → E₀) '' (LinearMap.range (Submodule.inclusion h) : Set q) = (p : Set E₀) := by
-  ext z
-  simp only [Set.mem_image, SetLike.mem_coe, LinearMap.mem_range]
-  refine ⟨?_, fun hz ↦ ⟨⟨z, h hz⟩, ⟨⟨z, hz⟩, rfl⟩, rfl⟩⟩
-  rintro ⟨w, ⟨u, rfl⟩, rfl⟩
-  exact u.2
 
 /-- Metric orthogonality of `x : q` to the range of the inclusion `p ≤ q`, computed inside `q`,
 is the same as metric orthogonality of `(x : E₀)` to `p` in the ambient space. This is the key
@@ -190,7 +175,10 @@ lemma isMOrtho_range_inclusion_iff {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     {p q : Submodule 𝕜 E₀} (h : p ≤ q) (x : q) :
     (IsMOrtho x (LinearMap.range (Submodule.inclusion h))) ↔
       Metric.infDist (x : E₀) p = ‖(x : E₀)‖ := by
-  rw [IsMOrtho, ← range_inclusion_image h,
+  rw [IsMOrtho, show (p : Set E₀) =
+      ((↑) : q → E₀) '' (LinearMap.range (Submodule.inclusion h)) from by
+    rw [← Submodule.coe_subtype, ← Submodule.map_coe, Submodule.range_inclusion,
+      Submodule.map_comap_subtype, inf_of_le_right h],
     Metric.infDist_image (Φ := ((↑) : q → E₀)) isometry_subtype_coe (x := x)]
   exact Iff.rfl
 
@@ -313,7 +301,6 @@ instance instSphericallyCompleteSpaceOfMaximalImmediateExtensionSubmodule
     have h_in : c n ∈ closedBall (c m) ↑(r m) :=
       hanti hmn <| mem_closedBall_self NNReal.zero_le_coe
     rw [mem_closedBall] at h_in
-    rw [show dist ((c n).val) ((c m).val) = dist (c n) (c m) from rfl]
     exact h_in)
   simp only [Set.nonempty_iInter, mem_closedBall] at this
   rcases this with ⟨a, ha⟩
@@ -322,7 +309,7 @@ instance instSphericallyCompleteSpaceOfMaximalImmediateExtensionSubmodule
     refine Set.nonempty_iff_ne_empty.mp ⟨⟨a, haa⟩, ?_⟩
     simp only [Set.mem_iInter, mem_closedBall]
     intro i
-    simpa [show dist (⟨a, haa⟩ : _) (c i) = dist a (c i).val from rfl] using ha i
+    exact ha i
   else
   have : (K + Submodule.span 𝕜 {a}) ∉ immediateExtensionSubmodules E E₀ f := by
     by_contra hc
@@ -389,7 +376,7 @@ instance instSphericallyCompleteSpaceOfMaximalImmediateExtensionSubmodule
       · exact ⟨⟨q1, q2⟩, by subst q3; rfl⟩
       · rw [dist_eq_norm, Submodule.coe_norm, Submodule.coe_sub, Submodule.coe_norm]
         exact hh
-    rw [(by abel : b.val - e.val = (b.val - g) + (g - e.val))]
+    rw [← sub_add_sub_cancel b.val g e.val]
     exact lt_of_le_of_lt (iud.norm_add_le_max _ _) <| max_lt hg2 he2
   have hx : x ∈ K := Submodule.smul_mem K (-s⁻¹) hx'
   suffices h : ∀ i : ℕ, ⟨x,hx⟩ ∈ closedBall (c i) ↑(r i) by

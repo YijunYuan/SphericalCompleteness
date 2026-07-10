@@ -68,8 +68,7 @@ theorem exist (𝕜 : Type*) [NontriviallyNormedField 𝕜]
         IsSphericalCompletion 𝕜 E E₀ := by
   let E₀ := ↥(exists_maximal_immediateExtensionSubmodule 𝕜 E _
     (canonicalSphericallyCompleteExtension 𝕜 E)).choose
-  refine ⟨E₀, inferInstance, inferInstance, inferInstance, inferInstance, ?_⟩
-  infer_instance
+  exact ⟨E₀, inferInstance, inferInstance, inferInstance, inferInstance, inferInstance⟩
 
 /--
 The canonical embedding of `E` into any spherical completion `F` (i.e. any `F` carrying an

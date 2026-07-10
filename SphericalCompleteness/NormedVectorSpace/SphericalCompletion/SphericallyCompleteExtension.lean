@@ -28,7 +28,8 @@ family `fun _ ↦ E`, the constant-sequence map `x ↦ [x, x, …]` gives the de
 ## Main definitions
 
 * `c₀ 𝕜 E` — the submodule of null sequences inside `lp E ⊤`.
-* `canonicalSphericallyCompleteExtension 𝕜 E` — the isometric embedding of `E` into `lp E ⊤ ⧸ c₀ 𝕜 E`.
+* `canonicalSphericallyCompleteExtension 𝕜 E` — the isometric embedding of `E`
+into `lp E ⊤ ⧸ c₀ 𝕜 E`.
 
 ## Main statements
 
