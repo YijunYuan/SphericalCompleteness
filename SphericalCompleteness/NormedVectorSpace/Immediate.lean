@@ -172,5 +172,273 @@ theorem exists_linearIsometry_comp_eq {𝕜 : Type*} [NontriviallyNormedField �
   rw [hf1 (f z) z rfl]
   exact congrArg g (f.equivRange.symm_apply_apply z)
 
+/-- The isometric inclusion of one submodule into a larger one (identity on underlying vectors). -/
+def inclusionᵢ {𝕜 : Type*} [NontriviallyNormedField 𝕜] {E₀ : Type*}
+    [SeminormedAddCommGroup E₀] [NormedSpace 𝕜 E₀] {p q : Submodule 𝕜 E₀} (h : p ≤ q) :
+    p →ₗᵢ[𝕜] q where
+  toFun x := ⟨x.1, h x.2⟩
+  map_add' _ _ := rfl
+  map_smul' _ _ := rfl
+  norm_map' _ := rfl
+
+/-- The image in the ambient space of the range of `inclusionᵢ h` is `p`. -/
+private lemma range_inclusionᵢ_image {𝕜 : Type*} [NontriviallyNormedField 𝕜] {E₀ : Type*}
+    [SeminormedAddCommGroup E₀] [NormedSpace 𝕜 E₀] {p q : Submodule 𝕜 E₀} (h : p ≤ q) :
+    ((↑) : q → E₀) '' (LinearMap.range (inclusionᵢ h).toLinearMap : Set q) = (p : Set E₀) := by
+  ext z
+  simp only [Set.mem_image, SetLike.mem_coe, LinearMap.mem_range]
+  refine ⟨?_, fun hz ↦ ⟨⟨z, h hz⟩, ⟨⟨z, hz⟩, rfl⟩, rfl⟩⟩
+  rintro ⟨w, ⟨u, rfl⟩, rfl⟩
+  exact u.2
+
+/-- Metric orthogonality of `x : q` to the range of the inclusion `p ≤ q`, computed inside `q`,
+is the same as metric orthogonality of `(x : E₀)` to `p` in the ambient space. This is the key
+transport principle for immediate extensions built from submodule inclusions. -/
+lemma isMOrtho_range_inclusionᵢ_iff {𝕜 : Type*} [NontriviallyNormedField 𝕜] {E₀ : Type*}
+    [SeminormedAddCommGroup E₀] [NormedSpace 𝕜 E₀] [IsUltrametricDist E₀]
+    {p q : Submodule 𝕜 E₀} (h : p ≤ q) (x : q) :
+    (IsMOrtho x (LinearMap.range (inclusionᵢ h).toLinearMap)) ↔
+      Metric.infDist (x : E₀) p = ‖(x : E₀)‖ := by
+  rw [IsMOrtho, ← range_inclusionᵢ_image h,
+    Metric.infDist_image (Φ := ((↑) : q → E₀)) isometry_subtype_coe (x := x)]
+  exact Iff.rfl
+
+/--
+`immediateExtensionSubmodules E E₀ f` is the set of `𝕜`-submodules `M ≤ E₀`
+such that:
+
+* the range of the linear isometry `f : E →ₗᵢ[𝕜] E₀` is contained in `M`, and
+* the induced linear isometry `(LinearMap.range f) →ₗᵢ[𝕜] M` is an *immediate* extension
+  (in the sense of `IsImmediate`).
+
+This is the collection of candidate intermediate spaces used to build a maximal immediate
+extension inside a fixed spherically complete ambient space.
+-/
+def immediateExtensionSubmodules {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+    (E : Type*) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
+    (E₀ : Type*) [NormedAddCommGroup E₀] [NormedSpace 𝕜 E₀] [IsUltrametricDist E₀]
+    --[SphericallyCompleteSpace E₀]
+    (f : E →ₗᵢ[𝕜] E₀) :
+    Set (Submodule 𝕜 E₀) := {M : Submodule 𝕜 E₀ | ∃ hc : f.range ≤ M, IsImmediate (inclusionᵢ hc) }
+
+/-- Clean membership criterion for `immediateExtensionSubmodules`, expressed
+entirely in the ambient
+space `E₀`: `M` contains `f.range`, and any `v ∈ M` metrically orthogonal to `f.range`
+(in `E₀`) is `0`. -/
+lemma mem_immediateExtensionSubmodules_iff
+    {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
+    {E₀ : Type*} [NormedAddCommGroup E₀] [NormedSpace 𝕜 E₀] [IsUltrametricDist E₀]
+    --[SphericallyCompleteSpace E₀]
+    {f : E →ₗᵢ[𝕜] E₀} {M : Submodule 𝕜 E₀} :
+    M ∈ immediateExtensionSubmodules E E₀ f ↔
+      ∃ _ : f.range ≤ M,
+        ∀ v : M, Metric.infDist (v : E₀) f.range = ‖(v : E₀)‖ → v = 0 := by
+  simp only [immediateExtensionSubmodules, Set.mem_setOf_eq, IsImmediate]
+  refine exists_congr fun hc ↦ forall_congr' fun v ↦ ?_
+  rw [isMOrtho_range_inclusionᵢ_iff]
+
+
+/--
+The set of candidate intermediate spaces for immediate extensions is nonempty.
+Specifically, the range of `f` itself is always a candidate, with the identity map
+serving as an immediate extension.
+-/
+lemma immediateExtensionSubmodules_nonempty
+    {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+    (E : Type*) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
+    (E₀ : Type*) [NormedAddCommGroup E₀] [NormedSpace 𝕜 E₀] [IsUltrametricDist E₀]
+    --[SphericallyCompleteSpace E₀]
+    (f : E →ₗᵢ[𝕜] E₀)
+    : (immediateExtensionSubmodules E E₀ f).Nonempty := by
+  refine ⟨f.range, mem_immediateExtensionSubmodules_iff.2
+    ⟨le_rfl, fun v hv ↦ ?_⟩⟩
+  rw [Metric.infDist_zero_of_mem v.2] at hv
+  exact Submodule.coe_eq_zero.mp (norm_eq_zero.mp hv.symm)
+
+/--
+Existence of a maximal *immediate* intermediate space inside a fixed spherically complete ambient
+space.
+
+Concretely, for a linear isometry `f : E →ₗᵢ[𝕜] E₀` into a spherically complete space `E₀`, we
+consider the set `immediateExtensionSubmodules E E₀ f` of submodules `M ≤ E₀`
+that contain the
+range of `f` and for which the induced inclusion `LinearMap.range f →ₗᵢ[𝕜] M` is an immediate
+extension.
+
+This theorem applies Zorn's lemma (on the poset of such submodules ordered by `≤`) to produce a
+maximal element, which is later used to define the `SphericalCompletion` of `E`.
+-/
+theorem exists_maximal_immediateExtensionSubmodule
+    (𝕜 : Type*) [NontriviallyNormedField 𝕜]
+    (E : Type*) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
+    (E₀ : Type*) [NormedAddCommGroup E₀] [NormedSpace 𝕜 E₀] [IsUltrametricDist E₀]
+    (f : E →ₗᵢ[𝕜] E₀) :
+    ∃ m, Maximal (fun x ↦ x ∈ immediateExtensionSubmodules E E₀ f) m := by
+  apply zorn_le₀
+  intro C hC1 hC2
+  if hC : ¬ C.Nonempty then
+    refine ⟨(immediateExtensionSubmodules_nonempty E E₀ f).some,
+      Set.Nonempty.some_mem (immediateExtensionSubmodules_nonempty E E₀ f), ?_⟩
+    intro c hc
+    contrapose hC
+    use c
+  else
+  use ⨆ i, (fun x ↦ x.val : C → Submodule 𝕜 E₀) i
+  simp only [not_not] at hC
+  have hf_le : f.range ≤ ⨆ i, (fun x ↦ x.val : C → Submodule 𝕜 E₀) i := fun z hz ↦
+    Submodule.mem_iSup _ |>.2 fun N hN ↦ (hN ⟨hC.some, hC.some_mem⟩) ((hC1 hC.some_mem).1 hz)
+  refine ⟨mem_immediateExtensionSubmodules_iff.2
+    ⟨hf_le, fun x hIsMOrtho ↦ ?_⟩, fun M hM z hz ↦
+    Submodule.mem_iSup _ |>.2 fun N hN ↦ (hN ⟨M, hM⟩) hz⟩
+  haveI : Nonempty ↑C := hC.to_subtype
+  have hxmem : (x : E₀) ∈ ⨆ i, (fun x ↦ x.val : C → Submodule 𝕜 E₀) i := x.2
+  rw [Submodule.mem_iSup_of_directed _ hC2.directed] at hxmem
+  rcases hxmem with ⟨N, hxN⟩
+  obtain ⟨hc, himm⟩ := mem_immediateExtensionSubmodules_iff.1 (hC1 N.2)
+  apply Subtype.ext
+  have := himm ⟨(x : E₀), hxN⟩ (by simpa using hIsMOrtho)
+  simpa using congrArg Subtype.val this
+
+instance instSphericallyCompleteSpaceOfMaximalImmediateExtensionSubmodule
+    {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+    (E : Type*) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
+    (E₀ : Type*) [NormedAddCommGroup E₀] [NormedSpace 𝕜 E₀] [iud : IsUltrametricDist E₀]
+    [hsc : SphericallyCompleteSpace E₀]
+    (f : E →ₗᵢ[𝕜] E₀) :
+    SphericallyCompleteSpace
+      (↥(exists_maximal_immediateExtensionSubmodule 𝕜 E E₀ f).choose) := by
+  rw [iff_strictAnti_radius]
+  set K := (exists_maximal_immediateExtensionSubmodule 𝕜 E E₀ f).choose with hK
+  by_contra hc
+  push Not at hc
+  rcases hc with ⟨c, r, hsr, hanti, hemp⟩
+  have := @hsc.isSphericallyComplete (fun n ↦ (c n).1) r (by
+    intro m n hmn z hz
+    simp only [mem_closedBall] at *
+    refine le_trans (iud.dist_triangle_max z (c n).val (c m).val) ?_
+    refine max_le (le_trans hz <| hsr.antitone hmn) ?_
+    have h_in : c n ∈ closedBall (c m) ↑(r m) :=
+      hanti hmn <| mem_closedBall_self NNReal.zero_le_coe
+    rw [mem_closedBall] at h_in
+    rw [show dist ((c n).val) ((c m).val) = dist (c n) (c m) from rfl]
+    exact h_in)
+  simp only [Set.nonempty_iInter, mem_closedBall] at this
+  rcases this with ⟨a, ha⟩
+  if haa : a ∈ K then
+    contrapose hemp
+    refine Set.nonempty_iff_ne_empty.mp ⟨⟨a, haa⟩, ?_⟩
+    simp only [Set.mem_iInter, mem_closedBall]
+    intro i
+    simpa [show dist (⟨a, haa⟩ : _) (c i) = dist a (c i).val from rfl] using ha i
+  else
+  have : (K + Submodule.span 𝕜 {a}) ∉ immediateExtensionSubmodules E E₀ f := by
+    by_contra hc
+    have : K < K + Submodule.span 𝕜 {a} := by
+      simpa only [Submodule.add_eq_sup, left_lt_sup, Submodule.span_singleton_le_iff_mem]
+    exact (not_le_of_gt this) <|
+      (exists_maximal_immediateExtensionSubmodule 𝕜 E E₀ f).choose_spec.2 hc
+        (le_of_lt this)
+  rw [mem_immediateExtensionSubmodules_iff, not_exists] at this
+  specialize this <| le_sup_of_le_left
+    (exists_maximal_immediateExtensionSubmodule 𝕜 E E₀ f).choose_spec.1.choose
+  simp only [not_forall] at this
+  rcases this with ⟨b', hb'1, hb'2⟩
+  rcases Submodule.mem_sup.1 b'.prop with ⟨x', hx', v', hv', hx'v'⟩
+  rcases Submodule.mem_span_singleton.1 hv' with ⟨s, hs⟩
+  rw [← hs] at hx'v'
+  have hhs : s ≠ 0 := by
+    by_contra hc
+    simp only [hc, zero_smul, add_zero] at hx'v'
+    subst hx'v'
+    obtain ⟨_, himmK⟩ :=
+      mem_immediateExtensionSubmodules_iff.1
+        (exists_maximal_immediateExtensionSubmodule 𝕜 E E₀ f).choose_spec.1
+    exact hb'2 (ZeroMemClass.coe_eq_zero.mp (congrArg Subtype.val (himmK ⟨b', hx'⟩ hb'1)))
+  let b := s⁻¹ • b'
+  let x := - s⁻¹ • x'
+  have : b = a - x := by
+    simp only [SetLike.val_smul, ← hx'v', smul_add, neg_smul, sub_neg_eq_add, b, x]
+    rw [add_comm]
+    simpa only [add_left_inj] using inv_smul_smul₀ hhs a
+  have hb'1' : IsMOrtho b' (LinearMap.range (inclusionᵢ (le_sup_of_le_left
+      (exists_maximal_immediateExtensionSubmodule 𝕜 E E₀
+        f).choose_spec.1.choose)).toLinearMap) :=
+    (isMOrtho_range_inclusionᵢ_iff _ b').2 hb'1
+  have hb1 := @IsMOrtho.smul 𝕜 _ _ _ _ inferInstance b' _ s⁻¹ hb'1'
+  replace hb1 : IsMOrtho b.val K := by
+    by_contra hc
+    rcases IsMOrtho.not_iff_exists_dist_lt_norm.1 hc with ⟨g, hg1, hg2⟩
+    rw [dist_eq_norm] at hg2
+    have hg2' := IsUltrametricDist.norm_eq_of_norm_sub_lt_left hg2
+    have hgg : g ≠ 0 := by
+      by_contra hc
+      simp only [hc, norm_zero, norm_eq_zero, ZeroMemClass.coe_eq_zero] at hg2'
+      simp only [dist_le_coe, IsMOrtho, ne_eq,
+        hg2', ZeroMemClass.coe_zero, norm_zero] at *
+      contrapose hc
+      exact infDist_zero_of_mem <| by simp only [SetLike.mem_coe, zero_mem]
+    have hChooseSpec :=
+      (exists_maximal_immediateExtensionSubmodule 𝕜 E E₀
+        f).choose_spec.1.choose_spec
+    have hNIsMOrtho := mt (hChooseSpec ⟨g, hg1⟩)
+        (fun h ↦ hgg (congrArg Subtype.val h))
+    rcases @IsMOrtho.not_iff_exists_dist_lt_norm 𝕜 _ (↥K)
+        _ _ inferInstance (⟨g, hg1⟩) _ |>.1 hNIsMOrtho with ⟨e, he1, he2⟩
+    simp only [Submodule.coe_norm, ← hg2', dist_eq_norm, AddSubgroupClass.coe_sub] at he2
+    suffices hh : ‖b.val - e.val‖ < ‖b.val‖ by
+      contrapose hb1
+      apply @IsMOrtho.not_iff_exists_dist_lt_norm 𝕜 _ _ _ _ inferInstance |>.2
+      use ⟨e.val, Submodule.mem_sup_left e.prop⟩
+      simp only [LinearMap.mem_range, LinearMap.coe_mk, AddHom.coe_mk,
+        inclusionᵢ, Subtype.exists] at he1
+      rcases he1 with ⟨q1, q2, q3⟩
+      replace q3 : q1 = e.val := by simp [← q3]
+      constructor
+      · exact ⟨⟨q1, q2⟩, by subst q3; rfl⟩
+      · rw [dist_eq_norm, Submodule.coe_norm, Submodule.coe_sub, Submodule.coe_norm]
+        exact hh
+    rw [(by abel : b.val - e.val = (b.val - g) + (g - e.val))]
+    exact lt_of_le_of_lt (iud.norm_add_le_max _ _) <| max_lt hg2 he2
+  have hx : x ∈ K := Submodule.smul_mem K (-s⁻¹) hx'
+  suffices h : ∀ i : ℕ, ⟨x,hx⟩ ∈ closedBall (c i) ↑(r i) by
+    contrapose hemp
+    exact Set.nonempty_iff_ne_empty.mp ⟨⟨x, hx⟩, by simpa only [Set.mem_iInter]⟩
+  intro i
+  simp only [mem_closedBall]
+  have hbval : b.val = a - x := this
+  have hb1' : infDist b.val ↑K = ‖b.val‖ := hb1
+  have hcix : (↑(c i) - x : E₀) ∈ K := Submodule.sub_mem _ (c i).prop hx
+  have hdist : dist ⟨x, hx⟩ (c i) = ‖x - ↑(c i)‖ := by
+    rw [Subtype.dist_eq, dist_eq_norm]
+  have hda : dist a ↑(c i) = ‖b.val - (↑(c i) - x)‖ := by
+    rw [dist_eq_norm, hbval]; congr 1; abel
+  rw [hdist]
+  calc ‖x - ↑(c i)‖
+      ≤ max ‖x - ↑(c i)‖ ‖b.val‖ := le_max_left _ _
+    _ ≤ ‖b.val - (↑(c i) - x)‖ := by
+        if hf : ‖x - ↑(c i)‖ = ‖b.val‖ then
+          rw [hf, max_self, ← hb1', ← dist_eq_norm]
+          exact infDist_le_dist_of_mem (SetLike.mem_coe.mpr hcix)
+        else
+          have hnorm_ne : ‖b.val‖ ≠ ‖x - ↑(c i)‖ := Ne.symm hf
+          rw [show b.val - (↑(c i) - x) = b.val + (x - ↑(c i)) by abel,
+            max_comm, iud.norm_add_eq_max_of_norm_ne_norm hnorm_ne]
+    _ = dist a ↑(c i) := hda.symm
+    _ ≤ ↑(r i) := ha i
+
+noncomputable def maximalImmediateExtensionEmbedding {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
+    {E₀ : Type*} [NormedAddCommGroup E₀] [NormedSpace 𝕜 E₀] [IsUltrametricDist E₀]
+    [SphericallyCompleteSpace E₀]
+    (f : E →ₗᵢ[𝕜] E₀) :
+    E →ₗᵢ[𝕜] ↥(exists_maximal_immediateExtensionSubmodule 𝕜 E E₀ f).choose := {
+    toFun x := ⟨f x, (exists_maximal_immediateExtensionSubmodule 𝕜 E E₀ f
+      ).choose_spec.1.out.choose <| LinearMap.mem_range_self _ _⟩
+    map_add' _ _ := by ext; simp
+    map_smul' _ _ := by ext; simp
+    norm_map' := f.norm_map
+  }
+
 end IsImmediate
 end SphericallyCompleteSpace
