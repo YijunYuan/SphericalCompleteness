@@ -46,8 +46,11 @@ construction and universal property of the spherical completion.
 - `SphericallyCompleteSpace.of_finiteDimensional`: a finite-dimensional
   ultrametric normed space over a spherically complete field is spherically complete.
 - `SphericallyCompleteSpace.hahn_banach`: the non-Archimedean Hahn-Banach extension theorem.
-- `SphericallyCompleteSpace.SphericalCompletion`: the spherical completion of an ultrametric normed
-  space, together with its universal property and uniqueness.
+- `SphericallyCompleteSpace.IsSphericalCompletion`: the class characterising a *spherical
+  completion* of an ultrametric normed space `E` as a minimal spherically complete extension of `E`,
+  shown to exist (`IsSphericalCompletion.exists_isSphericalCompletion`), to be unique up to linear
+  isometry (`IsSphericalCompletion.unique`), and to satisfy a universal property
+  (`IsSphericalCompletion.universal_property`).
 - `SphericallyCompleteSpace.iff_maximallyComplete`: spherical completeness is
   equivalent to admitting no proper immediate extension.
 -/

@@ -10,6 +10,39 @@ public import SphericalCompleteness.NormedVectorSpace.SphericalCompletion.Defs
 /-!
 # Spherical completion: basic results
 
+This file records the fundamental properties of the *spherical completion* of an ultrametric
+normed `𝕜`-vector space `E`, organised around the class
+`SphericallyCompleteSpace.IsSphericalCompletion 𝕜 E F`, which asserts that the spherically complete
+space `F` is a *minimal* spherically complete extension of `E` (no proper spherically complete
+submodule of `F` contains the image of `E`).
+
+Building on the Zorn construction of a maximal immediate extension
+(`exists_maximal_immediateExtensionSubmodule`) inside the canonical spherically complete extension,
+we show:
+
+* every `E` admits a spherical completion;
+* the canonical embedding into any spherical completion is an *immediate* extension;
+* the spherical completion is unique up to linear isometry and satisfies a universal property;
+* `E` is spherically complete if and only if it is *maximally complete* — equivalently, iff the
+  embedding of `E` into its spherical completion is surjective.
+
+The key geometric input is the orthogonal-complement decomposition of a spherically complete
+subspace (`isCompl_orthComp`): a proper spherically complete subspace has a nonzero orthogonal
+complement, which supplies a vector metrically orthogonal to the range of the embedding and hence
+contradicts immediacy.
+
+## Main statements
+
+* `SphericallyCompleteSpace.IsSphericalCompletion.exists_isSphericalCompletion`: every ultrametric
+  normed `𝕜`-vector space admits a spherical completion.
+* `SphericallyCompleteSpace.IsSphericalCompletion.embedding_isImmediate`: the canonical embedding
+  of `E` into a spherical completion is an immediate extension.
+* `SphericallyCompleteSpace.IsSphericalCompletion.unique`: any two spherical completions of `E`
+  are linearly isometric.
+* `SphericallyCompleteSpace.IsSphericalCompletion.universal_property`: linear isometries out of `E`
+  into a spherically complete space factor through any spherical completion of `E`.
+* `SphericallyCompleteSpace.iff_maximallyComplete`: `E` is spherically complete if and only if it
+  is maximally complete.
 -/
 
 @[expose] public section
@@ -22,10 +55,22 @@ open IsImmediate
 
 namespace IsSphericalCompletion
 
+/--
+The maximal immediate-extension submodule of `E` chosen inside a spherically complete ambient
+space `E₀` (via `exists_maximal_immediateExtensionSubmodule`) is a spherical completion of `E`,
+with canonical embedding `maximalImmediateExtensionEmbedding f`.
+
+Minimality is forced by maximality of the submodule. Suppose some spherically complete intermediate
+submodule `M`, containing the range of the embedding, were proper. Since `M` is spherically
+complete it is complemented by its orthogonal complement (`isCompl_orthComp`), which is therefore
+nonzero; a nonzero vector `b` of `orthComp 𝕜 M` is metrically orthogonal to `M`, hence to the range
+of the embedding. But immediacy of the maximal extension forbids a nonzero vector orthogonal to
+that range — a contradiction. Therefore every such `M` equals `⊤`.
+-/
 instance {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
-    {E₀ : Type*} [NormedAddCommGroup E₀] [NormedSpace 𝕜 E₀] [iud : IsUltrametricDist E₀]
-    [hsc : SphericallyCompleteSpace E₀]
+    {E₀ : Type*} [NormedAddCommGroup E₀] [NormedSpace 𝕜 E₀] [IsUltrametricDist E₀]
+    [SphericallyCompleteSpace E₀]
     (f : E →ₗᵢ[𝕜] E₀) :
     IsSphericalCompletion 𝕜 E (↥(exists_maximal_immediateExtensionSubmodule 𝕜 E E₀ f).choose) where
   is_sph_comp := by
@@ -58,7 +103,18 @@ instance {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     · rintro ⟨e, he⟩
       exact ⟨e, Subtype.ext he⟩
 
-theorem exist (𝕜 : Type*) [NontriviallyNormedField 𝕜]
+/--
+Every ultrametric normed `𝕜`-vector space `E` admits a spherical completion: there is a type `E₀`
+carrying an ultrametric normed `𝕜`-vector-space structure that is spherically complete and for which
+`IsSphericalCompletion 𝕜 E E₀` holds.
+
+The witness is the maximal immediate extension carved out of the canonical spherically complete
+extension `canonicalSphericallyCompleteExtension 𝕜 E` (a quotient of an `ℓ∞`-type space): the
+maximal immediate submodule selected by `exists_maximal_immediateExtensionSubmodule` is itself
+spherically complete and, by maximality, a minimal spherically complete extension of `E`. All of
+the required structure and the completion property are supplied by the surrounding instances.
+-/
+theorem exists_isSphericalCompletion (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     (E : Type u) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E] :
     ∃ E₀ : Type u,
       ∃ _ : NormedAddCommGroup E₀,
@@ -107,7 +163,7 @@ Extend `f` along its own immediacy to a linear isometry `T : F₂ →ₗᵢ[𝕜
 range of the embedding, so minimality of the spherical completion `F₁` forces `T` to be surjective,
 hence a linear isometric equivalence.
 -/
-theorem linearIsometry_of_immediateExtension_in_sphericallyCompleteSpace
+theorem nonempty_linearIsometryEquiv_of_isImmediate
     {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
     (F₁ : Type*) [NormedAddCommGroup F₁] [NormedSpace 𝕜 F₁] [IsUltrametricDist F₁]
@@ -127,7 +183,7 @@ Uniqueness of the spherical completion.
 
 Any two spherical completions `F₁` and `F₂` of the same space `E` are linearly isometric. The
 embedding of `F₂` is an immediate extension (`embedding_isImmediate`), so
-`linearIsometry_of_immediateExtension_in_sphericallyCompleteSpace` applied to `F₁` yields the
+`nonempty_linearIsometryEquiv_of_isImmediate` applied to `F₁` yields the
 equivalence.
 -/
 theorem unique (𝕜 : Type*) [NontriviallyNormedField 𝕜]
@@ -139,7 +195,7 @@ theorem unique (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     IsSphericalCompletion 𝕜 E F₁ → IsSphericalCompletion 𝕜 E F₂ →
     Nonempty (F₁ ≃ₗᵢ[𝕜] F₂) := by
   intro hF₁ hF₂
-  exact linearIsometry_of_immediateExtension_in_sphericallyCompleteSpace F₁ hF₁
+  exact nonempty_linearIsometryEquiv_of_isImmediate F₁ hF₁
     (embedding_isImmediate hF₂)
 
 /--
@@ -168,7 +224,7 @@ containing itself, so minimality forces it to be everything, i.e. the embedding 
 Conversely, a surjective linear isometry makes `F` (which is spherically complete) linearly
 isometric to `E`, transporting spherical completeness back to `E`.
 -/
-theorem sphericalCompleteSpacee_iff_embeding_to_sphericalCompletion_surjective
+theorem sphericallyCompleteSpace_iff_embedding_to_sphericalCompletion_surjective
     {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
     {F : Type*} [NormedAddCommGroup F] [NormedSpace 𝕜 F] [IsUltrametricDist F]
@@ -184,6 +240,19 @@ theorem sphericalCompleteSpacee_iff_embeding_to_sphericalCompletion_surjective
 
 end IsSphericalCompletion
 
+/--
+An ultrametric normed `𝕜`-vector space `E` is spherically complete if and only if it is *maximally
+complete* (`MaximallyComplete 𝕜 E`), i.e. it admits no proper immediate extension.
+
+For the forward direction, if `E` were spherically complete yet had a non-surjective immediate
+extension `f : E →ₗᵢ[𝕜] F`, then `range f` would be a proper spherically complete subspace of `F`,
+whose orthogonal complement `orthComp 𝕜 (range f)` is nonzero (the two are complementary,
+`isCompl_orthComp`); a nonzero vector of that complement is metrically orthogonal to `range f`,
+contradicting immediacy of `f`. Conversely, if `E` is maximally complete, the canonical embedding
+of `E` into its spherical completion is immediate (`IsSphericalCompletion.embedding_isImmediate`),
+hence surjective by maximal completeness; so `E` is linearly isometric to the spherically complete
+completion and is therefore itself spherically complete.
+-/
 theorem iff_maximallyComplete (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     (E : Type*) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E] :
     SphericallyCompleteSpace E ↔ MaximallyComplete 𝕜 E := by

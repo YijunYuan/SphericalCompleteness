@@ -13,9 +13,18 @@ public import SphericalCompleteness.NormedVectorSpace.ContinuousLinearMap.HahnBa
 This file develops the theory of *immediate extensions* of ultrametric normed vector spaces.
 
 A linear isometry `f : E →ₗᵢ[𝕜] F` is *immediate* (`IsImmediate f`) when no nonzero vector of `F`
-is metrically orthogonal to the range of `f`; intuitively, `F` adds no genuinely new "directions"
-beyond those already present in `E`. A space is *maximally complete* (`MaximallyComplete 𝕜 E`) when
-it admits no proper immediate extension.
+is metrically orthogonal to the range of `f`; equivalently, every `v : F` can be approximated by
+vectors of `range f` strictly better than by `0`. Intuitively, `F` adds no genuinely new
+"directions" beyond those already present in `E`. A space is *maximally complete*
+(`MaximallyComplete 𝕜 E`) when it admits no proper immediate extension.
+
+The central results are an *extension property* — an isometry out of `E` into a spherically
+complete space extends along any immediate embedding of `E` — and a **Zorn's lemma** construction:
+inside a fixed ambient space `E₀`, we collect the intermediate subspaces through which `f` factors
+as an immediate extension into the set `immediateExtensionSubmodules` and extract a maximal such
+subspace. When the ambient space `E₀` is *spherically complete*, this maximal subspace is again
+spherically complete, and the induced embedding of `E` into it
+(`maximalImmediateExtensionEmbedding`) is the space underlying the spherical completion of `E`.
 
 ## Main definitions
 
@@ -23,11 +32,19 @@ it admits no proper immediate extension.
   embedding.
 * `SphericallyCompleteSpace.MaximallyComplete`: the predicate that a space admits no proper
   immediate extension.
+* `SphericallyCompleteSpace.IsImmediate.immediateExtensionSubmodules`: the set of intermediate
+  subspaces of a fixed ambient space through which a linear isometry factors as an immediate
+  extension.
+* `SphericallyCompleteSpace.IsImmediate.maximalImmediateExtensionEmbedding`: the embedding of `E`
+  into a maximal immediate-extension subspace of a spherically complete ambient space.
 
 ## Main statements
 
-* `SphericallyCompleteSpace.exists_linearIsometry_comp_eq_of_isImmediate`: any linear isometry from
+* `SphericallyCompleteSpace.IsImmediate.exists_linearIsometry_comp_eq`: any linear isometry from
   `E` into a spherically complete space extends along an immediate embedding of `E`.
+* `SphericallyCompleteSpace.IsImmediate.exists_maximal_immediateExtensionSubmodule`: inside a
+  fixed ambient space, **Zorn's lemma** produces a maximal immediate-extension subspace containing
+  the range of `f`.
 -/
 
 @[expose] public section
@@ -69,6 +86,7 @@ def MaximallyComplete (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 (f : E →ₗᵢ[𝕜] F), IsImmediate f → Function.Surjective f
 
 namespace IsImmediate
+
 /--
 `weakInv f` is the (weak, partial) inverse of a linear isometry
 `f : E →ₗᵢ[𝕜] F`.
@@ -81,7 +99,7 @@ Since `f` is an isometry it is injective, hence a linear isometric isomorphism o
 private noncomputable def weakInv {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
     {F : Type*} [NormedAddCommGroup F] [NormedSpace 𝕜 F]
-    (f : E →ₗᵢ[𝕜] F) := f.equivRange.symm.toLinearIsometry
+    (f : E →ₗᵢ[𝕜] F) : ↥f.range →ₗᵢ[𝕜] E := f.equivRange.symm.toLinearIsometry
 
 /--
 Key norm-preservation step behind `IsImmediate.exists_linearIsometry_comp_eq`.
@@ -119,7 +137,7 @@ private lemma norm_map {𝕜 : Type*}
       refine lt_of_le_of_ne ?_ hf
       rw [← dist_zero_right v]
       exact infDist_le_dist_of_mem <| zero_mem (LinearMap.range f.toLinearMap)
-    rcases(infDist_lt_iff <| Submodule.nonempty (LinearMap.range f.toLinearMap)).1 hf with ⟨x, hx⟩
+    rcases (infDist_lt_iff <| Submodule.nonempty (LinearMap.range f.toLinearMap)).1 hf with ⟨x, hx⟩
     rw [dist_eq_norm] at hx
     have : ‖h x - h v‖ < ‖v‖ := by
       rw [← map_sub]
@@ -139,9 +157,14 @@ spherically complete ultrametric normed space `H`, there exists a linear isometr
 `h : F →ₗᵢ[𝕜] H` such that `h.comp f = g`.
 
 This is an extension property: along an immediate embedding `f`, any isometric map out of `E`
-into a spherically complete target extends to an isometric map out of `F`.
+into a spherically complete target extends to an isometric map out of `F`. The proof extends the
+composite `g ∘ weakInv f` (defined on the range of `f`) to all of `F` by the non-Archimedean
+**Hahn-Banach** theorem, then uses immediacy of `f` to promote the resulting continuous linear map
+to a norm-preserving one (`IsImmediate.norm_map`): every `v : F` is approximated arbitrarily well
+by vectors of `range f`, on which the extension already preserves norms.
 
-The conclusion is stated using an explicit `@LinearIsometry.comp` to avoid elaboration issues.
+The conclusion is stated using `LinearIsometry.comp` with explicit type ascriptions on its
+arguments to avoid elaboration issues.
 -/
 theorem exists_linearIsometry_comp_eq {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
@@ -191,25 +214,25 @@ such that:
   i.e. every `v : M` metrically orthogonal to its range is `0` (as in `IsImmediate`).
 
 This is the collection of candidate intermediate spaces used to build a maximal immediate
-extension inside a fixed spherically complete ambient space.
+extension inside a fixed ambient space `E₀`; taking `E₀` spherically complete yields the spherical
+completion of `E`.
 -/
 def immediateExtensionSubmodules {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     (E : Type*) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
     (E₀ : Type*) [NormedAddCommGroup E₀] [NormedSpace 𝕜 E₀] [IsUltrametricDist E₀]
-    --[SphericallyCompleteSpace E₀]
     (f : E →ₗᵢ[𝕜] E₀) :
     Set (Submodule 𝕜 E₀) := {M : Submodule 𝕜 E₀ | ∃ hc : f.range ≤ M,
       ∀ v : M, (v ⟂ₘ LinearMap.range (Submodule.inclusion hc)) → v = 0 }
 
-/-- Clean membership criterion for `immediateExtensionSubmodules`, expressed
-entirely in the ambient
-space `E₀`: `M` contains `f.range`, and any `v ∈ M` metrically orthogonal to `f.range`
-(in `E₀`) is `0`. -/
+/-- Membership criterion for `immediateExtensionSubmodules`, expressed entirely in the ambient
+space `E₀`: `M` belongs to the set iff it contains `f.range` and every `v ∈ M` that is metrically
+orthogonal to `f.range` (measured in `E₀`) is `0`. This transports the immediacy condition — stated
+inside `M` via `Submodule.inclusion` — down to the ambient norm, which is what makes the Zorn
+argument in `exists_maximal_immediateExtensionSubmodule` manageable. -/
 lemma mem_immediateExtensionSubmodules_iff
     {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
     {E₀ : Type*} [NormedAddCommGroup E₀] [NormedSpace 𝕜 E₀] [IsUltrametricDist E₀]
-    --[SphericallyCompleteSpace E₀]
     {f : E →ₗᵢ[𝕜] E₀} {M : Submodule 𝕜 E₀} :
     M ∈ immediateExtensionSubmodules E E₀ f ↔
       ∃ _ : f.range ≤ M,
@@ -217,7 +240,6 @@ lemma mem_immediateExtensionSubmodules_iff
   simp only [immediateExtensionSubmodules, Set.mem_setOf_eq]
   refine exists_congr fun hc ↦ forall_congr' fun v ↦ ?_
   rw [isMOrtho_range_inclusion_iff]
-
 
 /--
 The set of candidate intermediate spaces for immediate extensions is nonempty.
@@ -228,7 +250,6 @@ lemma immediateExtensionSubmodules_nonempty
     {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     (E : Type*) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
     (E₀ : Type*) [NormedAddCommGroup E₀] [NormedSpace 𝕜 E₀] [IsUltrametricDist E₀]
-    --[SphericallyCompleteSpace E₀]
     (f : E →ₗᵢ[𝕜] E₀)
     : (immediateExtensionSubmodules E E₀ f).Nonempty := by
   refine ⟨f.range, mem_immediateExtensionSubmodules_iff.2
@@ -237,17 +258,19 @@ lemma immediateExtensionSubmodules_nonempty
   exact Submodule.coe_eq_zero.mp (norm_eq_zero.mp hv.symm)
 
 /--
-Existence of a maximal *immediate* intermediate space inside a fixed spherically complete ambient
-space.
+Existence of a maximal *immediate* intermediate space inside a fixed ambient space.
 
-Concretely, for a linear isometry `f : E →ₗᵢ[𝕜] E₀` into a spherically complete space `E₀`, we
-consider the set `immediateExtensionSubmodules E E₀ f` of submodules `M ≤ E₀`
-that contain the
-range of `f` and for which the induced inclusion `LinearMap.range f →ₗᵢ[𝕜] M` is an immediate
-extension.
+Concretely, for a linear isometry `f : E →ₗᵢ[𝕜] E₀`, we consider the set
+`immediateExtensionSubmodules E E₀ f` of submodules `M ≤ E₀` that contain the range of `f` and for
+which the induced inclusion `LinearMap.range f →ₗᵢ[𝕜] M` is an immediate extension.
 
-This theorem applies Zorn's lemma (on the poset of such submodules ordered by `≤`) to produce a
-maximal element, which is later used to define the `SphericalCompletion` of `E`.
+Ordered by inclusion, this set is closed under unions of chains — the union of a chain of immediate
+extensions is again immediate, since any vector orthogonal to the union is orthogonal to some member
+of the chain. **Zorn's lemma** then produces a maximal element. No hypothesis on `E₀` beyond the
+ultrametric structure is needed here; when `E₀` is additionally spherically complete, the maximal
+submodule is itself spherically complete
+(`instSphericallyCompleteSpaceOfMaximalImmediateExtensionSubmodule`) and underlies the spherical
+completion of `E`.
 -/
 theorem exists_maximal_immediateExtensionSubmodule
     (𝕜 : Type*) [NontriviallyNormedField 𝕜]
@@ -280,6 +303,21 @@ theorem exists_maximal_immediateExtensionSubmodule
   have := himm ⟨(x : E₀), hxN⟩ (by simpa using hIsMOrtho)
   simpa using congrArg Subtype.val this
 
+/--
+The maximal immediate-extension subspace of a spherically complete ambient space is itself
+spherically complete.
+
+For `f : E →ₗᵢ[𝕜] E₀` with `E₀` spherically complete, let `K` be the maximal element
+`(exists_maximal_immediateExtensionSubmodule 𝕜 E E₀ f).choose` of
+`immediateExtensionSubmodules E E₀ f`. Then `K` inherits spherical completeness from `E₀`: a nested
+family of closed balls in `K`, pushed forward along the isometric inclusion `K ↪ E₀`, is again a
+nested family of closed balls in `E₀` (same radii), which meets in a point `a : E₀` by spherical
+completeness of `E₀`. If `a ∈ K` we are done. Otherwise `K + 𝕜 ∙ a` would be a strictly larger
+immediate extension of `E` — one checks, using immediacy of `K` and the strong triangle inequality,
+that no nonzero vector of `K + 𝕜 ∙ a` is metrically orthogonal to `range f` — contradicting
+maximality of `K`. Hence the intersection point lies in `K` and every
+nested family of balls in `K` has a common point.
+-/
 instance instSphericallyCompleteSpaceOfMaximalImmediateExtensionSubmodule
     {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     (E : Type*) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
@@ -379,7 +417,7 @@ instance instSphericallyCompleteSpaceOfMaximalImmediateExtensionSubmodule
     rw [← sub_add_sub_cancel b.val g e.val]
     exact lt_of_le_of_lt (iud.norm_add_le_max _ _) <| max_lt hg2 he2
   have hx : x ∈ K := Submodule.smul_mem K (-s⁻¹) hx'
-  suffices h : ∀ i : ℕ, ⟨x,hx⟩ ∈ closedBall (c i) ↑(r i) by
+  suffices h : ∀ i : ℕ, ⟨x, hx⟩ ∈ closedBall (c i) ↑(r i) by
     contrapose hemp
     exact Set.nonempty_iff_ne_empty.mp ⟨⟨x, hx⟩, by simpa only [Set.mem_iInter]⟩
   intro i
@@ -405,6 +443,18 @@ instance instSphericallyCompleteSpaceOfMaximalImmediateExtensionSubmodule
     _ = dist a ↑(c i) := hda.symm
     _ ≤ ↑(r i) := ha i
 
+/--
+`maximalImmediateExtensionEmbedding f` is the canonical linear isometry embedding `E` into a
+maximal immediate-extension subspace of the spherically complete ambient space `E₀`.
+
+Given `f : E →ₗᵢ[𝕜] E₀` with `E₀` spherically complete,
+`exists_maximal_immediateExtensionSubmodule` provides a maximal element `M` of
+`immediateExtensionSubmodules E E₀ f`; in particular `M` contains `range f`. This definition sends
+`x : E` to `f x`, viewed as an element of `M`. Since `f` is an isometry and the inclusion
+`M ↪ E₀` preserves norms, the result is again an isometric embedding. Together with the spherical
+completeness of `M` (`instSphericallyCompleteSpaceOfMaximalImmediateExtensionSubmodule`), this is
+the isometry realising `M` as a spherical completion of `E`.
+-/
 noncomputable def maximalImmediateExtensionEmbedding {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
     {E₀ : Type*} [NormedAddCommGroup E₀] [NormedSpace 𝕜 E₀] [IsUltrametricDist E₀]

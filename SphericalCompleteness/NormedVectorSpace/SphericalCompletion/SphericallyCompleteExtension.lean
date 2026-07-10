@@ -28,8 +28,8 @@ family `fun _ ↦ E`, the constant-sequence map `x ↦ [x, x, …]` gives the de
 ## Main definitions
 
 * `c₀ 𝕜 E` — the submodule of null sequences inside `lp E ⊤`.
-* `canonicalSphericallyCompleteExtension 𝕜 E` — the isometric embedding of `E`
-into `lp E ⊤ ⧸ c₀ 𝕜 E`.
+* `canonicalSphericallyCompleteExtension 𝕜 E` — the isometric embedding of `E` into
+  `lp E ⊤ ⧸ c₀ 𝕜 E`.
 
 ## Main statements
 
@@ -83,7 +83,7 @@ center `c (i + 1)`, this produces a representative `aip2` of the next center `c 
 distance to `aip1` is controlled: `‖aip2 - aip1‖ < r i`. Iterating this step (see
 `quotientMkSection`) yields a sequence of lifts whose successive differences shrink like `r`, which
 is what lets a diagonal sequence be assembled in `lp E ⊤`. -/
-private lemma exists_norm_sub_lt {𝕜 : Type*} [inst : NontriviallyNormedField 𝕜]
+private lemma exists_norm_sub_lt {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     (E : ℕ → Type*) [(i : ℕ) → NormedAddCommGroup (E i)] [(i : ℕ) → NormedSpace 𝕜 (E i)]
     [∀ (i : ℕ), IsUltrametricDist (E i)]
     {c : ℕ → ↥(lp E ⊤) ⧸ c₀ 𝕜 E} {r : ℕ → NNReal} (hsr : StrictAnti r)
@@ -153,7 +153,7 @@ whose class modulo `c₀ 𝕜 E` is the center `c k`. The representatives for `k
 `Quotient.out` lifts, and each subsequent representative is chosen by `exists_norm_sub_lt` so that
 its distance to the previous one is smaller than `r (k - 2)`. This recursively defined section is
 the source of the diagonal sequence used to prove spherical completeness of the quotient. -/
-private noncomputable def quotientMkSection {𝕜 : Type*} [inst : NontriviallyNormedField 𝕜]
+private noncomputable def quotientMkSection {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     (E : ℕ → Type*) [(i : ℕ) → NormedAddCommGroup (E i)] [(i : ℕ) → NormedSpace 𝕜 (E i)]
     [∀ (i : ℕ), IsUltrametricDist (E i)]
     {c : ℕ → ↥(lp E ⊤) ⧸ c₀ 𝕜 E} {r : ℕ → NNReal} (hsr : StrictAnti r)
@@ -178,7 +178,7 @@ private noncomputable def quotientMkSection {𝕜 : Type*} [inst : NontriviallyN
 
 These are read off directly from the recursive construction and the guarantee provided by
 `exists_norm_sub_lt`. -/
-private lemma mk_eq_and_norm_sub_lt {𝕜 : Type*} [inst : NontriviallyNormedField 𝕜]
+private lemma mk_eq_and_norm_sub_lt {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     (E : ℕ → Type*) [(i : ℕ) → NormedAddCommGroup (E i)] [(i : ℕ) → NormedSpace 𝕜 (E i)]
     [∀ (i : ℕ), IsUltrametricDist (E i)]
     {c : ℕ → ↥(lp E ⊤) ⧸ c₀ 𝕜 E} {r : ℕ → NNReal} (hsr : StrictAnti r)
@@ -204,7 +204,7 @@ consecutive differences controlled by `mk_eq_and_norm_sub_lt` and uses the stron
 triangle inequality. -/
 private lemma quotientMkSection_norm_apply_self_le_max {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     (E : ℕ → Type*) [(i : ℕ) → NormedAddCommGroup (E i)] [(i : ℕ) → NormedSpace 𝕜 (E i)]
-    [iiud : ∀ (i : ℕ), IsUltrametricDist (E i)]
+    [∀ (i : ℕ), IsUltrametricDist (E i)]
     ⦃c : ℕ → ↥(lp E ⊤) ⧸ c₀ 𝕜 E⦄ ⦃r : ℕ → NNReal⦄ (hsr : StrictAnti r)
     (hanti : Antitone fun i ↦ closedBall (c i) ↑(r i)) :
     ∀ (n : ℕ), ‖((quotientMkSection E hsr hanti n).val : (i : ℕ) → E i) n‖ ≤
@@ -361,8 +361,9 @@ instance sphericallyCompleteSpace_lp_quotient_c₀ {𝕜 : Type*} [NontriviallyN
 /-- A linear isometric embedding of an arbitrary normed `𝕜`-space `E` into a spherically complete
 space, namely the constant-sequence map `x ↦ [x, x, x, …]` into `lp (fun _ ↦ E) ⊤ ⧸ c₀ 𝕜 _`.
 It is an isometry because the quotient norm of a constant sequence equals `‖x‖`. This realises
-every normed space inside a spherically complete one, the first step in constructing the
-`SphericalCompletion`. -/
+every normed space inside a spherically complete one — the first step in constructing a spherical
+completion of `E`, from which a maximal immediate extension is subsequently carved out (see
+`SphericallyCompleteSpace.IsImmediate.exists_maximal_immediateExtensionSubmodule`). -/
 noncomputable def canonicalSphericallyCompleteExtension (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     (E : Type*) [NormedAddCommGroup E] [NormedSpace 𝕜 E] :
     E →ₗᵢ[𝕜] ((lp (fun (_ : ℕ) ↦ E) ⊤)⧸ c₀ 𝕜 (fun (_ : ℕ) ↦ E)) where
@@ -420,7 +421,7 @@ null-sequence submodule `c₀ 𝕜 (fun _ ↦ E)` is a closed subset of `lp (fun
 `IsSeqClosed.isClosed`, using an `ε/2` argument on the `ℓ∞` norm), and then lets typeclass inference
 upgrade the quotient seminorm to a `NormedAddCommGroup`. This is what makes
 `canonicalSphericallyCompleteExtension 𝕜 E` land in a normed—not merely seminormed—space. -/
-noncomputable instance (𝕜 : Type*) [NontriviallyNormedField 𝕜]
+noncomputable instance normedAddCommGroup_lp_quotient_c₀ (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     (E : Type*) [NormedAddCommGroup E] [NormedSpace 𝕜 E] :
     NormedAddCommGroup (↥(lp (fun _ ↦ E) ⊤) ⧸ c₀ 𝕜 fun _ ↦ E) := by
   have : IsClosed (↑(c₀ 𝕜 fun x ↦ E).carrier) := by
@@ -452,7 +453,8 @@ complete Banach space over itself: the quotient `lp (fun _ ↦ 𝕜) ⊤ ⧸ c�
 `SphericallyCompleteSpace`. This is the constant-scalar-family specialisation of
 `sphericallyCompleteSpace_lp_quotient_c₀`, recorded as an instance so that spherical completeness of
 this concrete space is available to typeclass inference. -/
-instance {𝕜 : Type*} [NontriviallyNormedField 𝕜] [IsUltrametricDist 𝕜] :
+instance sphericallyCompleteSpace_lp_quotient_c₀_self
+    {𝕜 : Type*} [NontriviallyNormedField 𝕜] [IsUltrametricDist 𝕜] :
     SphericallyCompleteSpace ((lp (fun _ ↦ 𝕜) ⊤)⧸ c₀ 𝕜 (fun _ ↦ 𝕜)) := by
   simpa only using sphericallyCompleteSpace_lp_quotient_c₀ (fun _ ↦ 𝕜)
 

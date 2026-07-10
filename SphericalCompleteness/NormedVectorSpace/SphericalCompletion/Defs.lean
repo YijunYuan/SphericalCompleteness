@@ -10,40 +10,58 @@ public import SphericalCompleteness.NormedVectorSpace.Orthogonal.OrthComp
 public import SphericalCompleteness.NormedVectorSpace.SphericalCompletion.SphericallyCompleteExtension
 
 /-!
-# Spherical completion: definitions
+# Spherical completion: definition
 
-This file constructs the *spherical completion* `SphericalCompletion 𝕜 E` of an ultrametric
-normed vector space `E` over a nontrivially normed field `𝕜`, together with its canonical
-isometric embedding `SphericalCompletion.embedding 𝕜 E : E →ₗᵢ[𝕜] SphericalCompletion 𝕜 E`.
+This file defines the class `IsSphericalCompletion 𝕜 E F`, which characterises when a spherically
+complete ultrametric normed space `F` is a *spherical completion* of an ultrametric normed
+`𝕜`-vector space `E`.
 
-The construction proceeds in two steps. First, `sphericallyCompleteExtension 𝕜 E` embeds `E`
-isometrically into a fixed spherically complete ambient space (a quotient of an `ℓ∞`-type space).
-Second, among the submodules of that ambient space which contain the image of `E` and form an
-*immediate* extension of it, `SphericalCompletion.exists_maximal_immediateExtensionSubmodule`
-selects a maximal one via
-Zorn's lemma; the underlying type of that submodule is `SphericalCompletion 𝕜 E`. The auxiliary
-predicate `SphericalCompletion.immediateExtensionSubmodules` and the transport lemmas around
-`Submodule.inclusion` set up this
-Zorn argument.
+A spherical completion of `E` is a spherically complete space `F` into which `E` embeds
+isometrically and which is *minimal* with this property: among the `𝕜`-submodules of `F`, the only
+spherically complete one containing the image of `E` is `F` itself. Concretely,
+`IsSphericalCompletion 𝕜 E F` — with `F` already carrying a `SphericallyCompleteSpace` instance —
+asserts that there is a linear isometry `ι : E →ₗᵢ[𝕜] F` such that every spherically complete
+submodule `D ≤ F` with `ι.range ≤ D` equals `⊤`.
+
+Existence of such an `F` for every `E`, its uniqueness up to linear isometry, the universal
+property, and the equivalence with maximal completeness are established in the companion file
+`Basic`. There `F` is produced as a maximal immediate extension (via
+`SphericallyCompleteSpace.IsImmediate.exists_maximal_immediateExtensionSubmodule`) of the
+constant-sequence embedding of `E` into a spherically complete `ℓ∞`-quotient
+(`canonicalSphericallyCompleteExtension`).
 
 ## Main definitions
 
-* `SphericalCompletion.immediateExtensionSubmodules` — the collection of candidate immediate
-  intermediate submodules.
-* `SphericalCompletion 𝕜 E` — the underlying type of a chosen maximal immediate extension of `E`.
-* `SphericalCompletion.embedding 𝕜 E` — the canonical isometric embedding of `E` into it.
+* `SphericallyCompleteSpace.IsSphericalCompletion 𝕜 E F` — the class asserting that the spherically
+  complete space `F` is a spherical completion of `E`, i.e. `E` embeds isometrically into `F` as a
+  minimal spherically complete extension.
 -/
 
 @[expose] public section
 
-open Metric
-
 namespace SphericallyCompleteSpace
 
+/--
+`IsSphericalCompletion 𝕜 E F` states that the spherically complete ultrametric normed `𝕜`-vector
+space `F` is a *spherical completion* of `E`.
+
+It holds when there is a linear isometric embedding `ι : E →ₗᵢ[𝕜] F` that is *minimal* among
+spherically complete spaces: the only spherically complete submodule `D ≤ F` containing the image
+`ι.range` of `E` is `F` itself, i.e. `D = ⊤`.
+
+Intuitively, $F$ is the smallest spherically complete space containing an isometric copy of $E$:
+no proper spherically complete subspace of $F$ still contains $E$. The ambient
+`[SphericallyCompleteSpace F]` instance records that `F` is itself spherically complete, so the
+class pins down *which* spherically complete extension counts as a completion. That such an `F` is
+in addition an immediate extension of `E`, and is unique up to linear isometry, is proved in
+`Basic`.
+-/
 class IsSphericalCompletion (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     (E : Type*) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
     (F : Type*) [NormedAddCommGroup F] [NormedSpace 𝕜 F] [IsUltrametricDist F]
     [SphericallyCompleteSpace F] : Prop where
+  /-- There is a linear isometry `ι : E →ₗᵢ[𝕜] F` that is minimal among spherically complete
+  extensions: every spherically complete submodule `D ≤ F` containing `ι.range` is all of `F`. -/
   is_sph_comp : ∃ ι : E →ₗᵢ[𝕜] F,
     ∀ D : Submodule 𝕜 F, SphericallyCompleteSpace D → ι.range ≤ D → D = ⊤
 
