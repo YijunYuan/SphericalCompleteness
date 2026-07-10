@@ -23,7 +23,7 @@ Second, among the submodules of that ambient space which contain the image of `E
 selects a maximal one via
 Zorn's lemma; the underlying type of that submodule is `SphericalCompletion 𝕜 E`. The auxiliary
 predicate `SphericalCompletion.immediateExtensionSubmodules` and the transport lemmas around
-`inclusionᵢ` set up this
+`Submodule.inclusion` set up this
 Zorn argument.
 
 ## Main definitions

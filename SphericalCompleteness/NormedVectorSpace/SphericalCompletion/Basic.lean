@@ -49,14 +49,14 @@ instance {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     convert hy
     apply Submodule.ext_iff.mpr
     intro z
+    rw [Submodule.range_inclusion, Submodule.mem_comap, Submodule.coe_subtype]
     simp only [LinearMap.mem_range, maximalImmediateExtensionEmbedding, LinearMap.coe_mk,
-      AddHom.coe_mk, inclusionᵢ]
+      AddHom.coe_mk]
     constructor
     · rintro ⟨e, rfl⟩
-      exact ⟨⟨f e, LinearMap.mem_range_self _ _⟩, rfl⟩
-    · rintro ⟨e, rfl⟩
-      obtain ⟨e', he'⟩ := LinearMap.mem_range.mp e.prop
-      exact ⟨e', by simp [← he']⟩
+      exact ⟨e, rfl⟩
+    · rintro ⟨e, he⟩
+      exact ⟨e, Subtype.ext he⟩
 
 theorem exist (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     (E : Type u) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E] :
