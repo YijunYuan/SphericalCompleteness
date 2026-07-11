@@ -56,13 +56,34 @@ open Metric
 
 namespace SphericallyCompleteSpace
 
-/-- The heart of the codimension-one extension step (van Rooij, *Non-Archimedean Functional
-Analysis*, Lemma 4.4). Given a continuous linear `S : D →L[𝕜] F` approximated on `D` by a
-compatible family `𝒰` with tolerances `ε`, and a vector `a ∉ D`, spherical completeness of `F`
-produces a single value `z0` that plays the role of `S a`: adjoining it keeps every approximation
-bound `‖S x + z0 - U (x + a)‖ ≤ ε U * ‖x + a‖` valid on `D + 𝕜 ∙ a`. The witness is extracted from
-the nonempty intersection of the family of operator-norm balls. -/
-lemma exists_extensionValue_norm_le {𝕜 : Type*}
+/-- The linear equivalence `↥(D + 𝕜∙a) ≃ₗ D × 𝕜` given by the (unique, since `a ∉ D`)
+decomposition `x = d + l • a`. -/
+noncomputable def spanSupDecomp {𝕜 : Type*} [NontriviallyNormedField 𝕜] {E : Type*}
+    [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] {D : Submodule 𝕜 E} {a : E} (ha : a ∉ D) :
+    ↥(D + Submodule.span 𝕜 {a}) ≃ₗ[𝕜] D × 𝕜 :=
+  have hinj : Function.Injective (D.subtype.coprod (LinearMap.toSpanSingleton 𝕜 E a)) := by
+    rw [← LinearMap.ker_eq_bot, LinearMap.ker_eq_bot']
+    rintro ⟨d, l⟩ hdl
+    simp only [LinearMap.coprod_apply, Submodule.subtype_apply,
+      LinearMap.toSpanSingleton_apply] at hdl
+    rcases eq_or_ne l 0 with hl | hl
+    · subst hl; simp only [zero_smul, add_zero] at hdl; simp [Submodule.coe_eq_zero.1 hdl]
+    · exact absurd ((neg_eq_of_add_eq_zero_right hdl ▸ D.neg_mem d.2 :
+        l • a ∈ D) |> D.smul_mem l⁻¹ |> (by simpa [hl] using ·)) ha
+  (LinearEquiv.ofEq _ _ (by rw [Submodule.add_eq_sup, LinearMap.range_coprod,
+    Submodule.range_subtype, LinearMap.span_singleton_eq_range])).symm.trans
+    (LinearEquiv.ofInjective _ hinj).symm
+
+/-- The inverse of `spanSupDecomp` sends the coordinates `(d, l)` back to the vector
+`d + l • a`. This is the defining computation of the decomposition, phrased as a `simp` lemma so
+that downstream proofs can rewrite an element of `D + 𝕜 ∙ a` into its `D`-part plus its
+`𝕜 ∙ a`-part. -/
+@[simp] lemma spanSupDecomp_symm_apply {𝕜 : Type*} [NontriviallyNormedField 𝕜] {E : Type*}
+    [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] {D : Submodule 𝕜 E} {a : E} (ha : a ∉ D)
+    (d : D) (l : 𝕜) : (((spanSupDecomp ha).symm (d, l)) : E) = (d : E) + l • a := rfl
+
+section
+variable {𝕜 : Type*}
     [NontriviallyNormedField 𝕜] {E : Type*} [SeminormedAddCommGroup E] [iude : IsUltrametricDist E]
     [NormedSpace 𝕜 E] {D : Submodule 𝕜 E}
     {a : E} (ha1 : a ∉ D)
@@ -70,7 +91,16 @@ lemma exists_extensionValue_norm_le {𝕜 : Type*}
     [iud : IsUltrametricDist F] [NormedSpace 𝕜 F] [hsc : SphericallyCompleteSpace F]
     (S : ↥D →L[𝕜] F) {𝒰 : Set (E →L[𝕜] F)} (h𝒰 : 𝒰.Nonempty)
     {ε : ↑𝒰 → ℝ} (hε1 : ∀ (T : ↑𝒰), 0 < ε T) (hε2 : ∀ (U V : ↑𝒰), ‖U.val - V.val‖ ≤ max (ε U) (ε V))
-    (hε3 : ∀ (U : ↑𝒰) (x : ↥D), ‖S x - U.val ↑x‖ ≤ ε U * ‖x‖) :
+    (hε3 : ∀ (U : ↑𝒰) (x : ↥D), ‖S x - U.val ↑x‖ ≤ ε U * ‖x‖)
+
+include ha1 h𝒰 hε1 hε2 hε3 in
+/-- The heart of the codimension-one extension step (van Rooij, *Non-Archimedean Functional
+Analysis*, Lemma 4.4). Given a continuous linear `S : D →L[𝕜] F` approximated on `D` by a
+compatible family `𝒰` with tolerances `ε`, and a vector `a ∉ D`, spherical completeness of `F`
+produces a single value `z0` that plays the role of `S a`: adjoining it keeps every approximation
+bound `‖S x + z0 - U (x + a)‖ ≤ ε U * ‖x + a‖` valid on `D + 𝕜 ∙ a`. The witness is extracted from
+the nonempty intersection of the family of operator-norm balls. -/
+lemma exists_extensionValue_norm_le :
     ∃ z0 : F, ∀ (x : ↥D) (U : ↑𝒰), ‖S x + z0 - U.val (↑x + a)‖ ≤ ε U * ‖↑x + a‖ := by
   rw [iff_pairwise_inter_nonempty] at hsc
   let 𝒮 : Set (F × NNReal) := {(U.val x + U.val a - S x,
@@ -161,15 +191,7 @@ lemma exists_extensionValue_norm_le {𝕜 : Type*}
 chosen extension value survives scaling of `a` by any `l : 𝕜`, i.e.
 `‖S x + l • z0 - U (x + l • a)‖ ≤ ε U * ‖x + l • a‖`. This upgrades the single-vector bound to the
 full line `𝕜 ∙ a`, which is what makes the extension well defined on `D + 𝕜 ∙ a`. -/
-lemma norm_smul_extensionValue_le {𝕜 : Type*}
-    [NontriviallyNormedField 𝕜] {E : Type*} [SeminormedAddCommGroup E] [iude : IsUltrametricDist E]
-    [NormedSpace 𝕜 E] {D : Submodule 𝕜 E}
-    {a : E} (ha1 : a ∉ D)
-    {F : Type*} [SeminormedAddCommGroup F]
-    [iud : IsUltrametricDist F] [NormedSpace 𝕜 F] [hsc : SphericallyCompleteSpace F]
-    (S : ↥D →L[𝕜] F) {𝒰 : Set (E →L[𝕜] F)} (h𝒰 : 𝒰.Nonempty)
-    {ε : ↑𝒰 → ℝ} (hε1 : ∀ (T : ↑𝒰), 0 < ε T) (hε2 : ∀ (U V : ↑𝒰), ‖U.val - V.val‖ ≤ max (ε U) (ε V))
-    (hε3 : ∀ (U : ↑𝒰) (x : ↥D), ‖S x - U.val ↑x‖ ≤ ε U * ‖x‖) :
+lemma norm_smul_extensionValue_le :
     ∀ (x : ↥D) (l : 𝕜) (U : ↑𝒰),
     ‖S x + l • (exists_extensionValue_norm_le ha1 S h𝒰 hε1 hε2 hε3).choose - U.val (↑x + l • a)‖ ≤
     ε U * ‖↑x + l • a‖ := by
@@ -182,65 +204,24 @@ lemma norm_smul_extensionValue_le {𝕜 : Type*}
       mul_assoc, mul_le_mul_iff_of_pos_left <| norm_pos_iff.mpr hl]
     exact (exists_extensionValue_norm_le ha1 S h𝒰 hε1 hε2 hε3).choose_spec (l⁻¹ • x) U
 
+include ha1 h𝒰 hε1 hε2 hε3 in
 /-- The underlying function of the codimension-one extension of `S` to `D + 𝕜 ∙ a`. On the unique
 decomposition `m = d + l • a` (with `d ∈ D`, valid because `a ∉ D`) it returns
 `S d + l • z0`, where `z0` is the extension value from `exists_extensionValue_norm_le`. Linearity
 and boundedness are established separately in `isLinearMap_codimOneExtension` and
 `isBoundedLinearMap_codimOneExtension`. -/
-noncomputable def codimOneExtension {𝕜 : Type*}
-    [NontriviallyNormedField 𝕜] {E : Type*} [SeminormedAddCommGroup E] [iude : IsUltrametricDist E]
-    [NormedSpace 𝕜 E] {D : Submodule 𝕜 E}
-    {a : E} (ha1 : a ∉ D)
-    {F : Type*} [SeminormedAddCommGroup F]
-    [iud : IsUltrametricDist F] [NormedSpace 𝕜 F] [hsc : SphericallyCompleteSpace F]
-    (S : ↥D →L[𝕜] F) {𝒰 : Set (E →L[𝕜] F)} (h𝒰 : 𝒰.Nonempty)
-    {ε : ↑𝒰 → ℝ} (hε1 : ∀ (T : ↑𝒰), 0 < ε T) (hε2 : ∀ (U V : ↑𝒰), ‖U.val - V.val‖ ≤ max (ε U) (ε V))
-    (hε3 : ∀ (U : ↑𝒰) (x : ↥D), ‖S x - U.val ↑x‖ ≤ ε U * ‖x‖) :
+noncomputable def codimOneExtension :
     (D + Submodule.span 𝕜 {a}) → F := fun M ↦ by
     have := Submodule.mem_sup.1 M.prop
     let lambda := (Submodule.mem_span_singleton.1 this.choose_spec.2.choose_spec.1).choose
     use S ⟨this.choose, this.choose_spec.1⟩ +
       lambda • (exists_extensionValue_norm_le ha1 S h𝒰 hε1 hε2 hε3).choose
 
-/-- The linear equivalence `↥(D + 𝕜∙a) ≃ₗ D × 𝕜` given by the (unique, since `a ∉ D`)
-decomposition `x = d + l • a`. -/
-noncomputable def spanSupDecomp {𝕜 : Type*} [NontriviallyNormedField 𝕜] {E : Type*}
-    [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] {D : Submodule 𝕜 E} {a : E} (ha : a ∉ D) :
-    ↥(D + Submodule.span 𝕜 {a}) ≃ₗ[𝕜] D × 𝕜 :=
-  have hinj : Function.Injective (D.subtype.coprod (LinearMap.toSpanSingleton 𝕜 E a)) := by
-    rw [← LinearMap.ker_eq_bot, LinearMap.ker_eq_bot']
-    rintro ⟨d, l⟩ hdl
-    simp only [LinearMap.coprod_apply, Submodule.subtype_apply,
-      LinearMap.toSpanSingleton_apply] at hdl
-    rcases eq_or_ne l 0 with hl | hl
-    · subst hl; simp only [zero_smul, add_zero] at hdl; simp [Submodule.coe_eq_zero.1 hdl]
-    · exact absurd ((neg_eq_of_add_eq_zero_right hdl ▸ D.neg_mem d.2 :
-        l • a ∈ D) |> D.smul_mem l⁻¹ |> (by simpa [hl] using ·)) ha
-  (LinearEquiv.ofEq _ _ (by rw [Submodule.add_eq_sup, LinearMap.range_coprod,
-    Submodule.range_subtype, LinearMap.span_singleton_eq_range])).symm.trans
-    (LinearEquiv.ofInjective _ hinj).symm
-
-/-- The inverse of `spanSupDecomp` sends the coordinates `(d, l)` back to the vector
-`d + l • a`. This is the defining computation of the decomposition, phrased as a `simp` lemma so
-that downstream proofs can rewrite an element of `D + 𝕜 ∙ a` into its `D`-part plus its
-`𝕜 ∙ a`-part. -/
-@[simp] lemma spanSupDecomp_symm_apply {𝕜 : Type*} [NontriviallyNormedField 𝕜] {E : Type*}
-    [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] {D : Submodule 𝕜 E} {a : E} (ha : a ∉ D)
-    (d : D) (l : 𝕜) : (((spanSupDecomp ha).symm (d, l)) : E) = (d : E) + l • a := rfl
-
 /-- Closed form of `codimOneExtension` in the `spanSupDecomp` coordinates `m ↦ (d, l)`:
 its value is `S d + l • z0`, where `z0` is the extension value from
 `exists_extensionValue_norm_le`. This is the computational identity that all downstream
 linearity, boundedness and approximation proofs rewrite with. -/
-lemma codimOneExtension_eq {𝕜 : Type*}
-    [NontriviallyNormedField 𝕜] {E : Type*} [SeminormedAddCommGroup E] [iude : IsUltrametricDist E]
-    [NormedSpace 𝕜 E] {D : Submodule 𝕜 E}
-    {a : E} (ha1 : a ∉ D)
-    {F : Type*} [SeminormedAddCommGroup F]
-    [iud : IsUltrametricDist F] [NormedSpace 𝕜 F] [hsc : SphericallyCompleteSpace F]
-    (S : ↥D →L[𝕜] F) {𝒰 : Set (E →L[𝕜] F)} (h𝒰 : 𝒰.Nonempty)
-    {ε : ↑𝒰 → ℝ} (hε1 : ∀ (T : ↑𝒰), 0 < ε T) (hε2 : ∀ (U V : ↑𝒰), ‖U.val - V.val‖ ≤ max (ε U) (ε V))
-    (hε3 : ∀ (U : ↑𝒰) (x : ↥D), ‖S x - U.val ↑x‖ ≤ ε U * ‖x‖) (M : ↥(D + Submodule.span 𝕜 {a})) :
+lemma codimOneExtension_eq (M : ↥(D + Submodule.span 𝕜 {a})) :
     codimOneExtension ha1 S h𝒰 hε1 hε2 hε3 M =
     S (spanSupDecomp ha1 M).1 +
       (spanSupDecomp ha1 M).2 • (exists_extensionValue_norm_le ha1 S h𝒰 hε1 hε2 hε3).choose := by
@@ -264,15 +245,7 @@ lemma codimOneExtension_eq {𝕜 : Type*}
 /-- The codimension-one extension `codimOneExtension` is `𝕜`-linear. Additivity and homogeneity
 both reduce, via `codimOneExtension_eq`, to the linearity of `S` and of scalar multiplication in
 the `spanSupDecomp` coordinates. -/
-noncomputable def isLinearMap_codimOneExtension {𝕜 : Type*}
-    [NontriviallyNormedField 𝕜] {E : Type*} [SeminormedAddCommGroup E] [iude : IsUltrametricDist E]
-    [NormedSpace 𝕜 E] {D : Submodule 𝕜 E}
-    {a : E} (ha1 : a ∉ D)
-    {F : Type*} [SeminormedAddCommGroup F]
-    [iud : IsUltrametricDist F] [NormedSpace 𝕜 F] [hsc : SphericallyCompleteSpace F]
-    (S : ↥D →L[𝕜] F) {𝒰 : Set (E →L[𝕜] F)} (h𝒰 : 𝒰.Nonempty)
-    {ε : ↑𝒰 → ℝ} (hε1 : ∀ (T : ↑𝒰), 0 < ε T) (hε2 : ∀ (U V : ↑𝒰), ‖U.val - V.val‖ ≤ max (ε U) (ε V))
-    (hε3 : ∀ (U : ↑𝒰) (x : ↥D), ‖S x - U.val ↑x‖ ≤ ε U * ‖x‖) :
+noncomputable def isLinearMap_codimOneExtension :
     IsLinearMap 𝕜 (codimOneExtension ha1 S h𝒰 hε1 hε2 hε3) where
   map_add x1 x2 := by
     simp only [codimOneExtension_eq, map_add, Prod.fst_add, Prod.snd_add, S.map_add, add_smul]
@@ -286,15 +259,7 @@ noncomputable def isLinearMap_codimOneExtension {𝕜 : Type*}
 (`isLinearMap_codimOneExtension`) the ultrametric estimate bounds its value by
 `max (ε U₀) ‖U₀‖ * ‖x‖` for a fixed member `U₀` of the family, using the extension bound
 `norm_smul_extensionValue_le`. -/
-noncomputable def isBoundedLinearMap_codimOneExtension {𝕜 : Type*}
-    [NontriviallyNormedField 𝕜] {E : Type*} [SeminormedAddCommGroup E] [iude : IsUltrametricDist E]
-    [NormedSpace 𝕜 E] {D : Submodule 𝕜 E}
-    {a : E} (ha1 : a ∉ D)
-    {F : Type*} [SeminormedAddCommGroup F]
-    [iud : IsUltrametricDist F] [NormedSpace 𝕜 F] [hsc : SphericallyCompleteSpace F]
-    (S : ↥D →L[𝕜] F) {𝒰 : Set (E →L[𝕜] F)} (h𝒰 : 𝒰.Nonempty)
-    {ε : ↑𝒰 → ℝ} (hε1 : ∀ (T : ↑𝒰), 0 < ε T) (hε2 : ∀ (U V : ↑𝒰), ‖U.val - V.val‖ ≤ max (ε U) (ε V))
-    (hε3 : ∀ (U : ↑𝒰) (x : ↥D), ‖S x - U.val ↑x‖ ≤ ε U * ‖x‖) :
+noncomputable def isBoundedLinearMap_codimOneExtension :
     IsBoundedLinearMap 𝕜 (codimOneExtension ha1 S h𝒰 hε1 hε2 hε3) where
   map_add := (isLinearMap_codimOneExtension ha1 S h𝒰 hε1 hε2 hε3).map_add
   map_smul := (isLinearMap_codimOneExtension ha1 S h𝒰 hε1 hε2 hε3).map_smul
@@ -316,6 +281,8 @@ noncomputable def isBoundedLinearMap_codimOneExtension {𝕜 : Type*}
       simpa using tt
     · rw [hx_eq]
       exact ContinuousLinearMap.le_opNorm h𝒰.some ↑x
+
+end
 
 /-- **Codimension-one Hahn–Banach step.** Given `S : D →L[𝕜] F` approximated on `D` by a
 compatible family `𝒰` (pairwise close in operator norm, each within tolerance `ε U` of `S`), and a
@@ -385,17 +352,19 @@ private structure PartialExtension (𝕜 : Type*) [NontriviallyNormedField 𝕜]
   i.e. `‖T x - U x‖ ≤ ε U * ‖x‖` for all `x : M`. -/
   hU : ∀ U : ↑𝒰, ∀ x : M, ‖T x- U.val x‖ ≤ (ε U) * ‖x‖
 
-/-- The poset of partial extensions is nonempty: `S` itself, defined on `D`, is a partial extension
-(its tolerance bounds are exactly the hypothesis `hε3`). This provides the base point required to
-start Zorn's lemma. -/
-private lemma instNonemptyPartialExtension
-    (𝕜 : Type*) [NontriviallyNormedField 𝕜]
+section
+variable (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     (E : Type*) [SeminormedAddCommGroup E] [IsUltrametricDist E] [NormedSpace 𝕜 E]
     {D : Submodule 𝕜 E}
     (F : Type*) [SeminormedAddCommGroup F] [IsUltrametricDist F]
     [NormedSpace 𝕜 F] [SphericallyCompleteSpace F]
     (S : D →L[𝕜] F) (𝒰 : Set (E →L[𝕜] F)) (h𝒰 : 𝒰.Nonempty)
     (ε : ↑𝒰 → ℝ)
+
+/-- The poset of partial extensions is nonempty: `S` itself, defined on `D`, is a partial extension
+(its tolerance bounds are exactly the hypothesis `hε3`). This provides the base point required to
+start Zorn's lemma. -/
+private lemma instNonemptyPartialExtension
     (hε3 : ∀ U : ↑𝒰, ∀ x : D, ‖S x - U.val x‖ ≤ ε U * ‖x‖)
     : Nonempty (PartialExtension 𝕜 E F S 𝒰 h𝒰 ε) :=
   Nonempty.intro { M := D, hDM := fun ⦃x⦄ a ↦ a, T := S, hT := by simp, hU := hε3 }
@@ -403,13 +372,7 @@ private lemma instNonemptyPartialExtension
 /-- The extension order on `PartialExtension`: `a ≤ b` when the domain of `a` is contained in that
 of `b` and `b.T` restricts to `a.T` on `a.M`. In other words, `b` extends `a`. This is the order
 along which Zorn's lemma builds ever-larger extensions of `S`. -/
-private instance instPartialOrderPartialExtension (𝕜 : Type*) [NontriviallyNormedField 𝕜]
-    (E : Type*) [SeminormedAddCommGroup E] [IsUltrametricDist E] [NormedSpace 𝕜 E]
-    {D : Submodule 𝕜 E}
-    (F : Type*) [SeminormedAddCommGroup F] [IsUltrametricDist F]
-    [NormedSpace 𝕜 F] [SphericallyCompleteSpace F]
-    (S : D →L[𝕜] F) (𝒰 : Set (E →L[𝕜] F)) (h𝒰 : 𝒰.Nonempty)
-    (ε : ↑𝒰 → ℝ)
+private instance instPartialOrderPartialExtension
     : PartialOrder (PartialExtension 𝕜 E F S 𝒰 h𝒰 ε) where
   le a b := ∃ hab : a.M ≤ b.M, ∀ x : a.M, b.T ⟨x.val, hab x.prop⟩ = a.T x
   le_refl a := ⟨fun ⦃x⦄ a ↦ a, by simp⟩
@@ -421,15 +384,20 @@ private instance instPartialOrderPartialExtension (𝕜 : Type*) [NontriviallyNo
     have hM : a.M = b.M := le_antisymm hab hba
     cases a; cases b; subst hM; congr; ext z; rw [← habT]
 
+end
+
+section
+variable (𝕜 : Type*) [NontriviallyNormedField 𝕜]
+    {E : Type*} [SeminormedAddCommGroup E] [IsUltrametricDist E] [NormedSpace 𝕜 E]
+    {D : Submodule 𝕜 E} {F : Type*} [SeminormedAddCommGroup F] [iudf : IsUltrametricDist F]
+    [NormedSpace 𝕜 F] [SphericallyCompleteSpace F] {S : ↥D →L[𝕜] F} {𝒰 : Set (E →L[𝕜] F)}
+    (h𝒰 : 𝒰.Nonempty) (ε : ↑𝒰 → ℝ)
+
 /-- Along any chain `P` of partial extensions, the family of domains `p ↦ p.val.M` is directed
 under inclusion. This directedness lets `gluedMap` compute the value at a point by descending to a
 single chain member whose domain already contains that point (via `Submodule.mem_iSup_of_directed`),
 and is the mechanism that turns a chain into a well-defined map on the union of its domains. -/
-private lemma directed_chain (𝕜 : Type*) [NontriviallyNormedField 𝕜]
-    {E : Type*} [SeminormedAddCommGroup E] [IsUltrametricDist E] [NormedSpace 𝕜 E]
-    {D : Submodule 𝕜 E} {F : Type*} [SeminormedAddCommGroup F] [IsUltrametricDist F]
-    [NormedSpace 𝕜 F] [SphericallyCompleteSpace F] {S : ↥D →L[𝕜] F} {𝒰 : Set (E →L[𝕜] F)}
-    (h𝒰 : 𝒰.Nonempty) (ε : ↑𝒰 → ℝ)
+private lemma directed_chain
     (P : Set (PartialExtension 𝕜 E F S 𝒰 h𝒰 ε)) (hP : IsChain (fun x1 x2 ↦ x1 ≤ x2) P)
     : Directed (fun x1 x2 ↦ x1 ≤ x2) fun p : P ↦ p.val.M := fun a b ↦
   (hP.directed a b).imp fun _ h ↦ ⟨h.1.1, h.2.1⟩
@@ -440,11 +408,7 @@ private lemma directed_chain (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 `p.T x`. Independence of the chosen member is the content of `gluedMap_eq`; linearity, boundedness
 and the extension/tolerance properties are then established in the following lemmas, making this the
 upper bound of the chain used by Zorn's lemma. -/
-private noncomputable def gluedMap (𝕜 : Type*) [NontriviallyNormedField 𝕜]
-    {E : Type*} [SeminormedAddCommGroup E] [IsUltrametricDist E] [NormedSpace 𝕜 E]
-    {D : Submodule 𝕜 E} {F : Type*} [SeminormedAddCommGroup F] [IsUltrametricDist F]
-    [NormedSpace 𝕜 F] [SphericallyCompleteSpace F] {S : ↥D →L[𝕜] F} {𝒰 : Set (E →L[𝕜] F)}
-    (h𝒰 : 𝒰.Nonempty) (ε : ↑𝒰 → ℝ)
+private noncomputable def gluedMap
     (P : Set (PartialExtension 𝕜 E F S 𝒰 h𝒰 ε))
     (hP : IsChain (fun x1 x2 ↦ x1 ≤ x2) P) (hhP : P.Nonempty) :
     ↥(iSup (fun p : P ↦ p.val.M)) → F := fun x ↦ by
@@ -455,11 +419,7 @@ private noncomputable def gluedMap (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 
 /-- `gluedMap` agrees with `p.T` on any chain member `p` whose module contains the point.
 This is the key well-definedness fact that all downstream proofs reduce to. -/
-private lemma gluedMap_eq (𝕜 : Type*) [NontriviallyNormedField 𝕜]
-    {E : Type*} [SeminormedAddCommGroup E] [IsUltrametricDist E] [NormedSpace 𝕜 E]
-    {D : Submodule 𝕜 E} {F : Type*} [SeminormedAddCommGroup F] [IsUltrametricDist F]
-    [NormedSpace 𝕜 F] [SphericallyCompleteSpace F] {S : ↥D →L[𝕜] F} {𝒰 : Set (E →L[𝕜] F)}
-    (h𝒰 : 𝒰.Nonempty) (ε : ↑𝒰 → ℝ)
+private lemma gluedMap_eq
     (P : Set (PartialExtension 𝕜 E F S 𝒰 h𝒰 ε))
     (hP : IsChain (fun x1 x2 ↦ x1 ≤ x2) P) (hhP : P.Nonempty)
     (x : ↥(iSup (fun p : P ↦ p.val.M))) (p : ↑P) (hp : x.val ∈ p.val.M) :
@@ -474,11 +434,7 @@ private lemma gluedMap_eq (𝕜 : Type*) [NontriviallyNormedField 𝕜]
 /-- The glued map `gluedMap` is `𝕜`-linear. Additivity and homogeneity are checked by pulling the
 relevant points down into a common chain member (using directedness) and invoking the linearity of
 that member's continuous linear map `p.T`, via `gluedMap_eq`. -/
-private def isLinearMap_of_gluedMap (𝕜 : Type*) [NontriviallyNormedField 𝕜]
-    {E : Type*} [SeminormedAddCommGroup E] [IsUltrametricDist E] [NormedSpace 𝕜 E]
-    {D : Submodule 𝕜 E} {F : Type*} [SeminormedAddCommGroup F] [IsUltrametricDist F]
-    [NormedSpace 𝕜 F] [SphericallyCompleteSpace F] {S : ↥D →L[𝕜] F} {𝒰 : Set (E →L[𝕜] F)}
-    (h𝒰 : 𝒰.Nonempty) (ε : ↑𝒰 → ℝ)
+private def isLinearMap_of_gluedMap
     (P : Set (PartialExtension 𝕜 E F S 𝒰 h𝒰 ε))
     (hP : IsChain (fun x1 x2 ↦ x1 ≤ x2) P) (hhP : P.Nonempty) :
     IsLinearMap 𝕜 (gluedMap 𝕜 h𝒰 ε P hP hhP) where
@@ -507,12 +463,8 @@ private def isLinearMap_of_gluedMap (𝕜 : Type*) [NontriviallyNormedField 𝕜
 `max (ε U₀) ‖U₀‖ * ‖x‖` for a fixed member `U₀` of the family `𝒰`, using the tolerance bound
 `p.hU` carried by each partial extension. This packaging as `IsBoundedLinearMap` lets the chain's
 upper bound be promoted to a continuous linear map in `bddAbove_of_chain_of_partial_extension`. -/
-private def isBoundedLinearMap_of_gluedMap (𝕜 : Type*) [NontriviallyNormedField 𝕜]
-    {E : Type*} [SeminormedAddCommGroup E] [IsUltrametricDist E] [NormedSpace 𝕜 E]
-    {D : Submodule 𝕜 E} {F : Type*} [SeminormedAddCommGroup F] [iudf : IsUltrametricDist F]
-    [NormedSpace 𝕜 F] [SphericallyCompleteSpace F] {S : ↥D →L[𝕜] F}
-    {𝒰 : Set (E →L[𝕜] F)} (h𝒰 : 𝒰.Nonempty)
-    (ε : ↑𝒰 → ℝ) (hε1 : ∀ (T : ↑𝒰), 0 < ε T)
+private def isBoundedLinearMap_of_gluedMap
+    (hε1 : ∀ (T : ↑𝒰), 0 < ε T)
     (P : Set (PartialExtension 𝕜 E F S 𝒰 h𝒰 ε))
     (hP : IsChain (fun x1 x2 ↦ x1 ≤ x2) P) (hhP : P.Nonempty) :
     IsBoundedLinearMap 𝕜 (gluedMap 𝕜 h𝒰 ε P hP hhP) where
@@ -537,12 +489,8 @@ extension whose domain is the union `⨆ p, p.val.M` and whose map is the contin
 from `gluedMap` (packaged via `isBoundedLinearMap_of_gluedMap`); `gluedMap_eq` shows it extends `S`
 and respects the tolerances, and that it dominates every member of the chain. This is the `BddAbove`
 hypothesis feeding `zorn_le_nonempty` in `exists_extension_opNorm_le`. -/
-private lemma bddAbove_of_chain_of_partial_extension (𝕜 : Type*) [NontriviallyNormedField 𝕜]
-    {E : Type*} [SeminormedAddCommGroup E] [IsUltrametricDist E] [NormedSpace 𝕜 E]
-    {D : Submodule 𝕜 E} {F : Type*} [SeminormedAddCommGroup F] [IsUltrametricDist F]
-    [NormedSpace 𝕜 F] [SphericallyCompleteSpace F] {S : ↥D →L[𝕜] F}
-    {𝒰 : Set (E →L[𝕜] F)} (h𝒰 : 𝒰.Nonempty)
-    (ε : ↑𝒰 → ℝ) (hε1 : ∀ (T : ↑𝒰), 0 < ε T)
+private lemma bddAbove_of_chain_of_partial_extension
+    (hε1 : ∀ (T : ↑𝒰), 0 < ε T)
     (P : Set (PartialExtension 𝕜 E F S 𝒰 h𝒰 ε))
     (hP : IsChain (fun x1 x2 ↦ x1 ≤ x2) P) (hhP : P.Nonempty) : BddAbove P := by
   use { M := iSup (fun p : P ↦ p.val.M)
@@ -574,6 +522,8 @@ private lemma bddAbove_of_chain_of_partial_extension (𝕜 : Type*) [Nontriviall
   refine ⟨hM', fun a ↦ ?_⟩
   change gluedMap 𝕜 h𝒰 ε P hP hhP ⟨↑a, hM' a.prop⟩ = M.T a
   exact gluedMap_eq 𝕜 h𝒰 ε P hP hhP ⟨↑a, hM' a.prop⟩ ⟨M, hM⟩ a.prop
+
+end
 
 
 /--

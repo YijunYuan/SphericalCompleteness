@@ -197,6 +197,12 @@ theorem unique (𝕜 : Type*) [NontriviallyNormedField 𝕜]
   exact nonempty_linearIsometryEquiv_of_isImmediate F₁ hF₁
     (embedding_isImmediate hF₂)
 
+section
+variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
+    {F : Type*} [NormedAddCommGroup F] [NormedSpace 𝕜 F] [IsUltrametricDist F]
+    (hF : IsSphericalCompletion 𝕜 E F)
+
 /--
 **Universal property of the spherical completion.**
 
@@ -205,10 +211,7 @@ through the canonical embedding of any spherical completion `F` of `E`: there is
 `T : F →ₗᵢ[𝕜] F'` with `T.comp (hF.is_sph_comp.choose) = f`. This is the extension property of the
 immediate embedding (`embedding_isImmediate`) into the spherically complete target `F'`.
 -/
-theorem universal_property {𝕜 : Type*} [NontriviallyNormedField 𝕜]
-    {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
-    {F : Type*} [NormedAddCommGroup F] [NormedSpace 𝕜 F] [IsUltrametricDist F]
-    (hF : IsSphericalCompletion 𝕜 E F)
+theorem universal_property
     {F' : Type*} [NormedAddCommGroup F'] [NormedSpace 𝕜 F'] [IsUltrametricDist F']
     [SphericallyCompleteSpace F'] (f : E →ₗᵢ[𝕜] F') :
     ∃ T : F →ₗᵢ[𝕜] F', T.comp (hF.is_sph_comp.choose) = f :=
@@ -223,11 +226,7 @@ containing itself, so minimality forces it to be everything, i.e. the embedding 
 Conversely, a surjective linear isometry makes `F` (which is spherically complete) linearly
 isometric to `E`, transporting spherical completeness back to `E`.
 -/
-theorem sphericallyCompleteSpace_iff_embedding_to_sphericalCompletion_surjective
-    {𝕜 : Type*} [NontriviallyNormedField 𝕜]
-    {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
-    {F : Type*} [NormedAddCommGroup F] [NormedSpace 𝕜 F] [IsUltrametricDist F]
-    (hF : IsSphericalCompletion 𝕜 E F) :
+theorem sphericallyCompleteSpace_iff_embedding_to_sphericalCompletion_surjective :
     SphericallyCompleteSpace E ↔ Function.Surjective (hF.is_sph_comp.choose) := by
   haveI := hF.toSphericallyCompleteSpace
   constructor
@@ -237,6 +236,8 @@ theorem sphericallyCompleteSpace_iff_embedding_to_sphericalCompletion_surjective
       (of_isometryEquiv (Isometry.isometryEquivOnRange hF.is_sph_comp.choose.isometry)) le_rfl)
   · exact fun h ↦ of_isometryEquiv
       (LinearIsometryEquiv.ofSurjective _ h).symm.toIsometryEquiv
+
+end
 
 end IsSphericalCompletion
 

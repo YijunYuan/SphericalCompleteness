@@ -69,6 +69,11 @@ def IsImmediate {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     (f : E →ₗᵢ[𝕜] F) : Prop :=
 ∀ v : F, (v ⟂ₘ LinearMap.range f.toLinearMap) → v = 0
 
+def IsImmediateExtension {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+    {E : Type u} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
+    (D : Submodule 𝕜 E) : Prop :=
+    ∀ v : E, (v ⟂ₘ D) → v = 0
+
 /--
 `MaximallyComplete 𝕜 E` expresses a maximal completeness (a spherical-completeness–style)
 property of the ultrametric normed `𝕜`-vector space `E`.
@@ -101,6 +106,14 @@ private noncomputable def weakInv {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     {F : Type*} [NormedAddCommGroup F] [NormedSpace 𝕜 F]
     (f : E →ₗᵢ[𝕜] F) : ↥f.range →ₗᵢ[𝕜] E := f.equivRange.symm.toLinearIsometry
 
+section
+variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
+    {F : Type*} [NormedAddCommGroup F] [NormedSpace 𝕜 F] [IsUltrametricDist F]
+    {H : Type*} [NormedAddCommGroup H] [NormedSpace 𝕜 H] [IsUltrametricDist H]
+    [SphericallyCompleteSpace H]
+
+omit [SphericallyCompleteSpace H] in
 /--
 Key norm-preservation step behind `IsImmediate.exists_linearIsometry_comp_eq`.
 
@@ -114,11 +127,7 @@ The upper bound `‖h v‖ ≤ ‖v‖` follows from `‖h‖ ≤ 1`, while the 
 any `v` can be approximated within distance `< ‖v‖` by a vector in the range of `f`, on which `h`
 already preserves norms. This is what promotes the continuous linear map `h` to a linear isometry.
 -/
-private lemma norm_map {𝕜 : Type*}
-    [NontriviallyNormedField 𝕜] {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
-    [IsUltrametricDist E] {F : Type*} [NormedAddCommGroup F] [NormedSpace 𝕜 F]
-    [IsUltrametricDist F] {H : Type*} [NormedAddCommGroup H] [NormedSpace 𝕜 H]
-    [IsUltrametricDist H] [SphericallyCompleteSpace H] (f : E →ₗᵢ[𝕜] F) (hf : IsImmediate f)
+private lemma norm_map (f : E →ₗᵢ[𝕜] F) (hf : IsImmediate f)
     (g : E →ₗᵢ[𝕜] H) (h : F →L[𝕜] H)
     (hf2 : ‖h‖ = ‖g.toContinuousLinearMap.comp (weakInv f).toContinuousLinearMap‖)
     (hf1 : ∀ (v : F) (x : E) (h_1 : f x = v), h v = g ((weakInv f) ⟨v, Exists.intro
@@ -166,11 +175,7 @@ by vectors of `range f`, on which the extension already preserves norms.
 The conclusion is stated using `LinearIsometry.comp` with explicit type ascriptions on its
 arguments to avoid elaboration issues.
 -/
-theorem exists_linearIsometry_comp_eq {𝕜 : Type*} [NontriviallyNormedField 𝕜]
-    {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
-    {F : Type*} [NormedAddCommGroup F] [NormedSpace 𝕜 F] [IsUltrametricDist F]
-    {H : Type*} [NormedAddCommGroup H] [NormedSpace 𝕜 H] [IsUltrametricDist H]
-    [SphericallyCompleteSpace H]
+theorem exists_linearIsometry_comp_eq
     (f : E →ₗᵢ[𝕜] F) (hf : IsImmediate f)
     (g : E →ₗᵢ[𝕜] H) :
     ∃ (h : F →ₗᵢ[𝕜] H), LinearIsometry.comp (h : F →ₗᵢ[𝕜] H) (f : E →ₗᵢ[𝕜] F) = g := by
@@ -189,6 +194,8 @@ theorem exists_linearIsometry_comp_eq {𝕜 : Type*} [NontriviallyNormedField �
     Function.comp_apply, h]
   rw [hf1 (f z) z rfl]
   exact congrArg g (f.equivRange.symm_apply_apply z)
+
+end
 
 /-- Metric orthogonality of `x : q` to the range of the inclusion `p ≤ q`, computed inside `q`,
 is the same as metric orthogonality of `(x : E₀)` to `p` in the ambient space. This is the key

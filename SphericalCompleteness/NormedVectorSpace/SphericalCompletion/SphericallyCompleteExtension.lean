@@ -170,6 +170,11 @@ private noncomputable def quotientMkSection {𝕜 : Type*} [NontriviallyNormedFi
             (quotientMkSection E hsr hanti (m + 1)).val
             (quotientMkSection E hsr hanti (m + 1)).prop).choose_spec.1⟩
 
+section
+variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+    (E : ℕ → Type*) [∀ i, NormedAddCommGroup (E i)] [∀ i, NormedSpace 𝕜 (E i)]
+    [∀ i, IsUltrametricDist (E i)]
+
 /-- The two defining properties of `quotientMkSection`, packaged together. For every index `i`:
 
 * `(quotientMkSection E hsr hanti i)` really is a representative of the center `c i`, i.e. its class
@@ -178,9 +183,7 @@ private noncomputable def quotientMkSection {𝕜 : Type*} [NontriviallyNormedFi
 
 These are read off directly from the recursive construction and the guarantee provided by
 `exists_norm_sub_lt`. -/
-private lemma mk_eq_and_norm_sub_lt {𝕜 : Type*} [NontriviallyNormedField 𝕜]
-    (E : ℕ → Type*) [(i : ℕ) → NormedAddCommGroup (E i)] [(i : ℕ) → NormedSpace 𝕜 (E i)]
-    [∀ (i : ℕ), IsUltrametricDist (E i)]
+private lemma mk_eq_and_norm_sub_lt
     {c : ℕ → ↥(lp E ⊤) ⧸ c₀ 𝕜 E} {r : ℕ → NNReal} (hsr : StrictAnti r)
     (hanti : Antitone fun i ↦ Metric.closedBall (c i) ↑(r i))
     : ∀ i : ℕ,
@@ -202,9 +205,7 @@ guarantees that the diagonal sequence `fun n ↦ (quotientMkSection E hsr hanti 
 and hence defines an element of `lp E ⊤`. The proof telescopes `section n - section 1` through the
 consecutive differences controlled by `mk_eq_and_norm_sub_lt` and uses the strong (ultrametric)
 triangle inequality. -/
-private lemma quotientMkSection_norm_apply_self_le_max {𝕜 : Type*} [NontriviallyNormedField 𝕜]
-    (E : ℕ → Type*) [(i : ℕ) → NormedAddCommGroup (E i)] [(i : ℕ) → NormedSpace 𝕜 (E i)]
-    [∀ (i : ℕ), IsUltrametricDist (E i)]
+private lemma quotientMkSection_norm_apply_self_le_max
     ⦃c : ℕ → ↥(lp E ⊤) ⧸ c₀ 𝕜 E⦄ ⦃r : ℕ → NNReal⦄ (hsr : StrictAnti r)
     (hanti : Antitone fun i ↦ closedBall (c i) ↑(r i)) :
     ∀ (n : ℕ), ‖((quotientMkSection E hsr hanti n).val : (i : ℕ) → E i) n‖ ≤
@@ -252,9 +253,7 @@ makes nested families of closed balls meet. Given such a family, one lifts it to
 in `lp E ⊤` (via `quotientMkSection`), assembles a diagonal candidate sequence, and checks it lies
 in every ball using the ultrametric estimates and a `c₀`-correction.
 -/
-instance sphericallyCompleteSpace_lp_quotient_c₀ {𝕜 : Type*} [NontriviallyNormedField 𝕜]
-    (E : ℕ → Type*) [∀ i, NormedAddCommGroup (E i)]
-    [∀ i, NormedSpace 𝕜 (E i)] [∀ i, IsUltrametricDist (E i)] :
+instance sphericallyCompleteSpace_lp_quotient_c₀ :
     SphericallyCompleteSpace ((lp E ⊤)⧸ c₀ 𝕜 E) := by
   rw [iff_strictAnti_radius]
   intro c r hsr hanti
@@ -357,6 +356,8 @@ instance sphericallyCompleteSpace_lp_quotient_c₀ {𝕜 : Type*} [NontriviallyN
   rw [← dist_eq_norm, ← mem_closedBall]
   refine (hanti (Nat.le_succ i)) ?_
   simp only [Nat.succ_eq_add_one, mem_closedBall, dist_self, NNReal.zero_le_coe]
+
+end
 
 /-- A linear isometric embedding of an arbitrary normed `𝕜`-space `E` into a spherically complete
 space, namely the constant-sequence map `x ↦ [x, x, x, …]` into `lp (fun _ ↦ E) ⊤ ⧸ c₀ 𝕜 _`.

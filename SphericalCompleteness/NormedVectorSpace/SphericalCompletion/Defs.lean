@@ -60,7 +60,7 @@ and is unique up to linear isometry, is proved in `Basic`.
 class IsSphericalCompletion (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     (E : Type*) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
     (F : Type*) [NormedAddCommGroup F] [NormedSpace 𝕜 F] [IsUltrametricDist F]
-    extends SphericallyCompleteSpace F where
+    : Prop extends SphericallyCompleteSpace F where
   /-- There is a linear isometry `ι : E →ₗᵢ[𝕜] F` that is minimal among spherically complete
   extensions: every spherically complete submodule `D ≤ F` containing `ι.range` is all of `F`. -/
   is_sph_comp : ∃ ι : E →ₗᵢ[𝕜] F,
