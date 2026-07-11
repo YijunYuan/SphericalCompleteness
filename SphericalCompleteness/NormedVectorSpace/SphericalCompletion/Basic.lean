@@ -40,7 +40,7 @@ contradicts immediacy.
 * `SphericallyCompleteSpace.IsSphericalCompletion.embedding_isImmediate`: any embedding realising a
   spherical completion of `E` is an immediate extension.
 * `SphericallyCompleteSpace.IsSphericalCompletion.unique`: any two spherical completions of `E` have
-  linearly isometric codomains.
+  linearly isometric codomains, via an equivalence compatible with the two embeddings.
 * `SphericallyCompleteSpace.IsSphericalCompletion.universal_property`: linear isometries out of `E`
   into a spherically complete space factor through any spherical-completion embedding of `E`.
 * `SphericallyCompleteSpace.iff_maximallyComplete`: `E` is spherically complete if and only if it
@@ -159,35 +159,41 @@ theorem embedding_isImmediate {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 Uniqueness of the spherical completion (immediate-extension form).
 
 If `ι₁ : E →ₗᵢ[𝕜] F₁` realises `F₁` as a spherical completion of `E` and `f : E →ₗᵢ[𝕜] F₂` is an
-immediate extension into a spherically complete space `F₂`, then `F₁` and `F₂` are linearly
-isometric.
+immediate extension into a spherically complete space `F₂`, then there is a linear isometric
+equivalence `T : F₂ ≃ₗᵢ[𝕜] F₁` intertwining the two embeddings, i.e. `T.comp f = ι₁`.
 
 Extend `f` along its own immediacy to a linear isometry `T : F₂ →ₗᵢ[𝕜] F₁` with `T.comp f = ι₁`.
 The range of `T` is spherically complete and contains the range of `ι₁`, so minimality of the
-spherical completion `F₁` forces `T` to be surjective, hence a linear isometric equivalence.
+spherical completion `F₁` forces `T` to be surjective, hence a linear isometric equivalence; the
+intertwining identity survives the upgrade since the underlying map is unchanged.
 -/
-theorem nonempty_linearIsometryEquiv_of_isImmediate
+theorem exists_linearIsometryEquiv_of_isImmediate
     {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
     {F₁ : Type*} [NormedAddCommGroup F₁] [NormedSpace 𝕜 F₁] [IsUltrametricDist F₁]
     {ι₁ : E →ₗᵢ[𝕜] F₁} (hF₁ : IsSphericalCompletion ι₁)
     {F₂ : Type*} [NormedAddCommGroup F₂] [NormedSpace 𝕜 F₂] [IsUltrametricDist F₂]
     [SphericallyCompleteSpace F₂]
-    {f : E →ₗᵢ[𝕜] F₂} (hf : IsImmediate f) : Nonempty (F₁ ≃ₗᵢ[𝕜] F₂) := by
+    {f : E →ₗᵢ[𝕜] F₂} (hf : IsImmediate f) :
+    ∃ T : F₂ ≃ₗᵢ[𝕜] F₁, T.toLinearIsometry.comp f = ι₁ := by
   rcases IsImmediate.exists_linearIsometry_comp_eq f hf ι₁ with ⟨T, hT⟩
   have hmin := hF₁.is_sph_comp (LinearMap.range T.toLinearMap)
     (of_isometryEquiv (Isometry.isometryEquivOnRange T.isometry))
   rw [← hT] at hmin
-  exact ⟨(LinearIsometryEquiv.ofSurjective T (LinearMap.range_eq_top.mp
-    (hmin (by apply LinearMap.range_comp_le_range)))).symm⟩
+  let e : F₂ ≃ₗᵢ[𝕜] F₁ := LinearIsometryEquiv.ofSurjective T (LinearMap.range_eq_top.mp
+    (hmin (by apply LinearMap.range_comp_le_range)))
+  have he : e.toLinearIsometry = T := LinearIsometry.ext fun x ↦ Eq.refl (e.toLinearIsometry x)
+  exact ⟨e, by simpa [he] using hT⟩
 
 /--
 Uniqueness of the spherical completion.
 
 Any two spherical completions of the same space `E`, given by embeddings `ι₁ : E →ₗᵢ[𝕜] F₁` and
-`ι₂ : E →ₗᵢ[𝕜] F₂`, have linearly isometric codomains `F₁` and `F₂`. The embedding `ι₂` is an
-immediate extension (`embedding_isImmediate`), so `nonempty_linearIsometryEquiv_of_isImmediate`
-applied to `ι₁` yields the equivalence.
+`ι₂ : E →ₗᵢ[𝕜] F₂`, have linearly isometric codomains: there is a linear isometric equivalence
+`f : F₁ ≃ₗᵢ[𝕜] F₂` compatible with the embeddings, i.e. `f.comp ι₁ = ι₂`. The embedding `ι₂` is an
+immediate extension (`embedding_isImmediate`), so `exists_linearIsometryEquiv_of_isImmediate`
+applied to `ι₁` yields an equivalence `T : F₂ ≃ₗᵢ[𝕜] F₁` with `T.comp ι₂ = ι₁`; its inverse `T.symm`
+is the required intertwining equivalence.
 -/
 theorem unique {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
@@ -195,11 +201,12 @@ theorem unique {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     {F₂ : Type*} [NormedAddCommGroup F₂] [NormedSpace 𝕜 F₂] [IsUltrametricDist F₂]
     {ι₁ : E →ₗᵢ[𝕜] F₁} {ι₂ : E →ₗᵢ[𝕜] F₂} :
     IsSphericalCompletion ι₁ → IsSphericalCompletion ι₂ →
-    Nonempty (F₁ ≃ₗᵢ[𝕜] F₂) := by
+    ∃ f : F₁ ≃ₗᵢ[𝕜] F₂, f.toLinearIsometry.comp ι₁ = ι₂ := by
   intro hF₁ hF₂
-  haveI := hF₂.toSphericallyCompleteSpace
-  exact nonempty_linearIsometryEquiv_of_isImmediate hF₁
-    (embedding_isImmediate hF₂)
+  rcases exists_linearIsometryEquiv_of_isImmediate hF₁ (embedding_isImmediate hF₂) with ⟨T, hT⟩
+  refine ⟨T.symm, ?_⟩
+  ext x
+  exact T.injective <| by simpa using (congrArg (fun g => g x) hT).symm
 
 section
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
