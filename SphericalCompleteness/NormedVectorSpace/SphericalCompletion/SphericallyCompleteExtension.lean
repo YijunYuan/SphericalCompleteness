@@ -369,8 +369,7 @@ noncomputable def canonicalSphericallyCompleteExtension (𝕜 : Type*) [Nontrivi
     (E : Type*) [NormedAddCommGroup E] [NormedSpace 𝕜 E] :
     E →ₗᵢ[𝕜] ((lp (fun (_ : ℕ) ↦ E) ⊤)⧸ c₀ 𝕜 (fun (_ : ℕ) ↦ E)) where
   toFun x := by
-    refine (QuotientAddGroup.mk' (c₀ 𝕜 (fun x ↦ E)).toAddSubgroup) (⟨fun (_ : ℕ) ↦ x, ?_⟩)
-    refine memℓp_infty ⟨‖x‖, ?_⟩
+    refine (QuotientAddGroup.mk' _) (⟨fun (_ : ℕ) ↦ x, memℓp_infty ⟨‖x‖, ?_⟩⟩)
     simp only [upperBounds, Set.range_const, Set.mem_singleton_iff, forall_eq, Set.mem_setOf_eq,
       le_refl]
   map_add' x y := rfl
@@ -388,8 +387,7 @@ noncomputable def canonicalSphericallyCompleteExtension (𝕜 : Type*) [Nontrivi
       change (⨆ _ : ℕ, ‖x‖) = ‖x‖
       simp
     refine le_antisymm ?_ ?_
-    · refine le_trans (Submodule.Quotient.norm_mk_le (S := c₀ 𝕜 fun _ ↦ E) v) ?_
-      exact hvnorm.le
+    · exact le_trans (Submodule.Quotient.norm_mk_le (S := c₀ 𝕜 fun _ ↦ E) v) hvnorm.le
     · rw [quotient_norm_mk_eq (c₀ 𝕜 fun _ ↦ E).toAddSubgroup v]
       apply le_csInf
       · refine ⟨‖x‖, ?_⟩

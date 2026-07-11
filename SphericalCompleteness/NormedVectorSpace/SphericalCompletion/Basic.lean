@@ -67,7 +67,8 @@ nonzero; a nonzero vector `b` of `orthComp 𝕜 M` is metrically orthogonal to `
 of the embedding. But immediacy of the maximal extension forbids a nonzero vector orthogonal to
 that range — a contradiction. Therefore every such `M` equals `⊤`.
 -/
-instance {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+instance instIsSphericalCompletionOfMaximalImmediateExtensionSubmodule
+    {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
     {E₀ : Type*} [NormedAddCommGroup E₀] [NormedSpace 𝕜 E₀] [IsUltrametricDist E₀]
     [SphericallyCompleteSpace E₀]
@@ -226,7 +227,7 @@ containing itself, so minimality forces it to be everything, i.e. the embedding 
 Conversely, a surjective linear isometry makes `F` (which is spherically complete) linearly
 isometric to `E`, transporting spherical completeness back to `E`.
 -/
-theorem sphericallyCompleteSpace_iff_embedding_to_sphericalCompletion_surjective :
+theorem iff_embedding_to_sphericalCompletion_surjective :
     SphericallyCompleteSpace E ↔ Function.Surjective (hF.is_sph_comp.choose) := by
   haveI := hF.toSphericallyCompleteSpace
   constructor
