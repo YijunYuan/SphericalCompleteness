@@ -63,8 +63,8 @@ theorem iff_antitone_radius :
     ∀ ⦃ci : ℕ → α⦄, ∀ ⦃ri : ℕ → NNReal⦄,
     Antitone ri →
     Antitone (fun i ↦ closedBall (ci i) (ri i)) → (⋂ i, closedBall (ci i) (ri i)).Nonempty := by
-  refine ⟨fun h ci ri hri hanti ↦ h.isSphericallyComplete hanti, fun h ↦ ?_⟩
-  · refine { isSphericallyComplete := ?_ }
+  refine ⟨fun h ci ri hri hanti ↦ h.nonempty_iInter_of_antitone hanti, fun h ↦ ?_⟩
+  · refine { nonempty_iInter_of_antitone := ?_ }
     intro c r hanti
     let r' : ℕ → NNReal := fun n ↦ sInf {r k | k ≤ n}
     have hr'_Antitone : Antitone r' := fun m n hmn ↦
@@ -117,7 +117,7 @@ theorem iff_strictAnti_radius :
     ∀ ⦃ci : ℕ → α⦄, ∀ ⦃ri : ℕ → NNReal⦄,
     StrictAnti ri →
     Antitone (fun i ↦ closedBall (ci i) (ri i)) → (⋂ i, closedBall (ci i) (ri i)).Nonempty := by
-  refine ⟨fun h ci ri hri hanti ↦ h.isSphericallyComplete hanti, ?_⟩
+  refine ⟨fun h ci ri hri hanti ↦ h.nonempty_iInter_of_antitone hanti, ?_⟩
   · rw [iff_antitone_radius α]
     intro h ci ri hri hanti
     rcases eventually_stable_or_exists_strictAnti_of_antitone hri with hc | hc
@@ -281,7 +281,7 @@ theorem iff_pairwise_inter_nonempty :
     ∀ S : Set (α × NNReal), S.Nonempty →
     (∀ w1 w2 : ↑S, (closedBall w1.val.1 w1.val.2 ∩ closedBall w2.val.1 w2.val.2).Nonempty) →
     (⋂ w : ↑S, closedBall w.val.1 w.val.2).Nonempty) := by
-  refine ⟨fun h S hSne h'↦ ?_, fun h ↦ { isSphericallyComplete := ?_ }⟩
+  refine ⟨fun h S hSne h'↦ ?_, fun h ↦ { nonempty_iInter_of_antitone := ?_ }⟩
   · if hw : ∃ w ∈ S, w.2 = sInf {w.2 | w ∈ S} then
       rcases hw with ⟨w, hwS, hwr⟩
       have : ∀ w' ∈ S, closedBall w.1 w.2 ⊆ closedBall w'.1 w'.2 := by
@@ -302,7 +302,7 @@ theorem iff_pairwise_inter_nonempty :
         simp only [Prod.exists, exists_eq_right, Set.mem_setOf_eq]
         use w.1
       haveI := Set.Nonempty.to_subtype hSne
-      rcases h.isSphericallyComplete (antitone_of_countableChainOfBall h' hw) with ⟨u, hu⟩
+      rcases h.nonempty_iInter_of_antitone (antitone_of_countableChainOfBall h' hw) with ⟨u, hu⟩
       use u
       simp only [Set.mem_iInter] at *
       intro s
@@ -370,7 +370,7 @@ instance _root_.Prod.sphericallyCompleteSpace {E F : Type*}
     [PseudoMetricSpace E] [PseudoMetricSpace F]
     [hse : SphericallyCompleteSpace E] [hsf : SphericallyCompleteSpace F] :
     SphericallyCompleteSpace (E × F) where
-  isSphericallyComplete := by
+  nonempty_iInter_of_antitone := by
     intro ci ri hanti
     have hE : Antitone (fun i ↦ closedBall (ci i).1 (ri i)) := fun m n hmn x hx ↦ by
       have h2 := hanti hmn (show (x, (ci n).2) ∈ closedBall (ci n) (ri n) by
@@ -382,8 +382,8 @@ instance _root_.Prod.sphericallyCompleteSpace {E F : Type*}
         simpa [Prod.dist_eq, sup_le_iff, mem_closedBall] using hx)
       simp only [mem_closedBall, Prod.dist_eq, sup_le_iff] at h2 ⊢
       exact h2.2
-    replace hE := hse.isSphericallyComplete hE
-    replace hF := hsf.isSphericallyComplete hF
+    replace hE := hse.nonempty_iInter_of_antitone hE
+    replace hF := hsf.nonempty_iInter_of_antitone hF
     simp only [Set.nonempty_iInter, mem_closedBall, Prod.exists] at *
     obtain ⟨xE, hxE⟩ := hE
     obtain ⟨xF, hxF⟩ := hF
@@ -407,7 +407,7 @@ instance _root_.Pi.sphericallyCompleteSpace {ι : Type*} [Fintype ι] {E : ι �
     [∀ i, PseudoMetricSpace (E i)]
     [hh : ∀ i, SphericallyCompleteSpace (E i)] :
     SphericallyCompleteSpace (∀ i, E i) where
-  isSphericallyComplete := by
+  nonempty_iInter_of_antitone := by
     intro ci ri hanti
     have hE : ∀ i, Antitone (fun n ↦ closedBall (ci n i) (ri n)) := by
       intro i m n hmn
@@ -433,13 +433,13 @@ instance _root_.Pi.sphericallyCompleteSpace {ι : Type*} [Fintype ι] {E : ι �
         simpa only [↓reduceDIte] using hanti
       · exact (ri m).prop
       · exact (ri n).prop
-    use fun i ↦ ((hh i).isSphericallyComplete (hE i)).choose
+    use fun i ↦ ((hh i).nonempty_iInter_of_antitone (hE i)).choose
     simp only [Set.mem_iInter]
     intro i
     rw [closedBall_pi]
     · simp only [Set.mem_pi, Set.mem_univ, forall_const]
       intro j
-      exact Set.mem_iInter.1 ((hh j).isSphericallyComplete (hE j)).choose_spec i
+      exact Set.mem_iInter.1 ((hh j).nonempty_iInter_of_antitone (hE j)).choose_spec i
     · exact (ri i).prop
 
 /-- The one-point space `PUnit` is spherically complete. Being trivially proper (its closed balls

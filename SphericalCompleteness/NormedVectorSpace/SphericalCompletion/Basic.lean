@@ -76,7 +76,7 @@ instance instIsSphericalCompletionOfMaximalImmediateExtensionSubmodule
     [SphericallyCompleteSpace E₀]
     (f : E →ₗᵢ[𝕜] E₀) :
     IsSphericalCompletion (maximalImmediateExtensionEmbedding f) where
-  is_sph_comp := by
+  minimal_of_sphericallyComplete := by
     intro M hsc hM
     by_contra hc
     have hMo : orthComp 𝕜 M ≠ ⊥ := by
@@ -149,7 +149,7 @@ theorem embedding_isImmediate {𝕜 : Type*} [NontriviallyNormedField 𝕜]
   obtain ⟨hSle, hSimm⟩ := mem_immediateExtensionSubmodules_iff.1
     (exists_maximal_immediateExtensionSubmodule 𝕜 E F ι).choose_spec.1
   have hStop : (exists_maximal_immediateExtensionSubmodule 𝕜 E F ι).choose = ⊤ :=
-    hF.is_sph_comp _ inferInstance hSle
+    hF.minimal_of_sphericallyComplete _ inferInstance hSle
   intro v hv
   have hvS : v ∈ (exists_maximal_immediateExtensionSubmodule 𝕜 E F ι).choose := by
     rw [hStop]; exact Submodule.mem_top
@@ -177,7 +177,7 @@ theorem exists_linearIsometryEquiv_of_isImmediate
     {f : E →ₗᵢ[𝕜] F₂} (hf : IsImmediate f) :
     ∃ T : F₂ ≃ₗᵢ[𝕜] F₁, T.toLinearIsometry.comp f = ι₁ := by
   rcases IsImmediate.exists_linearIsometry_comp_eq f hf ι₁ with ⟨T, hT⟩
-  have hmin := hF₁.is_sph_comp (LinearMap.range T.toLinearMap)
+  have hmin := hF₁.minimal_of_sphericallyComplete (LinearMap.range T.toLinearMap)
     (of_isometryEquiv (Isometry.isometryEquivOnRange T.isometry))
   rw [← hT] at hmin
   let e : F₂ ≃ₗᵢ[𝕜] F₁ := LinearIsometryEquiv.ofSurjective T (LinearMap.range_eq_top.mp
@@ -243,7 +243,7 @@ theorem iff_embedding_to_sphericalCompletion_surjective
     SphericallyCompleteSpace E ↔ Function.Surjective ι := by
   constructor
   · intro h
-    exact LinearMap.range_eq_top.mp (hF.is_sph_comp
+    exact LinearMap.range_eq_top.mp (hF.minimal_of_sphericallyComplete
       (LinearMap.range ι.toLinearMap)
       (of_isometryEquiv (Isometry.isometryEquivOnRange ι.isometry)) le_rfl)
   · exact fun h ↦ of_isometryEquiv

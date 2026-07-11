@@ -330,7 +330,7 @@ theorem not_sphericallyCompleteSpace_of_isSphericallyDense_separable_ultrametric
     [nemp : Nonempty α] [hsep : SeparableSpace α] :
     ¬ SphericallyCompleteSpace α := by
   by_contra hc
-  replace hc := hc.isSphericallyComplete
+  replace hc := hc.nonempty_iInter_of_antitone
   if hinf : Nonempty (Denumerable hsep.exists_countable_dense.choose) then
     specialize hc <| nestedBallChain_decreasing α hinf.some
     simp only [Set.nonempty_iInter] at hc

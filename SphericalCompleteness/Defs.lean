@@ -35,7 +35,7 @@ This is a standard completeness-type axiom used in non-Archimedean/ultrametric s
 but it is stated here for general pseudo-metric spaces.
 -/
 class SphericallyCompleteSpace (α : Type*) [PseudoMetricSpace α] : Prop where
-  isSphericallyComplete : ∀ ⦃ci : ℕ → α⦄, ∀ ⦃ri : ℕ → NNReal⦄,
+  nonempty_iInter_of_antitone : ∀ ⦃ci : ℕ → α⦄, ∀ ⦃ri : ℕ → NNReal⦄,
     Antitone (fun i ↦ closedBall (ci i) (ri i)) → (⋂ i, closedBall (ci i) (ri i)).Nonempty
 
 namespace SphericallyCompleteSpace
@@ -48,7 +48,7 @@ antitone (nested) family of closed balls whose radii tend to `0` has a nonempty 
 A spherically complete space provides exactly this nonempty-intersection property for nested
 balls, so we can rewrite completeness using
 `completeSpace_iff_nonempty_iInter_closedBall_of_tendsto_zero` and discharge the
-resulting goal via `SphericallyCompleteSpace.isSphericallyComplete`.
+resulting goal via `SphericallyCompleteSpace.nonempty_iInter_of_antitone`.
 
 This instance is useful for transferring results stated for `CompleteSpace` to contexts where
 spherical completeness is assumed.
@@ -56,7 +56,7 @@ spherical completeness is assumed.
 instance instCompleteOfSphericallyComplete (α : Type*)
     [PseudoMetricSpace α] [sc : SphericallyCompleteSpace α] : CompleteSpace α := by
   rw [completeSpace_iff_nonempty_iInter_closedBall_of_tendsto_zero]
-  exact fun _ _ hanti _ ↦ sc.isSphericallyComplete hanti
+  exact fun _ _ hanti _ ↦ sc.nonempty_iInter_of_antitone hanti
 
 /--
 Constructs a `SphericallyCompleteSpace` instance from `ProperSpace`.
@@ -76,7 +76,7 @@ closed balls, using:
 -/
 instance instSphericallyCompleteSpaceOfProperSpace (α : Type*)
     [PseudoMetricSpace α] [ProperSpace α] : SphericallyCompleteSpace α where
-  isSphericallyComplete := by
+  nonempty_iInter_of_antitone := by
     intro ci ri hanti
     exact IsCompact.nonempty_iInter_of_sequence_nonempty_isCompact_isClosed
       (fun i ↦ closedBall (ci i) ↑(ri i)) (fun _ ↦ hanti (by linarith))
@@ -100,14 +100,14 @@ theorem of_isometryEquiv {E F : Type*}
     [PseudoMetricSpace E] [PseudoMetricSpace F]
     [he : SphericallyCompleteSpace E]
     (f : E ≃ᵢ F) : SphericallyCompleteSpace F where
-  isSphericallyComplete := by
+  nonempty_iInter_of_antitone := by
     intro ci ri hanti
     let ci' := fun n ↦ f.symm (ci n)
     have hanti' : Antitone (fun i ↦ closedBall (ci' i) (ri i)) := by
       intro m n hmn
       simp only [ci', Set.le_eq_subset, ← IsometryEquiv.preimage_closedBall f]
       exact Set.preimage_mono (hanti hmn)
-    rcases he.isSphericallyComplete hanti' with ⟨z',hz'⟩
+    rcases he.nonempty_iInter_of_antitone hanti' with ⟨z',hz'⟩
     simp only [Set.mem_iInter, mem_closedBall, Set.nonempty_iInter] at *
     refine ⟨f z', fun i ↦ ?_⟩
     rw [← IsometryEquiv.apply_symm_apply f (ci i), Isometry.dist_eq f.isometry]

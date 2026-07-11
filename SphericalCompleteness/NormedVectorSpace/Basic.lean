@@ -59,7 +59,7 @@ instance instSphericallyCompleteSpaceSpanSingleton (𝕜 : Type*) [NontriviallyN
     [scsk : SphericallyCompleteSpace 𝕜]
     {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
     (z : E) : SphericallyCompleteSpace (Submodule.span 𝕜 {z}) where
-  isSphericallyComplete := by
+  nonempty_iInter_of_antitone := by
     if h: z = 0 then
       rw [h, Submodule.span_zero_singleton]
       intro ci ri hanti
@@ -67,7 +67,7 @@ instance instSphericallyCompleteSpaceSpanSingleton (𝕜 : Type*) [NontriviallyN
       simp [(Submodule.eq_zero_of_bot_submodule (ci i) : ci i = 0)]
     else
     intro ci ri hanti
-    have := @scsk.isSphericallyComplete
+    have := @scsk.nonempty_iInter_of_antitone
       (fun n ↦ (Submodule.mem_span_singleton.1 (ci n).prop).choose)
       (fun n ↦ ⟨ri n / ‖z‖, div_nonneg NNReal.zero_le_coe <| norm_nonneg z⟩) (by
       refine antitone_nat_of_succ_le ?_
@@ -149,8 +149,8 @@ theorem of_finiteDimensional
     (∃ M : Subspace 𝕜 E, Module.finrank 𝕜 M = n ∧ SphericallyCompleteSpace M) by
     rcases h (Module.finrank 𝕜 E) le_rfl with ⟨M, hM1, hM2⟩
     rw [Submodule.eq_top_of_finrank_eq hM1] at hM2
-    refine { isSphericallyComplete := fun ci ri h ↦ ?_ }
-    rcases @hM2.isSphericallyComplete (fun i ↦ ⟨ci i,trivial⟩) ri (
+    refine { nonempty_iInter_of_antitone := fun ci ri h ↦ ?_ }
+    rcases @hM2.nonempty_iInter_of_antitone (fun i ↦ ⟨ci i,trivial⟩) ri (
       fun _ _ hab _ hz ↦ (h hab) hz
     ) with ⟨x, hx⟩
     use x.val

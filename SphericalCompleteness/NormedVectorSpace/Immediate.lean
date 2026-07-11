@@ -338,7 +338,7 @@ instance instSphericallyCompleteSpaceOfMaximalImmediateExtensionSubmodule
   by_contra hc
   push Not at hc
   rcases hc with ⟨c, r, hsr, hanti, hemp⟩
-  have := @hsc.isSphericallyComplete (fun n ↦ (c n).1) r (by
+  have := @hsc.nonempty_iInter_of_antitone (fun n ↦ (c n).1) r (by
     intro m n hmn z hz
     simp only [mem_closedBall] at *
     refine le_trans (iud.dist_triangle_max z (c n).val (c m).val) ?_

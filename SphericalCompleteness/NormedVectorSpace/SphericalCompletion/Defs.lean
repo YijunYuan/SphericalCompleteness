@@ -64,6 +64,7 @@ class IsSphericalCompletion {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     : Prop extends SphericallyCompleteSpace F where
   /-- The linear isometry `ι : E →ₗᵢ[𝕜] F` is minimal among spherically complete extensions: every
   spherically complete submodule `D ≤ F` containing `ι.range` is all of `F`. -/
-  is_sph_comp : ∀ D : Submodule 𝕜 F, SphericallyCompleteSpace D → ι.range ≤ D → D = ⊤
+  minimal_of_sphericallyComplete :
+    ∀ D : Submodule 𝕜 F, SphericallyCompleteSpace D → ι.range ≤ D → D = ⊤
 
 end SphericallyCompleteSpace

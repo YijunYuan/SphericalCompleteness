@@ -200,7 +200,7 @@ theorem exists_isMOrtho_vec_of_finrank_lt
       intro w hw
       rw [dist_eq_norm, (sub_sub a z w : a - z - w = a - (z + w)), ← dist_eq_norm]
       exact infDist_le_dist_of_mem <| add_mem hz.1 hw
-  have := @sF.isSphericallyComplete
+  have := @sF.nonempty_iInter_of_antitone
     (fun i ↦ (exists_image_closedBall_eq_closedBall_inter 𝕜 F a (infDist a F + 1 / (i + 1))
     (by simp only [one_div, gt_iff_lt, lt_add_iff_pos_right, inv_pos, Nat.cast_add_one_pos]
       )).choose) (fun i ↦ ⟨infDist a F + 1 / (i + 1), by

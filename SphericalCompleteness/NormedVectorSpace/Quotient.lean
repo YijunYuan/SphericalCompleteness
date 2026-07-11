@@ -152,7 +152,7 @@ theorem sphericallyCompleteSpace
     SphericallyCompleteSpace (E ⧸ F) := by
   rw [iff_strictAnti_radius]
   intro c r hr hanti
-  have := @scsk.isSphericallyComplete (fun n ↦ (liftSequence 𝕜 hr hanti (n + 2)).val)
+  have := @scsk.nonempty_iInter_of_antitone (fun n ↦ (liftSequence 𝕜 hr hanti (n + 2)).val)
     (fun n ↦ r (n + 1)) (by
     refine antitone_nat_of_succ_le fun n ↦ ?_
     intro z hz
