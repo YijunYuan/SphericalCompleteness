@@ -41,8 +41,8 @@ contradicts immediacy.
   spherical completion of `E` is an immediate extension.
 * `SphericallyCompleteSpace.IsSphericalCompletion.unique`: any two spherical completions of `E` have
   linearly isometric codomains, via an equivalence compatible with the two embeddings.
-* `SphericallyCompleteSpace.IsSphericalCompletion.universal_property`: linear isometries out of `E`
-  into a spherically complete space factor through any spherical-completion embedding of `E`.
+* `SphericallyCompleteSpace.IsSphericalCompletion.weak_universal_property`: linear isometries out
+  of `E` into a spherically complete space factor through any spherical-completion embedding of `E`.
 * `SphericallyCompleteSpace.iff_maximallyComplete`: `E` is spherically complete if and only if it
   is maximally complete.
 -/
@@ -215,14 +215,14 @@ variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     {ι : E →ₗᵢ[𝕜] F}
 
 /--
-**Universal property of the spherical completion.**
+**Weak universal property of the spherical completion.**
 
 Every linear isometry `f : E →ₗᵢ[𝕜] F'` into a spherically complete ultrametric space `F'` factors
 through any spherical-completion embedding `ι : E →ₗᵢ[𝕜] F` of `E`: there is a linear isometry
 `T : F →ₗᵢ[𝕜] F'` with `T.comp ι = f`. This is the extension property of the immediate embedding
 `ι` (`embedding_isImmediate`) into the spherically complete target `F'`.
 -/
-theorem universal_property
+theorem weak_universal_property
     {F' : Type*} [NormedAddCommGroup F'] [NormedSpace 𝕜 F'] [IsUltrametricDist F']
     [SphericallyCompleteSpace F']
     (f : E →ₗᵢ[𝕜] F') (hF : IsSphericalCompletion ι) :

@@ -82,17 +82,7 @@ theorem completeSpace_iff_nonempty_iInter_closedBall_of_tendsto_zero
       simpa [ri] using ((NNReal.tendsto_pow_atTop_nhds_zero_of_lt_one
         (by norm_num : (1 / 2 : NNReal) < 1)).const_mul (2 : NNReal))
     rcases hballs hanti hri with ⟨x, hx⟩
-    refine ⟨x, Metric.tendsto_atTop.2 <| fun ε hε ↦ ?_⟩
-    have hbound : Tendsto (fun n : ℕ ↦ (3 : ℝ) * (1 / 2 : ℝ) ^ n) atTop (nhds 0) := by
-      simpa using ((tendsto_pow_atTop_nhds_zero_of_lt_one (by positivity : 0 ≤ (1 / 2 : ℝ))
-        (by norm_num : (1 / 2 : ℝ) < 1)).const_mul (3 : ℝ))
-    obtain ⟨n, hn⟩ := Filter.eventually_atTop.1 <| hbound (Iio_mem_nhds hε)
-    refine ⟨φ n, fun m hm ↦ ?_⟩
-    have hx_ball : dist (u (φ n)) x ≤ (ri n : ℝ) := by
-      simpa [mem_closedBall, dist_comm] using Set.mem_iInter.1 hx n
-    calc
-      dist (u m) x ≤ dist (u m) (u (φ n)) + dist (u (φ n)) x := dist_triangle _ _ _
-      _ < ((((1 / 2 : NNReal) ^ n : NNReal)) : ℝ) + (ri n : ℝ) :=
-        add_lt_add_of_lt_of_le (hN n m (le_trans (hN_le_φ n) hm) (φ n) (hN_le_φ n)) hx_ball
-      _ = (3 : ℝ) * (1 / 2 : ℝ) ^ n := by simpa [ri] using by ring
-      _ < ε := hn n le_rfl
+    refine ⟨x, tendsto_nhds_of_cauchySeq_of_subseq hu hφ_strict.tendsto_atTop ?_⟩
+    rw [tendsto_iff_dist_tendsto_zero]
+    refine squeeze_zero (fun n ↦ dist_nonneg) (fun n ↦ ?_) (NNReal.tendsto_coe.2 hri)
+    simpa [Function.comp, mem_closedBall, dist_comm] using Set.mem_iInter.1 hx n
