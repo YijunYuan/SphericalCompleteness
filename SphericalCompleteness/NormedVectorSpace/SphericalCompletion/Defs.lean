@@ -57,8 +57,8 @@ sites need not assume it separately. That such an `ι` is in addition an immedia
 and that `F` is unique up to linear isometry, is proved in `Basic`.
 -/
 class IsSphericalCompletion {𝕜 : Type*} [NontriviallyNormedField 𝕜]
-    {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
-    {F : Type*} [NormedAddCommGroup F] [NormedSpace 𝕜 F] [IsUltrametricDist F]
+    {E : Type*} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
+    {F : Type*} [SeminormedAddCommGroup F] [NormedSpace 𝕜 F] [IsUltrametricDist F]
     (ι : E →ₗᵢ[𝕜] F)
     : Prop extends SphericallyCompleteSpace F where
   /-- The linear isometry `ι : E →ₗᵢ[𝕜] F` is minimal among spherically complete extensions: every

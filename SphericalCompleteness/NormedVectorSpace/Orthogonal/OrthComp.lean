@@ -37,7 +37,7 @@ ambient setting used elsewhere in the development; the complement statement itse
 projection property of `T`.
 -/
 theorem isCompl_ker_of_forall_apply_eq
-    (𝕜 : Type*) [NontriviallyNormedField 𝕜] {E : Type*} [NormedAddCommGroup E]
+    (𝕜 : Type*) [NontriviallyNormedField 𝕜] {E : Type*} [SeminormedAddCommGroup E]
     [IsUltrametricDist E] [NormedSpace 𝕜 E] (F : Submodule 𝕜 E) [SphericallyCompleteSpace ↥F]
     (T : E →L[𝕜] ↥F) (hT1 : ∀ (a : E) (b : a ∈ F), T a = ⟨a, b⟩)
     : IsCompl F (LinearMap.ker T.toLinearMap) := by
@@ -58,7 +58,7 @@ theorem isCompl_ker_of_forall_apply_eq
 
 section
 variable (𝕜 : Type*) [NontriviallyNormedField 𝕜]
-  {E : Type*} [NormedAddCommGroup E] [iud : IsUltrametricDist E] [NormedSpace 𝕜 E]
+  {E : Type*} [SeminormedAddCommGroup E] [iud : IsUltrametricDist E] [NormedSpace 𝕜 E]
   (F : Submodule 𝕜 E) [SphericallyCompleteSpace ↥F]
 
 /--
