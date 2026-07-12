@@ -49,8 +49,7 @@ theorem isCompl_ker_of_forall_apply_eq
       simp only [ContinuousLinearMap.coe_coe] at h
       simp only [h.2] at hT1
       exact (AddSubmonoid.mk_eq_zero F.toAddSubmonoid).mp hT1.symm
-    · rw [h]
-      simp only [zero_mem, map_zero, and_self]
+    · simp only [h,zero_mem, map_zero, and_self]
   · ext x
     simp only [Submodule.mem_top, iff_true]
     rw [(by abel : x = (T x) + (x - T x))]

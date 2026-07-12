@@ -145,7 +145,7 @@ theorem smul_left {x y : E}
     simp only [zero_smul, norm_zero]
     exact infDist_zero_of_mem (by simp)
   else
-  rw [norm_smul, ← h, ← infDist_smul₀ ha, Submodule.smul_coe_eq_self ha]
+    rw [norm_smul, ← h, ← infDist_smul₀ ha, Submodule.smul_coe_eq_self ha]
 
 /-- For a nonzero scalar `a`, scaling the first vector preserves and reflects orthogonality:
 `x ⟂[𝕜] y` if and only if `(a • x) ⟂[𝕜] y`. -/
@@ -233,8 +233,7 @@ theorem smul
     (x ⟂ₘ F) → ((a • x) ⟂ₘ F) := by
   intro h
   rw [iff_forall_isVOrtho] at *
-  intro y hy
-  exact IsVOrtho.smul_left a (h y hy)
+  exact fun y hy ↦ IsVOrtho.smul_left a (h y hy)
 
 /-- For a nonzero scalar `a`, scaling preserves and reflects metric orthogonality to a subspace:
 `x ⟂ₘ F` if and only if `(a • x) ⟂ₘ F`. -/

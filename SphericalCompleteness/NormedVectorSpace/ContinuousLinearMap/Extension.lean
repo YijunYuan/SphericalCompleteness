@@ -175,14 +175,12 @@ lemma exists_extensionValue_norm_le :
   specialize hsc h𝒮
   simp only [Set.iInter_coe_set, Set.nonempty_iInter, Set.mem_iInter, mem_closedBall] at hsc
   rcases hsc with ⟨z0, hz0⟩
-  use z0
-  intro x U
+  refine ⟨z0, fun x U ↦ ?_⟩
   have : (U.val x + U.val a - S x,
     ⟨ε U * ‖x.val + a‖, mul_nonneg (le_of_lt (hε1 _)) (norm_nonneg _) ⟩) ∈ 𝒮 := by
     use x, U
   specialize hz0 _ this
-  simp only at hz0
-  rw [dist_eq_norm] at hz0
+  simp only [dist_eq_norm] at hz0
   have : z0 - (U.val ↑x + U.val a - S x) = S x + z0 - U.val (↑x + a) := by
     simp only [map_add]; abel
   rwa [this] at hz0

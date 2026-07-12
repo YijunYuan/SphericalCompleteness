@@ -54,14 +54,12 @@ noncomputable def directProdIsoSum (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     (x : E) (F : Subspace 𝕜 E) (hxF : x ⟂ₘ F) :
     (Submodule.span 𝕜 {x}) × F ≃ₛₗᵢ[RingHom.id 𝕜] (Submodule.span 𝕜 {x}) + F where
   toFun z := ⟨z.1.val + z.2.val, by
-    simp only [Submodule.add_eq_sup]
-    exact Submodule.add_mem_sup z.1.prop z.2.prop
+    simpa only [Submodule.add_eq_sup] using Submodule.add_mem_sup z.1.prop z.2.prop
     ⟩
   map_add' := by
     simp only [Submodule.add_eq_sup, Prod.fst_add, Submodule.coe_add, Prod.snd_add,
       AddMemClass.mk_add_mk, Subtype.mk.injEq, Prod.forall, Subtype.forall]
-    intros
-    exact add_add_add_comm _ _ _ _
+    intros; exact add_add_add_comm _ _ _ _
   map_smul' := by
     intro m a
     simp only [Submodule.add_eq_sup, Prod.smul_fst, SetLike.val_smul, Prod.smul_snd,
@@ -71,14 +69,10 @@ noncomputable def directProdIsoSum (𝕜 : Type*) [NontriviallyNormedField 𝕜]
       Submodule.coe_norm, Prod.forall, Prod.norm_mk, Subtype.forall]
     intro a ha b hab
     if hh : a = 0 ∨ b = 0 then
-      cases hh with
-      | inl hh => simp [hh]
-      | inr hh => simp [hh]
+      cases hh <;> simp [*]
     else
       refine eq_of_le_of_not_lt (IsUltrametricDist.norm_add_le_max _ _) ?_
       by_contra hc
-      have ha_norm := Submodule.coe_norm ⟨a, ha⟩
-      have hb_norm := Submodule.coe_norm ⟨b, hab⟩
       if h : ‖b‖ ≤ ‖a‖ then
         rw [sup_of_le_left h] at hc
         have : dist a (-b) = ‖a + b‖ := by simp only [dist_eq_norm, sub_neg_eq_add]
@@ -89,7 +83,7 @@ noncomputable def directProdIsoSum (𝕜 : Type*) [NontriviallyNormedField 𝕜]
         rw [sup_of_le_right <| le_of_lt h] at hc
         have := IsUltrametricDist.norm_add_le_max (a + b) (-a)
         simp only [add_neg_cancel_comm, norm_neg, le_sup_iff] at this
-        replace this := this.resolve_right <| not_le_of_gt h
+        replace := this.resolve_right <| not_le_of_gt h
         linarith
   invFun := by
     rw [Submodule.add_eq_sup]
@@ -115,16 +109,14 @@ noncomputable def directProdIsoSum (𝕜 : Type*) [NontriviallyNormedField 𝕜]
       simpa only [h3, neg_sub] using sub_mem_comm_iff.mp h2
     have h2' : this.choose_spec.2.choose - t.2 ∈ (↑(Submodule.span 𝕜 {x}) : Set E) ∩ ↑F := by
       simp only [Set.mem_inter_iff, SetLike.mem_coe, h2, and_true]
-      rw [← neg_eq_iff_eq_neg.2 h3]
-      exact Submodule.neg_mem (Submodule.span 𝕜 {x}) h1
+      simpa only [← neg_eq_iff_eq_neg.2 h3] using Submodule.neg_mem (Submodule.span 𝕜 {x}) h1
     have hh : (↑(Submodule.span 𝕜 {x}) : Set E) ∩ ↑F = {0} := by
       ext w
       simp only [Set.mem_inter_iff, SetLike.mem_coe, Set.mem_singleton_iff]
       constructor
       · rintro ⟨hw1, hw2⟩
         exact eq_zero_of_mem hw2 <| of_mem_span_singleton 𝕜 x F hxF w hw1
-      · intro h
-        simp only [h, zero_mem, and_self]
+      · intro h; simp only [h, zero_mem, and_self]
     simp only [hh, Set.mem_singleton_iff, sub_eq_zero] at h1' h2'
     simpa only [h2', and_true] using SetLike.coe_eq_coe.mp h1'
   right_inv := by
@@ -252,8 +244,7 @@ theorem exists_isMOrtho_vec_of_finrank_lt
     exact Set.mem_of_mem_inter_left this
   refine ⟨eq_of_le_of_ge ?_ ?_, fun hc ↦ ha <| (sub_eq_zero.1 hc) ▸ hz⟩
   · simp only [one_div, mem_closedBall, dist_comm, dist_eq_norm] at hfin
-    refine le_of_forall_pos_le_add (fun ε hε ↦ ?_)
-    refine le_trans (hfin (⌈1 / ε⌉₊ + 1)) ?_
+    refine le_of_forall_pos_le_add (fun ε hε ↦ le_trans (hfin (⌈1 / ε⌉₊ + 1)) ?_)
     simp only [one_div, Nat.cast_add, Nat.cast_one, add_le_add_iff_left]
     field_simp
     rw [mul_add, mul_add, add_assoc]

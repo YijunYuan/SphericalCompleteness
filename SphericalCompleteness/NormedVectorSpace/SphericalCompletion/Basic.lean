@@ -269,9 +269,8 @@ completion and is therefore itself spherically complete.
 theorem iff_maximallyComplete (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     (E : Type*) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E] :
     SphericallyCompleteSpace E ↔ MaximallyComplete 𝕜 E := by
-  constructor
-  · intro h
-    unfold MaximallyComplete
+  refine ⟨fun h ↦ ?_, fun h ↦ ?_⟩
+  · unfold MaximallyComplete
     by_contra hc
     push Not at hc
     rcases hc with ⟨F, _, _, _, f, hf1, hf2⟩
@@ -289,8 +288,7 @@ theorem iff_maximallyComplete (𝕜 : Type*) [NontriviallyNormedField 𝕜]
       simp only [this, lt_self_iff_false] at hf2
     rcases (Submodule.ne_bot_iff _).1 this with ⟨v, hv⟩
     exact hv.2 <| hf1 v (IsMOrtho.of_mem_orthComp _ _ hv.1)
-  · intro h
-    exact of_isometryEquiv (LinearIsometryEquiv.ofSurjective _
+  · exact of_isometryEquiv (LinearIsometryEquiv.ofSurjective _
       (h (maximalImmediateExtensionEmbedding (canonicalSphericallyCompleteExtension 𝕜 E))
         (IsSphericalCompletion.embedding_isImmediate inferInstance))).symm.toIsometryEquiv
 

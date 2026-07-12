@@ -59,30 +59,22 @@ theorem completeSpace_iff_nonempty_iInter_closedBall_of_tendsto_zero
         simpa using (NNReal.tendsto_coe.2 hri).const_mul 2
       exact squeeze_zero (fun n ↦ Metric.diam_nonneg) (fun n ↦ Metric.diam_closedBall
         (ri n).coe_nonneg) h2
-  · refine fun hballs ↦ Metric.complete_of_cauchySeq_tendsto fun u hu ↦ ?_
-    choose N hN using fun n : ℕ ↦
-      Metric.cauchySeq_iff.1 hu (((1 / 2 : NNReal) ^ n : NNReal) : ℝ) (by positivity)
-    let φ : ℕ → ℕ := Nat.rec (N 0) fun n prev ↦ max (N (n + 1)) (prev + 1)
-    have hN_le_φ : ∀ n, N n ≤ φ n := fun n ↦ by induction n <;> simp [φ]
-    have hφ_strict : StrictMono φ := strictMono_nat_of_lt_succ fun n ↦ by simp [φ]
+  · refine fun hballs ↦ Metric.complete_of_convergent_controlled_sequences
+      (fun n ↦ (1 / 2 : ℝ) ^ n) (fun n ↦ by positivity) fun u hu ↦ ?_
     let ri : ℕ → NNReal := fun n ↦ 2 * (1 / 2 : NNReal) ^ n
-    have hanti : Antitone fun n ↦ closedBall (u (φ n)) (ri n) := by
+    have hanti : Antitone fun n ↦ closedBall (u n) (ri n) := by
       refine antitone_nat_of_succ_le fun n x hx ↦ ?_
       simp only [mem_closedBall] at hx ⊢
-      have htail : dist (u (φ (n + 1))) (u (φ n)) < (((1 / 2 : NNReal) ^ n : NNReal) : ℝ) :=
-        hN n (φ (n + 1)) (le_trans (hN_le_φ n) (le_of_lt (hφ_strict (Nat.lt_succ_self n))))
-          (φ n) (hN_le_φ n)
       calc
-        dist x (u (φ n)) ≤ dist x (u (φ (n + 1))) + dist (u (φ (n + 1))) (u (φ n)) :=
-          dist_triangle _ _ _
-        _ ≤ ((ri (n + 1) : NNReal) : ℝ) + (((1 / 2 : NNReal) ^ n : NNReal) : ℝ) :=
-          add_le_add hx (le_of_lt htail)
-        _ = (ri n : ℝ) := by simpa [ri, pow_succ] using by ring
+        dist x (u n) ≤ dist x (u (n + 1)) + dist (u (n + 1)) (u n) := dist_triangle _ _ _
+        _ ≤ ((ri (n + 1) : NNReal) : ℝ) + (1 / 2 : ℝ) ^ n :=
+          add_le_add hx (le_of_lt (hu n (n + 1) n (Nat.le_succ n) le_rfl))
+        _ = (ri n : ℝ) := by push_cast [ri]; ring
     have hri : Tendsto ri atTop (nhds 0) := by
       simpa [ri] using ((NNReal.tendsto_pow_atTop_nhds_zero_of_lt_one
         (by norm_num : (1 / 2 : NNReal) < 1)).const_mul (2 : NNReal))
     rcases hballs hanti hri with ⟨x, hx⟩
-    refine ⟨x, tendsto_nhds_of_cauchySeq_of_subseq hu hφ_strict.tendsto_atTop ?_⟩
+    refine ⟨x, ?_⟩
     rw [tendsto_iff_dist_tendsto_zero]
     refine squeeze_zero (fun n ↦ dist_nonneg) (fun n ↦ ?_) (NNReal.tendsto_coe.2 hri)
-    simpa [Function.comp, mem_closedBall, dist_comm] using Set.mem_iInter.1 hx n
+    simpa [mem_closedBall, dist_comm] using Set.mem_iInter.1 hx n

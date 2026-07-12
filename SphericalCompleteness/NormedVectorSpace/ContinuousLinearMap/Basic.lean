@@ -77,9 +77,7 @@ instance instSphericallyCompleteSpaceContinuousLinearMap {𝕜 : Type*} [Nontriv
     intro i
     obtain ⟨N, hN⟩ := (Filter.tendsto_atTop_atTop_iff_of_monotone hφ.1.monotone).1
       (StrictMono.tendsto_atTop hφ.1) i
-    specialize hh N
-    simp only [c, r, Function.comp_apply] at hh
-    exact (hanti' hN) hh
+    simpa [c, r, Function.comp_apply] using (hanti' hN) <| hh N
   simp only [mem_closedBall]
   intro i
   have : c i ∈ 𝒰 := ⟨i, Set.mem_univ i, rfl⟩
