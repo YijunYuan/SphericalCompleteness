@@ -27,7 +27,7 @@ public import SphericalCompleteness.NormedVectorSpace.Orthogonal.OrthComp
 public import SphericalCompleteness.NormedVectorSpace.Quotient
 public import SphericalCompleteness.NormedVectorSpace.SphericalCompletion.Basic
 public import SphericalCompleteness.NormedVectorSpace.SphericalCompletion.Defs
-public import SphericalCompleteness.NormedVectorSpace.SphericalCompletion.SphericallyCompleteExtension
+public import SphericalCompleteness.NormedVectorSpace.SphericalCompletion.LpQuotient
 
 /-!
 # Spherical completeness

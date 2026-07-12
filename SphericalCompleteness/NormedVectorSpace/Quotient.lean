@@ -62,11 +62,26 @@ private lemma lift_to_nearby_element (𝕜 : Type*) [NontriviallyNormedField �
       from rfl, hm_eq]
     abel
   · rw [add_sub_cancel_left]
-    have hms : ‖m‖ < (ens1 : ℝ) := by
-      rw [show (ens1 : ℝ) = ‖unp1 - (QuotientAddGroup.mk' F.toAddSubgroup) lun‖ +
-        (↑ens1 - ‖unp1 - (QuotientAddGroup.mk' F.toAddSubgroup) lun‖) from by ring]
-      exact hm_norm
-    exact_mod_cast hms
+    exact_mod_cast hm_norm.trans_le (add_sub_cancel _ _).le
+
+/--
+The single lifting step used to build `liftSequence`: given a representative `prev` of the centre
+`c (m + 1)`, produce a representative of the next centre `c (m + 2)` within distance `r m` of
+`prev`. This is `lift_to_nearby_element` applied to the nested-ball datum
+`c (m + 1) ∈ closedBall (c m) (r m)` with the strictly larger tolerance `r m > r (m + 1)`. Both
+`liftSequence` (which chooses the lift) and `liftSequence_prop` (which reads off the closeness
+bound) refer to this one existence statement, so that the two stay in sync by proof irrelevance.
+-/
+private lemma exists_lift_step (𝕜 : Type*) [NontriviallyNormedField 𝕜]
+    {E : Type*} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
+    {F : Submodule 𝕜 E} {c : ℕ → E ⧸ F} {r : ℕ → NNReal} (hr : StrictAnti r)
+    (hanti : Antitone fun i ↦ closedBall (c i) ↑(r i)) (m : ℕ) (prev : E)
+    (hprev : (QuotientAddGroup.mk' F.toAddSubgroup) prev = c (m + 1)) :
+    ∃ lup1 : E, (QuotientAddGroup.mk' F.toAddSubgroup) lup1 = c (m + 2) ∧
+      ‖lup1 - prev‖ < ↑(r m) :=
+  lift_to_nearby_element 𝕜 (c (m + 1)) (r (m + 1)) (c (m + 2))
+    (hanti (Nat.le_succ (m + 1)) (mem_closedBall_self NNReal.zero_le_coe))
+    prev hprev (r m) (hr (lt_add_one m))
 
 /--
 Lifts a nested chain of closed balls in `E ⧸ F` to a sequence of representatives in `E`.
@@ -74,7 +89,7 @@ Lifts a nested chain of closed balls in `E ⧸ F` to a sequence of representativ
 Given ball centres `c : ℕ → E ⧸ F` with strictly decreasing radii `r` whose closed balls are
 nested (`hanti`), `liftSequence` produces for each `t` a representative `x : E` of `c t`. The first
 two terms are arbitrary representatives (`Quotient.out`); each later term `c (m + 2)` is lifted via
-`lift_to_nearby_element` so that its representative stays within `r m` of the representative of
+`exists_lift_step` so that its representative stays within `r m` of the representative of
 `c (m + 1)`. Consecutive representatives are therefore close enough that they form the centres of a
 nested chain of closed balls in `E`.
 
@@ -89,15 +104,10 @@ private noncomputable def liftSequence (𝕜 : Type*) [NontriviallyNormedField �
   match n with
   | 0 => ⟨(c 0).out, Quotient.out_eq' (c 0)⟩
   | 1 => ⟨(c 1).out, Quotient.out_eq' (c 1)⟩
-  | m + 2 => by
-    have := lift_to_nearby_element 𝕜 (c (m + 1)) (r (m + 1)) (c (m + 2)) (by
-      specialize hanti (Nat.le_succ (m+1))
-      refine hanti ?_
-      simp only [Nat.succ_eq_add_one, mem_closedBall, dist_self,
-        NNReal.zero_le_coe]) (liftSequence 𝕜 hr hanti (m + 1)).val (by
-      simp only [QuotientAddGroup.mk'_apply, (liftSequence 𝕜 hr hanti (m + 1)).prop]
-    ) (r m) (hr <| lt_add_one m)
-    exact ⟨this.choose, this.choose_spec.1⟩
+  | m + 2 =>
+    let h := exists_lift_step 𝕜 hr hanti m (liftSequence 𝕜 hr hanti (m + 1)).val
+      (liftSequence 𝕜 hr hanti (m + 1)).prop
+    ⟨h.choose, h.choose_spec.1⟩
 
 /--
 The consecutive representatives produced by `liftSequence` are close.
@@ -105,7 +115,7 @@ The consecutive representatives produced by `liftSequence` are close.
 For every `i'`, the representatives of `c (i' + 2)` and `c (i' + 1)` satisfy
 `‖liftSequence … (i' + 2) - liftSequence … (i' + 1)‖ < r i'`.
 
-This is exactly the norm bound guaranteed by the `lift_to_nearby_element` step used to construct
+This is exactly the norm bound guaranteed by the `exists_lift_step` call used to construct
 `liftSequence`, and it is what makes the lifted representatives the centres of a nested chain of
 closed balls in `E`.
 -/
@@ -115,16 +125,9 @@ private lemma liftSequence_prop (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     {F : Submodule 𝕜 E} ⦃c : ℕ → E ⧸ F⦄
     ⦃r : ℕ → NNReal⦄ (hr : StrictAnti r) (hanti : Antitone fun i ↦ closedBall (c i) ↑(r i)) :
     ∀ i' : ℕ, ‖(liftSequence 𝕜 hr hanti (i'+ 2)).val -
-             (liftSequence 𝕜 hr hanti (i' + 1)).val‖ < ↑(r i') := by
-  intro i'
-  simp only [liftSequence, QuotientAddGroup.mk'_apply]
-  exact (lift_to_nearby_element 𝕜 (c (i' + 1)) (r (i' + 1)) (c (i' + 2)) (by
-      specialize hanti (Nat.le_succ (i'+1))
-      refine hanti ?_
-      simp only [Nat.succ_eq_add_one, mem_closedBall, dist_self,
-        NNReal.zero_le_coe]) (liftSequence 𝕜 hr hanti (i' + 1)).val (by
-      simp only [QuotientAddGroup.mk'_apply, (liftSequence 𝕜 hr hanti (i' + 1)).prop]
-    ) (r i') (hr <| lt_add_one i')).choose_spec.2
+             (liftSequence 𝕜 hr hanti (i' + 1)).val‖ < ↑(r i') := fun i' ↦
+  (exists_lift_step 𝕜 hr hanti i' (liftSequence 𝕜 hr hanti (i' + 1)).val
+    (liftSequence 𝕜 hr hanti (i' + 1)).prop).choose_spec.2
 end SphericallyCompleteSpace
 
 namespace Quotient
@@ -172,19 +175,10 @@ theorem sphericallyCompleteSpace
   refine le_trans this <| sup_le_iff.2 ⟨?_, ?_⟩
   · specialize hw i
     simp only [mem_closedBall, dist_eq_norm] at hw
-    -- hw : ‖w - (liftSequence ... (i+2)).val‖ ≤ r (i+1)
-    let lc := liftSequence 𝕜 hr hanti (i + 2)
-    have htemp : ‖(QuotientAddGroup.mk' F.toAddSubgroup) (w - lc.val)‖ ≤ ↑(r i) :=
-      (Submodule.Quotient.norm_mk_le (S := F) (w - lc.val)).trans <|
-        hw.trans (le_of_lt (hr (lt_add_one i)))
-    calc
-      dist ((↑w : E ⧸ F.toAddSubgroup)) (c (i + 2))
-          = dist ((QuotientAddGroup.mk' F.toAddSubgroup) w)
-            ((QuotientAddGroup.mk' F.toAddSubgroup) lc.val) := by
-        simp [lc.prop]
-      _ = ‖(QuotientAddGroup.mk' F.toAddSubgroup) (w - lc.val)‖ := by
-        rw [dist_eq_norm, (QuotientAddGroup.mk' F.toAddSubgroup).map_sub]
-      _ ≤ ↑(r i) := htemp
+    rw [← (liftSequence 𝕜 hr hanti (i + 2)).prop, dist_eq_norm]
+    refine le_trans (QuotientAddGroup.norm_mk_le_norm
+      (m := w - (liftSequence 𝕜 hr hanti (i + 2)).val)) ?_
+    exact hw.trans <| by exact_mod_cast (hr (lt_add_one i)).le
   · refine (hanti <| Nat.le_add_right i 2) ?_
     simp only [mem_closedBall, dist_self, NNReal.zero_le_coe]
 

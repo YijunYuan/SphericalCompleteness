@@ -156,9 +156,8 @@ private lemma norm_map (f : E →ₗᵢ[𝕜] F) (hf : IsImmediate f)
     have hx' := IsUltrametricDist.norm_eq_of_norm_sub_lt_left hx.2
     have t : ‖h x‖ = ‖x‖ := by
       obtain ⟨z, hz⟩ := hx.1; rw [hf1 x z hz]; simp
-    rw [hx', ← t] at this
-    apply IsUltrametricDist.norm_eq_of_norm_sub_lt_left at this
-    simp only [hx', ContinuousLinearMap.coe_coe, ← this, t, le_refl]
+    have hlt : ‖h x - h v‖ < ‖h x‖ := by rw [t, ← hx']; exact this
+    rw [ContinuousLinearMap.coe_coe, ← IsUltrametricDist.norm_eq_of_norm_sub_lt_left hlt, t, ← hx']
 
 /--
 Given an immediate linear isometry `f : E →ₗᵢ[𝕜] F` and a linear isometry `g : E →ₗᵢ[𝕜] H` into a
@@ -334,7 +333,10 @@ instance instSphericallyCompleteSpaceOfMaximalImmediateExtensionSubmodule
     SphericallyCompleteSpace
       (↥(exists_maximal_immediateExtensionSubmodule 𝕜 E E₀ f).choose) := by
   rw [iff_strictAnti_radius]
-  set K := (exists_maximal_immediateExtensionSubmodule 𝕜 E E₀ f).choose with hK
+  set K := (exists_maximal_immediateExtensionSubmodule 𝕜 E E₀ f).choose
+  have hKmem := (exists_maximal_immediateExtensionSubmodule 𝕜 E E₀ f).choose_spec.1
+  have hKmax := (exists_maximal_immediateExtensionSubmodule 𝕜 E E₀ f).choose_spec.2
+  have hKle := hKmem.choose
   by_contra hc
   push Not at hc
   rcases hc with ⟨c, r, hsr, hanti, hemp⟩
@@ -360,12 +362,9 @@ instance instSphericallyCompleteSpaceOfMaximalImmediateExtensionSubmodule
     by_contra hc
     have : K < K + Submodule.span 𝕜 {a} := by
       simpa only [Submodule.add_eq_sup, left_lt_sup, Submodule.span_singleton_le_iff_mem]
-    exact (not_le_of_gt this) <|
-      (exists_maximal_immediateExtensionSubmodule 𝕜 E E₀ f).choose_spec.2 hc
-        (le_of_lt this)
+    exact (not_le_of_gt this) <| hKmax hc (le_of_lt this)
   rw [mem_immediateExtensionSubmodules_iff, not_exists] at this
-  specialize this <| le_sup_of_le_left
-    (exists_maximal_immediateExtensionSubmodule 𝕜 E E₀ f).choose_spec.1.choose
+  specialize this <| le_sup_of_le_left hKle
   simp only [not_forall] at this
   rcases this with ⟨b', hb'1, hb'2⟩
   rcases Submodule.mem_sup.1 b'.prop with ⟨x', hx', v', hv', hx'v'⟩
@@ -375,9 +374,7 @@ instance instSphericallyCompleteSpaceOfMaximalImmediateExtensionSubmodule
     by_contra hc
     simp only [hc, zero_smul, add_zero] at hx'v'
     subst hx'v'
-    obtain ⟨_, himmK⟩ :=
-      mem_immediateExtensionSubmodules_iff.1
-        (exists_maximal_immediateExtensionSubmodule 𝕜 E E₀ f).choose_spec.1
+    obtain ⟨_, himmK⟩ := mem_immediateExtensionSubmodules_iff.1 hKmem
     exact hb'2 (ZeroMemClass.coe_eq_zero.mp (congrArg Subtype.val (himmK ⟨b', hx'⟩ hb'1)))
   let b := s⁻¹ • b'
   let x := - s⁻¹ • x'
@@ -385,9 +382,7 @@ instance instSphericallyCompleteSpaceOfMaximalImmediateExtensionSubmodule
     simp only [SetLike.val_smul, ← hx'v', smul_add, neg_smul, sub_neg_eq_add, b, x]
     rw [add_comm]
     simpa only [add_left_inj] using inv_smul_smul₀ hhs a
-  have hb'1' : IsMOrtho b' (LinearMap.range (Submodule.inclusion (le_sup_of_le_left
-      (exists_maximal_immediateExtensionSubmodule 𝕜 E E₀
-        f).choose_spec.1.choose))) :=
+  have hb'1' : IsMOrtho b' (LinearMap.range (Submodule.inclusion (le_sup_of_le_left hKle))) :=
     (isMOrtho_range_inclusion_iff _ b').2 hb'1
   have hb1 := @IsMOrtho.smul 𝕜 _ _ _ _ inferInstance b' _ s⁻¹ hb'1'
   replace hb1 : IsMOrtho b.val K := by
@@ -402,10 +397,7 @@ instance instSphericallyCompleteSpaceOfMaximalImmediateExtensionSubmodule
         hg2', ZeroMemClass.coe_zero, norm_zero] at *
       contrapose hc
       exact infDist_zero_of_mem <| by simp only [SetLike.mem_coe, zero_mem]
-    have hChooseSpec :=
-      (exists_maximal_immediateExtensionSubmodule 𝕜 E E₀
-        f).choose_spec.1.choose_spec
-    have hNIsMOrtho := mt (hChooseSpec ⟨g, hg1⟩)
+    have hNIsMOrtho := mt (hKmem.choose_spec ⟨g, hg1⟩)
         (fun h ↦ hgg (congrArg Subtype.val h))
     rcases @IsMOrtho.not_iff_exists_dist_lt_norm 𝕜 _ (↥K)
         _ _ inferInstance (⟨g, hg1⟩) _ |>.1 hNIsMOrtho with ⟨e, he1, he2⟩

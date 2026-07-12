@@ -121,7 +121,7 @@ The library is organized in layers.
 
 ### Spherical completion construction
 
-- `SphericalCompletion/SphericallyCompleteExtension.lean`
+- `SphericalCompletion/LpQuotient.lean`
   - Construction of a large spherically complete ambient extension (via an `lp/c₀` quotient).
 - `SphericalCompletion/Defs.lean`
   - Definition of `SphericalCompletion` via maximal immediate subspaces (Zorn-style existence).
