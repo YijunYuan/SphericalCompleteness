@@ -623,16 +623,10 @@ theorem iff_isSphericallyDense_of_normedField (α : Type*)
       have hupp : dist u v < y := by
         have hsplit := abs_lt.mp habs; nlinarith
       exact ⟨u - v, by simpa [dist_eq_norm] using hlow, by simpa [dist_eq_norm] using hupp⟩
-    refine { spherically_dense := fun z r ↦ ?_ }
-    refine eq_of_le_of_ge (IsUltrametricDist.diam_le_radius _ _) ?_
-    by_contra hc
-    simp only [not_le] at hc
-    rcases hlt_norm_lt (diam (closedBall z ↑r)) ↑r diam_nonneg hc with ⟨δ, hδ1, hδ2⟩
-    have hmem : z + δ ∈ closedBall z r := by
-      simpa only [mem_closedBall, dist_self_add_left] using le_of_lt hδ2
-    have := dist_le_diam_of_mem isBounded_closedBall hmem (mem_closedBall_self zero_le_coe)
-    simp only [dist_self_add_left] at this
-    exact (not_lt_of_ge this) hδ1
+    let hdnf' : DenselyNormedField α := { dnf with lt_norm_lt := hlt_norm_lt }
+    have hsd : IsSphericallyDense α :=
+      @IsSphericallyDense.instIsSphericallyDenseOfDenselyNormedField α hdnf' hiud
+    exact hsd
   · intro h; exact of_isSphericallyDense α
 
 end IsDenseMetric
