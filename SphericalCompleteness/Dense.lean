@@ -67,6 +67,8 @@ class IsSphericallyDense (α : Type*) [PseudoMetricSpace α] : Prop where
   /-- Every closed ball realizes its radius as its diameter. -/
   spherically_dense : ∀ (c : α) (r : ℝ≥0), diam (closedBall c r) = r
 
+namespace IsSphericallyDense
+
 /--
 Builds an `IsSphericallyDense` instance on `α` from the assumptions that `α` is a
 `DenselyNormedField` and that its distance is ultrametric (`IsUltrametricDist α`).
@@ -89,7 +91,51 @@ instance instIsSphericallyDenseOfDenselyNormedField (α : Type*)
     simp only [dist_self_add_left] at this
     linarith
 
-namespace IsSphericallyDense
+/--
+Converse to `instIsSphericallyDenseOfDenselyNormedField`: an ultrametric normed field that is
+*spherically dense* is in fact a `DenselyNormedField`.
+
+Spherical density gives `diam (closedBall 0 r) = r` for every `r`, so for any target window
+`x < ‖·‖ < y` we may pick an intermediate radius `m ∈ (x, y)` and apply
+`IsSphericallyDense.exists_dist_lt_diam` inside `closedBall 0 m`: it yields points `u, v` with
+`x < nndist u v ≤ m`. In a normed field `nndist u v = ‖u - v‖`, so `a := u - v` witnesses
+`x < ‖a‖ < y`, which is exactly the density condition `lt_norm_lt`. -/
+instance instDenselyNormedFieldOfIsSphericallyDenseOfUltrametricNormedField (α : Type*)
+    [NormedField α] [IsUltrametricDist α] [IsSphericallyDense α] :
+    DenselyNormedField α where
+  lt_norm_lt := by
+    intro x y hx hxy
+    obtain ⟨m, hxm, hmy⟩ := exists_between hxy
+    set xN : ℝ≥0 := ⟨x, hx⟩ with hxNdef
+    set mN : ℝ≥0 := ⟨m, le_trans hx hxm.le⟩ with hmNdef
+    have hlt : xN < mN := by rw [← NNReal.coe_lt_coe]; exact hxm
+    have hdist :
+        ∃ u v : α,
+          u ∈ closedBall (0 : α) mN ∧ v ∈ closedBall (0 : α) mN ∧
+            nndist u v ∈ Set.Ioc xN mN := by
+      have hsd : diam (closedBall (0 : α) mN) = mN :=
+        IsSphericallyDense.spherically_dense (α := α) (0 : α) mN
+      have hlt' : (xN : ℝ) < mN := hlt
+      rw [← hsd] at hlt'
+      by_contra hc
+      push Not at hc
+      refine LT.lt.not_ge hlt' <| Metric.diam_le_of_forall_dist_le xN.prop ?_
+      intro u hu v hv
+      specialize hc u v hu hv
+      simp only [Set.mem_Ioc, not_and_or] at hc
+      simpa only [dist_le_coe, not_lt] using
+        hc.resolve_right
+          (by
+            simp only [not_le, not_lt]
+            rw [← dist_le_coe, ← hsd]
+            exact dist_le_diam_of_mem isBounded_closedBall hu hv)
+    obtain ⟨u, v, _, _, huv⟩ := hdist
+    refine ⟨u - v, ?_, ?_⟩
+    · have h1 : (xN : ℝ) < nndist u v := huv.1
+      rwa [coe_nndist, dist_eq_norm] at h1
+    · have h2 : (nndist u v : ℝ) ≤ mN := huv.2
+      rw [coe_nndist, dist_eq_norm] at h2
+      exact lt_of_le_of_lt h2 hmy
 
 /--
 From spherical density, any closed ball of positive radius has (at least) two points whose
@@ -446,6 +492,7 @@ class IsDenseMetric (α : Type*) [MetricSpace α] : Prop where
   dense_metric : ∀ z : α, ∀ r : ℝ≥0,
     closure (Set.image2 dist (closedBall z r) (closedBall z r)) = Set.Icc 0 (diam (closedBall z r))
 
+namespace IsDenseMetric
 /--
 Constructs `IsDenseMetric α` from spherical density in an ultrametric space.
 
@@ -454,14 +501,14 @@ Assuming:
 * `IsUltrametricDist α`,
 * `IsSphericallyDense α`,
 
-the instance proves that in every closed ball, realized distances are dense in the full
+the theorem proves that in every closed ball, realized distances are dense in the full
 interval from `0` to the ball diameter.
 
 The proof combines:
 * an upper bound (`dist x y ≤ diam (closedBall z r)`), and
 * approximation from below using `IsSphericallyDense.exists_dist_lt_diam`.
 -/
-instance instIsDenseMetricOfIsSphericallyDense (α : Type*)
+theorem of_isSphericallyDense (α : Type*)
     [MetricSpace α] [IsUltrametricDist α] [IsSphericallyDense α] :
     IsDenseMetric α where
   dense_metric := by
@@ -497,6 +544,98 @@ instance instIsDenseMetricOfIsSphericallyDense (α : Type*)
             refine lt_trans ?_ (by change ε / 2 < ε; nlinarith)
             exact sub_lt_comm.mp <| RCLike.ofReal_lt_ofReal.mp hlow
           simpa [Real.dist_eq, abs_of_nonneg (sub_nonneg.mpr hupp)] using hsub
+
+/--
+For an ultrametric normed field, Schikhof's metric-density condition is equivalent to
+spherical density.
+
+Assuming:
+* `NormedField α`,
+* `IsUltrametricDist α`,
+
+the theorem identifies the condition that, in every closed ball, the realized distances are dense
+in the whole interval `[0, diam]` with the condition that every closed ball realizes its radius as
+its diameter.
+
+The reverse implication is `of_isSphericallyDense`. For the forward implication, the
+density of realized distances first yields density of norm values in every interval `(x, y)`, which
+upgrades `α` to a `DenselyNormedField`; the ultrametric argument then forces each closed ball to
+have diameter exactly equal to its radius. -/
+theorem iff_isSphericallyDense_of_normedField (α : Type*)
+    [dnf : NormedField α] [hiud : IsUltrametricDist α] :
+    IsDenseMetric α ↔ IsSphericallyDense α := by
+  constructor
+  · intro h
+    have hlt_norm_lt : ∀ x y : ℝ, 0 ≤ x → x < y → ∃ a : α, x < ‖a‖ ∧ ‖a‖ < y := by
+      intro x y hx hxy
+      have hw : ∃ w : α, 1 < ‖w‖ := by
+        have hdiam1 : diam (closedBall (0 : α) (1 : ℝ≥0)) = (1 : ℝ≥0) := by
+          have hmem1 : (1 : ℝ) ∈ closure (Set.image2 dist (closedBall (0 : α) (1 : ℝ≥0))
+              (closedBall (0 : α) (1 : ℝ≥0))) := by
+            apply subset_closure
+            refine Set.mem_image2.mpr ⟨(1 : α), ?_, (0 : α), by simp, by simp [dist_eq_norm]⟩
+            simp [mem_closedBall, dist_eq_norm]
+          rw [h.dense_metric (0 : α) (1 : ℝ≥0)] at hmem1
+          exact le_antisymm (IsUltrametricDist.diam_le_radius _ _) hmem1.2
+        have hhalf : (1 / 2 : ℝ) ∈ closure
+          (Set.image2 dist (closedBall (0 : α) (1 : ℝ≥0)) (closedBall (0 : α) (1 : ℝ≥0))) := by
+          rw [h.dense_metric (0 : α) (1 : ℝ≥0), hdiam1]
+          norm_num
+        rcases Metric.mem_closure_iff.mp hhalf (1 / 4) (by norm_num) with ⟨t, ht, htt⟩
+        rcases Set.mem_image2.mp ht with ⟨u, hu, v, hv, rfl⟩
+        have habs : |dist u v - 1 / 2| < 1 / 4 := by
+          simpa [Real.dist_eq, abs_sub_comm] using htt
+        have hdist0 : 0 < dist u v := by
+          have hsplit := abs_lt.mp habs; nlinarith
+        have hdist1 : dist u v < 1 := by
+          have hsplit := abs_lt.mp habs; nlinarith
+        refine ⟨(u - v)⁻¹, ?_⟩
+        rw [norm_inv]
+        have hnorm_pos : 0 < ‖u - v‖ := by simpa [dist_eq_norm] using hdist0
+        have hnorm_lt : ‖u - v‖ < 1 := by simpa [dist_eq_norm] using hdist1
+        exact (one_lt_inv₀ hnorm_pos).2 hnorm_lt
+      obtain ⟨w, hw⟩ := hw
+      obtain ⟨n, hn⟩ := pow_unbounded_of_one_lt y hw
+      let c : α := w ^ n
+      have hyc : y < ‖c‖ := by
+        simpa [c, norm_pow] using hn
+      let r : ℝ≥0 := ‖c‖₊
+      have hdiamr : diam (closedBall (0 : α) r) = r := by
+        have hmemr : (r : ℝ) ∈ closure
+          (Set.image2 dist (closedBall (0 : α) r) (closedBall (0 : α) r)) := by
+          apply subset_closure
+          refine Set.mem_image2.mpr ⟨c, ?_, (0 : α), by simp, by simp [r, dist_eq_norm]⟩
+          simp [r, mem_closedBall, dist_eq_norm]
+        rw [h.dense_metric (0 : α) r] at hmemr
+        exact le_antisymm (IsUltrametricDist.diam_le_radius _ _) hmemr.2
+      have hmid : (x + y) / 2 ∈ closure
+          (Set.image2 dist (closedBall (0 : α) r) (closedBall (0 : α) r)) := by
+        rw [h.dense_metric (0 : α) r, hdiamr]
+        refine ⟨by nlinarith, ?_⟩
+        have hyc' : y < (r : ℝ) := by simpa [r] using hyc
+        nlinarith
+      rcases Metric.mem_closure_iff.mp hmid ((y - x) / 4) (by nlinarith [hxy]) with ⟨t, ht, htt⟩
+      rcases Set.mem_image2.mp ht with ⟨u, hu, v, hv, rfl⟩
+      have habs : |dist u v - (x + y) / 2| < (y - x) / 4 := by
+        simpa [Real.dist_eq, abs_sub_comm] using htt
+      have hlow : x < dist u v := by
+        have hsplit := abs_lt.mp habs; nlinarith
+      have hupp : dist u v < y := by
+        have hsplit := abs_lt.mp habs; nlinarith
+      exact ⟨u - v, by simpa [dist_eq_norm] using hlow, by simpa [dist_eq_norm] using hupp⟩
+    refine { spherically_dense := fun z r ↦ ?_ }
+    refine eq_of_le_of_ge (IsUltrametricDist.diam_le_radius _ _) ?_
+    by_contra hc
+    simp only [not_le] at hc
+    rcases hlt_norm_lt (diam (closedBall z ↑r)) ↑r diam_nonneg hc with ⟨δ, hδ1, hδ2⟩
+    have hmem : z + δ ∈ closedBall z r := by
+      simpa only [mem_closedBall, dist_self_add_left] using le_of_lt hδ2
+    have := dist_le_diam_of_mem isBounded_closedBall hmem (mem_closedBall_self zero_le_coe)
+    simp only [dist_self_add_left] at this
+    exact (not_lt_of_ge this) hδ1
+  · intro h; exact of_isSphericallyDense α
+
+end IsDenseMetric
 
 /--
 `PUnit` satisfies `IsDenseMetric`.
