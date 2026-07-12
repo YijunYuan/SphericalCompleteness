@@ -53,7 +53,7 @@ resulting goal via `SphericallyCompleteSpace.nonempty_iInter_of_antitone`.
 This instance is useful for transferring results stated for `CompleteSpace` to contexts where
 spherical completeness is assumed.
 -/
-instance instCompleteOfSphericallyComplete (α : Type*)
+instance (priority := low) instCompleteOfSphericallyComplete (α : Type*)
     [PseudoMetricSpace α] [sc : SphericallyCompleteSpace α] : CompleteSpace α := by
   rw [completeSpace_iff_nonempty_iInter_closedBall_of_tendsto_zero]
   exact fun _ _ hanti _ ↦ sc.nonempty_iInter_of_antitone hanti
