@@ -294,7 +294,7 @@ It is an isometry because the quotient norm of a constant sequence equals `‖x�
 every normed space inside a spherically complete one — the first step in constructing a spherical
 completion of `E`, from which a maximal immediate extension is subsequently carved out (see
 `SphericallyCompleteSpace.IsImmediate.exists_maximal_immediateExtensionSubmodule`). -/
-noncomputable def canonicalSphericallyCompleteExtension (𝕜 : Type*) [NontriviallyNormedField 𝕜]
+noncomputable def lpQuotientEmbedding (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     (E : Type*) [NormedAddCommGroup E] [NormedSpace 𝕜 E] :
     E →ₗᵢ[𝕜] ((lp (fun (_ : ℕ) ↦ E) ⊤)⧸ c₀ 𝕜 (fun (_ : ℕ) ↦ E)) where
   toFun x := by
@@ -340,7 +340,7 @@ submodule is topologically closed. This instance supplies the missing ingredient
 null-sequence submodule `c₀ 𝕜 (fun _ ↦ E)` is a closed subset of `lp (fun _ ↦ E) ⊤` (via
 `IsSeqClosed.isClosed`, using an `ε/2` argument on the `ℓ∞` norm), and then lets typeclass inference
 upgrade the quotient seminorm to a `NormedAddCommGroup`. This is what makes
-`canonicalSphericallyCompleteExtension 𝕜 E` land in a normed—not merely seminormed—space. -/
+`lpQuotientEmbedding 𝕜 E` land in a normed—not merely seminormed—space. -/
 noncomputable instance normedAddCommGroup_lp_quotient_c₀ (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     (E : Type*) [NormedAddCommGroup E] [NormedSpace 𝕜 E] :
     NormedAddCommGroup (↥(lp (fun _ ↦ E) ⊤) ⧸ c₀ 𝕜 fun _ ↦ E) := by

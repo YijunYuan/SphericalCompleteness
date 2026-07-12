@@ -6,6 +6,7 @@ Authors: Yijun Yuan
 module
 
 public import SphericalCompleteness.NormedVectorSpace.SphericalCompletion.Defs
+public import SphericalCompleteness.NormedVectorSpace.SphericalCompletion.LpQuotient
 
 /-!
 # Spherical completion: basic results
@@ -112,7 +113,7 @@ carrying an ultrametric normed `𝕜`-vector-space structure together with a lin
 SphericallyCompleteSpace`, `E₀` is in particular spherically complete.
 
 The witness is the maximal immediate extension carved out of the canonical spherically complete
-extension `canonicalSphericallyCompleteExtension 𝕜 E` (a quotient of an `ℓ∞`-type space): the
+extension `lpQuotientEmbedding 𝕜 E` (a quotient of an `ℓ∞`-type space): the
 maximal immediate submodule selected by `exists_maximal_immediateExtensionSubmodule` is itself
 spherically complete and, by maximality, a minimal spherically complete extension of `E`, embedded
 via `maximalImmediateExtensionEmbedding`. All of the required structure and the completion property
@@ -127,9 +128,9 @@ theorem exists_isSphericalCompletion (𝕜 : Type*) [NontriviallyNormedField �
       ∃ ι : E →ₗᵢ[𝕜] E₀,
         IsSphericalCompletion ι := by
   let E₀ := ↥(exists_maximal_immediateExtensionSubmodule 𝕜 E _
-    (canonicalSphericallyCompleteExtension 𝕜 E)).choose
+    (lpQuotientEmbedding 𝕜 E)).choose
   exact ⟨E₀, inferInstance, inferInstance, inferInstance,
-    maximalImmediateExtensionEmbedding (canonicalSphericallyCompleteExtension 𝕜 E), inferInstance⟩
+    maximalImmediateExtensionEmbedding (lpQuotientEmbedding 𝕜 E), inferInstance⟩
 
 /--
 Any embedding `ι : E →ₗᵢ[𝕜] F` realising `F` as a spherical completion of `E` (i.e. carrying an
@@ -289,7 +290,7 @@ theorem iff_maximallyComplete (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     rcases (Submodule.ne_bot_iff _).1 this with ⟨v, hv⟩
     exact hv.2 <| hf1 v (IsMOrtho.of_mem_orthComp _ _ hv.1)
   · exact of_isometryEquiv (LinearIsometryEquiv.ofSurjective _
-      (h (maximalImmediateExtensionEmbedding (canonicalSphericallyCompleteExtension 𝕜 E))
+      (h (maximalImmediateExtensionEmbedding (lpQuotientEmbedding 𝕜 E))
         (IsSphericalCompletion.embedding_isImmediate inferInstance))).symm.toIsometryEquiv
 
 end SphericallyCompleteSpace

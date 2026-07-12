@@ -7,7 +7,6 @@ module
 
 public import SphericalCompleteness.NormedVectorSpace.Immediate
 public import SphericalCompleteness.NormedVectorSpace.Orthogonal.OrthComp
-public import SphericalCompleteness.NormedVectorSpace.SphericalCompletion.SphericallyCompleteExtension
 
 /-!
 # Spherical completion: definition
