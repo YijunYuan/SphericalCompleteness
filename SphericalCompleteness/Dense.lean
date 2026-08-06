@@ -326,7 +326,7 @@ spherical completeness in the main theorem. -/
 private lemma nestedBallChain_decreasing :
     Antitone (fun n ↦ closedBall (nestedBallChain hα' n).1 (nestedBallChain hα' n).2) := by
   refine antitone_nat_of_succ_le <| fun n ↦ ?_
-  simp only [nestedBallChain, mem_closedBall, dist_le_coe, not_le, Set.le_eq_subset]
+  simp only [nestedBallChain, mem_closedBall, dist_le_coe, not_le]
   have := ((exists_sub_closedBall_not_mem (nestedBallChain hα' n).1 (shrinkingRadius α n)
       (shrinkingRadius α (n + 1)) <| shrinkingRadius_strictAnti α (lt_add_one n))
         (hα'.ofNat hsep.exists_countable_dense.choose n)).choose_spec.1

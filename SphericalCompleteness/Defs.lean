@@ -105,7 +105,7 @@ theorem of_isometryEquiv {E F : Type*}
     let ci' := fun n ↦ f.symm (ci n)
     have hanti' : Antitone (fun i ↦ closedBall (ci' i) (ri i)) := by
       intro m n hmn
-      simp only [ci', Set.le_eq_subset, ← IsometryEquiv.preimage_closedBall f]
+      simp only [ci', ← IsometryEquiv.preimage_closedBall f]
       exact Set.preimage_mono (hanti hmn)
     rcases he.nonempty_iInter_of_antitone hanti' with ⟨z',hz'⟩
     simp only [Set.mem_iInter, mem_closedBall, Set.nonempty_iInter] at *

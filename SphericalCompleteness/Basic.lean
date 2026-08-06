@@ -411,9 +411,9 @@ instance _root_.Pi.sphericallyCompleteSpace {ι : Type*} [Fintype ι] {E : ι �
     intro ci ri hanti
     have hE : ∀ i, Antitone (fun n ↦ closedBall (ci n i) (ri n)) := by
       intro i m n hmn
-      simp only [Set.le_eq_subset]
+      simp only
       specialize hanti hmn
-      simp only [Set.le_eq_subset] at hanti
+      simp only at hanti
       rw [closedBall_pi, closedBall_pi] at hanti
       · intro z hz
         let Z : ((i : ι) → E i) := fun (j : ι) ↦ if hij : j = i then hij ▸ z else (ci n j)

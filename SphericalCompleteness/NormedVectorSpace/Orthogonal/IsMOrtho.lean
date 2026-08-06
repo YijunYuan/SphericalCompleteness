@@ -201,7 +201,7 @@ theorem exists_isMOrtho_vec_of_finrank_lt
     linarith
     ⟩) (by
     refine antitone_nat_of_succ_le <| fun n ↦ ?_
-    simp only [Nat.cast_add, Nat.cast_one, one_div, Set.le_eq_subset]
+    simp only [Nat.cast_add, Nat.cast_one, one_div]
     intro x hx
     have := (exists_image_closedBall_eq_closedBall_inter 𝕜 F a (infDist a F + 1 / (n + 1 + 1))
       (by simp; linarith)).choose_spec

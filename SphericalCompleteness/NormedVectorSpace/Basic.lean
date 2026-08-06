@@ -74,7 +74,7 @@ instance instSphericallyCompleteSpaceSpanSingleton (𝕜 : Type*) [NontriviallyN
       intro n x hx
       simp only [mem_closedBall] at *
       have := hanti (by linarith : n ≤ n + 1)
-      simp only [Set.le_eq_subset] at this
+      simp only at this
       have this' : x • ⟨z, Submodule.mem_span_singleton_self z⟩
         ∈ closedBall (ci (n + 1)) ↑(ri (n + 1)) := by
         simp only [SetLike.mk_smul_mk, mem_closedBall, Subtype.dist_eq]

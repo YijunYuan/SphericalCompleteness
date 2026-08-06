@@ -243,7 +243,7 @@ lemma codimOneExtension_eq (M : ↥(D + Submodule.span 𝕜 {a})) :
 /-- The codimension-one extension `codimOneExtension` is `𝕜`-linear. Additivity and homogeneity
 both reduce, via `codimOneExtension_eq`, to the linearity of `S` and of scalar multiplication in
 the `spanSupDecomp` coordinates. -/
-noncomputable def isLinearMap_codimOneExtension :
+theorem isLinearMap_codimOneExtension :
     IsLinearMap 𝕜 (codimOneExtension ha1 S h𝒰 hε1 hε2 hε3) where
   map_add x1 x2 := by
     simp only [codimOneExtension_eq, map_add, Prod.fst_add, Prod.snd_add, S.map_add, add_smul]
@@ -257,7 +257,7 @@ noncomputable def isLinearMap_codimOneExtension :
 (`isLinearMap_codimOneExtension`) the ultrametric estimate bounds its value by
 `max (ε U₀) ‖U₀‖ * ‖x‖` for a fixed member `U₀` of the family, using the extension bound
 `norm_smul_extensionValue_le`. -/
-noncomputable def isBoundedLinearMap_codimOneExtension :
+theorem isBoundedLinearMap_codimOneExtension :
     IsBoundedLinearMap 𝕜 (codimOneExtension ha1 S h𝒰 hε1 hε2 hε3) where
   map_add := (isLinearMap_codimOneExtension ha1 S h𝒰 hε1 hε2 hε3).map_add
   map_smul := (isLinearMap_codimOneExtension ha1 S h𝒰 hε1 hε2 hε3).map_smul
@@ -432,7 +432,7 @@ private lemma gluedMap_eq
 /-- The glued map `gluedMap` is `𝕜`-linear. Additivity and homogeneity are checked by pulling the
 relevant points down into a common chain member (using directedness) and invoking the linearity of
 that member's continuous linear map `p.T`, via `gluedMap_eq`. -/
-private def isLinearMap_of_gluedMap
+private theorem isLinearMap_of_gluedMap
     (P : Set (PartialExtension 𝕜 E F S 𝒰 h𝒰 ε))
     (hP : IsChain (fun x1 x2 ↦ x1 ≤ x2) P) (hhP : P.Nonempty) :
     IsLinearMap 𝕜 (gluedMap 𝕜 h𝒰 ε P hP hhP) where
@@ -461,7 +461,7 @@ private def isLinearMap_of_gluedMap
 `max (ε U₀) ‖U₀‖ * ‖x‖` for a fixed member `U₀` of the family `𝒰`, using the tolerance bound
 `p.hU` carried by each partial extension. This packaging as `IsBoundedLinearMap` lets the chain's
 upper bound be promoted to a continuous linear map in `bddAbove_of_chain_of_partial_extension`. -/
-private def isBoundedLinearMap_of_gluedMap
+private theorem isBoundedLinearMap_of_gluedMap
     (hε1 : ∀ (T : ↑𝒰), 0 < ε T)
     (P : Set (PartialExtension 𝕜 E F S 𝒰 h𝒰 ε))
     (hP : IsChain (fun x1 x2 ↦ x1 ≤ x2) P) (hhP : P.Nonempty) :
