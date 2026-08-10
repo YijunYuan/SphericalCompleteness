@@ -1,3 +1,4 @@
 /.lake
 .mcp.json
 cleaner-prompt.md
+DependencyExtractor.lean

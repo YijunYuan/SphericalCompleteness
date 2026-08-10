@@ -228,7 +228,7 @@ private lemma exists_sub_closedBall_not_mem {α : Type*}
     exact (lt_self_iff_false (nndist x y)).mp <| lt_of_le_of_lt this hxy.out.1
   if hzx : z ∈ closedBall x r₁ then
     refine ⟨y, ⟨?_, Disjoint.notMem_of_mem_left this hzx⟩⟩
-    simp only [closedBall, Set.setOf_subset_setOf]
+    simp only [closedBall, Set.ofPred_subset_ofPred]
     refine fun a ha ↦ le_trans (hiud.dist_triangle_max a y c₀) ?_
     simp only [sup_le_iff]
     exact ⟨le_of_lt <| lt_of_le_of_lt ha hr, hy⟩
@@ -420,7 +420,7 @@ theorem not_sphericallyCompleteSpace_of_isSphericallyDense_separable_ultrametric
     have hfin := Set.toFinite ((fun (x : α × α) ↦ nndist x.1 x.2) '' {x | x.1 ≠ x.2})
     have hnemp : S.Nonempty := by
       use nndist (exists_pair_with_pos_dist α).choose.1 (exists_pair_with_pos_dist α).choose.2
-      simp only [ne_eq, gt_iff_lt, Set.mem_image, Set.mem_setOf_eq, Prod.exists, S]
+      simp only [ne_eq, gt_iff_lt, Set.mem_image, Set.mem_ofPred_eq, Prod.exists, S]
       use (exists_pair_with_pos_dist α).choose.1, (exists_pair_with_pos_dist α).choose.2
       simp only [gt_iff_lt, and_true]
       by_contra hc
@@ -430,7 +430,7 @@ theorem not_sphericallyCompleteSpace_of_isSphericallyDense_separable_ultrametric
     have r₀pos : r₀ > 0 := by
       simp only [gt_iff_lt, Nat.ofNat_pos, div_pos_iff_of_pos_right, r₀]
       have := (Set.Nonempty.csInf_mem hnemp hfin).out
-      simp only [ne_eq, Set.mem_setOf_eq, Prod.exists] at this
+      simp only [ne_eq, Set.mem_ofPred_eq, Prod.exists] at this
       rcases this with ⟨a,b,hneq,dis⟩
       rw [← dis]
       contrapose hneq
@@ -446,7 +446,7 @@ theorem not_sphericallyCompleteSpace_of_isSphericallyDense_separable_ultrametric
         by_contra hc
         have : (nndist x nemp.some) ∈ S := by
           unfold S
-          simp only [ne_eq, Set.mem_image, Set.mem_setOf_eq, Prod.exists]
+          simp only [ne_eq, Set.mem_image, Set.mem_ofPred_eq, Prod.exists]
           use x, nemp.some
         unfold r₀ at *
         field_simp at *

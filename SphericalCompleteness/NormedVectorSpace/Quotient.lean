@@ -46,20 +46,19 @@ between `un` and `unp1` by genuinely close representatives in `E`, with a strict
 -/
 private lemma lift_to_nearby_element (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     {E : Type*} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] {F : Submodule 𝕜 E}
-    (un : E ⧸ F.toAddSubgroup) (en : NNReal) (unp1 : E ⧸ F.toAddSubgroup)
+    (un : E ⧸ F) (en : NNReal) (unp1 : E ⧸ F)
     (h : unp1 ∈ closedBall un en)
-    (lun : E) (hlun : (QuotientAddGroup.mk' F.toAddSubgroup) lun = un)
+    (lun : E) (hlun : (Submodule.Quotient.mk lun : E ⧸ F) = un)
     (ens1 : NNReal) (hens1 : ens1 > en) :
-    ∃ lup1 : E, (QuotientAddGroup.mk' F.toAddSubgroup) lup1 = unp1 ∧ ‖lup1 - lun‖ < ens1 := by
+    ∃ lup1 : E, (Submodule.Quotient.mk lup1 : E ⧸ F) = unp1 ∧ ‖lup1 - lun‖ < ens1 := by
   subst hlun
   rw [mem_closedBall, dist_eq_norm] at h
-  have hε : (0 : ℝ) < ens1 - ‖unp1 - (QuotientAddGroup.mk' F.toAddSubgroup) lun‖ :=
+  have hε : (0 : ℝ) < ens1 - ‖unp1 - (Submodule.Quotient.mk lun : E ⧸ F)‖ :=
     sub_pos.2 (lt_of_le_of_lt h (by exact_mod_cast hens1))
   obtain ⟨m, hm_eq, hm_norm⟩ :=
-    Submodule.Quotient.norm_mk_lt (S := F) (unp1 - (QuotientAddGroup.mk' F.toAddSubgroup) lun) hε
+    Submodule.Quotient.norm_mk_lt (S := F) (unp1 - (Submodule.Quotient.mk lun : E ⧸ F)) hε
   refine ⟨lun + m, ?_, ?_⟩
-  · rw [map_add, show (QuotientAddGroup.mk' F.toAddSubgroup) m = Submodule.Quotient.mk m
-      from rfl, hm_eq]
+  · rw [Submodule.Quotient.mk_add, hm_eq]
     abel
   · rw [add_sub_cancel_left]
     exact_mod_cast hm_norm.trans_le (add_sub_cancel _ _).le
@@ -76,8 +75,8 @@ private lemma exists_lift_step (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     {E : Type*} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
     {F : Submodule 𝕜 E} {c : ℕ → E ⧸ F} {r : ℕ → NNReal} (hr : StrictAnti r)
     (hanti : Antitone fun i ↦ closedBall (c i) ↑(r i)) (m : ℕ) (prev : E)
-    (hprev : (QuotientAddGroup.mk' F.toAddSubgroup) prev = c (m + 1)) :
-    ∃ lup1 : E, (QuotientAddGroup.mk' F.toAddSubgroup) lup1 = c (m + 2) ∧
+    (hprev : (Submodule.Quotient.mk prev : E ⧸ F) = c (m + 1)) :
+    ∃ lup1 : E, (Submodule.Quotient.mk lup1 : E ⧸ F) = c (m + 2) ∧
       ‖lup1 - prev‖ < ↑(r m) :=
   lift_to_nearby_element 𝕜 (c (m + 1)) (r (m + 1)) (c (m + 2))
     (hanti (Nat.le_succ (m + 1)) (mem_closedBall_self NNReal.zero_le_coe))
@@ -100,7 +99,7 @@ private noncomputable def liftSequence (𝕜 : Type*) [NontriviallyNormedField �
     [NormedSpace 𝕜 E] [IsUltrametricDist E]
     {F : Submodule 𝕜 E} ⦃c : ℕ → E ⧸ F⦄
     ⦃r : ℕ → NNReal⦄ (hr : StrictAnti r) (hanti : Antitone fun i ↦ closedBall (c i) ↑(r i)) :
-    (t : ℕ) → {x : E // (↑x : E ⧸ F.toAddSubgroup) = c t} := fun n ↦
+    (t : ℕ) → {x : E // (Submodule.Quotient.mk x : E ⧸ F) = c t} := fun n ↦
   match n with
   | 0 => ⟨(c 0).out, Quotient.out_eq' (c 0)⟩
   | 1 => ⟨(c 1).out, Quotient.out_eq' (c 1)⟩
@@ -167,11 +166,11 @@ theorem sphericallyCompleteSpace
     )
   simp only [Set.nonempty_iInter] at this
   rcases this with ⟨w, hw⟩
-  use (QuotientAddGroup.mk' F.toAddSubgroup) w
-  simp only [QuotientAddGroup.mk'_apply, Set.mem_iInter, mem_closedBall]
+  use (Submodule.Quotient.mk w : E ⧸ F)
+  simp only [Set.mem_iInter, mem_closedBall]
   intro i
   have := (inferInstance : IsUltrametricDist (E ⧸ F)).dist_triangle_max
-    (↑w : E ⧸ F.toAddSubgroup) (c (i + 2)) (c i)
+    (Submodule.Quotient.mk w : E ⧸ F) (c (i + 2)) (c i)
   refine le_trans this <| sup_le_iff.2 ⟨?_, ?_⟩
   · specialize hw i
     simp only [mem_closedBall, dist_eq_norm] at hw

@@ -124,7 +124,7 @@ resolution infer `SphericallyCompleteSpace α` from `ProperSpace α`.
 instance instSphericallyCompleteSpaceOfWeaklyLocallyCompactNormedField
     {α : Type*} [NontriviallyNormedField α] [WeaklyLocallyCompactSpace α] :
     SphericallyCompleteSpace α := by
-  haveI := ProperSpace.of_nontriviallyNormedField_of_weaklyLocallyCompactSpace α
+  have := ProperSpace.of_nontriviallyNormedField_of_weaklyLocallyCompactSpace α
   infer_instance
 
 end SphericallyCompleteSpace

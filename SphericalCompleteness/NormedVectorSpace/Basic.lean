@@ -43,7 +43,7 @@ theorem of_locallyCompactSpace
     (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     {E : Type*} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [LocallyCompactSpace E] :
     SphericallyCompleteSpace E := by
-  haveI : ProperSpace E := ProperSpace.of_locallyCompactSpace 𝕜
+  have : ProperSpace E := ProperSpace.of_locallyCompactSpace 𝕜
   infer_instance
 
 /--
@@ -128,8 +128,8 @@ private lemma induction_sphericallyCompleteSpace_of_finiteDimensional
       (Nonempty.intro φ.toLinearEquiv)]
     simp only [Module.finrank_prod, hM1, add_comm, Nat.add_left_cancel_iff]
     exact finrank_span_singleton hz'
-  · haveI : SphericallyCompleteSpace M := ‹SphericallyCompleteSpace M›
-    haveI : SphericallyCompleteSpace (Submodule.span 𝕜 {z}) :=
+  · have : SphericallyCompleteSpace M := ‹SphericallyCompleteSpace M›
+    have : SphericallyCompleteSpace (Submodule.span 𝕜 {z}) :=
       instSphericallyCompleteSpaceSpanSingleton 𝕜 z
     exact of_isometryEquiv φ.toIsometryEquiv
 

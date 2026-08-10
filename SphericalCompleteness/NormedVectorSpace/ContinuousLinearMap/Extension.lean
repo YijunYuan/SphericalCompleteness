@@ -422,7 +422,7 @@ private lemma gluedMap_eq
     (hP : IsChain (fun x1 x2 ↦ x1 ≤ x2) P) (hhP : P.Nonempty)
     (x : ↥(iSup (fun p : P ↦ p.val.M))) (p : ↑P) (hp : x.val ∈ p.val.M) :
     gluedMap 𝕜 h𝒰 ε P hP hhP x = p.val.T ⟨x.val, hp⟩ := by
-  haveI : Nonempty ↑P := Set.Nonempty.to_subtype hhP
+  have : Nonempty ↑P := Set.Nonempty.to_subtype hhP
   simp only [gluedMap]
   rcases hP.directed (((Submodule.mem_iSup_of_directed (fun p : P ↦ p.val.M)
     (directed_chain 𝕜 h𝒰 ε P hP)).1 x.2).choose) p with ⟨R, hRQ, hRp⟩
@@ -437,7 +437,7 @@ private theorem isLinearMap_of_gluedMap
     (hP : IsChain (fun x1 x2 ↦ x1 ≤ x2) P) (hhP : P.Nonempty) :
     IsLinearMap 𝕜 (gluedMap 𝕜 h𝒰 ε P hP hhP) where
     map_add a b := by
-      haveI : Nonempty ↑P := Set.Nonempty.to_subtype hhP
+      have : Nonempty ↑P := Set.Nonempty.to_subtype hhP
       obtain ⟨pa, hpa⟩ := (Submodule.mem_iSup_of_directed (fun p : P ↦ p.val.M)
         (directed_chain 𝕜 h𝒰 ε P hP)).1 a.prop
       obtain ⟨pb, hpb⟩ := (Submodule.mem_iSup_of_directed (fun p : P ↦ p.val.M)
@@ -449,7 +449,7 @@ private theorem isLinearMap_of_gluedMap
         gluedMap_eq 𝕜 h𝒰 ε P hP hhP (a + b) p (Submodule.add_mem _ ha hb), ← p.val.T.map_add]
       simp only [Submodule.coe_add, AddMemClass.mk_add_mk]
     map_smul k a := by
-      haveI : Nonempty ↑P := Set.Nonempty.to_subtype hhP
+      have : Nonempty ↑P := Set.Nonempty.to_subtype hhP
       obtain ⟨p, hpa⟩ := (Submodule.mem_iSup_of_directed (fun p : P ↦ p.val.M)
         (directed_chain 𝕜 h𝒰 ε P hP)).1 a.prop
       rw [gluedMap_eq 𝕜 h𝒰 ε P hP hhP a p hpa,
@@ -471,7 +471,7 @@ private theorem isBoundedLinearMap_of_gluedMap
     bound := by
       use max (ε ⟨h𝒰.some, h𝒰.some_mem⟩) ‖h𝒰.some‖
       refine ⟨lt_sup_iff.2 <| Or.inl (hε1 _), fun x ↦ ?_⟩
-      haveI : Nonempty ↑P := Set.Nonempty.to_subtype hhP
+      have : Nonempty ↑P := Set.Nonempty.to_subtype hhP
       obtain ⟨p, hp⟩ := (Submodule.mem_iSup_of_directed (fun p : P ↦ p.val.M)
         (directed_chain 𝕜 h𝒰 ε P hP)).1 x.prop
       rw [gluedMap_eq 𝕜 h𝒰 ε P hP hhP x p hp,
@@ -498,7 +498,7 @@ private lemma bddAbove_of_chain_of_partial_extension
           (isBoundedLinearMap_of_gluedMap 𝕜 h𝒰 ε hε1 P hP hhP)
         hT := by
           intro d
-          haveI : Nonempty ↑P := Set.Nonempty.to_subtype hhP
+          have : Nonempty ↑P := Set.Nonempty.to_subtype hhP
           have hd : D ≤ iSup (fun p : P ↦ p.val.M) := fun z hz ↦ (Submodule.mem_iSup _).2 <|
             fun N hN ↦ (le_trans hhP.some.hDM <| hN ⟨hhP.some, hhP.some_mem⟩) hz
           obtain ⟨p, hp⟩ := (Submodule.mem_iSup_of_directed (fun p : P ↦ p.val.M)
@@ -507,13 +507,13 @@ private lemma bddAbove_of_chain_of_partial_extension
           rw [gluedMap_eq 𝕜 h𝒰 ε P hP hhP ⟨↑d, hd d.prop⟩ p hp]; exact p.val.hT d
         hU := by
           intro U x
-          haveI : Nonempty ↑P := Set.Nonempty.to_subtype hhP
+          have : Nonempty ↑P := Set.Nonempty.to_subtype hhP
           obtain ⟨p, hp⟩ := (Submodule.mem_iSup_of_directed (fun p : P ↦ p.val.M)
             (directed_chain 𝕜 h𝒰 ε P hP)).1 x.prop
           change ‖gluedMap 𝕜 h𝒰 ε P hP hhP x - U.val x.val‖ ≤ ε U * ‖x‖
           rw [gluedMap_eq 𝕜 h𝒰 ε P hP hhP x p hp]; exact p.val.hU U ⟨x.val, hp⟩
       }
-  simp only [upperBounds, Set.mem_setOf_eq]
+  simp only [upperBounds, Set.mem_ofPred_eq]
   intro M hM
   have hM' : M.M ≤ ⨆ (p : ↑P), (↑p : PartialExtension 𝕜 E F S 𝒰 h𝒰 ε).M :=
     fun z hz ↦ Submodule.mem_iSup_of_mem ⟨M,hM⟩ hz

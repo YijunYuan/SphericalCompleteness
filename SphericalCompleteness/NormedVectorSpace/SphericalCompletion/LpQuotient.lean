@@ -65,14 +65,14 @@ def c₀ (𝕜 : Type*) [NontriviallyNormedField 𝕜]
   carrier := {f : lp E ⊤ | Tendsto (fun n ↦ ‖f n‖) atTop (𝓝 0)}
   add_mem' := by
     intro a b ha hb
-    simp only [Set.mem_setOf_eq, lp.coeFn_add, Pi.add_apply] at *
+    simp only [Set.mem_ofPred_eq, lp.coeFn_add, Pi.add_apply] at *
     refine squeeze_zero (fun n ↦ norm_nonneg _) (fun n ↦ norm_add_le _ _) ?_
     simpa using ha.add hb
   zero_mem' := by
-    simpa only [Set.mem_setOf_eq, lp.coeFn_zero, Pi.zero_apply, norm_zero] using tendsto_const_nhds
+    simpa only [Set.mem_ofPred_eq, lp.coeFn_zero, Pi.zero_apply, norm_zero] using tendsto_const_nhds
   smul_mem' := by
     intro c x hx
-    simp only [Set.mem_setOf_eq, lp.coeFn_smul, Pi.smul_apply, norm_smul] at *
+    simp only [Set.mem_ofPred_eq, lp.coeFn_smul, Pi.smul_apply, norm_smul] at *
     simpa using hx.const_mul ‖c‖
 
 /-- Inductive step for lifting a nested family of balls to coherent representatives. Given a
@@ -215,8 +215,7 @@ instance sphericallyCompleteSpace_lp_quotient_c₀ :
   intro c r hsr hanti
   let f : ∀ i, E i := fun i ↦ (quotientMkSection E hsr hanti i).val i
   have hf_mem : ↑(f) ∈ lp E ⊤ := by
-    simp only [lp, AddSubgroup.mem_mk, AddSubmonoid.mem_mk,
-      AddSubsemigroup.mem_mk, Set.mem_setOf_eq, f]
+    simp only [lp, f]
     refine memℓp_infty <| bddAbove_def.mpr ?_
     simp only [Set.mem_range, forall_exists_index, forall_apply_eq_imp_iff]
     use max ‖(quotientMkSection E hsr hanti 0).val‖
@@ -239,7 +238,7 @@ instance sphericallyCompleteSpace_lp_quotient_c₀ :
       rw [hA_def]
       simp only [QuotientAddGroup.mk'_apply, AddSubgroupClass.coe_sub, f]
       refine le_trans ?_ (by simpa using norm_quotientMkSection_sub_le E hsr hanti n.succ_pos hm)
-      simpa [f] using lp.norm_apply_le_norm ENNReal.top_ne_zero
+      exact lp.norm_apply_le_norm ENNReal.top_ne_zero
         ((quotientMkSection E hsr hanti m).val -
           (quotientMkSection E hsr hanti (n + 1)).val) m
     -- The eventual coordinatewise bound descends to the quotient norm: the finitely many early
@@ -270,6 +269,9 @@ instance sphericallyCompleteSpace_lp_quotient_c₀ :
     rw [lp.norm_eq_ciSup]
     refine ciSup_le <| fun k ↦ ?_
     simp only [dite_eq_ite, AddSubgroup.coe_add, U, u]
+    -- `lp` coordinates live in the `PreLp` synonym, so the `Pi` simp lemmas do not fire here;
+    -- reduce the coordinate application definitionally instead.
+    change ‖(↑A : ∀ i, E i) k + (if k < n + 1 then -(↑A : ∀ i, E i) k else 0)‖ ≤ _
     if hk : k ≤ n then
       simp [if_pos hk, hC0]
     else
@@ -299,7 +301,7 @@ noncomputable def lpQuotientEmbedding (𝕜 : Type*) [NontriviallyNormedField �
     E →ₗᵢ[𝕜] ((lp (fun (_ : ℕ) ↦ E) ⊤)⧸ c₀ 𝕜 (fun (_ : ℕ) ↦ E)) where
   toFun x := by
     refine (QuotientAddGroup.mk' _) (⟨fun (_ : ℕ) ↦ x, memℓp_infty ⟨‖x‖, ?_⟩⟩)
-    simp only [upperBounds, Set.range_const, Set.mem_singleton_iff, forall_eq, Set.mem_setOf_eq,
+    simp only [upperBounds, Set.range_const, Set.mem_singleton_iff, forall_eq, Set.mem_ofPred_eq,
       le_refl]
   map_add' x y := rfl
   map_smul' c x := rfl
@@ -308,7 +310,7 @@ noncomputable def lpQuotientEmbedding (𝕜 : Type*) [NontriviallyNormedField �
     have hv : (fun (_ : ℕ) ↦ x) ∈ lp (fun (_ : ℕ) ↦ E) ⊤ :=
       memℓp_infty ⟨‖x‖, by
         simp only [upperBounds, Set.range_const, Set.mem_singleton_iff, forall_eq,
-          Set.mem_setOf_eq, le_refl]⟩
+          Set.mem_ofPred_eq, le_refl]⟩
     let v : lp (fun (_ : ℕ) ↦ E) ⊤ := ⟨fun (_ : ℕ) ↦ x, hv⟩
     change ‖(QuotientAddGroup.mk' (c₀ 𝕜 fun _ ↦ E).toAddSubgroup) v‖ = ‖x‖
     have hvnorm : ‖v‖ = ‖x‖ := by

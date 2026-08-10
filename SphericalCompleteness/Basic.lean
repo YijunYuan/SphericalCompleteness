@@ -160,7 +160,7 @@ private lemma smaller_radius {α : Type*} [PseudoMetricSpace α]
   intro m s
   exact ((csInf_lt_iff (by simp) (by
       use hS.some.val.2
-      simp only [Prod.exists, exists_eq_right, Set.mem_setOf_eq]
+      simp only [Prod.exists, exists_eq_right, Set.mem_ofPred_eq]
       use hS.some.1.1
       simp only [Prod.mk.eta, Subtype.coe_prop]
       : {x | ∃ w ∈ S, w.2 = x}.Nonempty)).1 (by
@@ -289,7 +289,7 @@ theorem iff_pairwise_inter_nonempty :
         apply IsUltrametricDist.closedBall_subset_closedBall_of_le_radius_of_nonempty_inter
         · rw [hwr]
           refine csInf_le' ?_
-          simp only [Prod.exists, exists_eq_right, Set.mem_setOf_eq]
+          simp only [Prod.exists, exists_eq_right, Set.mem_ofPred_eq]
           use w'.1
         · exact h' ⟨w,hwS⟩ ⟨w',hw'⟩
       use w.1
@@ -299,9 +299,9 @@ theorem iff_pairwise_inter_nonempty :
       push Not at hw
       replace hw : ∀ w ∈ S, sInf {x | ∃ w ∈ S, w.2 = x} < w.2 := by
         refine fun w hw' ↦ lt_of_le_of_ne (csInf_le' ?_) <| Ne.symm <| hw w hw'
-        simp only [Prod.exists, exists_eq_right, Set.mem_setOf_eq]
+        simp only [Prod.exists, exists_eq_right, Set.mem_ofPred_eq]
         use w.1
-      haveI := Set.Nonempty.to_subtype hSne
+      have := Set.Nonempty.to_subtype hSne
       rcases h.nonempty_iInter_of_antitone (antitone_of_countableChainOfBall h' hw) with ⟨u, hu⟩
       use u
       simp only [Set.mem_iInter] at *
@@ -315,13 +315,13 @@ theorem iff_pairwise_inter_nonempty :
       intro w1 w2
       rcases w1.prop with ⟨i1, hi1⟩
       rcases w2.prop with ⟨i2, hi2⟩
-      simp only [Set.mem_setOf_eq, ← hi1, ← hi2]
+      simp only [← hi1, ← hi2]
       rcases le_total i1 i2 with hi | hi
       · rw [Set.inter_eq_self_of_subset_right <| hanti hi]
         exact nonempty_closedBall.mpr NNReal.zero_le_coe
       · rw [Set.inter_eq_self_of_subset_left <| hanti hi]
         exact nonempty_closedBall.mpr NNReal.zero_le_coe)
-    simp only [Set.coe_setOf, Set.mem_setOf_eq, Set.nonempty_iInter] at h
+    simp only [Set.nonempty_iInter] at h
     rcases h with ⟨z, hz⟩
     exact ⟨z, Set.mem_iInter.2 <| fun i ↦ hz ⟨(c i, r i), i, rfl⟩⟩
 

@@ -279,7 +279,7 @@ theorem iff_maximallyComplete (𝕜 : Type*) [NontriviallyNormedField 𝕜]
       by_contra hc
       simp only [not_lt_top_iff] at hc
       exact hf2 <| LinearMap.range_eq_top.mp hc
-    haveI : SphericallyCompleteSpace (LinearMap.range f.toLinearMap) :=
+    have : SphericallyCompleteSpace (LinearMap.range f.toLinearMap) :=
       of_isometryEquiv <|
         Isometry.isometryEquivOnRange f.isometry
     have : orthComp 𝕜 (LinearMap.range f.toLinearMap) ≠ ⊥ := by

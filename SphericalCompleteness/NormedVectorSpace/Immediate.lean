@@ -243,7 +243,7 @@ lemma mem_immediateExtensionSubmodules_iff
     M ∈ immediateExtensionSubmodules E E₀ f ↔
       ∃ _ : f.range ≤ M,
         ∀ v : M, Metric.infDist (v : E₀) f.range = ‖(v : E₀)‖ → v = 0 := by
-  simp only [immediateExtensionSubmodules, Set.mem_setOf_eq]
+  simp only [immediateExtensionSubmodules, Set.mem_ofPred_eq]
   refine exists_congr fun hc ↦ forall_congr' fun v ↦ ?_
   rw [isMOrtho_range_inclusion_iff]
 
@@ -300,7 +300,7 @@ theorem exists_maximal_immediateExtensionSubmodule
   refine ⟨mem_immediateExtensionSubmodules_iff.2
     ⟨hf_le, fun x hIsMOrtho ↦ ?_⟩, fun M hM z hz ↦
     Submodule.mem_iSup _ |>.2 fun N hN ↦ (hN ⟨M, hM⟩) hz⟩
-  haveI : Nonempty ↑C := hC.to_subtype
+  have : Nonempty ↑C := hC.to_subtype
   have hxmem : (x : E₀) ∈ ⨆ i, (fun x ↦ x.val : C → Submodule 𝕜 E₀) i := x.2
   rw [Submodule.mem_iSup_of_directed _ hC2.directed] at hxmem
   rcases hxmem with ⟨N, hxN⟩
