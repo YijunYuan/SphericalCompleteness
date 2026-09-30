@@ -401,7 +401,7 @@ instance instSphericallyCompleteSpaceOfMaximalImmediateExtensionSubmodule
         (fun h ↦ hgg (congrArg Subtype.val h))
     rcases @IsMOrtho.not_iff_exists_dist_lt_norm 𝕜 _ (↥K)
         _ _ inferInstance (⟨g, hg1⟩) _ |>.1 hNIsMOrtho with ⟨e, he1, he2⟩
-    simp only [Submodule.coe_norm, ← hg2', dist_eq_norm, AddSubgroupClass.coe_sub] at he2
+    simp only [← Submodule.norm_coe, ← hg2', dist_eq_norm, AddSubgroupClass.coe_sub] at he2
     suffices hh : ‖b.val - e.val‖ < ‖b.val‖ by
       contrapose hb1
       apply @IsMOrtho.not_iff_exists_dist_lt_norm 𝕜 _ _ _ _ inferInstance |>.2
@@ -411,7 +411,7 @@ instance instSphericallyCompleteSpaceOfMaximalImmediateExtensionSubmodule
       replace q3 : q1 = e.val := by simp [← q3]
       constructor
       · exact ⟨⟨q1, q2⟩, by subst q3; rfl⟩
-      · rw [dist_eq_norm, Submodule.coe_norm, Submodule.coe_sub, Submodule.coe_norm]
+      · rw [dist_eq_norm, ← Submodule.norm_coe, Submodule.coe_sub, ← Submodule.norm_coe]
         exact hh
     rw [← sub_add_sub_cancel b.val g e.val]
     exact lt_of_le_of_lt (iud.norm_add_le_max _ _) <| max_lt hg2 he2

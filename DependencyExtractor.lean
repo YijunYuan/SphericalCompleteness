@@ -37,11 +37,12 @@ def getConstantBody (n : Name) : TermElabM (Option Expr) := do
 
 
 /--
-Leuenberger: Collect only the 'relevant' dependencies of a constant/definition by optionally filtering out instance dictionaries,
-which can reduce the total number of dependencies by orders of magnitude. To readmit instances set keepInstances to true.
+Leuenberger: Collect only the 'relevant' dependencies of a constant/definition by optionally
+filtering out instance dictionaries, which can reduce the total number of dependencies by orders
+of magnitude. To readmit instances set keepInstances to true.
 -/
-def getRelevantConstsFromConst (n : Name) (keepInstances := false) (keepTheorems := true) (keepInternal := true) :
-    TermElabM (Array Name) := do
+def getRelevantConstsFromConst (n : Name) (keepInstances := false) (keepTheorems := true)
+    (keepInternal := true) : TermElabM (Array Name) := do
   let body ← getConstantBody n
   let consts := match body with | some b => b.getUsedConstants | none => #[]
   let consts ← consts.filterM fun m => do
@@ -61,7 +62,8 @@ def getRelevantConstsFromConst (n : Name) (keepInstances := false) (keepTheorems
 
 def getAllConstsFromNamespace (n : String) : TermElabM (List Name) := do
   let env ← getEnv
-  let consts := env.constants.fold (fun res name _ => if name.getRoot.toString == n then name :: res else res) []
+  let consts := env.constants.fold
+    (fun res name _ => if name.getRoot.toString == n then name :: res else res) []
   return consts.toArray.toList
 
 
@@ -69,45 +71,29 @@ structure BFSState where
   g : HashMap Name (List Name)
   outerLayer : List Name
 
-def getUsedConstantGraph (names : List Name) (depth : Nat) : TermElabM (List (Name × List Name)) := do
-
+def getUsedConstantGraph (names : List Name) (depth : Nat) :
+    TermElabM (List (Name × List Name)) := do
   -- make bfs from the specified root node
-
-  -- the goal is to construct a hashmap where the key is the name of the const, and the entry is a list of names of other consts
-
+  -- The graph maps each constant name to the names of the constants it references.
   -- we keep a list of const names representing the outer layer of the bfs
-
-  -- in each iteration we for each const in the outer layer find its references and that way construct the nodes that will be added to the graph
-
-  -- then we extract the outer layer from the new nodes by looking at the children and checking whether they are already in the graph
-
+  -- Each iteration finds the references of the outer layer and adds these nodes to the graph.
+  -- The next outer layer consists of the children that are not already in the graph.
   let state ← (List.range depth).foldlM (fun (state : BFSState) (_ : Nat) => do
     let g := state.g
     let outerLayer := state.outerLayer
-
-
     let newNodes ← outerLayer.mapM fun name => do
       let consts ← try getRelevantConstsFromConst name catch | _ => pure #[]
       pure (name, consts)
-
-
     let g := newNodes.foldl (fun m p => m.insert p.fst p.snd.toList) g
     let newOuterLayer := newNodes.foldl (fun (set : HashSet Name) (node : Name × Array Name) =>
       let set := set.insertMany node.snd;
       set) HashSet.emptyWithCapacity
     let newOuterLayer := newOuterLayer.toList.filter (fun n => !(g.contains n))
-
     return BFSState.mk g newOuterLayer
   )
     (BFSState.mk HashMap.emptyWithCapacity names)
-
-
-
-
   return state.g.toList
 
-
-#synth ToJson (List (Name × List Name))
 
 def writeJsonToFile (filePath : String) (json : Json) : IO Unit := do
   let jsonString := toString json
@@ -125,7 +111,11 @@ def pairToJson (pair : Name × List Name) : TermElabM (Option Json) := do
   let constCategoryStr ← try (getConstType pair.fst) catch | _ => return none
   let nameListStr := pair.snd.map nameToString
   let constTypeStr ← getTypeStr pair.fst
-  return Json.mkObj [("name", Json.str nameStr),("constCategory", Json.str constCategoryStr), ("constType", constTypeStr), ("references", Json.arr (nameListStr.map Json.str).toArray)]
+  return Json.mkObj [
+    ("name", Json.str nameStr),
+    ("constCategory", Json.str constCategoryStr),
+    ("constType", constTypeStr),
+    ("references", Json.arr (nameListStr.map Json.str).toArray)]
 
 -- Serialize a List (Name, List Name) to JSON
 def serializeList (l : List (Name × List Name)) : TermElabM Json := do
@@ -155,13 +145,13 @@ def serializeAndWriteToFile (source : Source) (depth : Nat) : TermElabM Unit := 
     | Source.Constant s => do
       let expr ← getExpr s
       pure (expr.constName!).toString
-
   let g ← getUsedConstantGraph consts depth
   let js ←  serializeList g
   let _ ← writeJsonToFile ((toString name).append ".json") js
 
 
--- Edit and uncomment one of the lines below to get your .json file created in the current workspace folder
+-- Edit and uncomment one of the lines below to create your .json file in the current directory.
 
--- #eval serializeAndWriteToFile (Source.Constant `(@Nat.add_assoc)) 7
-#eval serializeAndWriteToFile (Source.Namespace "SphericallyCompleteSpace") 2
+-- run_cmd Command.liftTermElabM <| serializeAndWriteToFile (Source.Constant `(@Nat.add_assoc)) 7
+run_cmd Command.liftTermElabM <|
+  serializeAndWriteToFile (Source.Namespace "SphericallyCompleteSpace") 2

@@ -273,10 +273,8 @@ private lemma shrinkingRadius_strictAnti (α : Type*)
   refine strictAnti_nat_of_succ_lt fun n ↦ ?_
   unfold shrinkingRadius
   refine (mul_lt_mul_iff_right₀ (exists_pair_with_pos_dist α).choose_spec).mpr ?_
-  simp only [Nat.cast_add, Nat.cast_one, one_div, add_lt_add_iff_left, ne_eq,
-    AddLeftCancelMonoid.add_eq_zero, Nat.cast_eq_zero, one_ne_zero, and_false, not_false_eq_true,
-    lt_inv_iff_mul_lt]
-  field_simp
+  simp only [Nat.cast_add, Nat.cast_one, add_lt_add_iff_left]
+  apply one_div_lt_one_div_of_lt (by positivity)
   norm_num
 
 /-- Every term of `shrinkingRadius α` exceeds half of its initial value: for all `n`,

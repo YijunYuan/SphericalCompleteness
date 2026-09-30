@@ -273,9 +273,9 @@ instance sphericallyCompleteSpace_lp_quotient_c₀ :
     -- reduce the coordinate application definitionally instead.
     change ‖(↑A : ∀ i, E i) k + (if k < n + 1 then -(↑A : ∀ i, E i) k else 0)‖ ≤ _
     if hk : k ≤ n then
-      simp [if_pos hk, hC0]
+      simp [ite_eq_left hk, hC0]
     else
-      simpa [if_neg hk] using hev k (by omega)
+      simpa [ite_eq_right hk] using hev k (by omega)
   simp only [Set.mem_iInter]
   suffices h : ∀ i ≥ 1, x ∈ closedBall (c i) (r i) by
     exact fun i ↦ (hanti <| Nat.le_add_right i 1) <| h (i + 1) (Nat.le_add_left 1 i)

@@ -74,7 +74,7 @@ theorem iff_antitone_radius :
       refine antitone_nat_of_succ_le fun n ↦ ?_
       intro x hx
       simp only [mem_closedBall, dist_le_coe, r'] at *
-      rw [le_csInf_iff''] at *
+      rw [le_csInf_iff'] at *
       · intro b hb
         rcases hb with ⟨k, hk1, hk2⟩
         rw [← hk2]

@@ -170,12 +170,12 @@ have been strict on both sides, so `‖x‖ = ‖y‖`. The four lemmas below pa
 /-- If `‖x + y‖ < ‖x‖` then `‖x‖ = ‖y‖`: the sum cannot drop below the larger summand's norm
 unless the two norms coincide. -/
 theorem norm_eq_of_norm_add_lt_left (h : ‖x + y‖ < ‖x‖) : ‖x‖ = ‖y‖ :=
-  IsUltrametricDist.norm_eq_of_add_norm_lt_max <| by simp_all [lt_sup_iff, true_or]
+  IsUltrametricDist.norm_eq_of_add_norm_lt_max <| by simp_all [true_or]
 
 /-- If `‖x + y‖ < ‖y‖` then `‖x‖ = ‖y‖`, the right-hand companion of
 `norm_eq_of_norm_add_lt_left`. -/
 theorem norm_eq_of_norm_add_lt_right (h : ‖x + y‖ < ‖y‖) : ‖x‖ = ‖y‖ :=
-  IsUltrametricDist.norm_eq_of_add_norm_lt_max <| by simp_all [lt_sup_iff, or_true]
+  IsUltrametricDist.norm_eq_of_add_norm_lt_max <| by simp_all [or_true]
 
 /-- If `‖x - y‖ < ‖x‖` then `‖x‖ = ‖y‖`: the difference form of `norm_eq_of_norm_add_lt_left`. -/
 theorem norm_eq_of_norm_sub_lt_left (h : ‖x - y‖ < ‖x‖) : ‖x‖ = ‖y‖ :=

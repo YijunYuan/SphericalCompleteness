@@ -275,7 +275,7 @@ theorem isBoundedLinearMap_codimOneExtension :
       - h𝒰.some (d + l • a) + h𝒰.some (d + l • a) from by simp only [sub_add_cancel],
       max_mul_of_nonneg _ _ (norm_nonneg x)]
     refine le_trans (iud.norm_add_le_max _ _) (max_le_max ?_ ?_)
-    · rw [show ‖x‖ = ‖(d : E) + l • a‖ by rw [hx_eq, Submodule.coe_norm]]
+    · rw [show ‖x‖ = ‖(d : E) + l • a‖ by rw [hx_eq, ← Submodule.norm_coe]]
       simpa using tt
     · rw [hx_eq]
       exact ContinuousLinearMap.le_opNorm h𝒰.some ↑x

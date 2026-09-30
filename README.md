@@ -1,8 +1,8 @@
 # SphericalCompleteness
 
 [![CI](https://github.com/YijunYuan/SphericalCompleteness/actions/workflows/lean_action_ci.yml/badge.svg)](https://github.com/YijunYuan/SphericalCompleteness/actions/workflows/lean_action_ci.yml)
-[![Lean](https://img.shields.io/badge/Lean-4.31.0-5C2D91)](https://github.com/leanprover/lean4)
-[![mathlib](https://img.shields.io/badge/mathlib-v4.31.0-5C2D91)](https://github.com/leanprover-community/mathlib4)
+[![Lean](https://img.shields.io/badge/Lean-4.34.1-5C2D91)](https://github.com/leanprover/lean4)
+[![mathlib](https://img.shields.io/badge/mathlib-d13f23b-5C2D91)](https://github.com/leanprover-community/mathlib4/commit/d13f23b723b8a846827a245b89c10fc7d3f11612)
 [![License](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
 
 [![Graph](https://img.shields.io/badge/Dependency_graph-100000?style=for-the-badge&logo=GitHub&logoColor=white&labelColor=black&color=black)](https://yijunyuan.github.io/lean-graph/?url=https://raw.githubusercontent.com/YijunYuan/SphericalCompleteness/refs/heads/master/SphericallyCompleteSpace.json#dark)
@@ -81,9 +81,7 @@ The library is organized in layers.
 ### External support layer (`SphericalCompleteness/External/*`)
 
 - `Complete.lean`: completeness vs nested balls with radii tending to zero.
-- `ContinuityOfRoots.lean`: continuity-of-roots estimates in non-Archimedean settings.
 - `DenselyNormedField.lean`: persistence of densely normed field structure under completion.
-- `NNReal.lean`: helper lemmas on `NNReal`.
 - `PadicAlgCl.lean`: separability and density results for `PadicAlgCl`.
 - `PadicComplex.lean`: transfer of these structures to `ℂ_[p]`.
 - `Sequence.lean`: sequence/subsequence selection lemmas used in core arguments.
@@ -132,8 +130,8 @@ The library is organized in layers.
 
 ### Prerequisites
 
-- Lean toolchain: `leanprover/lean4:v4.28.0` (see `lean-toolchain`).
-- mathlib revision: `v4.28.0` (see `lakefile.toml`).
+- Lean toolchain: `leanprover/lean4:v4.34.1` (see `lean-toolchain`).
+- mathlib revision: `d13f23b723b8a846827a245b89c10fc7d3f11612` (see `lakefile.toml`).
 - Recommended editor: VS Code + the Lean 4 extension.
 
 ### Build

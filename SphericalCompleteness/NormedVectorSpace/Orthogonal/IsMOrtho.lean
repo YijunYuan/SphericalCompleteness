@@ -66,7 +66,7 @@ noncomputable def directProdIsoSum (𝕜 : Type*) [NontriviallyNormedField 𝕜]
       RingHom.id_apply, SetLike.mk_smul_mk, smul_add]
   norm_map' := by
     simp only [Submodule.add_eq_sup, LinearEquiv.coe_mk, LinearMap.coe_mk, AddHom.coe_mk,
-      Submodule.coe_norm, Prod.forall, Prod.norm_mk, Subtype.forall]
+      ← Submodule.norm_coe, Prod.forall, Prod.norm_mk, Subtype.forall]
     intro a ha b hab
     if hh : a = 0 ∨ b = 0 then
       cases hh <;> simp [*]
