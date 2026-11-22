@@ -7,13 +7,15 @@
 
 [![Graph](https://img.shields.io/badge/Dependency_graph-100000?style=for-the-badge&logo=GitHub&logoColor=white&labelColor=black&color=black)](https://yijunyuan.github.io/lean-graph/?url=https://raw.githubusercontent.com/YijunYuan/SphericalCompleteness/refs/heads/master/SphericallyCompleteSpace.json#dark)
 
-This repository is a Lean 4 / mathlib formalization of **spherical completeness** in ultrametric spaces and its consequences in **non-Archimedean normed vector spaces**.
+This Lean 4 library formalizes **spherical completeness** for bundled pseudometrics and valuations of arbitrary rank, with applications to non-Archimedean normed vector spaces.
 
 ## What the project does
 
 At a high level, the library provides:
 
-- The core typeclass `SphericallyCompleteSpace` and foundational consequences (including completeness).
+- For a bundled distance `d : PseudoMetric X Γ`, `d.IsSphericallyComplete` says that every nonempty nest of nonempty closed balls has a common point.
+- For real-valued pseudometric spaces, `Metric.sphericallyCompleteSpace_iff` identifies this property with the sequence class `SphericallyCompleteSpace X` used throughout the normed vector space library.
+- For a valuation `v`, `v.IsSphericallyComplete` is invariant under equivalent valuations. With a compatible valuative uniformity it implies `CompleteSpace`.
 - Multiple equivalent formulations of spherical completeness in ultrametric settings.
 - Structural results for normed spaces: orthogonality, orthogonal complements, quotient stability.
 - A non-Archimedean Hahn-Banach theorem with norm-preserving extension.
@@ -27,14 +29,14 @@ The main umbrella import is:
 
 The central conclusions formalized in this project include:
 
-1. Equivalent characterizations of spherical completeness (`SphericalCompleteness/Basic.lean`):
+1. Equivalent characterizations of spherical completeness (`SphericalCompleteness/Metric/Basic.lean`):
    - Nested closed balls with nonempty intersection (definition form).
    - Equivalent formulations with antitone or strictly antitone radii.
    - Equivalence with the pairwise-intersection criterion for closed balls (TFAE in ultrametric spaces).
-2. Spherical completeness implies completeness (`SphericalCompleteness/Defs.lean`).
-3. A non-spherical-completeness mechanism (`SphericalCompleteness/Dense.lean`):
+2. Spherical completeness implies completeness (`SphericalCompleteness/Metric/Basic.lean`).
+3. A non-spherical-completeness mechanism (`SphericalCompleteness/Metric/Dense.lean`):
    - Separable + ultrametric + spherically dense implies not spherically complete.
-   - Applied to show that `ℂ_[p]` is not spherically complete.
+   - The application to `ℂ_[p]` is in `SphericalCompleteness/Examples/Padic.lean`.
 4. Non-Archimedean Hahn-Banach (`SphericalCompleteness/NormedVectorSpace/ContinuousLinearMap/HahnBanach.lean`):
    - Continuous linear maps extend from subspaces while preserving operator norm.
 5. Orthogonal complements and projections (`SphericalCompleteness/NormedVectorSpace/Orthogonal/OrthComp.lean`):
@@ -71,12 +73,21 @@ The library is organized in layers.
 
 ### Core spherical-completeness theory
 
-- `SphericalCompleteness/Defs.lean`
-  - Definition of `SphericallyCompleteSpace` and fundamental transfer/instance lemmas.
-- `SphericalCompleteness/Basic.lean`
-  - Equivalent formulations (TFAE) and basic constructions (products, finite `Pi`, standard instances).
-- `SphericalCompleteness/Dense.lean`
-  - Definition of spherical density and non-spherical-completeness criteria.
+The table lists paths under `SphericalCompleteness/`. Each module can be imported independently.
+
+| Module | Contents |
+| --- | --- |
+| `PseudoMetric.lean` and `PseudoMetric/` | Bundled distances, arbitrary nests, pairwise intersection, realized radii, best approximation, products and transport. |
+| `Metric/Defs.lean` | The real-valued sequence class and its equivalence with the bundled definition. |
+| `Metric/Basic.lean` | Completeness, proper spaces, equivalent tests, isometries and finite products. |
+| `Metric/Dense.lean` | Spherical density and the obstruction to spherical completeness for separable pseudo-ultrametric spaces. |
+| `Valuation/Basic.lean` | Multiplicative and additive valuations, equivalent representatives and `ValuativeRel`. |
+| `Valuation/Complete.lean` | Completeness of a spherically complete valued ring in a compatible uniformity. |
+| `Valuation/Normed.lean` | The bridges between valuations and ultrametric norms. |
+| `Examples/Padic.lean` | The metric and valuation formulations for both `ℚ_[p]` and `ℂ_[p]`. |
+
+For the metric instance on `ℚ_[p]` alone, import `SphericalCompleteness.Examples.Padic.ProperSpace`.
+The earlier `Metric`, `Defs`, `Basic`, `Dense`, `Valuation` and `Valuation.Padic` imports remain available.
 
 ### External support layer (`SphericalCompleteness/External/*`)
 
@@ -86,7 +97,9 @@ The library is organized in layers.
 - `PadicComplex.lean`: transfer of these structures to `ℂ_[p]`.
 - `Sequence.lean`: sequence/subsequence selection lemmas used in core arguments.
 - `Submodule.lean`: algebraic submodule lemmas used in decomposition arguments.
-- `Ultrametric.lean`: ultrametric lemmas and lifted ultrametric instances.
+- `Ultrametric/Basic.lean` contains ultrametric ball, norm and completion lemmas.
+- `Ultrametric/NormedSpace.lean` adds the quotient and operator-space instances.
+- `Ultrametric.lean` re-exports both modules and adds the `lp` instance.
 
 ### Normed vector space layer (`SphericalCompleteness/NormedVectorSpace/*`)
 
@@ -147,32 +160,28 @@ If `lake exe cache get` fails in your environment (e.g. network restrictions), y
 
 ### Using the library in Lean
 
-To import everything:
+Use `import SphericalCompleteness` for the whole library. The metric interface gives existing
+normed-space results access to arbitrary nests through the bundled distance.
 
 ```lean
-import SphericalCompleteness
+import SphericalCompleteness.Metric.Defs
+
+example (X : Type*) [PseudoMetricSpace X] [SphericallyCompleteSpace X] :
+    (Metric.nnMetric X).IsSphericallyComplete := inferInstance
+
+example (X : Type*) [PseudoMetricSpace X] (h : (Metric.nnMetric X).IsSphericallyComplete) :
+    SphericallyCompleteSpace X := (Metric.sphericallyCompleteSpace_iff X).mpr h
 ```
 
-To import only the core definition of spherical completeness:
+Use `SphericalCompleteness.Valuation.Basic` for a specified valuation. A multiplicative valuation's
+closed balls are given by `v (x - c) ≤ r`. An additive valuation uses `r ≤ v (x - c)`.
 
 ```lean
-import SphericalCompleteness.Defs
-```
+import SphericalCompleteness.Valuation.Basic
 
-Example (sketch): once you have `[SphericallyCompleteSpace α]`, you can use the defining intersection principle.
-
-```lean
-import SphericalCompleteness.Defs
-
-open Metric
-
-variable {α : Type} [PseudoMetricSpace α] [SphericallyCompleteSpace α]
-
--- Given a nested sequence of closed balls, the intersection is nonempty.
-example (ci : ℕ → α) (ri : ℕ → NNReal)
-    (hanti : Antitone (fun i => closedBall (ci i) (ri i))) :
-    (⋂ i, closedBall (ci i) (ri i)).Nonempty :=
-  SphericallyCompleteSpace.isSphericallyComplete (ci := ci) (ri := ri) hanti
+example {R Γ : Type*} [Ring R] [LinearOrderedCommMonoidWithZero Γ]
+    (v : Valuation R Γ) (c : R) (r : Γ) :
+    v.toPseudoMetric.closedBall c (MaxTropical.trop r) = {x | v (x - c) ≤ r} := rfl
 ```
 
 ## Where users can get help

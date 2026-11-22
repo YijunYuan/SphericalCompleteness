@@ -59,7 +59,7 @@
  {"references": [],
   "name": "SphericallyCompleteSpace.iff_strictAnti_radius",
   "constType":
-  "∀ (α : Type u_1) [inst : PseudoMetricSpace α] [iud : IsUltrametricDist α],\n  SphericallyCompleteSpace α ↔\n    ∀ ⦃ci : ℕ → α⦄ ⦃ri : ℕ → NNReal⦄,\n      StrictAnti ri →\n        (Antitone fun i ↦ Metric.closedBall (ci i) ↑(ri i)) → (⋂ i, Metric.closedBall (ci i) ↑(ri i)).Nonempty",
+  "∀ (α : Type u_1) [inst : PseudoMetricSpace α],\n  SphericallyCompleteSpace α ↔\n    ∀ ⦃ci : ℕ → α⦄ ⦃ri : ℕ → NNReal⦄,\n      StrictAnti ri →\n        (Antitone fun i ↦ Metric.closedBall (ci i) ↑(ri i)) → (⋂ i, Metric.closedBall (ci i) ↑(ri i)).Nonempty",
   "constCategory": "Theorem"},
  {"references": ["Metric.closedBall", "NNReal", "NNReal.toReal", "Metric.diam"],
   "name": "SphericallyCompleteSpace.IsSphericallyDense.mk._flat_ctor",
@@ -91,7 +91,7 @@
   "name":
   "SphericallyCompleteSpace.not_sphericallyCompleteSpace_of_isSphericallyDense_separable_ultrametric",
   "constType":
-  "∀ (α : Type u_1) [inst : MetricSpace α] [hiud : IsUltrametricDist α]\n  [hα : SphericallyCompleteSpace.IsSphericallyDense α] [nemp : Nonempty α] [hsep : TopologicalSpace.SeparableSpace α],\n  ¬SphericallyCompleteSpace α",
+  "∀ (α : Type u_1) [inst : PseudoMetricSpace α] [IsUltrametricDist α] [hα : SphericallyCompleteSpace.IsSphericallyDense α]\n  [Nonempty α] [TopologicalSpace.SeparableSpace α], ¬SphericallyCompleteSpace α",
   "constCategory": "Theorem"},
  {"references":
   ["SphericallyCompleteSpace.IsImmediate.maximalImmediateExtensionEmbedding._proof_1",
@@ -155,14 +155,14 @@
   "∀ {𝕜 : Type u_1} [inst : NontriviallyNormedField 𝕜] {E : Type u_2} [inst_1 : SeminormedAddCommGroup E]\n  [inst_2 : NormedSpace 𝕜 E] [iud : IsUltrametricDist E] (F1 F2 : Subspace 𝕜 E),\n  (F1 ⟂ₛ F2) ↔ ∀ x ∈ F1, ∀ y ∈ F2, x ⟂[𝕜] y",
   "constCategory": "Theorem"},
  {"references": [],
+  "name": "SphericallyCompleteSpace.instSphericallyCompleteSpaceReal",
+  "constType": "SphericallyCompleteSpace ℝ",
+  "constCategory": "Theorem"},
+ {"references": [],
   "name":
   "SphericallyCompleteSpace.IsImmediate.immediateExtensionSubmodules.congr_simp",
   "constType":
   "∀ {𝕜 : Type u_1} [inst : NontriviallyNormedField 𝕜] (E : Type u_2) [inst_1 : NormedAddCommGroup E]\n  [inst_2 : NormedSpace 𝕜 E] [inst_3 : IsUltrametricDist E] (E₀ : Type u_3) [inst_4 : NormedAddCommGroup E₀]\n  [inst_5 : NormedSpace 𝕜 E₀] [inst_6 : IsUltrametricDist E₀] (f f_1 : E →ₗᵢ[𝕜] E₀),\n  f = f_1 →\n    SphericallyCompleteSpace.IsImmediate.immediateExtensionSubmodules E E₀ f =\n      SphericallyCompleteSpace.IsImmediate.immediateExtensionSubmodules E E₀ f_1",
-  "constCategory": "Theorem"},
- {"references": [],
-  "name": "SphericallyCompleteSpace.instSphericallyCompleteSpaceReal",
-  "constType": "SphericallyCompleteSpace ℝ",
   "constCategory": "Theorem"},
  {"references":
   ["Bind.bind",
@@ -192,7 +192,7 @@
  {"references": [],
   "name": "SphericallyCompleteSpace.iff_antitone_radius",
   "constType":
-  "∀ (α : Type u_1) [inst : PseudoMetricSpace α] [iud : IsUltrametricDist α],\n  SphericallyCompleteSpace α ↔\n    ∀ ⦃ci : ℕ → α⦄ ⦃ri : ℕ → NNReal⦄,\n      Antitone ri →\n        (Antitone fun i ↦ Metric.closedBall (ci i) ↑(ri i)) → (⋂ i, Metric.closedBall (ci i) ↑(ri i)).Nonempty",
+  "∀ (α : Type u_1) [inst : PseudoMetricSpace α],\n  SphericallyCompleteSpace α ↔\n    ∀ ⦃ci : ℕ → α⦄ ⦃ri : ℕ → NNReal⦄,\n      Antitone ri →\n        (Antitone fun i ↦ Metric.closedBall (ci i) ↑(ri i)) → (⋂ i, Metric.closedBall (ci i) ↑(ri i)).Nonempty",
   "constCategory": "Theorem"},
  {"references": [],
   "name": "SphericallyCompleteSpace.orthComp._proof_1",
@@ -271,6 +271,11 @@
   "constType":
   "∀ {𝕜 : Type u_1} [inst : NontriviallyNormedField 𝕜] {E : Type u_2} [inst_1 : SeminormedAddCommGroup E]\n  [iude : IsUltrametricDist E] [inst_2 : NormedSpace 𝕜 E] {D : Submodule 𝕜 E} {a : E} (ha1 : a ∉ D) {F : Type u_3}\n  [inst_3 : SeminormedAddCommGroup F] [iud : IsUltrametricDist F] [inst_4 : NormedSpace 𝕜 F]\n  [hsc : SphericallyCompleteSpace F] (S : ↥D →L[𝕜] F) {𝒰 : Set (E →L[𝕜] F)} (h𝒰 : 𝒰.Nonempty) {ε : ↑𝒰 → ℝ}\n  (hε1 : ∀ (T : ↑𝒰), 0 < ε T) (hε2 : ∀ (U V : ↑𝒰), ‖↑U - ↑V‖ ≤ max (ε U) (ε V))\n  (hε3 : ∀ (U : ↑𝒰) (x : ↥D), ‖S x - ↑U ↑x‖ ≤ ε U * ‖x‖) (x : ↥D) (l : 𝕜) (U : ↑𝒰),\n  ‖S x + l • ⋯.choose - ↑U (↑x + l • a)‖ ≤ ε U * ‖↑x + l • a‖",
   "constCategory": "Theorem"},
+ {"references": [],
+  "name": "SphericallyCompleteSpace.IsSphericallyDense.nnMetric",
+  "constType":
+  "∀ {α : Type u_1} [inst : PseudoMetricSpace α] [h : SphericallyCompleteSpace.IsSphericallyDense α],\n  (Metric.nnMetric α).IsSphericallyDense",
+  "constCategory": "Theorem"},
  {"references":
   ["Metric.closedBall",
    "Set.Icc",
@@ -284,7 +289,7 @@
   "name":
   "SphericallyCompleteSpace.SchikhofCounterexample.IsDenseMetric.casesOn",
   "constType":
-  "{α : Type u_1} →\n  [inst : MetricSpace α] →\n    {motive : SphericallyCompleteSpace.SchikhofCounterexample.IsDenseMetric α → Sort u} →\n      (t : SphericallyCompleteSpace.SchikhofCounterexample.IsDenseMetric α) →\n        ((dense_metric :\n              ∀ (z : α) (r : NNReal),\n                closure (Set.image2 dist (Metric.closedBall z ↑r) (Metric.closedBall z ↑r)) =\n                  Set.Icc 0 (Metric.diam (Metric.closedBall z ↑r))) →\n            motive ⋯) →\n          motive t",
+  "{α : Type u_1} →\n  [inst : PseudoMetricSpace α] →\n    {motive : SphericallyCompleteSpace.SchikhofCounterexample.IsDenseMetric α → Sort u} →\n      (t : SphericallyCompleteSpace.SchikhofCounterexample.IsDenseMetric α) →\n        ((dense_metric :\n              ∀ (z : α) (r : NNReal),\n                closure (Set.image2 dist (Metric.closedBall z ↑r) (Metric.closedBall z ↑r)) =\n                  Set.Icc 0 (Metric.diam (Metric.closedBall z ↑r))) →\n            motive ⋯) →\n          motive t",
   "constCategory": "Definition"},
  {"references": ["SphericallyCompleteSpace.casesOn"],
   "name": "SphericallyCompleteSpace.recOn",
@@ -476,7 +481,7 @@
   ["SphericallyCompleteSpace.SchikhofCounterexample.IsDenseMetric.casesOn"],
   "name": "SphericallyCompleteSpace.SchikhofCounterexample.IsDenseMetric.recOn",
   "constType":
-  "{α : Type u_1} →\n  [inst : MetricSpace α] →\n    {motive : SphericallyCompleteSpace.SchikhofCounterexample.IsDenseMetric α → Sort u} →\n      (t : SphericallyCompleteSpace.SchikhofCounterexample.IsDenseMetric α) →\n        ((dense_metric :\n              ∀ (z : α) (r : NNReal),\n                closure (Set.image2 dist (Metric.closedBall z ↑r) (Metric.closedBall z ↑r)) =\n                  Set.Icc 0 (Metric.diam (Metric.closedBall z ↑r))) →\n            motive ⋯) →\n          motive t",
+  "{α : Type u_1} →\n  [inst : PseudoMetricSpace α] →\n    {motive : SphericallyCompleteSpace.SchikhofCounterexample.IsDenseMetric α → Sort u} →\n      (t : SphericallyCompleteSpace.SchikhofCounterexample.IsDenseMetric α) →\n        ((dense_metric :\n              ∀ (z : α) (r : NNReal),\n                closure (Set.image2 dist (Metric.closedBall z ↑r) (Metric.closedBall z ↑r)) =\n                  Set.Icc 0 (Metric.diam (Metric.closedBall z ↑r))) →\n            motive ⋯) →\n          motive t",
   "constCategory": "Definition"},
  {"references": ["Lean.Name.mkStr1", "Lean.Name.mkStr2", "OfNat.ofNat"],
   "name": "SphericallyCompleteSpace.«term_⟂ₘ_»",
@@ -618,11 +623,6 @@
   "constType":
   "∀ (α : Type u_1) [inst : PseudoMetricSpace α] [ProperSpace α], SphericallyCompleteSpace α",
   "constCategory": "Theorem"},
- {"references": [],
-  "name": "SphericallyCompleteSpace.IsVOrtho.smul_right",
-  "constType":
-  "∀ {𝕜 : Type u_1} [inst : NontriviallyNormedField 𝕜] {E : Type u_2} [inst_1 : SeminormedAddCommGroup E]\n  [inst_2 : NormedSpace 𝕜 E] [iud : IsUltrametricDist E] {x y : E} (a : 𝕜), (x ⟂[𝕜] y) → x ⟂[𝕜] a • y",
-  "constCategory": "Theorem"},
  {"references":
   ["LinearIsometry.toLinearMap",
    "SphericallyCompleteSpace.IsImmediate._proof_1",
@@ -634,6 +634,11 @@
   "constType":
   "{𝕜 : Type u_1} →\n  [inst : NontriviallyNormedField 𝕜] →\n    {E : Type u} →\n      [inst_1 : SeminormedAddCommGroup E] →\n        [inst_2 : NormedSpace 𝕜 E] →\n          [IsUltrametricDist E] →\n            {F : Type v} →\n              [inst_4 : SeminormedAddCommGroup F] →\n                [inst_5 : NormedSpace 𝕜 F] → [IsUltrametricDist F] → (E →ₗᵢ[𝕜] F) → Prop",
   "constCategory": "Definition"},
+ {"references": [],
+  "name": "SphericallyCompleteSpace.IsVOrtho.smul_right",
+  "constType":
+  "∀ {𝕜 : Type u_1} [inst : NontriviallyNormedField 𝕜] {E : Type u_2} [inst_1 : SeminormedAddCommGroup E]\n  [inst_2 : NormedSpace 𝕜 E] [iud : IsUltrametricDist E] {x y : E} (a : 𝕜), (x ⟂[𝕜] y) → x ⟂[𝕜] a • y",
+  "constCategory": "Theorem"},
  {"references":
   ["SetLike.coe",
    "Equiv.invFun",
@@ -1045,6 +1050,11 @@
   "∀ (𝕜 : Type u_1) [inst : NontriviallyNormedField 𝕜] [scsk : SphericallyCompleteSpace 𝕜] {E : Type u_2}\n  [inst_1 : NormedAddCommGroup E] [inst_2 : NormedSpace 𝕜 E] (z : E), SphericallyCompleteSpace ↥(𝕜 ∙ z)",
   "constCategory": "Theorem"},
  {"references": [],
+  "name": "SphericallyCompleteSpace.isSphericallyDense_iff_nnMetric",
+  "constType":
+  "∀ (α : Type u_1) [inst : PseudoMetricSpace α] [IsUltrametricDist α],\n  SphericallyCompleteSpace.IsSphericallyDense α ↔ (Metric.nnMetric α).IsSphericallyDense",
+  "constCategory": "Theorem"},
+ {"references": [],
   "name": "SphericallyCompleteSpace.orthProj.congr_simp",
   "constType":
   "∀ (𝕜 : Type u_1) [inst : NontriviallyNormedField 𝕜] {E : Type u_2} [inst_1 : SeminormedAddCommGroup E]\n  [iud : IsUltrametricDist E] [inst_2 : NormedSpace 𝕜 E] (F : Submodule 𝕜 E) [inst_3 : SphericallyCompleteSpace ↥F],\n  SphericallyCompleteSpace.orthProj 𝕜 F = SphericallyCompleteSpace.orthProj 𝕜 F",
@@ -1061,14 +1071,14 @@
   "∀ {𝕜 : Type u_1} [inst : NontriviallyNormedField 𝕜] {E : Type u_2} [inst_1 : NormedAddCommGroup E]\n  [inst_2 : NormedSpace 𝕜 E] [inst_3 : IsUltrametricDist E] {E₀ : Type u_3} [inst_4 : NormedAddCommGroup E₀]\n  [inst_5 : NormedSpace 𝕜 E₀] [inst_6 : IsUltrametricDist E₀] [inst_7 : SphericallyCompleteSpace E₀] (f : E →ₗᵢ[𝕜] E₀),\n  SphericallyCompleteSpace.IsSphericalCompletion\n    (SphericallyCompleteSpace.IsImmediate.maximalImmediateExtensionEmbedding f)",
   "constCategory": "Theorem"},
  {"references": [],
+  "name": "SphericallyCompleteSpace.IsSphericallyDense",
+  "constType": "(α : Type u_1) → [PseudoMetricSpace α] → Prop",
+  "constCategory": "Other"},
+ {"references": [],
   "name": "SphericallyCompleteSpace.codimOneExtension._proof_2",
   "constType":
   "∀ {𝕜 : Type u_2} [inst : NontriviallyNormedField 𝕜] {E : Type u_1} [inst_1 : SeminormedAddCommGroup E]\n  [inst_2 : NormedSpace 𝕜 E] {D : Submodule 𝕜 E} {a : E} (M : ↥(D + 𝕜 ∙ a)), ∃ y ∈ D, ∃ z ∈ 𝕜 ∙ a, y + z = ↑M",
   "constCategory": "Theorem"},
- {"references": [],
-  "name": "SphericallyCompleteSpace.IsSphericallyDense",
-  "constType": "(α : Type u_1) → [PseudoMetricSpace α] → Prop",
-  "constCategory": "Other"},
  {"references": [],
   "name":
   "SphericallyCompleteSpace.IsImmediate.immediateExtensionSubmodules._proof_1",
@@ -1298,7 +1308,7 @@
   "name":
   "SphericallyCompleteSpace.SchikhofCounterexample.IsDenseMetric.mk._flat_ctor",
   "constType":
-  "∀ {α : Type u_1} [inst : MetricSpace α],\n  (∀ (z : α) (r : NNReal),\n      closure (Set.image2 dist (Metric.closedBall z ↑r) (Metric.closedBall z ↑r)) =\n        Set.Icc 0 (Metric.diam (Metric.closedBall z ↑r))) →\n    SphericallyCompleteSpace.SchikhofCounterexample.IsDenseMetric α",
+  "∀ {α : Type u_1} [inst : PseudoMetricSpace α],\n  (∀ (z : α) (r : NNReal),\n      closure (Set.image2 dist (Metric.closedBall z ↑r) (Metric.closedBall z ↑r)) =\n        Set.Icc 0 (Metric.diam (Metric.closedBall z ↑r))) →\n    SphericallyCompleteSpace.SchikhofCounterexample.IsDenseMetric α",
   "constCategory": "Definition"},
  {"references": ["Array.mkArray2", "Lean.SyntaxNodeKind"],
   "name": "Lean.Syntax.node2",
@@ -1462,6 +1472,11 @@
   "∀ {𝕜 : Type u_2} [inst : NontriviallyNormedField 𝕜] {E : Type u_1} [inst_1 : SeminormedAddCommGroup E]\n  [inst_2 : NormedSpace 𝕜 E] {D : Submodule 𝕜 E} {a : E},\n  (D.subtype.coprod (LinearMap.toSpanSingleton 𝕜 E a)).range = D + 𝕜 ∙ a",
   "constCategory": "Theorem"},
  {"references": [],
+  "name": "SphericallyCompleteSpace.separationQuotient_iff",
+  "constType":
+  "∀ (E : Type u_1) [inst : PseudoMetricSpace E],\n  SphericallyCompleteSpace (SeparationQuotient E) ↔ SphericallyCompleteSpace E",
+  "constCategory": "Theorem"},
+ {"references": [],
   "name": "SphericallyCompleteSpace.c₀._proof_1",
   "constType":
   "∀ (E : ℕ → Type u_1) [inst : (i : ℕ) → NormedAddCommGroup (E i)] {a b : ↥(lp E ⊤)},\n  a ∈ {f | Filter.Tendsto (fun n ↦ ‖↑f n‖) Filter.atTop (nhds 0)} →\n    b ∈ {f | Filter.Tendsto (fun n ↦ ‖↑f n‖) Filter.atTop (nhds 0)} →\n      a + b ∈ {f | Filter.Tendsto (fun n ↦ ‖↑f n‖) Filter.atTop (nhds 0)}",
@@ -1575,12 +1590,12 @@
   "name":
   "SphericallyCompleteSpace.SchikhofCounterexample.IsDenseMetric.dense_metric",
   "constType":
-  "∀ {α : Type u_1} {inst : MetricSpace α} [self : SphericallyCompleteSpace.SchikhofCounterexample.IsDenseMetric α] (z : α)\n  (r : NNReal),\n  closure (Set.image2 dist (Metric.closedBall z ↑r) (Metric.closedBall z ↑r)) =\n    Set.Icc 0 (Metric.diam (Metric.closedBall z ↑r))",
+  "∀ {α : Type u_1} {inst : PseudoMetricSpace α} [self : SphericallyCompleteSpace.SchikhofCounterexample.IsDenseMetric α]\n  (z : α) (r : NNReal),\n  closure (Set.image2 dist (Metric.closedBall z ↑r) (Metric.closedBall z ↑r)) =\n    Set.Icc 0 (Metric.diam (Metric.closedBall z ↑r))",
   "constCategory": "Theorem"},
  {"references": [],
   "name": "SphericallyCompleteSpace.SchikhofCounterexample.IsDenseMetric.rec",
   "constType":
-  "{α : Type u_1} →\n  [inst : MetricSpace α] →\n    {motive : SphericallyCompleteSpace.SchikhofCounterexample.IsDenseMetric α → Sort u} →\n      ((dense_metric :\n            ∀ (z : α) (r : NNReal),\n              closure (Set.image2 dist (Metric.closedBall z ↑r) (Metric.closedBall z ↑r)) =\n                Set.Icc 0 (Metric.diam (Metric.closedBall z ↑r))) →\n          motive ⋯) →\n        (t : SphericallyCompleteSpace.SchikhofCounterexample.IsDenseMetric α) → motive t",
+  "{α : Type u_1} →\n  [inst : PseudoMetricSpace α] →\n    {motive : SphericallyCompleteSpace.SchikhofCounterexample.IsDenseMetric α → Sort u} →\n      ((dense_metric :\n            ∀ (z : α) (r : NNReal),\n              closure (Set.image2 dist (Metric.closedBall z ↑r) (Metric.closedBall z ↑r)) =\n                Set.Icc 0 (Metric.diam (Metric.closedBall z ↑r))) →\n          motive ⋯) →\n        (t : SphericallyCompleteSpace.SchikhofCounterexample.IsDenseMetric α) → motive t",
   "constCategory": "Other"},
  {"references": [],
   "name": "SphericallyCompleteSpace.iff_maximallyComplete",
@@ -1652,7 +1667,7 @@
   "constCategory": "Definition"},
  {"references": [],
   "name": "SphericallyCompleteSpace.SchikhofCounterexample.IsDenseMetric",
-  "constType": "(α : Type u_1) → [MetricSpace α] → Prop",
+  "constType": "(α : Type u_1) → [PseudoMetricSpace α] → Prop",
   "constCategory": "Other"},
  {"references": [],
   "name": "SphericallyCompleteSpace.spanSupDecomp._proof_3",
@@ -1775,6 +1790,11 @@
   "∀ {𝕜 : Type u_1} [inst : NontriviallyNormedField 𝕜] {E : Type u_2} [inst_1 : SeminormedAddCommGroup E]\n  [inst_2 : NormedSpace 𝕜 E] [inst_3 : IsUltrametricDist E] {F : Type u_3} [inst_4 : SeminormedAddCommGroup F]\n  [inst_5 : NormedSpace 𝕜 F] [inst_6 : IsUltrametricDist F] {ι : E →ₗᵢ[𝕜] F}\n  [toSphericallyCompleteSpace : SphericallyCompleteSpace F],\n  (∀ (D : Submodule 𝕜 F), SphericallyCompleteSpace ↥D → ι.range ≤ D → D = ⊤) →\n    SphericallyCompleteSpace.IsSphericalCompletion ι",
   "constCategory": "Other"},
  {"references": [],
+  "name": "SphericallyCompleteSpace.iff_of_surjective_isometry",
+  "constType":
+  "∀ {E : Type u_1} {F : Type u_2} [inst : PseudoMetricSpace E] [inst_1 : PseudoMetricSpace F] {f : E → F},\n  Function.Surjective f → Isometry f → (SphericallyCompleteSpace E ↔ SphericallyCompleteSpace F)",
+  "constCategory": "Theorem"},
+ {"references": [],
   "name":
   "SphericallyCompleteSpace.IsSphericallyDense.instDenselyNormedFieldOfIsSphericallyDenseOfUltrametricNormedField._proof_5",
   "constType":
@@ -1852,7 +1872,7 @@
  {"references": [],
   "name": "SphericallyCompleteSpace.SchikhofCounterexample.IsDenseMetric.mk",
   "constType":
-  "∀ {α : Type u_1} [inst : MetricSpace α],\n  (∀ (z : α) (r : NNReal),\n      closure (Set.image2 dist (Metric.closedBall z ↑r) (Metric.closedBall z ↑r)) =\n        Set.Icc 0 (Metric.diam (Metric.closedBall z ↑r))) →\n    SphericallyCompleteSpace.SchikhofCounterexample.IsDenseMetric α",
+  "∀ {α : Type u_1} [inst : PseudoMetricSpace α],\n  (∀ (z : α) (r : NNReal),\n      closure (Set.image2 dist (Metric.closedBall z ↑r) (Metric.closedBall z ↑r)) =\n        Set.Icc 0 (Metric.diam (Metric.closedBall z ↑r))) →\n    SphericallyCompleteSpace.SchikhofCounterexample.IsDenseMetric α",
   "constCategory": "Other"},
  {"references": [],
   "name":
@@ -1875,7 +1895,7 @@
   "name":
   "SphericallyCompleteSpace.SchikhofCounterexample.IsDenseMetric.of_isSphericallyDense",
   "constType":
-  "∀ (α : Type u_1) [inst : MetricSpace α] [IsUltrametricDist α] [SphericallyCompleteSpace.IsSphericallyDense α],\n  SphericallyCompleteSpace.SchikhofCounterexample.IsDenseMetric α",
+  "∀ (α : Type u_1) [inst : PseudoMetricSpace α] [IsUltrametricDist α] [SphericallyCompleteSpace.IsSphericallyDense α],\n  SphericallyCompleteSpace.SchikhofCounterexample.IsDenseMetric α",
   "constCategory": "Theorem"},
  {"references": [],
   "name": "SphericallyCompleteSpace.lpQuotientEmbedding._proof_6",

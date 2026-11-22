@@ -5,29 +5,14 @@ Authors: Yijun Yuan
 -/
 module
 
-public import SphericalCompleteness.Basic
-public import SphericalCompleteness.Defs
-public import SphericalCompleteness.Dense
-public import SphericalCompleteness.External.Complete
-public import SphericalCompleteness.External.DenselyNormedField
-public import SphericalCompleteness.External.PadicAlgCl
-public import SphericalCompleteness.External.PadicComplex
-public import SphericalCompleteness.External.Sequence
-public import SphericalCompleteness.External.Submodule
-public import SphericalCompleteness.External.Ultrametric
-public import SphericalCompleteness.NormedVectorSpace.Basic
+public import SphericalCompleteness.Examples.Padic
+public import SphericalCompleteness.Metric.Basic
+public import SphericalCompleteness.Metric.Dense
 public import SphericalCompleteness.NormedVectorSpace.ContinuousLinearMap.Basic
 public import SphericalCompleteness.NormedVectorSpace.ContinuousLinearMap.HahnBanach
-public import SphericalCompleteness.NormedVectorSpace.ContinuousLinearMap.Extension
-public import SphericalCompleteness.NormedVectorSpace.Immediate
-public import SphericalCompleteness.NormedVectorSpace.Orthogonal.Basic
-public import SphericalCompleteness.NormedVectorSpace.Orthogonal.Defs
-public import SphericalCompleteness.NormedVectorSpace.Orthogonal.IsMOrtho
-public import SphericalCompleteness.NormedVectorSpace.Orthogonal.OrthComp
-public import SphericalCompleteness.NormedVectorSpace.Quotient
 public import SphericalCompleteness.NormedVectorSpace.SphericalCompletion.Basic
-public import SphericalCompleteness.NormedVectorSpace.SphericalCompletion.Defs
-public import SphericalCompleteness.NormedVectorSpace.SphericalCompletion.LpQuotient
+public import SphericalCompleteness.Valuation.Complete
+public import SphericalCompleteness.Valuation.Normed
 
 /-!
 # Spherical completeness
@@ -42,7 +27,11 @@ construction and universal property of the spherical completion.
 
 ## Main results
 
-- `SphericallyCompleteSpace`: the class of spherically complete pseudometric spaces.
+- `PseudoMetric.IsSphericallyComplete`: intersection of arbitrary nests for a bundled distance.
+- `Metric.sphericallyCompleteSpace_iff`: the bridge to the real-valued sequence class
+  `SphericallyCompleteSpace` used in the normed vector space files.
+- `Valuation.IsSphericallyComplete`: spherical completeness of a valuation of arbitrary rank.
+- `Valuation.IsEquiv.isSphericallyComplete_iff`: invariance under equivalent valuations.
 - `SphericallyCompleteSpace.of_finiteDimensional`: a finite-dimensional
   ultrametric normed space over a spherically complete field is spherically complete.
 - `SphericallyCompleteSpace.hahn_banach`: the non-Archimedean Hahn-Banach extension theorem.

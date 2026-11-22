@@ -5,8 +5,10 @@ Authors: Yijun Yuan
 -/
 module
 
-public import SphericalCompleteness.Basic
-public import SphericalCompleteness.External.Submodule
+public import Mathlib.Analysis.Normed.Module.Basic
+public import Mathlib.LinearAlgebra.Span.Defs
+public import Mathlib.Topology.MetricSpace.HausdorffDistance
+public import Mathlib.Topology.MetricSpace.Ultra.Basic
 
 /-!
 # Orthogonality: definitions

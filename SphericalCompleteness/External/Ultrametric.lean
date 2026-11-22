@@ -5,128 +5,21 @@ Authors: Yijun Yuan
 -/
 module
 
-public import Mathlib.Analysis.Normed.Group.Ultra
 public import Mathlib.Analysis.Normed.Lp.lpSpace
-public import Mathlib.Analysis.Normed.Operator.Basic
 public import Mathlib.Tactic.Common
-public import Mathlib.Topology.MetricSpace.Completion
-public import Mathlib.Topology.MetricSpace.Pseudo.Defs
-public import Mathlib.Topology.MetricSpace.Ultra.Basic
+public import SphericalCompleteness.External.Ultrametric.Basic
+public import SphericalCompleteness.External.Ultrametric.NormedSpace
 
 /-!
-# Ultrametric auxiliary results
+# Ultrametric instances
 
-Supporting results on ultrametric distances, including transfer to completions,
-quotients, submodules, operator spaces and `lp` spaces.
+This module collects the results on ultrametric balls, groups, and normed spaces and provides the
+ultrametric distance on bounded families.
 -/
 
 @[expose] public section
 
-open Metric
-open NNReal
-
 namespace IsUltrametricDist
-
-section
-variable {α : Type*} [PseudoMetricSpace α] [hiud : IsUltrametricDist α]
-
-/--
-In an ultrametric (pseudo)metric space, the diameter of a closed ball is bounded by its radius.
-
-More precisely, assuming `IsUltrametricDist α`, for any center `z : α` and radius `r : ℝ≥0`,
-the set `closedBall z r` has `diam (closedBall z r) ≤ r`. This is a characteristic feature of
-ultrametrics: any two points in the same ball are at distance at most the ball's radius.
--/
-theorem diam_le_radius
-    (z : α) (r : ℝ≥0) :
-    diam (closedBall z r) ≤ r :=
-  diam_le_of_forall_dist_le r.prop fun _ hx _ hy ↦
-    (hiud.dist_triangle_max _ z _).trans <|
-      max_le hx <| (dist_comm _ _).trans_le hy
-
-/--
-In an ultrametric space, if two closed balls `closedBall z1 r1` and `closedBall z2 r2` intersect
-nontrivially and `r1 ≤ r2`, then the smaller-radius ball is contained in the larger-radius one.
-
-More precisely, assuming `IsUltrametricDist α`, `r1 ≤ r2`, and
-`(closedBall z1 r1 ∩ closedBall z2 r2).Nonempty`, this theorem proves
-`closedBall z1 r1 ⊆ closedBall z2 r2`.
-
-This is a standard “nesting of intersecting balls” property characteristic of ultrametric spaces.
--/
-theorem closedBall_subset_closedBall_of_le_radius_of_nonempty_inter
-    {z1 z2 : α} {r1 r2 : ℝ≥0}
-    (hle : r1 ≤ r2)
-    (hne : (closedBall z1 r1 ∩ closedBall z2 r2).Nonempty) :
-    closedBall z1 r1 ⊆ closedBall z2 r2 := by
-  obtain ⟨y, hy1, hy2⟩ := hne
-  rw [closedBall_eq_of_mem hy1, closedBall_eq_of_mem hy2]
-  exact closedBall_subset_closedBall (NNReal.coe_le_coe.mpr hle)
-
-end
-
-/--
-Transfers an ultrametric distance from a seminormed `𝕜`-normed space `E` to the quotient `E ⧸ F`.
-
-Assuming `[IsUltrametricDist E]`, this instance equips the quotient by a submodule
-`F : Submodule 𝕜 E` with an `IsUltrametricDist` structure (for the quotient distance coming from the
-seminormed additive group structure on `E ⧸ F`), i.e. the distance on `E ⧸ F` satisfies the strong
-triangle inequality.
-
-This is useful for working with non-Archimedean/ultrametric geometry in quotients while retaining
-the ultrametric property needed for many standard arguments.
--/
-instance instIsUltrametricDistQuotient
-    (𝕜 : Type*) [NormedField 𝕜]
-    {E : Type*} [inst_1 : SeminormedAddCommGroup E]
-    [NormedSpace 𝕜 E] [iud : IsUltrametricDist E]
-    {F : Submodule 𝕜 E} : IsUltrametricDist (E ⧸ F) :=
-  IsUltrametricDist.isUltrametricDist_of_isNonarchimedean_norm <| by
-    intro x y
-    refine le_of_forall_pos_le_add fun ε hε ↦ ?_
-    obtain ⟨x', hx', hx'_norm⟩ := Submodule.Quotient.norm_mk_lt (S := F) x hε
-    obtain ⟨y', hy', hy'_norm⟩ := Submodule.Quotient.norm_mk_lt (S := F) y hε
-    rw [← hx', ← hy']
-    refine le_of_lt <| calc
-      ‖(Submodule.Quotient.mk x' : E ⧸ F) + Submodule.Quotient.mk y'‖
-          = ‖(Submodule.Quotient.mk (x' + y') : E ⧸ F)‖ := by simp
-      _ ≤ max ‖x'‖ ‖y'‖ :=
-        (Submodule.Quotient.norm_mk_le (S := F) (x' + y')).trans <| iud.norm_add_le_max _ _
-      _ < max (‖x‖ + ε) (‖y‖ + ε) := by
-        simpa [hx', hy'] using max_lt_max hx'_norm hy'_norm
-      _ = max ‖(Submodule.Quotient.mk x' : E ⧸ F)‖ ‖(Submodule.Quotient.mk y' : E ⧸ F)‖ + ε := by
-        simpa [hx', hy'] using
-          (max_add_add_right ‖(Submodule.Quotient.mk x' : E ⧸ F)‖
-            ‖(Submodule.Quotient.mk y' : E ⧸ F)‖ ε)
-
-/--
-Provides an `IsUltrametricDist` instance on the space of continuous linear maps `E →L[𝕜] F`
-whenever the codomain `F` has an ultrametric distance.
-
-Intuitively, this lifts the ultrametric inequality from `F` to the operator norm distance on
-`E →L[𝕜] F`, so that for `f g h : E →L[𝕜] F` one has an inequality of the form
-`dist f h ≤ max (dist f g) (dist g h)`.
-
-**Typeclass assumptions:**
-- `𝕜` is a nontrivially normed field,
-- `E` and `F` are seminormed additive commutative groups and normed spaces over `𝕜`,
-- `F` carries an ultrametric distance via `[IsUltrametricDist F]`.
-
-This instance is intended for use in developments involving non-Archimedean / ultrametric
-normed spaces, where spaces of bounded linear operators inherit ultrametric behavior from
-their codomain.
--/
-instance instIsUltrametricDistContinuousLinearMap
-    {𝕜 : Type*} [NontriviallyNormedField 𝕜]
-    {E : Type*} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E]
-    {F : Type*} [SeminormedAddCommGroup F] [iud : IsUltrametricDist F]
-    [NormedSpace 𝕜 F] :
-    IsUltrametricDist (E →L[𝕜] F) :=
-  IsUltrametricDist.isUltrametricDist_of_isNonarchimedean_norm fun f g ↦ by
-    rw [ContinuousLinearMap.opNorm_le_iff (le_max_of_le_left (norm_nonneg _))]
-    intro x
-    rw [max_mul_of_nonneg _ _ (norm_nonneg x)]
-    exact (iud.norm_add_le_max _ _).trans (max_le_max (f.le_opNorm x) (g.le_opNorm x))
 
 /--
 `lp E ⊤` (the `ℓ∞`-product) inherits an ultrametric distance from its coordinate spaces.
@@ -150,69 +43,5 @@ instance instIsUltrametricDistLp
     refine ((iiud j).dist_triangle_max (a j) (b j) (c j)).trans (max_le_max ?_ ?_)
     · exact (dist_eq_norm _ _).trans_le (lp.norm_apply_le_norm ENNReal.top_ne_zero (a - b) j)
     · exact (dist_eq_norm _ _).trans_le (lp.norm_apply_le_norm ENNReal.top_ne_zero (b - c) j)
-
-section
-variable {S : Type*} [SeminormedAddGroup S] [IsUltrametricDist S] {x y : S}
-
-/-!
-### Norm equality from a strictly smaller sum or difference
-
-In an ultrametric seminormed additive group the strong triangle inequality forces a *dominance*
-principle: if `‖x ± y‖` is strictly smaller than one of `‖x‖`, `‖y‖`, then that inequality cannot
-have been strict on both sides, so `‖x‖ = ‖y‖`. The four lemmas below package this in the
-`add`/`sub` and `left`/`right` forms needed downstream; each is a thin wrapper around
-`IsUltrametricDist.norm_eq_of_add_norm_lt_max`.
--/
-
-/-- If `‖x + y‖ < ‖x‖` then `‖x‖ = ‖y‖`: the sum cannot drop below the larger summand's norm
-unless the two norms coincide. -/
-theorem norm_eq_of_norm_add_lt_left (h : ‖x + y‖ < ‖x‖) : ‖x‖ = ‖y‖ :=
-  IsUltrametricDist.norm_eq_of_add_norm_lt_max <| by simp_all [true_or]
-
-/-- If `‖x + y‖ < ‖y‖` then `‖x‖ = ‖y‖`, the right-hand companion of
-`norm_eq_of_norm_add_lt_left`. -/
-theorem norm_eq_of_norm_add_lt_right (h : ‖x + y‖ < ‖y‖) : ‖x‖ = ‖y‖ :=
-  IsUltrametricDist.norm_eq_of_add_norm_lt_max <| by simp_all [or_true]
-
-/-- If `‖x - y‖ < ‖x‖` then `‖x‖ = ‖y‖`: the difference form of `norm_eq_of_norm_add_lt_left`. -/
-theorem norm_eq_of_norm_sub_lt_left (h : ‖x - y‖ < ‖x‖) : ‖x‖ = ‖y‖ :=
-  norm_neg y ▸ norm_eq_of_norm_add_lt_left (sub_eq_add_neg x y ▸ h)
-
-/-- If `‖x - y‖ < ‖y‖` then `‖x‖ = ‖y‖`, the right-hand companion of
-`norm_eq_of_norm_sub_lt_left`. -/
-theorem norm_eq_of_norm_sub_lt_right (h : ‖x - y‖ < ‖y‖) : ‖x‖ = ‖y‖ :=
-  (norm_eq_of_norm_sub_lt_left (by rwa [← norm_neg, neg_sub])).symm
-
-end
-
-/--
-Lifts the ultrametric inequality on distances from `𝕜` to its uniform completion.
-
-If `𝕜` is a `PseudoMetricSpace` whose distance is ultrametric (`IsUltrametricDist 𝕜`),
-then `UniformSpace.Completion 𝕜` inherits an ultrametric distance with respect to the
-canonical `dist` coming from `UniformSpace.Completion.instMetricSpace.toPseudoMetricSpace.toDist`.
-
-This instance is useful for transferring non-Archimedean/ultrametric arguments to the
-completion, allowing one to work in a complete ultrametric space without changing the
-underlying distance structure.
--/
-instance instIsUltrametricDistCompletion {𝕜 : Type*} [PseudoMetricSpace 𝕜]
-    [IsUltrametricDist 𝕜] :
-    IsUltrametricDist (UniformSpace.Completion 𝕜) where
-  dist_triangle_max x y z := by
-    refine UniformSpace.Completion.induction_on₃ x y z (isClosed_le ?_ ?_) fun a b c ↦ ?_
-    · fun_prop
-    · fun_prop
-    · simp_rw [UniformSpace.Completion.dist_eq]
-      exact IsUltrametricDist.dist_triangle_max a b c
-
-/--
-`PUnit` carries an ultrametric distance.
-
-This is immediate because all points in `PUnit` are equal, hence all distances are `0`, and
-the strong triangle inequality is trivial. It lets the one-point space serve as a base case and
-as a witness that the hypotheses of the ultrametric development are satisfiable. -/
-instance instIsUltrametricDistPUnit : IsUltrametricDist PUnit where
-  dist_triangle_max x y z := by simp
 
 end IsUltrametricDist

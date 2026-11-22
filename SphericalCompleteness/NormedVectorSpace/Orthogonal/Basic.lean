@@ -6,8 +6,9 @@ Authors: Yijun Yuan
 module
 
 public import Mathlib.Algebra.Module.Submodule.Pointwise
+public import Mathlib.Analysis.Normed.Group.Ultra
+public import Mathlib.Analysis.Normed.Module.Ball.Pointwise
 public import SphericalCompleteness.NormedVectorSpace.Orthogonal.Defs
-public import Mathlib.LinearAlgebra.Span.Defs
 
 /-!
 # Orthogonality: basic results

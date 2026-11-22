@@ -6,6 +6,7 @@ Authors: Yijun Yuan
 module
 
 public import SphericalCompleteness.External.Sequence
+public import SphericalCompleteness.External.Ultrametric.NormedSpace
 public import SphericalCompleteness.NormedVectorSpace.ContinuousLinearMap.Extension
 
 /-!

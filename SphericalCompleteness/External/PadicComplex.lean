@@ -7,7 +7,7 @@ module
 
 public import SphericalCompleteness.External.DenselyNormedField
 public import SphericalCompleteness.External.PadicAlgCl
-public import SphericalCompleteness.External.Ultrametric
+public import SphericalCompleteness.External.Ultrametric.Basic
 
 /-!
 # The field `ℂ_[p]`

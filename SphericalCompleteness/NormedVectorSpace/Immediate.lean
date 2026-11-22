@@ -5,6 +5,7 @@ Authors: Yijun Yuan
 -/
 module
 
+public import SphericalCompleteness.External.Ultrametric.Basic
 public import SphericalCompleteness.NormedVectorSpace.ContinuousLinearMap.HahnBanach
 
 /-!

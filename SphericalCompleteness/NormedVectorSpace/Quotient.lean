@@ -5,7 +5,8 @@ Authors: Yijun Yuan
 -/
 module
 
-public import SphericalCompleteness.Basic
+public import SphericalCompleteness.External.Ultrametric.NormedSpace
+public import SphericalCompleteness.Metric.Basic
 
 /-!
 # Spherical completeness of quotient spaces
