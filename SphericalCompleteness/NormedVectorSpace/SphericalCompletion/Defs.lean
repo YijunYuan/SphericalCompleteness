@@ -24,10 +24,8 @@ with `ι.range ≤ D` equals `⊤`.
 
 Existence of such an `F` for every `E`, its uniqueness up to linear isometry, the universal
 property, and the equivalence with maximal completeness are established in the companion file
-`Basic`. There `F` is produced as a maximal immediate extension (via
-`SphericallyCompleteSpace.IsImmediate.exists_maximal_immediateExtensionSubmodule`) of the
-constant-sequence embedding of `E` into a spherically complete `ℓ∞`-quotient
-(`canonicalSphericallyCompleteExtension`).
+`Basic`. The construction uses the arbitrary-value immediate linear extension for the
+nonnegative-real distance and recovers the norm from the distance to zero.
 
 ## Main definitions
 
@@ -53,10 +51,10 @@ Intuitively, $F$ is the smallest spherically complete space containing the isome
 of $E$: no proper spherically complete subspace of $F$ still contains $ι(E)$. Because spherical
 completeness is carried by the class, any `[IsSphericalCompletion ι]` instance automatically yields
 `SphericallyCompleteSpace F` (through the parent projection `toSphericallyCompleteSpace`), so call
-sites need not assume it separately. That such an `ι` is in addition an immediate extension of `E`,
-and that `F` is unique up to linear isometry, is proved in `Basic`.
+sites need not assume it separately. For an injective `ι`, the companion file proves immediacy
+of the bundled distance and uniqueness up to a linear isometric equivalence.
 -/
-class IsSphericalCompletion {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+class IsSphericalCompletion {𝕜 : Type*} [NormedField 𝕜]
     {E : Type*} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
     {F : Type*} [SeminormedAddCommGroup F] [NormedSpace 𝕜 F] [IsUltrametricDist F]
     (ι : E →ₗᵢ[𝕜] F)

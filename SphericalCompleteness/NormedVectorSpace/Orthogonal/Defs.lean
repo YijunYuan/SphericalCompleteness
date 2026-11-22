@@ -39,20 +39,20 @@ Notation:
 /-- `IsMOrtho 𝕜 x F` is *metric orthogonality* of a vector to a subspace: the distance from `x`
 to `F` equals `‖x‖`, i.e. no point of `F` approximates `x` better than `0` does. This is the
 non-Archimedean substitute for "`x` has no component along `F`". -/
-def IsMOrtho {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+def IsMOrtho {𝕜 : Type*} [NormedField 𝕜]
     {E : Type*} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
     (x : E) (F : Subspace 𝕜 E) := Metric.infDist x F = ‖x‖
 
 /-- `IsVOrtho 𝕜 x y` is orthogonality of two vectors: `x` is metrically orthogonal to the line
 `𝕜 ∙ y` spanned by `y`. Despite the asymmetric definition this relation is symmetric
 (see `IsVOrtho.symm`). -/
-def IsVOrtho (𝕜 : Type*) [NontriviallyNormedField 𝕜]
+def IsVOrtho (𝕜 : Type*) [NormedField 𝕜]
     {E : Type*} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
     (x y : E) := Metric.infDist x (𝕜 ∙ y) = ‖x‖
 
 /-- `IsOrtho 𝕜 F₁ F₂` is orthogonality of two subspaces: every vector of `F₁` is metrically
 orthogonal to `F₂`. Like `IsVOrtho`, this relation is in fact symmetric (see `IsOrtho.symm`). -/
-def IsOrtho {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+def IsOrtho {𝕜 : Type*} [NormedField 𝕜]
     {E : Type*} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
     (F1 : Subspace 𝕜 E) (F2 : Subspace 𝕜 E) := ∀ x ∈ F1, IsMOrtho x F2
 

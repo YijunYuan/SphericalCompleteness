@@ -8,6 +8,7 @@ module
 public import Mathlib.Algebra.Module.Submodule.Pointwise
 public import Mathlib.Analysis.Normed.Group.Ultra
 public import Mathlib.Analysis.Normed.Module.Ball.Pointwise
+public import SphericalCompleteness.Metric.Seminormed.Basic
 public import SphericalCompleteness.NormedVectorSpace.Orthogonal.Defs
 
 /-!
@@ -39,48 +40,33 @@ open Metric
 namespace SphericallyCompleteSpace
 
 section
-variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+variable {𝕜 : Type*} [NormedField 𝕜]
   {E : Type*} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [iud : IsUltrametricDist E]
+
+/-- The distance-comparison formulation of orthogonality agrees with the normed-space API. -/
+theorem isMOrtho_iff_nnMetric {x : E} {F : Submodule 𝕜 E} :
+    (x ⟂ₘ F) ↔ (nnMetric E).IsOrthogonalTo x F := by
+  have hzero : infDist x (F : Set E) ≤ ‖x‖ := by
+    simpa only [dist_zero_right] using infDist_le_dist_of_mem F.zero_mem
+  change infDist x (F : Set E) = ‖x‖ ↔ _
+  rw [le_antisymm_iff, and_iff_right hzero, le_infDist F.nonempty]
+  simp only [PseudoMetric.IsOrthogonalTo, nnMetric_apply, ← NNReal.coe_le_coe, coe_nndist,
+    dist_zero_right]
+
+private theorem isVOrtho_iff_nnMetric {x y : E} :
+    (x ⟂[𝕜] y) ↔ (nnMetric E).IsOrthogonalTo x (𝕜 ∙ y) := isMOrtho_iff_nnMetric
 
 /-! ### Orthogonality of vectors -/
 
 namespace IsVOrtho
-
-/-- Orthogonality of two vectors is symmetric: if `x ⟂[𝕜] y` then `y ⟂[𝕜] x`. This is the
-technical direction from which the symmetry equivalence `IsVOrtho.symm` is assembled; the argument
-uses the strong triangle inequality to rule out any point of `𝕜 ∙ x` approximating `y` better
-than `0` does. -/
-private lemma of_isVOrtho {x y : E}
-    (h : x ⟂[𝕜] y) : y ⟂[𝕜] x := by
-  unfold SphericallyCompleteSpace.IsVOrtho at *
-  refine eq_of_le_of_not_lt ?_ ?_
-  · simpa only [dist_zero_right] using infDist_le_dist_of_mem (by simp : (0 : E) ∈ 𝕜 ∙ x)
-  · by_contra hc
-    rcases (infDist_lt_iff ⟨0, by simp⟩).1 hc with ⟨z, hz1, hz2⟩
-    rcases Submodule.mem_span_singleton.1 hz1 with ⟨a, ha⟩
-    rw [← ha] at hz2
-    if ha' : a = 0 then
-      subst ha'
-      simp only [zero_smul, dist_zero_right, lt_self_iff_false] at *
-    else
-    rw [dist_eq_norm] at hz2
-    have hax : ‖a • x‖ = ‖y‖ := by
-      rw [← norm_neg, neg_sub] at hz2
-      rw [(by abel : a • x = a • x - y + y), iud.norm_add_eq_max_of_norm_ne_norm (ne_of_lt hz2),
-        max_eq_right hz2.le]
-    have : y = a • a⁻¹ • y := (inv_smul_eq_iff₀ ha').mp rfl
-    rw [← hax, this, ← smul_sub, norm_smul, norm_smul, norm_sub_rev,
-      ← dist_eq_norm, mul_lt_mul_iff_right₀ <| norm_pos_iff.mpr ha'] at hz2
-    have := lt_of_le_of_lt (infDist_le_dist_of_mem
-      (Submodule.mem_span_singleton.mpr ⟨a⁻¹,rfl⟩)) hz2
-    linarith
 
 /-- Orthogonality of vectors is symmetric: `x ⟂[𝕜] y` if and only if `y ⟂[𝕜] x`. Although `IsVOrtho`
 is defined asymmetrically (as a distance to the line spanned by the second vector), the relation
 does not depend on the order of its arguments. -/
 lemma symm {x y : E} :
     (x ⟂[𝕜] y) ↔ (y ⟂[𝕜] x) :=
-  ⟨of_isVOrtho, of_isVOrtho⟩
+  isVOrtho_iff_nnMetric.trans <| PseudoMetric.isOrthogonalTo_span_singleton_comm.trans
+    isVOrtho_iff_nnMetric.symm
 
 /-- **Birkhoff–James characterization of orthogonality**: `x ⟂[𝕜] y` if and only if `x` is a
 best approximation of itself along the line `𝕜 ∙ y`, i.e. `‖x‖ ≤ ‖x + c • y‖` for every scalar
@@ -105,38 +91,8 @@ of the norms" identity on the spanned plane: `x ⟂[𝕜] y` if and only if
 then span a plane on which the norm is completely determined by the norms of the two axes. -/
 lemma iff_norm_add_eq_max {x y : E} :
     (x ⟂[𝕜] y) ↔ (∀ α β : 𝕜, ‖α • x + β • y‖ = max ‖α • x‖ ‖β • y‖) := by
-  constructor
-  · intro h a b
-    if hab : a = 0 ∨ b = 0 then
-      rcases hab with ha | hb
-      · simp only [ha, zero_smul, zero_add, norm_zero, norm_nonneg, sup_of_le_right]
-      · simp only [hb, zero_smul, add_zero, norm_zero, norm_nonneg, sup_of_le_left]
-    else
-    push Not at hab
-    refine eq_of_le_of_ge (iud.norm_add_le_max _ _) ?_
-    apply max_le
-    · rw [← sub_neg_eq_add, ← dist_eq_norm]
-      refine le_trans ?_ <|
-        infDist_le_dist_of_mem (neg_mem (Submodule.mem_span_singleton.mpr ⟨b, rfl⟩))
-      have := infDist_smul₀ a (Submodule.span 𝕜 {y} : Set E) x
-      rw [← Submodule.coe_pointwise_smul,
-        Submodule.smul_eq_self_of_isUnit (isUnit_iff_ne_zero.mpr hab.1)] at this
-      rw [this, h, norm_smul]
-    · rw [(by abel : a • x + b • y = b • y - - (a • x)), ← dist_eq_norm]
-      refine le_trans ?_ <|
-        infDist_le_dist_of_mem (neg_mem (Submodule.mem_span_singleton.mpr ⟨a, rfl⟩))
-      have := infDist_smul₀ b (Submodule.span 𝕜 {x} : Set E) y
-      rw [← Submodule.coe_pointwise_smul,
-        Submodule.smul_eq_self_of_isUnit (isUnit_iff_ne_zero.mpr hab.2)] at this
-      rw [this, norm_smul, mul_le_mul_iff_right₀ (norm_pos_iff.mpr hab.2)]
-      rw [symm] at h
-      simpa only using le_of_eq (Eq.symm h)
-  · rw [iff_birkhoffJames]
-    intro h c
-    have := h 1 c
-    simp only [one_smul] at this
-    rw [this]
-    exact le_max_left _ _
+  rw [isVOrtho_iff_nnMetric, PseudoMetric.isOrthogonalTo_span_singleton_iff_max]
+  simp only [nnMetric_apply, nndist_zero_right, ← NNReal.coe_inj, NNReal.coe_max, coe_nnNorm]
 
 /-- Orthogonality is preserved by scaling the first vector: if `x ⟂[𝕜] y` then `(a • x) ⟂[𝕜] y`
 for every scalar `a` (including `a = 0`, since `0` is orthogonal to everything). -/
@@ -183,23 +139,8 @@ vector notion `IsVOrtho`. -/
 lemma iff_forall_isVOrtho
     (x : E) (F : Subspace 𝕜 E) :
     (x ⟂ₘ F) ↔ ∀ y ∈ F, (x ⟂[𝕜] y) := by
-  constructor
-  · intro h y hy
-    refine eq_of_le_of_not_lt ?_ ?_
-    · simpa only [dist_zero_right] using
-        infDist_le_dist_of_mem (Submodule.zero_mem (Submodule.span 𝕜 {y}))
-    · by_contra hc
-      rcases (infDist_lt_iff (Submodule.nonempty (Submodule.span 𝕜 {y}))).1 hc with ⟨y', hy'⟩
-      exact lt_iff_not_ge.1 hy'.2 <| (le_infDist (Submodule.nonempty F)).1
-        (by rw [h]) (by aesop : y' ∈ F)
-  · intro h
-    refine eq_of_le_of_not_lt ?_ ?_
-    · simpa only [dist_zero_right] using infDist_le_dist_of_mem (Submodule.zero_mem F)
-    · by_contra hc
-      rcases (infDist_lt_iff (Submodule.nonempty F)).1 hc with ⟨y, hy⟩
-      exact lt_iff_not_ge.1 hy.2 <|
-        (h y hy.1) ▸ (le_infDist (Submodule.nonempty (Submodule.span 𝕜 {y}))).1
-          le_rfl (Submodule.mem_span_singleton_self y)
+  simp_rw [isMOrtho_iff_nnMetric, isVOrtho_iff_nnMetric]
+  exact PseudoMetric.isOrthogonalTo_iff_forall_span_singleton
 
 end IsMOrtho
 
@@ -213,7 +154,7 @@ namespace IsMOrtho
 
 Unlike the surrounding results this requires the genuine `NormedAddCommGroup E` (rather than only
 `SeminormedAddCommGroup E`), since it is where `‖x‖ = 0` is upgraded to `x = 0`. -/
-theorem eq_zero_of_mem {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+theorem eq_zero_of_mem {𝕜 : Type*} [NormedField 𝕜]
     {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
     {x : E} {F : Subspace 𝕜 E} : x ∈ F → (x ⟂ₘ F) → x = 0 :=
   fun h1 h2 ↦ norm_eq_zero.mp (infDist_zero_of_mem h1 ▸ h2 : (0 : ℝ) = ‖x‖).symm
@@ -221,7 +162,7 @@ theorem eq_zero_of_mem {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 end IsMOrtho
 
 section
-variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+variable {𝕜 : Type*} [NormedField 𝕜]
   {E : Type*} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [iud : IsUltrametricDist E]
 
 namespace IsMOrtho
@@ -268,21 +209,13 @@ theorem iff_forall_isVOrtho
     (F1 F2 : Subspace 𝕜 E) : (F1 ⟂ₛ F2) ↔ ∀ x ∈ F1, ∀ y ∈ F2, (x ⟂[𝕜] y) := by
   simp only [SphericallyCompleteSpace.IsOrtho, IsMOrtho.iff_forall_isVOrtho]
 
-/-- Subspace orthogonality is symmetric: if `F₁ ⟂ₛ F₂` then `F₂ ⟂ₛ F₁`. This is the technical
-direction underlying the symmetry equivalence `IsOrtho.symm`, obtained by swapping the roles of the
-two subspaces and applying symmetry of vector orthogonality. -/
-private lemma of_isOrtho
-    {F1 F2 : Subspace 𝕜 E} : (F1 ⟂ₛ F2) → (F2 ⟂ₛ F1) := by
-  intro h
-  simp only [SphericallyCompleteSpace.IsOrtho, IsMOrtho.iff_forall_isVOrtho] at *
-  exact fun x hx y hy ↦ IsVOrtho.of_isVOrtho (h y hy x hx)
-
 /-- Subspace orthogonality is symmetric: `F₁ ⟂ₛ F₂` if and only if `F₂ ⟂ₛ F₁`. Despite the
 asymmetric definition of `IsOrtho` (quantifying over vectors of the first subspace only), the
 relation is independent of the order of its arguments. -/
 theorem symm
-    {F1 F2 : Subspace 𝕜 E} : (F1 ⟂ₛ F2) ↔ (F2 ⟂ₛ F1) :=
-  ⟨of_isOrtho, of_isOrtho⟩
+    {F1 F2 : Subspace 𝕜 E} : (F1 ⟂ₛ F2) ↔ (F2 ⟂ₛ F1) := by
+  simp_rw [SphericallyCompleteSpace.IsOrtho, isMOrtho_iff_nnMetric]
+  exact PseudoMetric.forall_isOrthogonalTo_comm
 
 end IsOrtho
 

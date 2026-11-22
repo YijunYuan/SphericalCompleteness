@@ -16,7 +16,8 @@ At a high level, the library provides:
 - For a bundled distance `d : PseudoMetric X Γ`, `d.IsSphericallyComplete` says that every nonempty nest of nonempty closed balls has a common point.
 - For real-valued pseudometric spaces, `Metric.sphericallyCompleteSpace_iff` identifies this property with the sequence class `SphericallyCompleteSpace X` used throughout the normed vector space library.
 - For a valuation `v`, `v.IsSphericallyComplete` is invariant under equivalent valuations. With a compatible valuative uniformity it implies `CompleteSpace`.
-- Multiple equivalent formulations of spherical completeness in ultrametric settings.
+- Every bundled pseudoultrametric admits a spherically complete immediate extension with the same value type. The canonical construction uses maximal nests of nonempty closed balls.
+- For valued vector spaces, the library proves finite-dimensional permanence, Hahn–Banach with a bound in the value monoid, and existence and uniqueness of immediate linear spherical completions over the base.
 - Structural results for normed spaces: orthogonality, orthogonal complements, quotient stability.
 - A non-Archimedean Hahn-Banach theorem with norm-preserving extension.
 - A construction and characterization of `SphericalCompletion` via maximal immediate extensions.
@@ -73,18 +74,22 @@ The library is organized in layers.
 
 ### Core spherical-completeness theory
 
-The table lists paths under `SphericalCompleteness/`. Each module can be imported independently.
+The paths below are relative to `SphericalCompleteness/`. For example, use
+`import SphericalCompleteness.PseudoMetric.Module.Extension` for linear extension and
+`import SphericalCompleteness.Valuation.Module.Extension` for its valuative bound.
 
-| Module | Contents |
+| Location | Contents |
 | --- | --- |
-| `PseudoMetric.lean` and `PseudoMetric/` | Bundled distances, arbitrary nests, pairwise intersection, realized radii, best approximation, products and transport. |
-| `Metric/Defs.lean` | The real-valued sequence class and its equivalence with the bundled definition. |
-| `Metric/Basic.lean` | Completeness, proper spaces, equivalent tests, isometries and finite products. |
-| `Metric/Dense.lean` | Spherical density and the obstruction to spherical completeness for separable pseudo-ultrametric spaces. |
-| `Valuation/Basic.lean` | Multiplicative and additive valuations, equivalent representatives and `ValuativeRel`. |
-| `Valuation/Complete.lean` | Completeness of a spherically complete valued ring in a compatible uniformity. |
-| `Valuation/Normed.lean` | The bridges between valuations and ultrametric norms. |
-| `Examples/Padic.lean` | The metric and valuation formulations for both `ℚ_[p]` and `ℂ_[p]`. |
+| [PseudoMetric.lean](SphericalCompleteness/PseudoMetric.lean) | Arbitrary nests, pairwise intersection, realized radii and best approximation for a bundled distance. |
+| [PseudoMetric/](SphericalCompleteness/PseudoMetric) | Products and transport (`Constructions`), nonexpansive extensions (`Extension`), ball-lifting maps (`Quotient`), the maximal-completeness criterion (`Immediate`) and completion by maximal nests (`SphericalCompletion`). |
+| [PseudoMetric/AddGroup/](SphericalCompleteness/PseudoMetric/AddGroup) | Translation-invariant distances, quotients by spherically complete subgroups and a cardinality bound for immediate extensions. |
+| [PseudoMetric/Module/](SphericalCompleteness/PseudoMetric/Module) | Orthogonality (`Basic`), finite-dimensional spaces, submodule quotients, linear extensions and orthogonal projections (`Extension`), and intersections of operator balls (`Operator`). |
+| [PseudoMetric/Module/SphericalCompletion.lean](SphericalCompleteness/PseudoMetric/Module/SphericalCompletion.lean) | Existence of an immediate linear spherical completion. The [SphericalCompletion/](SphericalCompleteness/PseudoMetric/Module/SphericalCompletion) directory contains its characterization and uniqueness in `Basic`, and the construction in `OneDimensional`, `Ambient` and `Chain`. |
+| [Metric/](SphericalCompleteness/Metric) | The real-valued sequence class (`Defs`), completeness, proper spaces and finite products (`Basic`), the obstruction from spherical density (`Dense`), and Lipschitz extensions (`Extension`). |
+| [Metric/Seminormed/](SphericalCompleteness/Metric/Seminormed) | Specializations to the usual seminorm distance, including group quotients and linear spherical completions. |
+| [Valuation/](SphericalCompleteness/Valuation) | Additive and multiplicative valuations, equivalent representatives and `ValuativeRel` (`Basic`), uniform completeness (`Complete`), immediate valued extensions (`Immediate`), and the bridge to ultrametric norms (`Normed`). |
+| [Valuation/Module/](SphericalCompleteness/Valuation/Module) | Homogeneous pseudometrics (`Basic`), finite-dimensional valued extensions, linear extension with a valuative bound, quotient distances, operator balls and linear spherical completions over the given valuation. |
+| [Examples/Padic.lean](SphericalCompleteness/Examples/Padic.lean) | The metric and valuation formulations for both `ℚ_[p]` and `ℂ_[p]`. |
 
 For the metric instance on `ℚ_[p]` alone, import `SphericalCompleteness.Examples.Padic.ProperSpace`.
 The earlier `Metric`, `Defs`, `Basic`, `Dense`, `Valuation` and `Valuation.Padic` imports remain available.
@@ -135,7 +140,7 @@ The earlier `Metric`, `Defs`, `Basic`, `Dense`, `Valuation` and `Valuation.Padic
 - `SphericalCompletion/LpQuotient.lean`
   - Construction of a large spherically complete ambient extension (via an `lp/c₀` quotient).
 - `SphericalCompletion/Defs.lean`
-  - Definition of `SphericalCompletion` via maximal immediate subspaces (Zorn-style existence).
+  - Definition of `IsSphericalCompletion` by minimality among spherically complete submodules.
 - `SphericalCompletion/Basic.lean`
   - Minimality, uniqueness, universal property, and completion criteria.
 
@@ -183,6 +188,32 @@ example {R Γ : Type*} [Ring R] [LinearOrderedCommMonoidWithZero Γ]
     (v : Valuation R Γ) (c : R) (r : Γ) :
     v.toPseudoMetric.closedBall c (MaxTropical.trop r) = {x | v (x - c) ≤ r} := rfl
 ```
+
+Import `SphericalCompleteness.Valuation.Module.Basic` to construct the bundled distance of a
+valuative seminorm `p : E → Γ` with `v.pseudoMetricOfSeminorm p hadd hsmul`. The hypotheses
+are the ultrametric sum inequality and the identity `p (a • x) = v a * p x`.
+
+To pass from a valued field to a finite-dimensional algebra, import the finite-dimensional
+result. Mathlib's `HasExtension` lets the valuations use different value monoids.
+
+```lean
+import SphericalCompleteness.Valuation.Module.FiniteDimensional
+
+example {K L Γ Δ : Type*} [Field K] [Field L] [Algebra K L] [Module.Finite K L]
+    [LinearOrderedCommMonoidWithZero Γ] [LinearOrderedCommMonoidWithZero Δ]
+    (v : Valuation K Γ) (w : Valuation L Δ) [v.HasExtension w]
+    (hv : v.IsSphericallyComplete) : w.IsSphericallyComplete :=
+  Valuation.HasExtension.isSphericallyComplete w v hv
+```
+
+For a translation-invariant bundled pseudoultrametric on a module over a division ring,
+`PseudoMetric.exists_linearSphericalCompletion` gives a linear completion when scalar
+multiplication preserves distance comparisons. Its embedding is injective even if the base
+has nonzero vectors of distance zero. Two completions are linearly isometric over the base
+by `PseudoMetric.IsLinearSphericalCompletion.unique`. In a valued vector space,
+`Valuation.IsHomogeneous.exists_linearSphericalCompletion` preserves the given valuation's
+scalar law. The geometric completion of the underlying space is available separately in
+`PseudoMetric/SphericalCompletion.lean`.
 
 ## Where users can get help
 

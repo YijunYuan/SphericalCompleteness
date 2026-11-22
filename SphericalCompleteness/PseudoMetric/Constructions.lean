@@ -79,6 +79,34 @@ theorem isSphericallyComplete_iff_of_surjective (d : PseudoMetric X R) (e : Pseu
 
 end Transfer
 
+/-- A distance on a product given by the coordinatewise supremum is spherically complete
+if both factors are. Given the product distance, this uses only the order on radii. -/
+theorem IsSphericallyComplete.of_prod_eq_sup [Zero R] [Add R] [SemilatticeSup R]
+    (d : PseudoMetric X R) (e : PseudoMetric Y R) (q : PseudoMetric (X × Y) R)
+    [hd : d.IsSphericallyComplete] [he : e.IsSphericallyComplete]
+    (hsup : ∀ p c, q p c = d p.1 c.1 ⊔ e p.2 c.2) : q.IsSphericallyComplete where
+  nonempty_sInter S hS hne hn hc := by
+    have hrect (B) (hB : B ∈ S) :
+        ∃ A ∈ d.closedBalls, ∃ C ∈ e.closedBalls, B = A ×ˢ C := by
+      obtain ⟨c, r, rfl⟩ := hS hB
+      refine ⟨_, d.closedBall_mem_closedBalls c.1 r, _, e.closedBall_mem_closedBalls c.2 r, ?_⟩
+      ext p
+      change q p c ≤ r ↔ d p.1 c.1 ≤ r ∧ e p.2 c.2 ≤ r
+      rw [hsup, sup_le_iff]
+    obtain ⟨x, hx⟩ := exists_mem_mapped_nest hd.nonempty_sInter (image Prod.fst)
+      (fun _ _ ↦ image_mono) hne hc (by
+        intro B hB
+        obtain ⟨A, hA, C, _, rfl⟩ := hrect B hB
+        rwa [fst_image_prod _ (hn _ hB).snd]) (fun B hB ↦ (hn B hB).image _)
+    obtain ⟨y, hy⟩ := exists_mem_mapped_nest he.nonempty_sInter (image Prod.snd)
+      (fun _ _ ↦ image_mono) hne hc (by
+        intro B hB
+        obtain ⟨A, _, C, hC, rfl⟩ := hrect B hB
+        rwa [snd_image_prod (hn _ hB).fst _]) (fun B hB ↦ (hn B hB).image _)
+    refine ⟨(x, y), mem_sInter.mpr (fun B hB ↦ ?_)⟩
+    obtain ⟨A, _, C, _, rfl⟩ := hrect B hB
+    exact ⟨fst_image_prod_subset _ _ (hx _ hB), snd_image_prod_subset _ _ (hy _ hB)⟩
+
 section Product
 
 variable [AddZeroClass R] [SemilatticeSup R] [AddLeftMono R] [AddRightMono R]
@@ -99,27 +127,8 @@ theorem closedBall_prod (c : X × Y) (r : R) :
   ext
   exact sup_le_iff
 
-instance [hd : d.IsSphericallyComplete] [he : e.IsSphericallyComplete] :
-    (d.prod e).IsSphericallyComplete where
-  nonempty_sInter S hS hne hn hc := by
-    have hrect (B) (hB : B ∈ S) :
-        ∃ A ∈ d.closedBalls, ∃ C ∈ e.closedBalls, B = A ×ˢ C := by
-      obtain ⟨c, r, rfl⟩ := hS hB
-      exact ⟨_, d.closedBall_mem_closedBalls .., _, e.closedBall_mem_closedBalls ..,
-        closedBall_prod ..⟩
-    obtain ⟨x, hx⟩ := exists_mem_mapped_nest hd.nonempty_sInter (image Prod.fst)
-      (fun _ _ ↦ image_mono) hne hc (by
-        intro B hB
-        obtain ⟨A, hA, C, _, rfl⟩ := hrect B hB
-        rwa [fst_image_prod _ (hn _ hB).snd]) (fun B hB ↦ (hn B hB).image _)
-    obtain ⟨y, hy⟩ := exists_mem_mapped_nest he.nonempty_sInter (image Prod.snd)
-      (fun _ _ ↦ image_mono) hne hc (by
-        intro B hB
-        obtain ⟨A, _, C, hC, rfl⟩ := hrect B hB
-        rwa [snd_image_prod (hn _ hB).fst _]) (fun B hB ↦ (hn B hB).image _)
-    refine ⟨(x, y), mem_sInter.mpr (fun B hB ↦ ?_)⟩
-    obtain ⟨A, _, C, _, rfl⟩ := hrect B hB
-    exact ⟨fst_image_prod_subset _ _ (hx _ hB), snd_image_prod_subset _ _ (hy _ hB)⟩
+instance [d.IsSphericallyComplete] [e.IsSphericallyComplete] : (d.prod e).IsSphericallyComplete :=
+  .of_prod_eq_sup d e (d.prod e) (d.prod_apply e)
 
 end Product
 

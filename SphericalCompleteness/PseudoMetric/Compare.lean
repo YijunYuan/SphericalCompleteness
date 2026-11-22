@@ -20,6 +20,23 @@ namespace PseudoMetric
 
 variable {X Γ Δ : Type*} [Zero Γ] [Add Γ] [Zero Δ] [Add Δ]
 
+/-- If each ball of the second distance is a ball of the first, spherical completeness transfers.
+This also applies to distances with different value types. -/
+theorem IsSphericallyComplete.of_closedBalls_subset [LE Γ] [LE Δ] {d : PseudoMetric X Γ}
+    (hd : d.IsSphericallyComplete) (e : PseudoMetric X Δ) (h : e.closedBalls ⊆ d.closedBalls) :
+    e.IsSphericallyComplete := ⟨hd.nonempty_sInter.mono h⟩
+
+/-- A pseudometric identically equal to zero is spherically complete. -/
+theorem isSphericallyComplete_of_forall_eq_zero [LE Γ] (d : PseudoMetric X Γ)
+    (hd : ∀ x y, d x y = 0) : d.IsSphericallyComplete where
+  nonempty_sInter S hS hne hn _ := by
+    obtain ⟨B, hB⟩ := hne
+    obtain ⟨x, _⟩ := hn B hB
+    refine ⟨x, Set.mem_sInter.mpr fun C hC ↦ ?_⟩
+    obtain ⟨y, hy⟩ := hn C hC
+    obtain ⟨c, r, rfl⟩ := hS hC
+    simpa only [mem_closedBall, hd] using hy
+
 /-- Distances that give the same comparisons at each center have identical realized balls. -/
 theorem realizedBalls_eq_of_le_iff [LE Γ] [LE Δ] (d : PseudoMetric X Γ) (e : PseudoMetric X Δ)
     (h : ∀ x c y, d x c ≤ d y c ↔ e x c ≤ e y c) :

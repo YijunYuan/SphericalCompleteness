@@ -45,13 +45,14 @@ a bounded linear projection of operator norm at most `1` from `E` onto `F`.
 -/
 theorem exists_orthProj_of_sphericallyComplete :
     ∃ T : E →L[𝕜] ↥F, (∀ a ∈ F, T a = a) ∧ ‖T‖ ≤ 1 := by
-  have := @exists_extension_opNorm_le 𝕜 _ E _ _ _ F ↥F _ _ _ _
-    (ContinuousLinearMap.id 𝕜 ↥F) {0} (by simp) (fun _ ↦ 1) (fun _ ↦ by simp)
-    (fun U V ↦ by rw [congrArg Subtype.val (Subsingleton.elim U V)]; simp)
-    (fun U x ↦ by simp [Set.mem_singleton_iff.mp U.2, one_mul])
-  simp only [Subtype.forall, Set.mem_singleton_iff, forall_eq, sub_zero] at this
-  rcases this with ⟨T, hT1, hT2⟩
-  exact ⟨T, ⟨fun a ha ↦ congrArg Subtype.val (hT1 a ha), hT2⟩⟩
+  have : ((nnMetric E).comap ((↑) : F → E)).IsSphericallyComplete :=
+    (sphericallyCompleteSpace_iff F).mp inferInstance
+  obtain ⟨p, hp, hle⟩ := (nnMetric E).exists_nonexpansive_linear_retraction F
+  have hbound (x : E) : ‖p x‖ ≤ 1 * ‖x‖ := by
+    simpa only [map_zero, ZeroMemClass.coe_zero, nnMetric_apply, nndist_zero_right, coe_nnNorm,
+      Submodule.norm_coe, one_mul] using NNReal.coe_le_coe.mpr (hle x 0)
+  exact ⟨p.mkContinuous 1 hbound, fun x hx ↦ congrArg Subtype.val (hp ⟨x, hx⟩),
+    p.mkContinuous_norm_le zero_le_one hbound⟩
 
 /--
 `orthComp 𝕜 F` is the *orthogonal complement* of a submodule `F : Submodule 𝕜 E` in a
@@ -99,31 +100,22 @@ orthogonality relation `F ⟂ₛ orthComp 𝕜 F`.
 -/
 theorem orthComp :
     (F ⟂ₛ (orthComp 𝕜 F)) := by
-  unfold SphericallyCompleteSpace.orthComp
   let T := (exists_orthProj_of_sphericallyComplete 𝕜 F).choose
-  let hT2 := (exists_orthProj_of_sphericallyComplete 𝕜 F).choose_spec.2
+  obtain ⟨hfix, hnorm⟩ := (exists_orthProj_of_sphericallyComplete 𝕜 F).choose_spec
+  have hLip : LipschitzWith 1 T := ContinuousLinearMap.lipschitzWith_of_opNorm_le hnorm
   rw [IsOrtho.symm]
   intro x hx
-  simp only [LinearMap.mem_ker] at hx
-  refine eq_of_le_of_ge ?_ ?_
-  · rw [← dist_zero, dist_comm]
-    exact infDist_le_dist_of_mem <| zero_mem F
-  · apply (le_infDist (Submodule.nonempty F)).2
-    intro y hy
-    rw [dist_eq_norm]
-    have : ‖y‖ ≤ ‖x - y‖ := by
-      have : T (x - y) = -y := by
-        simp only [map_sub, AddSubgroupClass.coe_sub, T]
-        simp only [ContinuousLinearMap.coe_coe] at hx
-        simp only [hx, ZeroMemClass.coe_zero, zero_sub, neg_inj]
-        apply (exists_orthProj_of_sphericallyComplete 𝕜 F).choose_spec.1
-        exact (Submodule.mem_toAddSubgroup F).mp hy
-      rw [← norm_neg, ← this]
-      have := (ContinuousLinearMap.opNorm_le_iff zero_le_one).1 hT2 (x - y)
-      simpa only [map_sub, AddSubgroupClass.coe_sub, ge_iff_le, AddSubgroupClass.coe_norm, one_mul]
-    nth_rw 1 [(by abel : x = (x - y) + y)]
-    refine le_trans (iud.norm_add_le_max _ _) ?_
-    simp only [this, sup_of_le_left, le_refl]
+  change T x = 0 at hx
+  refine eq_of_le_of_ge ?_ ((le_infDist F.nonempty).mpr ?_)
+  · simpa using (infDist_le_dist_of_mem (x := x) F.zero_mem)
+  · intro y hy
+    have h := (nnMetric E).dist_retraction_le (D := (F : Set E)) T
+      (fun u ↦ Subtype.ext (hfix u u.prop))
+      (fun z w ↦ by
+        change nndist (T z) (T w) ≤ nndist z w
+        simpa only [one_mul] using hLip.nndist_le z w) x ⟨y, hy⟩
+    have : dist x (T x : E) ≤ dist x y := NNReal.coe_le_coe.mpr h
+    simpa [hx] using this
 
 end IsOrtho
 

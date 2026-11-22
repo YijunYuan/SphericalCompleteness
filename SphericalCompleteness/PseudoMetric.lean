@@ -137,6 +137,12 @@ section LinearOrder
 
 variable [LinearOrder R] (d : PseudoMetric X R) [d.IsUltra]
 
+/-- In an ultrametric triangle with unequal sides, the two longer sides coincide. -/
+theorem eq_of_lt {x y a : X} (h : d x y < d x a) : d y a = d x a := by
+  refine le_antisymm ((IsUltra.le_sup' (d := d) y x a).trans
+    (max_le ((d.symm _ _).trans_le h.le) le_rfl)) ?_
+  exact (le_max_iff.mp (IsUltra.le_sup' (d := d) x y a)).resolve_left h.not_ge
+
 private theorem comparable_of_inter {B C : Set X} (hB : B ∈ d.closedBalls)
     (hC : C ∈ d.closedBalls) (h : (B ∩ C).Nonempty) : B ⊆ C ∨ C ⊆ B := by
   obtain ⟨b, r, rfl⟩ := hB

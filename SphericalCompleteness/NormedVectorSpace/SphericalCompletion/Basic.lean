@@ -5,6 +5,7 @@ Authors: Yijun Yuan
 -/
 module
 
+public import SphericalCompleteness.Metric.Seminormed.SphericalCompletion
 public import SphericalCompleteness.NormedVectorSpace.SphericalCompletion.Defs
 public import SphericalCompleteness.NormedVectorSpace.SphericalCompletion.LpQuotient
 
@@ -18,20 +19,10 @@ normed `𝕜`-vector space `E`, organised around the class
 spherically complete extension of `E` (no proper spherically complete submodule of `F` contains the
 image of `E`).
 
-Building on the Zorn construction of a maximal immediate extension
-(`exists_maximal_immediateExtensionSubmodule`) inside the canonical spherically complete extension,
-we show:
-
-* every `E` admits a spherical completion;
-* the canonical embedding into any spherical completion is an *immediate* extension;
-* the spherical completion is unique up to linear isometry and satisfies a universal property;
-* `E` is spherically complete if and only if it is *maximally complete* — equivalently, iff the
-  embedding of `E` into its spherical completion is surjective.
-
-The key geometric input is the orthogonal-complement decomposition of a spherically complete
-subspace (`isCompl_orthComp`): a proper spherically complete subspace has a nonzero orthogonal
-complement, which supplies a vector metrically orthogonal to the range of the embedding and hence
-contradicts immediacy.
+The bundled-distance construction supplies spherically complete immediate linear extensions
+of seminormed spaces. Immediacy gives minimality: every ambient point has a nearest point in
+a spherically complete intermediate submodule. The completion of a separated source is again
+separated.
 
 ## Main statements
 
@@ -58,53 +49,70 @@ open IsImmediate
 
 namespace IsSphericalCompletion
 
+/-- Any spherically complete immediate linear extension is minimal among spherically
+complete intermediate submodules. This criterion also applies to seminormed spaces. -/
+theorem of_isImmediate_nnMetric {𝕜 : Type*} [NormedField 𝕜]
+    {E F : Type*} [SeminormedAddCommGroup E] [SeminormedAddCommGroup F]
+    [NormedSpace 𝕜 E] [NormedSpace 𝕜 F] [IsUltrametricDist E] [IsUltrametricDist F]
+    [SphericallyCompleteSpace F] (f : E →ₗᵢ[𝕜] F) (hi : (nnMetric F).IsImmediate f) :
+    IsSphericalCompletion f where
+  minimal_of_sphericallyComplete D hD hle := by
+    have : ((nnMetric F).comap ((↑) : D → F)).IsSphericallyComplete :=
+      (sphericallyCompleteSpace_iff D).mp hD
+    exact PseudoMetric.IsImmediate.eq_top_of_isSphericallyComplete (nnMetric F)
+      (i := f.toLinearMap) hi D hle
+
+/-- The bundled-distance definition is equivalent to the normed-space minimality class
+together with injectivity of the embedding. The latter is automatic for a separated source. -/
+theorem isLinearSphericalCompletion_iff {𝕜 : Type*} [NormedField 𝕜]
+    {E F : Type*} [SeminormedAddCommGroup E] [SeminormedAddCommGroup F]
+    [NormedSpace 𝕜 E] [NormedSpace 𝕜 F] [IsUltrametricDist E] [IsUltrametricDist F]
+    (f : E →ₗᵢ[𝕜] F) : (nnMetric E).IsLinearSphericalCompletion (nnMetric F) f.toLinearMap ↔
+      Function.Injective f ∧ IsSphericalCompletion f := by
+  constructor
+  · intro h
+    have : SphericallyCompleteSpace F := (sphericallyCompleteSpace_iff F).mpr h.complete
+    exact ⟨h.injective, of_isImmediate_nnMetric f h.immediate⟩
+  · rintro ⟨hinj, hf⟩
+    apply (PseudoMetric.isLinearSphericalCompletion_iff_minimal (nnMetric F) (nnMetric E)
+      f.toLinearMap hinj f.isometry.nndist_eq).mpr
+    intro D hD hc
+    exact hf.minimal_of_sphericallyComplete D ((sphericallyCompleteSpace_iff D).mpr hc) hD
+
 /--
 The maximal immediate-extension submodule of `E` chosen inside a spherically complete ambient
 space `E₀` (via `exists_maximal_immediateExtensionSubmodule`) is a spherical completion of `E`,
 with canonical embedding `maximalImmediateExtensionEmbedding f`.
 
-Minimality is forced by maximality of the submodule. Suppose some spherically complete intermediate
-submodule `M`, containing the range of the embedding, were proper. Since `M` is spherically
-complete it is complemented by its orthogonal complement (`isCompl_orthComp`), which is therefore
-nonzero; a nonzero vector `b` of `orthComp 𝕜 M` is metrically orthogonal to `M`, hence to the range
-of the embedding. But immediacy of the maximal extension forbids a nonzero vector orthogonal to
-that range — a contradiction. Therefore every such `M` equals `⊤`.
+The maximal submodule is spherically complete and immediate over the original image.
+Minimality follows from the nearest-point criterion for spherically complete intermediate
+submodules.
 -/
 instance instIsSphericalCompletionOfMaximalImmediateExtensionSubmodule
-    {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+    {𝕜 : Type*} [NormedField 𝕜]
     {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
     {E₀ : Type*} [NormedAddCommGroup E₀] [NormedSpace 𝕜 E₀] [IsUltrametricDist E₀]
     [SphericallyCompleteSpace E₀]
     (f : E →ₗᵢ[𝕜] E₀) :
-    IsSphericalCompletion (maximalImmediateExtensionEmbedding f) where
-  minimal_of_sphericallyComplete := by
-    intro M hsc hM
-    by_contra hc
-    have hMo : orthComp 𝕜 M ≠ ⊥ := by
-      by_contra hc'
-      have := (isCompl_orthComp 𝕜 M).sup_eq_top
-      simp only [hc', bot_le, sup_of_le_left] at this
-      exact hc this
-    rcases (Submodule.ne_bot_iff _).1 hMo with ⟨b, hb1, hb2⟩
-    apply IsMOrtho.of_mem_orthComp at hb1
-    contrapose hb2
-    apply (exists_maximal_immediateExtensionSubmodule 𝕜 E E₀ f
-      ).choose_spec.1.out.choose_spec
-    rw [IsMOrtho.iff_forall_isVOrtho] at *
-    intro y hy
-    suffices hy' : y ∈ (maximalImmediateExtensionEmbedding f).range by
-      exact hb1 _ <| hM hy'
-    convert hy
-    apply Submodule.ext_iff.mpr
-    intro z
-    rw [Submodule.range_inclusion, Submodule.mem_comap, Submodule.coe_subtype]
-    simp only [LinearMap.mem_range, maximalImmediateExtensionEmbedding, LinearMap.coe_mk,
-      AddHom.coe_mk]
-    constructor
-    · rintro ⟨e, rfl⟩
-      exact ⟨e, rfl⟩
-    · rintro ⟨e, he⟩
-      exact ⟨e, Subtype.ext he⟩
+    IsSphericalCompletion (maximalImmediateExtensionEmbedding f) := by
+  let M := (exists_maximal_immediateExtensionSubmodule 𝕜 E E₀ f).choose
+  have hm : (nnMetric E₀).IsImmediateSubmodule f.range M := by
+    have hm : M ∈ immediateExtensionSubmodules E E₀ f :=
+      (exists_maximal_immediateExtensionSubmodule 𝕜 E E₀ f).choose_spec.1
+    rwa [immediateExtensionSubmodules_eq_nnMetric] at hm
+  obtain ⟨hM, hi⟩ := (nnMetric E₀).isImmediateSubmodule_iff.mp hm
+  apply of_isImmediate_nnMetric
+  exact hi.comp (f := f.toLinearMap.rangeRestrict)
+    (fun y hy ↦ (hy (f.toLinearMap.surjective_rangeRestrict y)).elim)
+
+/-- Every ultrametric seminormed space over a normed field has a spherical completion.
+The embedding is injective, including on vectors with seminorm zero. -/
+theorem exists_isSphericalCompletion_seminormed (𝕜 : Type*) [NormedField 𝕜]
+    (E : Type u) [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E] :
+    ∃ (F : Type u) (_ : SeminormedAddCommGroup F) (_ : NormedSpace 𝕜 F) (_ : IsUltrametricDist F)
+      (ι : E →ₗᵢ[𝕜] F), Function.Injective ι ∧ IsSphericalCompletion ι := by
+  obtain ⟨F, _, _, _, i, _, hinj, hi⟩ := Metric.exists_seminormed_linearSphericalCompletion 𝕜 E
+  exact ⟨F, inferInstance, inferInstance, inferInstance, i, hinj, of_isImmediate_nnMetric i hi⟩
 
 /--
 Every ultrametric normed `𝕜`-vector space `E` admits a spherical completion: there is a type `E₀`
@@ -112,14 +120,10 @@ carrying an ultrametric normed `𝕜`-vector-space structure together with a lin
 `ι : E →ₗᵢ[𝕜] E₀` for which `IsSphericalCompletion ι` holds. Since that class `extends
 SphericallyCompleteSpace`, `E₀` is in particular spherically complete.
 
-The witness is the maximal immediate extension carved out of the canonical spherically complete
-extension `lpQuotientEmbedding 𝕜 E` (a quotient of an `ℓ∞`-type space): the
-maximal immediate submodule selected by `exists_maximal_immediateExtensionSubmodule` is itself
-spherically complete and, by maximality, a minimal spherically complete extension of `E`, embedded
-via `maximalImmediateExtensionEmbedding`. All of the required structure and the completion property
-are supplied by the surrounding instances.
+The arbitrary-value linear extension is spherically complete and immediate for the
+nonnegative-real distance. This distance defines a genuine norm because the source is separated.
 -/
-theorem exists_isSphericalCompletion (𝕜 : Type*) [NontriviallyNormedField 𝕜]
+theorem exists_isSphericalCompletion (𝕜 : Type*) [NormedField 𝕜]
     (E : Type u) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E] :
     ∃ E₀ : Type u,
       ∃ _ : NormedAddCommGroup E₀,
@@ -127,34 +131,23 @@ theorem exists_isSphericalCompletion (𝕜 : Type*) [NontriviallyNormedField �
       ∃ _ : IsUltrametricDist E₀,
       ∃ ι : E →ₗᵢ[𝕜] E₀,
         IsSphericalCompletion ι := by
-  let E₀ := ↥(exists_maximal_immediateExtensionSubmodule 𝕜 E _
-    (lpQuotientEmbedding 𝕜 E)).choose
-  exact ⟨E₀, inferInstance, inferInstance, inferInstance,
-    maximalImmediateExtensionEmbedding (lpQuotientEmbedding 𝕜 E), inferInstance⟩
+  obtain ⟨F, _, _, _, i, _, hi⟩ := Metric.exists_normed_linearSphericalCompletion 𝕜 E
+  exact ⟨F, inferInstance, inferInstance, inferInstance, i, of_isImmediate_nnMetric i hi⟩
 
 /--
 Any embedding `ι : E →ₗᵢ[𝕜] F` realising `F` as a spherical completion of `E` (i.e. carrying an
 `IsSphericalCompletion ι` instance) is an *immediate* extension.
 
-Apply the Zorn construction `exists_maximal_immediateExtensionSubmodule` inside the spherically
-complete ambient space `F` to the embedding `ι`: it selects a maximal submodule `S ⊇ range ι` for
-which the inclusion `range ι →ₗᵢ S` is immediate. This `S` is itself spherically complete, so
-minimality of the spherical completion forces `S = ⊤`. Immediacy of that inclusion, read off in the
-ambient space via `mem_immediateExtensionSubmodules_iff`, is exactly immediacy of `ι`.
+Minimality identifies an injective norm-preserving map with a bundled-distance linear
+spherical completion, hence its image is immediate.
 -/
-theorem embedding_isImmediate {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+theorem embedding_isImmediate {𝕜 : Type*} [NormedField 𝕜]
     {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
     {F : Type*} [NormedAddCommGroup F] [NormedSpace 𝕜 F] [IsUltrametricDist F]
     {ι : E →ₗᵢ[𝕜] F} (hF : IsSphericalCompletion ι) :
     IsImmediate ι := by
-  obtain ⟨hSle, hSimm⟩ := mem_immediateExtensionSubmodules_iff.1
-    (exists_maximal_immediateExtensionSubmodule 𝕜 E F ι).choose_spec.1
-  have hStop : (exists_maximal_immediateExtensionSubmodule 𝕜 E F ι).choose = ⊤ :=
-    hF.minimal_of_sphericallyComplete _ inferInstance hSle
-  intro v hv
-  have hvS : v ∈ (exists_maximal_immediateExtensionSubmodule 𝕜 E F ι).choose := by
-    rw [hStop]; exact Submodule.mem_top
-  simpa using congrArg Subtype.val (hSimm ⟨v, hvS⟩ hv)
+  exact (isImmediate_iff_nnMetric ι).mpr
+    (((isLinearSphericalCompletion_iff ι).mpr ⟨ι.injective, hF⟩).immediate)
 
 /--
 Uniqueness of the spherical completion (immediate-extension form).
@@ -169,7 +162,7 @@ spherical completion `F₁` forces `T` to be surjective, hence a linear isometri
 intertwining identity survives the upgrade since the underlying map is unchanged.
 -/
 theorem exists_linearIsometryEquiv_of_isImmediate
-    {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+    {𝕜 : Type*} [NormedField 𝕜]
     {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
     {F₁ : Type*} [NormedAddCommGroup F₁] [NormedSpace 𝕜 F₁] [IsUltrametricDist F₁]
     {ι₁ : E →ₗᵢ[𝕜] F₁} (hF₁ : IsSphericalCompletion ι₁)
@@ -186,6 +179,24 @@ theorem exists_linearIsometryEquiv_of_isImmediate
   have he : e.toLinearIsometry = T := LinearIsometry.ext fun x ↦ Eq.refl (e.toLinearIsometry x)
   exact ⟨e, by simpa [he] using hT⟩
 
+/-- Two injective spherical completions of a seminormed space are linearly isometrically
+equivalent over their common source. -/
+theorem unique_of_injective {𝕜 : Type*} [NormedField 𝕜]
+    {E F₁ F₂ : Type*} [SeminormedAddCommGroup E] [SeminormedAddCommGroup F₁]
+    [SeminormedAddCommGroup F₂] [NormedSpace 𝕜 E] [NormedSpace 𝕜 F₁] [NormedSpace 𝕜 F₂]
+    [IsUltrametricDist E] [IsUltrametricDist F₁] [IsUltrametricDist F₂]
+    {ι₁ : E →ₗᵢ[𝕜] F₁} {ι₂ : E →ₗᵢ[𝕜] F₂}
+    (h₁ : Function.Injective ι₁) (h₂ : Function.Injective ι₂)
+    (hF₁ : IsSphericalCompletion ι₁) (hF₂ : IsSphericalCompletion ι₂) :
+    ∃ g : F₁ ≃ₗᵢ[𝕜] F₂, g.toLinearIsometry.comp ι₁ = ι₂ := by
+  have hi := (isLinearSphericalCompletion_iff ι₁).mpr ⟨h₁, hF₁⟩
+  have hj := (isLinearSphericalCompletion_iff ι₂).mpr ⟨h₂, hF₂⟩
+  obtain ⟨g, hcomp, hd⟩ := hi.unique (nnMetric F₁) (nnMetric F₂) hj
+  let T : F₁ ≃ₗᵢ[𝕜] F₂ := ⟨g, fun x ↦ by
+    simpa only [nnMetric_apply, map_zero, nndist_zero_right, coe_nnNorm] using
+      congrArg NNReal.toReal (hd x 0)⟩
+  exact ⟨T, LinearIsometry.ext fun x ↦ LinearMap.congr_fun hcomp x⟩
+
 /--
 Uniqueness of the spherical completion.
 
@@ -196,21 +207,33 @@ immediate extension (`embedding_isImmediate`), so `exists_linearIsometryEquiv_of
 applied to `ι₁` yields an equivalence `T : F₂ ≃ₗᵢ[𝕜] F₁` with `T.comp ι₂ = ι₁`; its inverse `T.symm`
 is the required intertwining equivalence.
 -/
-theorem unique {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+theorem unique {𝕜 : Type*} [NormedField 𝕜]
     {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
     {F₁ : Type*} [NormedAddCommGroup F₁] [NormedSpace 𝕜 F₁] [IsUltrametricDist F₁]
     {F₂ : Type*} [NormedAddCommGroup F₂] [NormedSpace 𝕜 F₂] [IsUltrametricDist F₂]
     {ι₁ : E →ₗᵢ[𝕜] F₁} {ι₂ : E →ₗᵢ[𝕜] F₂} :
     IsSphericalCompletion ι₁ → IsSphericalCompletion ι₂ →
-    ∃ f : F₁ ≃ₗᵢ[𝕜] F₂, f.toLinearIsometry.comp ι₁ = ι₂ := by
-  intro hF₁ hF₂
-  rcases exists_linearIsometryEquiv_of_isImmediate hF₁ (embedding_isImmediate hF₂) with ⟨T, hT⟩
-  refine ⟨T.symm, ?_⟩
-  ext x
-  exact T.injective <| by simpa using (congrArg (fun g => g x) hT).symm
+    ∃ f : F₁ ≃ₗᵢ[𝕜] F₂, f.toLinearIsometry.comp ι₁ = ι₂ :=
+  unique_of_injective ι₁.injective ι₂.injective
 
 section
-variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+variable {𝕜 : Type*} [NormedField 𝕜]
+    {E : Type*} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
+    {F : Type*} [SeminormedAddCommGroup F] [NormedSpace 𝕜 F] [IsUltrametricDist F]
+    {ι : E →ₗᵢ[𝕜] F}
+
+/-- Weak universal property for an injective completion of a seminormed space. -/
+theorem weak_universal_property_of_injective {H : Type*} [SeminormedAddCommGroup H]
+    [NormedSpace 𝕜 H] [IsUltrametricDist H] [SphericallyCompleteSpace H]
+    (f : E →ₗᵢ[𝕜] H) (hinj : Function.Injective ι) (hF : IsSphericalCompletion ι) :
+    ∃ T : F →ₗᵢ[𝕜] H, T.comp ι = f :=
+  IsImmediate.exists_linearIsometry_comp_eq_of_nnMetric ι hinj
+    (((isLinearSphericalCompletion_iff ι).mpr ⟨hinj, hF⟩).immediate) f
+
+end
+
+section
+variable {𝕜 : Type*} [NormedField 𝕜]
     {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
     {F : Type*} [NormedAddCommGroup F] [NormedSpace 𝕜 F] [IsUltrametricDist F]
     {ι : E →ₗᵢ[𝕜] F}
@@ -224,11 +247,19 @@ through any spherical-completion embedding `ι : E →ₗᵢ[𝕜] F` of `E`: th
 `ι` (`embedding_isImmediate`) into the spherically complete target `F'`.
 -/
 theorem weak_universal_property
-    {F' : Type*} [NormedAddCommGroup F'] [NormedSpace 𝕜 F'] [IsUltrametricDist F']
+    {F' : Type*} [SeminormedAddCommGroup F'] [NormedSpace 𝕜 F'] [IsUltrametricDist F']
     [SphericallyCompleteSpace F']
     (f : E →ₗᵢ[𝕜] F') (hF : IsSphericalCompletion ι) :
     ∃ T : F →ₗᵢ[𝕜] F', T.comp ι = f :=
-  IsImmediate.exists_linearIsometry_comp_eq ι (embedding_isImmediate hF) f
+  weak_universal_property_of_injective f ι.injective hF
+
+end
+
+section
+variable {𝕜 : Type*} [NormedField 𝕜]
+    {E : Type*} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
+    {F : Type*} [SeminormedAddCommGroup F] [NormedSpace 𝕜 F] [IsUltrametricDist F]
+    {ι : E →ₗᵢ[𝕜] F}
 
 /--
 `E` is spherically complete if and only if a spherical-completion embedding `ι : E →ₗᵢ[𝕜] F` of `E`
@@ -242,13 +273,15 @@ transporting spherical completeness back to `E`.
 theorem iff_embedding_to_sphericalCompletion_surjective
     (hF : IsSphericalCompletion ι) :
     SphericallyCompleteSpace E ↔ Function.Surjective ι := by
+  rw [sphericallyCompleteSpace_iff]
   constructor
   · intro h
-    exact LinearMap.range_eq_top.mp (hF.minimal_of_sphericallyComplete
-      (LinearMap.range ι.toLinearMap)
-      (of_isometryEquiv (Isometry.isometryEquivOnRange ι.isometry)) le_rfl)
-  · exact fun h ↦ of_isometryEquiv
-      (LinearIsometryEquiv.ofSurjective _ h).symm.toIsometryEquiv
+    have hR := ((nnMetric E).isSphericallyComplete_iff_of_surjective (nnMetric ι.range)
+      ι.toLinearMap.surjective_rangeRestrict ι.isometry.nndist_eq).mp h
+    exact LinearMap.range_eq_top.mp (hF.minimal_of_sphericallyComplete ι.range
+      ((sphericallyCompleteSpace_iff _).mpr hR) le_rfl)
+  · exact fun h ↦ ((nnMetric E).isSphericallyComplete_iff_of_surjective (nnMetric F) h
+      ι.isometry.nndist_eq).mpr inferInstance
 
 end
 
@@ -258,39 +291,23 @@ end IsSphericalCompletion
 An ultrametric normed `𝕜`-vector space `E` is spherically complete if and only if it is *maximally
 complete* (`MaximallyComplete 𝕜 E`), i.e. it admits no proper immediate extension.
 
-For the forward direction, if `E` were spherically complete yet had a non-surjective immediate
-extension `f : E →ₗᵢ[𝕜] F`, then `range f` would be a proper spherically complete subspace of `F`,
-whose orthogonal complement `orthComp 𝕜 (range f)` is nonzero (the two are complementary,
-`isCompl_orthComp`); a nonzero vector of that complement is metrically orthogonal to `range f`,
-contradicting immediacy of `f`. Conversely, if `E` is maximally complete, the canonical embedding
+For the forward direction, every point has a best approximation in a spherically complete image,
+whereas immediacy would strictly improve that approximation at any point outside the image.
+Conversely, if `E` is maximally complete, the canonical embedding
 of `E` into its spherical completion is immediate (`IsSphericalCompletion.embedding_isImmediate`),
 hence surjective by maximal completeness; so `E` is linearly isometric to the spherically complete
 completion and is therefore itself spherically complete.
 -/
-theorem iff_maximallyComplete (𝕜 : Type*) [NontriviallyNormedField 𝕜]
+theorem iff_maximallyComplete (𝕜 : Type*) [NormedField 𝕜]
     (E : Type*) [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E] :
     SphericallyCompleteSpace E ↔ MaximallyComplete 𝕜 E := by
   refine ⟨fun h ↦ ?_, fun h ↦ ?_⟩
-  · unfold MaximallyComplete
-    by_contra hc
-    push Not at hc
-    rcases hc with ⟨F, _, _, _, f, hf1, hf2⟩
-    replace hf2 : LinearMap.range f.toLinearMap < ⊤ := by
-      by_contra hc
-      simp only [not_lt_top_iff] at hc
-      exact hf2 <| LinearMap.range_eq_top.mp hc
-    have : SphericallyCompleteSpace (LinearMap.range f.toLinearMap) :=
-      of_isometryEquiv <|
-        Isometry.isometryEquivOnRange f.isometry
-    have : orthComp 𝕜 (LinearMap.range f.toLinearMap) ≠ ⊥ := by
-      by_contra hc'
-      have := (isCompl_orthComp 𝕜 (LinearMap.range f.toLinearMap)).sup_eq_top
-      simp only [hc', bot_le, sup_of_le_left] at this
-      simp only [this, lt_self_iff_false] at hf2
-    rcases (Submodule.ne_bot_iff _).1 this with ⟨v, hv⟩
-    exact hv.2 <| hf1 v (IsMOrtho.of_mem_orthComp _ _ hv.1)
-  · exact of_isometryEquiv (LinearIsometryEquiv.ofSurjective _
-      (h (maximalImmediateExtensionEmbedding (lpQuotientEmbedding 𝕜 E))
-        (IsSphericalCompletion.embedding_isImmediate inferInstance))).symm.toIsometryEquiv
+  · intro F _ _ _ f hf
+    exact ((isImmediate_iff_nnMetric f).mp hf).surjective (Metric.nnMetric E) (Metric.nnMetric F)
+      f.isometry.nndist_eq
+  · obtain ⟨F, _, _, _, i, hsc, hi⟩ := Metric.exists_normed_linearSphericalCompletion 𝕜 E
+    have hs := h i ((isImmediate_iff_nnMetric i).mpr hi)
+    exact of_isometryEquiv (LinearIsometryEquiv.ofSurjective i hs).symm.toIsometryEquiv
+
 
 end SphericallyCompleteSpace

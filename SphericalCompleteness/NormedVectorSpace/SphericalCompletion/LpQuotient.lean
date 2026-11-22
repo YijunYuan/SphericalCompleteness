@@ -13,10 +13,8 @@ public import SphericalCompleteness.NormedVectorSpace.Quotient
 /-!
 # Spherically complete extensions
 
-This file exhibits, for an arbitrary normed `𝕜`-vector space `E`, a linear isometric embedding of
-`E` into a *spherically complete* ultrametric normed space. This is the starting point of the
-spherical completion construction: it realises every normed space inside a spherically complete one,
-so that a maximal immediate extension can subsequently be carved out.
+This file gives an explicit linear isometric embedding of an ultrametric normed
+`𝕜`-vector space `E` into a spherically complete ultrametric normed space.
 
 The ambient spherically complete space is a quotient of an `ℓ∞`-type space. Given a family of
 ultrametric normed spaces `E : ℕ → Type*`, the space `lp E ⊤` of bounded sequences carries the

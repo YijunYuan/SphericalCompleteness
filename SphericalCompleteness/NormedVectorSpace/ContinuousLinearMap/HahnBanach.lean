@@ -21,7 +21,7 @@ instances:
 * the domain `D` is spherically complete, in which case `f` factors through the norm-nonincreasing
   orthogonal projection `orthProj 𝕜 D` onto `D`;
 * the codomain `F` is spherically complete, in which case `f` is extended by
-  `exists_extension_opNorm_le`, iterating the codimension-one step over all of `E`.
+  the simultaneous extension theorem with the single operator-norm bound `‖f‖`.
 
 ## Main definitions
 
@@ -49,9 +49,9 @@ namespace SphericallyCompleteSpace
 
 section
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
-  {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
+  {E : Type*} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
   (D : Submodule 𝕜 E)
-  (F : Type*) [NormedAddCommGroup F] [NormedSpace 𝕜 F] [IsUltrametricDist F]
+  (F : Type*) [SeminormedAddCommGroup F] [NormedSpace 𝕜 F] [IsUltrametricDist F]
 
 /--
 `IsHahnBanachPair D F` states that the submodule `D` of `E` and the space `F` satisfy the
@@ -97,27 +97,21 @@ instance instIsHahnBanachPairOfDomainSphericallyComplete
 /--
 A spherically complete codomain forms an `IsHahnBanachPair`.
 
-If the target `F` is spherically complete, no completeness assumption is placed on `D`; the
-extension is built by iterating the codimension-one Hahn–Banach step `exists_extension_codimOne`
-over all of `E` through `exists_extension_opNorm_le`, which is why spherical completeness is
-required on the side where the values live.
+For a spherically complete target, use the arbitrary-value linear extension theorem with
+the bound `r ↦ ‖f‖₊ * r`. This also handles nonzero maps of seminorm zero.
 -/
 instance instIsHahnBanachPairOfCodomainSphericallyComplete
     [SphericallyCompleteSpace F] : IsHahnBanachPair D F where
   is_hb f := by
-    if hf : f = 0 then exact ⟨0, fun v hv ↦ by simp [hf], by simp [hf]⟩
-    else
-      rcases exists_extension_opNorm_le 𝕜 D f (𝒰 := {0})
-        (by simp) (fun _ ↦ opNorm f)
-        (fun _ ↦ norm_pos_iff.mpr hf)
-        (fun U V ↦ by rw [U.2, V.2, sub_zero, norm_zero, max_self]; exact opNorm_nonneg f)
-        (fun U a ↦ by rw [U.2]; simp only [zero_apply, sub_zero]; exact le_opNorm f a)
-        with ⟨f', hf1, hf2⟩
-      use f'
-      simp only [Subtype.forall, Set.mem_singleton_iff, forall_eq, sub_zero] at hf2
-      refine ⟨fun v hv ↦ hf1 ⟨v, hv⟩, le_antisymm hf2 ?_⟩
-      refine (opNorm_le_iff <| opNorm_nonneg f').mpr fun a ↦ ?_
-      simpa [AddSubgroupClass.coe_norm, hf1 a] using le_opNorm f' (a : E)
+    obtain ⟨T, hT, hnorm⟩ := exists_extension_opNorm_le_of_nonneg 𝕜 D f (𝒰 := {0})
+      (by simp) (fun _ ↦ ‖f‖) (fun _ ↦ norm_nonneg f)
+      (fun U V ↦ by rw [Set.mem_singleton_iff.mp U.prop, Set.mem_singleton_iff.mp V.prop]; simp)
+      (fun U x ↦ by
+        simpa only [Set.mem_singleton_iff.mp U.prop, zero_apply, sub_zero] using f.le_opNorm x)
+    refine ⟨T, fun x hx ↦ hT ⟨x, hx⟩, le_antisymm ?_ ((opNorm_le_iff (norm_nonneg T)).mpr ?_)⟩
+    · simpa using hnorm ⟨0, rfl⟩
+    · intro x
+      simpa only [hT, Submodule.norm_coe] using T.le_opNorm (x : E)
 
 end
 

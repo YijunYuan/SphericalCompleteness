@@ -30,7 +30,7 @@ namespace IsMOrtho
 
 /-- Metric orthogonality to `F` passes from `x` to every scalar multiple of `x`: any element of
 the line `𝕜 ∙ x` is again metrically orthogonal to `F`. -/
-private lemma of_mem_span_singleton (𝕜 : Type*) [NontriviallyNormedField 𝕜]
+private lemma of_mem_span_singleton (𝕜 : Type*) [NormedField 𝕜]
     {E : Type*} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
     (x : E) (F : Subspace 𝕜 E)
     (hxF : x ⟂ₘ F) (a : E) (ha : a ∈ Submodule.span 𝕜 {x}) : a ⟂ₘ F := by
@@ -49,7 +49,7 @@ compatible with the norm, yielding an isometry.
 This is stated as an isometric linear equivalence (`≃ₛₗᵢ[RingHom.id 𝕜]`), i.e. a linear
 equivalence that preserves norms.
 -/
-noncomputable def directProdIsoSum (𝕜 : Type*) [NontriviallyNormedField 𝕜]
+noncomputable def directProdIsoSum (𝕜 : Type*) [NormedField 𝕜]
     {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
     (x : E) (F : Subspace 𝕜 E) (hxF : x ⟂ₘ F) :
     (Submodule.span 𝕜 {x}) × F ≃ₛₗᵢ[RingHom.id 𝕜] (Submodule.span 𝕜 {x}) + F := by
@@ -72,7 +72,7 @@ end IsMOrtho
 universe u
 
 section
-variable (𝕜 : Type*) [NontriviallyNormedField 𝕜]
+variable (𝕜 : Type*) [NormedField 𝕜]
   {E : Type u} [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [iud : IsUltrametricDist E]
   (F : Subspace 𝕜 E) [sF : SphericallyCompleteSpace F] [FiniteDimensional 𝕜 E]
 
@@ -95,13 +95,10 @@ theorem exists_isMOrtho_vec_of_finrank_lt
   rcases Submodule.exists_smul_notMem_of_rank_lt hF with ⟨a, ha⟩
   specialize ha 1 one_ne_zero
   simp only [one_smul] at ha
-  obtain ⟨z, hz⟩ := Metric.exists_dist_le_of_sphericallyComplete (F : Set E) F.nonempty a
-  refine ⟨a - z, fun h ↦ ha ((sub_eq_zero.mp h) ▸ z.prop), ?_⟩
-  by_contra h
-  obtain ⟨w, hw, hlt⟩ := IsMOrtho.not_iff_exists_dist_lt_norm.mp h
-  have hle := hz ⟨z + w, F.add_mem z.prop hw⟩
-  simp only [dist_eq_norm, sub_sub] at hle hlt
-  exact (not_lt_of_ge hle) hlt
+  have : ((nnMetric E).comap ((↑) : F → E)).IsSphericallyComplete :=
+    (sphericallyCompleteSpace_iff F).mp sF
+  obtain ⟨z, hz⟩ := PseudoMetric.exists_sub_isOrthogonalTo (d := nnMetric E) F a
+  exact ⟨a - z, fun h ↦ ha ((sub_eq_zero.mp h) ▸ z.prop), isMOrtho_iff_nnMetric.mpr hz⟩
 
 end
 
