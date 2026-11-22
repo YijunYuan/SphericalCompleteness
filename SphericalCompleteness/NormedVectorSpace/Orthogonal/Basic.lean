@@ -5,6 +5,7 @@ Authors: Yijun Yuan
 -/
 module
 
+public import Mathlib.Algebra.Module.Submodule.Pointwise
 public import SphericalCompleteness.NormedVectorSpace.Orthogonal.Defs
 public import Mathlib.LinearAlgebra.Span.Defs
 
@@ -116,14 +117,16 @@ lemma iff_norm_add_eq_max {x y : E} :
     · rw [← sub_neg_eq_add, ← dist_eq_norm]
       refine le_trans ?_ <|
         infDist_le_dist_of_mem (neg_mem (Submodule.mem_span_singleton.mpr ⟨b, rfl⟩))
-      have := infDist_smul₀ hab.1 (Submodule.span 𝕜 {y} : Set E) x
-      rw [Submodule.smul_coe_eq_self hab.1] at this
+      have := infDist_smul₀ a (Submodule.span 𝕜 {y} : Set E) x
+      rw [← Submodule.coe_pointwise_smul,
+        Submodule.smul_eq_self_of_isUnit (isUnit_iff_ne_zero.mpr hab.1)] at this
       rw [this, h, norm_smul]
     · rw [(by abel : a • x + b • y = b • y - - (a • x)), ← dist_eq_norm]
       refine le_trans ?_ <|
         infDist_le_dist_of_mem (neg_mem (Submodule.mem_span_singleton.mpr ⟨a, rfl⟩))
-      have := infDist_smul₀ hab.2 (Submodule.span 𝕜 {x} : Set E) y
-      rw [Submodule.smul_coe_eq_self hab.2] at this
+      have := infDist_smul₀ b (Submodule.span 𝕜 {x} : Set E) y
+      rw [← Submodule.coe_pointwise_smul,
+        Submodule.smul_eq_self_of_isUnit (isUnit_iff_ne_zero.mpr hab.2)] at this
       rw [this, norm_smul, mul_le_mul_iff_right₀ (norm_pos_iff.mpr hab.2)]
       rw [symm] at h
       simpa only using le_of_eq (Eq.symm h)
@@ -139,13 +142,9 @@ for every scalar `a` (including `a = 0`, since `0` is orthogonal to everything).
 theorem smul_left {x y : E}
     (a : 𝕜) : (x ⟂[𝕜] y) → ((a • x) ⟂[𝕜] y) := by
   intro h
-  unfold SphericallyCompleteSpace.IsVOrtho at *
-  if ha : a = 0 then
-    subst ha
-    simp only [zero_smul, norm_zero]
-    exact infDist_zero_of_mem (by simp)
-  else
-    rw [norm_smul, ← h, ← infDist_smul₀ ha, Submodule.smul_coe_eq_self ha]
+  rw [iff_norm_add_eq_max] at h ⊢
+  intro b c
+  simpa only [smul_smul] using h (b * a) c
 
 /-- For a nonzero scalar `a`, scaling the first vector preserves and reflects orthogonality:
 `x ⟂[𝕜] y` if and only if `(a • x) ⟂[𝕜] y`. -/
@@ -250,19 +249,11 @@ negation of `IsMOrtho` phrased as the existence of a point of `F` closer to `x` 
 theorem not_iff_exists_dist_lt_norm
     {x : E} {F : Subspace 𝕜 E} :
     ¬ (x ⟂ₘ F) ↔ ∃ y ∈ F, dist x y < ‖x‖ := by
-  unfold SphericallyCompleteSpace.IsMOrtho
-  constructor
-  · intro h
-    contrapose h
-    push Not at h
-    exact eq_of_le_of_ge
-      (by simpa only [dist_zero_right] using infDist_le_dist_of_mem (by simp : (0 : E) ∈ ↑F))
-      ((le_infDist <| Submodule.nonempty F).2 h)
-  · intro h
-    contrapose h
-    push Not
-    rw [← h]
-    exact fun z hz ↦ infDist_le_dist_of_mem hz
+  have hle : infDist x (F : Set E) ≤ ‖x‖ := by
+    simpa only [dist_zero_right] using infDist_le_dist_of_mem F.zero_mem
+  change infDist x (F : Set E) ≠ ‖x‖ ↔ _
+  simpa only [lt_iff_le_and_ne, hle, true_and, SetLike.mem_coe] using
+    (infDist_lt_iff (x := x) (r := ‖x‖) F.nonempty)
 
 end IsMOrtho
 

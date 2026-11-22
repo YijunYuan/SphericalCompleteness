@@ -6,7 +6,7 @@ Authors: Yijun Yuan
 module
 
 public import Mathlib.Algebra.Field.Defs
-public import Mathlib.LinearAlgebra.Span.Defs
+public import Mathlib.LinearAlgebra.Span.Basic
 
 /-!
 # Auxiliary submodule lemmas
@@ -36,42 +36,11 @@ lemma eq_and_eq_of_add_eq_add_of_notMem {𝕜 : Type*} [Field 𝕜]
     ∀ d₁ ∈ D, ∀ l₁ ∈ Submodule.span 𝕜 {a}, ∀ d₂ ∈ D, ∀ l₂ ∈ Submodule.span 𝕜 {a},
       d₁ + l₁ = d₂ + l₂ → d₁ = d₂ ∧ l₁ = l₂ := by
   intro d₁ hd₁ l₁ hl₁ d₂ hd₂ l₂ hl₂ heq
-  rw [add_comm, ← sub_eq_sub_iff_add_eq_add] at heq
-  rcases Submodule.mem_span_singleton.1
-    (heq ▸ (Submodule.sub_mem_iff_left (Submodule.span 𝕜 {a}) hl₂).mpr hl₁) with ⟨r, hr⟩
-  if hr' : r = 0 then
-    simp only [hr', zero_smul] at hr
-    rw [← hr] at heq
-    exact ⟨(sub_eq_zero.1 hr.symm).symm, sub_eq_zero.1 heq⟩
-  else
-  replace hr : a = r⁻¹ • (d₂ - d₁) := by
-    rw [← hr]
-    exact (eq_inv_smul_iff₀ hr').mpr rfl
-  simp only [hr] at ha
-  exact absurd (Submodule.smul_mem D r⁻¹ <| (Submodule.sub_mem_iff_left D hd₁).mpr hd₂) ha
-
-/--
-If `a : 𝕜` is nonzero, then scalar multiplication by `a` leaves any submodule `M` invariant:
-`a • M = M`.
-
-This is the submodule-level expression of the fact that `a` acts as an invertible linear map
-(with inverse given by multiplication by `a⁻¹`), so the image of `M` under the action equals `M`
-itself.
-
-Parameters:
-- `ha : a ≠ 0` ensures `a` is a unit in the field `𝕜`.
-- `M : Submodule 𝕜 E` is the submodule being scaled.
-
-Result:
-- `a • M = M`.
--/
-theorem smul_coe_eq_self {𝕜 : Type*} [Field 𝕜]
-    {E : Type*} [AddCommMonoid E] [Module 𝕜 E] {a : 𝕜} (ha : a ≠ 0) (M : Submodule 𝕜 E) :
-    (@HSMul.hSMul 𝕜 (Set E) (Set E) (@instHSMul 𝕜 (Set E) Set.smulSet) a ↑M)
-      = ↑M := by
-  ext z
-  refine ⟨?_, fun h ↦ ⟨a⁻¹ • z, SMulMemClass.smul_mem a⁻¹ h, smul_inv_smul₀ ha z⟩⟩
-  rintro ⟨c, hc, rfl⟩
-  exact SMulMemClass.smul_mem a hc
+  have h : d₁ - d₂ = l₂ - l₁ := by
+    rw [sub_eq_sub_iff_add_eq_add]
+    simpa [add_comm] using heq
+  have hd : d₁ - d₂ = 0 := (disjoint_def.mp (disjoint_span_singleton_of_notMem ha)) _
+    (D.sub_mem hd₁ hd₂) (h.symm ▸ (span 𝕜 {a}).sub_mem hl₂ hl₁)
+  exact ⟨sub_eq_zero.mp hd, by simpa [sub_eq_zero.mp hd] using heq⟩
 
 end Submodule

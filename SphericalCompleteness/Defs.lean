@@ -5,6 +5,7 @@ Authors: Yijun Yuan
 -/
 module
 
+public import Mathlib.Analysis.Normed.Field.ProperSpace
 public import Mathlib.NumberTheory.Padics.ProperSpace
 public import SphericalCompleteness.External.Complete
 public import SphericalCompleteness.External.Sequence

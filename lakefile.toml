@@ -12,7 +12,7 @@ maxSynthPendingDepth = 3
 [[require]]
 name = "mathlib"
 scope = "leanprover-community"
-rev = "d13f23b723b8a846827a245b89c10fc7d3f11612"
+rev = "v4.36.0"
 
 [[lean_lib]]
 name = "SphericalCompleteness"

@@ -59,12 +59,9 @@ theorem closedBall_subset_closedBall_of_le_radius_of_nonempty_inter
     (hle : r1 ≤ r2)
     (hne : (closedBall z1 r1 ∩ closedBall z2 r2).Nonempty) :
     closedBall z1 r1 ⊆ closedBall z2 r2 := by
-  intro x hx
-  rcases hne with ⟨y, hy1, hy2⟩
-  simp only [mem_closedBall] at *
-  refine (hiud.dist_triangle_max x y z2).trans (max_le ?_ hy2)
-  exact (hiud.dist_triangle_max x z1 y).trans
-    (max_le (hx.trans hle) ((dist_comm y z1 ▸ hy1).trans hle))
+  obtain ⟨y, hy1, hy2⟩ := hne
+  rw [closedBall_eq_of_mem hy1, closedBall_eq_of_mem hy2]
+  exact closedBall_subset_closedBall (NNReal.coe_le_coe.mpr hle)
 
 end
 

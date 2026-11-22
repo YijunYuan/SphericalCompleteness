@@ -1,13 +1,13 @@
 [{"references": [],
-  "name": "SphericallyCompleteSpace.lpQuotientEmbedding._proof_1",
-  "constType":
-  "∀ (E : Type u_1) [inst : NormedAddCommGroup E], AddSubmonoidClass (AddSubgroup (PreLp fun x ↦ E)) (PreLp fun x ↦ E)",
-  "constCategory": "Theorem"},
- {"references": [],
   "name":
   "SphericallyCompleteSpace.IsImmediate.immediateExtensionSubmodules._proof_3",
   "constType":
   "∀ {𝕜 : Type u_1} [inst : NontriviallyNormedField 𝕜], RingHomSurjective (RingHom.id 𝕜)",
+  "constCategory": "Theorem"},
+ {"references": [],
+  "name": "SphericallyCompleteSpace.lpQuotientEmbedding._proof_1",
+  "constType":
+  "∀ (E : Type u_1) [inst : NormedAddCommGroup E], AddSubmonoidClass (AddSubgroup (PreLp fun x ↦ E)) (PreLp fun x ↦ E)",
   "constCategory": "Theorem"},
  {"references": [],
   "name": "Submodule.toAddSubmonoid",
@@ -29,7 +29,7 @@
   "constType":
   "∀ {𝕜 : Type u_1} [inst : NontriviallyNormedField 𝕜] {E : Type u_2} [inst_1 : SeminormedAddCommGroup E]\n  [inst_2 : NormedSpace 𝕜 E] [iud : IsUltrametricDist E] {F1 F2 : Subspace 𝕜 E}, (F1 ⟂ₛ F2) ↔ F2 ⟂ₛ F1",
   "constCategory": "Theorem"},
- {"references": ["Metric.ediam", "Set", "ENNReal.toReal"],
+ {"references": ["Metric.ediam", "ENNReal.toReal"],
   "name": "Metric.diam",
   "constType": "{α : Type u} → [PseudoMetricSpace α] → Set α → ℝ",
   "constCategory": "Definition"},
@@ -37,11 +37,6 @@
   "name": "SphericallyCompleteSpace.orthProj_id",
   "constType":
   "∀ (𝕜 : Type u_1) [inst : NontriviallyNormedField 𝕜] {E : Type u_2} [inst_1 : SeminormedAddCommGroup E]\n  [iud : IsUltrametricDist E] [inst_2 : NormedSpace 𝕜 E] (F : Submodule 𝕜 E) [inst_3 : SphericallyCompleteSpace ↥F],\n  ∀ a ∈ F, ↑((SphericallyCompleteSpace.orthProj 𝕜 F) a) = a",
-  "constCategory": "Theorem"},
- {"references": [],
-  "name": "SphericallyCompleteSpace.IsMOrtho.directProdIsoSum._proof_6",
-  "constType":
-  "∀ (𝕜 : Type u_2) [inst : NontriviallyNormedField 𝕜] {E : Type u_1} [inst_1 : NormedAddCommGroup E]\n  [inst_2 : NormedSpace 𝕜 E] (x : E) (F : Subspace 𝕜 E) (z : ↥(𝕜 ∙ x ⊔ F)), ∃ y ∈ 𝕜 ∙ x, ∃ z_1 ∈ F, y + z_1 = ↑z",
   "constCategory": "Theorem"},
  {"references":
   ["RingHom.id._proof_3",
@@ -104,7 +99,6 @@
    "SphericallyCompleteSpace.IsImmediate.exists_maximal_immediateExtensionSubmodule",
    "Maximal",
    "SphericallyCompleteSpace.IsImmediate.maximalImmediateExtensionEmbedding._proof_2",
-   "Set",
    "RingHom.id",
    "SphericallyCompleteSpace.IsImmediate.maximalImmediateExtensionEmbedding._proof_3",
    "Membership.mem",
@@ -150,10 +144,6 @@
   "constType":
   "∀ {𝕜 : Type u_1} [inst : NontriviallyNormedField 𝕜] {E : Type u_2} [inst_1 : NormedAddCommGroup E]\n  [inst_2 : NormedSpace 𝕜 E] [inst_3 : IsUltrametricDist E] (D : Submodule 𝕜 E) (F : Type u_3)\n  [inst_4 : NormedAddCommGroup F] [inst_5 : NormedSpace 𝕜 F] [inst_6 : IsUltrametricDist F]\n  [SphericallyCompleteSpace.IsHahnBanachPair D F] (f : ↥D →L[𝕜] F),\n  ∃ f', (∀ (v : E) (hv : v ∈ D), f' v = f ⟨v, hv⟩) ∧ ‖f'‖ = ‖f‖",
   "constCategory": "Theorem"},
- {"references": ["Eq.symm"],
-  "name": "Eq.mpr",
-  "constType": "{α β : Sort u} → α = β → β → α",
-  "constCategory": "Definition"},
  {"references": [],
   "name": "SphericallyCompleteSpace.nonempty_iInter_of_antitone",
   "constType":
@@ -165,14 +155,14 @@
   "∀ {𝕜 : Type u_1} [inst : NontriviallyNormedField 𝕜] {E : Type u_2} [inst_1 : SeminormedAddCommGroup E]\n  [inst_2 : NormedSpace 𝕜 E] [iud : IsUltrametricDist E] (F1 F2 : Subspace 𝕜 E),\n  (F1 ⟂ₛ F2) ↔ ∀ x ∈ F1, ∀ y ∈ F2, x ⟂[𝕜] y",
   "constCategory": "Theorem"},
  {"references": [],
-  "name": "SphericallyCompleteSpace.instSphericallyCompleteSpaceReal",
-  "constType": "SphericallyCompleteSpace ℝ",
-  "constCategory": "Theorem"},
- {"references": [],
   "name":
   "SphericallyCompleteSpace.IsImmediate.immediateExtensionSubmodules.congr_simp",
   "constType":
-  "∀ {𝕜 : Type u_1} [inst : NontriviallyNormedField 𝕜] (E : Type u_2) [inst_1 : NormedAddCommGroup E]\n  [inst_2 : NormedSpace 𝕜 E] [inst_3 : IsUltrametricDist E] (E₀ : Type u_3) [inst_4 : NormedAddCommGroup E₀]\n  [inst_5 : NormedSpace 𝕜 E₀] [inst_6 : IsUltrametricDist E₀] (f f_1 : E →ₗᵢ[𝕜] E₀),\n  f = f_1 →\n    ∀ (a a_1 : Submodule 𝕜 E₀),\n      a = a_1 →\n        SphericallyCompleteSpace.IsImmediate.immediateExtensionSubmodules E E₀ f a =\n          SphericallyCompleteSpace.IsImmediate.immediateExtensionSubmodules E E₀ f_1 a_1",
+  "∀ {𝕜 : Type u_1} [inst : NontriviallyNormedField 𝕜] (E : Type u_2) [inst_1 : NormedAddCommGroup E]\n  [inst_2 : NormedSpace 𝕜 E] [inst_3 : IsUltrametricDist E] (E₀ : Type u_3) [inst_4 : NormedAddCommGroup E₀]\n  [inst_5 : NormedSpace 𝕜 E₀] [inst_6 : IsUltrametricDist E₀] (f f_1 : E →ₗᵢ[𝕜] E₀),\n  f = f_1 →\n    SphericallyCompleteSpace.IsImmediate.immediateExtensionSubmodules E E₀ f =\n      SphericallyCompleteSpace.IsImmediate.immediateExtensionSubmodules E E₀ f_1",
+  "constCategory": "Theorem"},
+ {"references": [],
+  "name": "SphericallyCompleteSpace.instSphericallyCompleteSpaceReal",
+  "constType": "SphericallyCompleteSpace ℝ",
   "constCategory": "Theorem"},
  {"references":
   ["Bind.bind",
@@ -219,7 +209,7 @@
   "constType":
   "(A : outParam (Type u)) → {B : Type v} → [self : HasQuotient A B] → B → Type (max u v)",
   "constCategory": "Definition"},
- {"references": ["Set.ofPred", "LE.le"],
+ {"references": ["LE.le"],
   "name": "Set.Icc",
   "constType": "{α : Type u_1} → [Preorder α] → α → α → Set α",
   "constCategory": "Definition"},
@@ -237,7 +227,7 @@
   "name": "Lean.Syntax.isOfKind",
   "constType": "Syntax → SyntaxNodeKind → Bool",
   "constCategory": "Definition"},
- {"references": ["Set.ofPred", "Set", "Membership.mem"],
+ {"references": ["Membership.mem"],
   "name": "Set.image2",
   "constType":
   "{α : Type u} → {β : Type v} → {γ : Type w} → (α → β → γ) → Set α → Set β → Set γ",
@@ -245,7 +235,7 @@
  {"references": [],
   "name": "SphericallyCompleteSpace.IsMOrtho.directProdIsoSum._proof_1",
   "constType":
-  "∀ (𝕜 : Type u_2) [inst : NontriviallyNormedField 𝕜] {E : Type u_1} [inst_1 : NormedAddCommGroup E]\n  [inst_2 : NormedSpace 𝕜 E] (x : E) (F : Subspace 𝕜 E) (z : ↥(𝕜 ∙ x) × ↥F), ↑z.1 + ↑z.2 ∈ 𝕜 ∙ x + F",
+  "∀ (𝕜 : Type u_2) [inst : NontriviallyNormedField 𝕜] {E : Type u_1} [inst_1 : NormedAddCommGroup E]\n  [inst_2 : NormedSpace 𝕜 E] [inst_3 : IsUltrametricDist E] (x : E) (F : Subspace 𝕜 E),\n  (x ⟂ₘ F) →\n    ∀ (x_1 : ↥(𝕜 ∙ x) × ↥F),\n      ‖(LinearMap.codRestrict (𝕜 ∙ x + F) ((𝕜 ∙ x).subtype.coprod (Submodule.subtype F)) ⋯) x_1‖ = ‖x_1‖",
   "constCategory": "Theorem"},
  {"references": [],
   "name": "SphericallyCompleteSpace.isBoundedLinearMap_codimOneExtension",
@@ -258,10 +248,6 @@
   "∀ {𝕜 : Type u_1} [inst : NontriviallyNormedField 𝕜] (E : ℕ → Type u_2) [inst_1 : (i : ℕ) → NormedAddCommGroup (E i)]\n  [inst_2 : (i : ℕ) → NormedSpace 𝕜 (E i)] [∀ (i : ℕ), IsUltrametricDist (E i)],\n  SphericallyCompleteSpace (↥(lp E ⊤) ⧸ SphericallyCompleteSpace.c₀ 𝕜 E)",
   "constCategory": "Theorem"},
  {"references": [],
-  "name": "Prod.fst",
-  "constType": "{α : Type u} → {β : Type v} → α × β → α",
-  "constCategory": "Definition"},
- {"references": [],
   "name": "SphericallyCompleteSpace.IsVOrtho.smul_right_iff",
   "constType":
   "∀ {𝕜 : Type u_1} [inst : NontriviallyNormedField 𝕜] {E : Type u_2} [inst_1 : SeminormedAddCommGroup E]\n  [inst_2 : NormedSpace 𝕜 E] [iud : IsUltrametricDist E] {x y : E} {a : 𝕜}, a ≠ 0 → ((x ⟂[𝕜] y) ↔ x ⟂[𝕜] a • y)",
@@ -270,7 +256,7 @@
   "name": "AddSubsemigroup.carrier",
   "constType": "{M : Type u_3} → [inst : Add M] → AddSubsemigroup M → Set M",
   "constCategory": "Definition"},
- {"references": ["Metric.closedBall", "NNReal", "NNReal.toReal", "Metric.diam"],
+ {"references": ["SphericallyCompleteSpace.IsSphericallyDense.casesOn"],
   "name": "SphericallyCompleteSpace.IsSphericallyDense.recOn",
   "constType":
   "{α : Type u_1} →\n  [inst : PseudoMetricSpace α] →\n    {motive : SphericallyCompleteSpace.IsSphericallyDense α → Sort u} →\n      (t : SphericallyCompleteSpace.IsSphericallyDense α) →\n        ((spherically_dense : ∀ (c : α) (r : NNReal), Metric.diam (Metric.closedBall c ↑r) = ↑r) → motive ⋯) → motive t",
@@ -288,7 +274,6 @@
  {"references":
   ["Metric.closedBall",
    "Set.Icc",
-   "Set",
    "Dist.dist",
    "NNReal",
    "Metric.diam",
@@ -301,14 +286,7 @@
   "constType":
   "{α : Type u_1} →\n  [inst : MetricSpace α] →\n    {motive : SphericallyCompleteSpace.SchikhofCounterexample.IsDenseMetric α → Sort u} →\n      (t : SphericallyCompleteSpace.SchikhofCounterexample.IsDenseMetric α) →\n        ((dense_metric :\n              ∀ (z : α) (r : NNReal),\n                closure (Set.image2 dist (Metric.closedBall z ↑r) (Metric.closedBall z ↑r)) =\n                  Set.Icc 0 (Metric.diam (Metric.closedBall z ↑r))) →\n            motive ⋯) →\n          motive t",
   "constCategory": "Definition"},
- {"references":
-  ["Metric.closedBall",
-   "Set.Nonempty",
-   "Set",
-   "Antitone",
-   "NNReal",
-   "NNReal.toReal",
-   "Set.iInter"],
+ {"references": ["SphericallyCompleteSpace.casesOn"],
   "name": "SphericallyCompleteSpace.recOn",
   "constType":
   "{α : Type u_1} →\n  [inst : PseudoMetricSpace α] →\n    {motive : SphericallyCompleteSpace α → Sort u} →\n      (t : SphericallyCompleteSpace α) →\n        ((nonempty_iInter_of_antitone :\n              ∀ ⦃ci : ℕ → α⦄ ⦃ri : ℕ → NNReal⦄,\n                (Antitone fun i ↦ Metric.closedBall (ci i) ↑(ri i)) →\n                  (⋂ i, Metric.closedBall (ci i) ↑(ri i)).Nonempty) →\n            motive ⋯) →\n          motive t",
@@ -337,10 +315,6 @@
   "∀ (𝕜 : Type u_2) [inst : NontriviallyNormedField 𝕜] (E : Type u_1) [inst_1 : NormedAddCommGroup E]\n  [inst_2 : NormedSpace 𝕜 E], (SphericallyCompleteSpace.c₀ 𝕜 fun x ↦ E).toAddSubgroup.Normal",
   "constCategory": "Theorem"},
  {"references": [],
-  "name": "Set",
-  "constType": "Type u → Type u",
-  "constCategory": "Definition"},
- {"references": [],
   "name": "SphericallyCompleteSpace.lpQuotientEmbedding._simp_2",
   "constType":
   "∀ {α : Sort u_1} {p : α → Prop} {a' : α}, (∀ (a : α), a = a' → p a) = p a'",
@@ -350,11 +324,6 @@
   "constType":
   "SourceInfo → SyntaxNodeKind → Syntax → Syntax → Syntax → Syntax",
   "constCategory": "Definition"},
- {"references": [],
-  "name": "SphericallyCompleteSpace.IsMOrtho.directProdIsoSum._proof_11",
-  "constType":
-  "∀ (𝕜 : Type u_2) [inst : NontriviallyNormedField 𝕜] {E : Type u_1} [inst_1 : NormedAddCommGroup E]\n  [inst_2 : NormedSpace 𝕜 E] [inst_3 : IsUltrametricDist E] (x : E) (F : Subspace 𝕜 E),\n  (x ⟂ₘ F) → Function.LeftInverse (⋯.mpr fun z ↦ (⟨⋯.choose, ⋯⟩, ⟨⋯.choose, ⋯⟩)) fun z ↦ ⟨↑z.1 + ↑z.2, ⋯⟩",
-  "constCategory": "Theorem"},
  {"references":
   ["Equiv.left_inv",
    "LinearEquiv.toEquiv",
@@ -370,7 +339,7 @@
  {"references": [],
   "name": "SphericallyCompleteSpace.IsMOrtho.directProdIsoSum._proof_4",
   "constType":
-  "∀ (𝕜 : Type u_2) [inst : NontriviallyNormedField 𝕜] {E : Type u_1} [inst_1 : NormedAddCommGroup E]\n  [inst_2 : NormedSpace 𝕜 E] (x : E) (F : Subspace 𝕜 E) (x_1 y : ↥(𝕜 ∙ x) × ↥F),\n  ⟨↑(x_1 + y).1 + ↑(x_1 + y).2, ⋯⟩ = ⟨↑x_1.1 + ↑x_1.2, ⋯⟩ + ⟨↑y.1 + ↑y.2, ⋯⟩",
+  "∀ (𝕜 : Type u_2) [inst : NontriviallyNormedField 𝕜] {E : Type u_1} [inst_1 : NormedAddCommGroup E]\n  [inst_2 : NormedSpace 𝕜 E] (x : E) (F : Subspace 𝕜 E) (z : ↥(𝕜 ∙ x) × ↥F),\n  ((𝕜 ∙ x).subtype ∘ₗ LinearMap.fst 𝕜 ↥(𝕜 ∙ x) ↥F) z + (Submodule.subtype F ∘ₗ LinearMap.snd 𝕜 ↥(𝕜 ∙ x) ↥F) z ∈\n    𝕜 ∙ x ⊔ F",
   "constCategory": "Theorem"},
  {"references": [],
   "name": "SphericallyCompleteSpace.isCompl_orthComp",
@@ -399,7 +368,6 @@
    "Not",
    "Set.Nonempty",
    "Norm.norm",
-   "Set",
    "Exists.choose",
    "OfNat.ofNat",
    "SphericallyCompleteSpace.codimOneExtension._proof_3",
@@ -436,7 +404,6 @@
  {"references":
   ["Not",
    "LinearMap.toSpanSingleton",
-   "Set",
    "LinearMap.range",
    "LinearMap.coprod",
    "SphericallyCompleteSpace.spanSupDecomp._proof_1",
@@ -479,7 +446,7 @@
   "constType":
   "∀ (𝕜 : Type u_2) [inst : NontriviallyNormedField 𝕜] (E : ℕ → Type u_1) [inst_1 : (i : ℕ) → NormedAddCommGroup (E i)]\n  [inst_2 : (i : ℕ) → NormedSpace 𝕜 (E i)] (c : 𝕜) {x : ↥(lp E ⊤)},\n  x ∈ {f | Filter.Tendsto (fun n ↦ ‖↑f n‖) Filter.atTop (nhds 0)} →\n    c • x ∈ {f | Filter.Tendsto (fun n ↦ ‖↑f n‖) Filter.atTop (nhds 0)}",
   "constCategory": "Theorem"},
- {"references": ["SetLike.coe", "Set.ofPred", "Set", "LE.le", "InfSet.sInf"],
+ {"references": ["SetLike.coe", "LE.le", "InfSet.sInf"],
   "name": "Submodule.span",
   "constType":
   "(R : Type u_1) →\n  {M : Type u_2} →\n    [inst : Semiring R] → [inst_1 : AddCommMonoid M] → [inst_2 : _root_.Module R M] → Set M → Submodule R M",
@@ -488,7 +455,6 @@
   ["PreLp",
    "SphericallyCompleteSpace.c₀._proof_2",
    "SphericallyCompleteSpace.c₀._proof_5",
-   "Set.ofPred",
    "Norm.norm",
    "lp",
    "Membership.mem",
@@ -507,16 +473,7 @@
   "(𝕜 : Type u_1) →\n  [inst : NontriviallyNormedField 𝕜] →\n    (E : ℕ → Type u_2) →\n      [inst_1 : (i : ℕ) → NormedAddCommGroup (E i)] → [inst_2 : (i : ℕ) → NormedSpace 𝕜 (E i)] → Submodule 𝕜 ↥(lp E ⊤)",
   "constCategory": "Definition"},
  {"references":
-  ["Metric.closedBall",
-   "Set.Icc",
-   "Set",
-   "Dist.dist",
-   "NNReal",
-   "Metric.diam",
-   "NNReal.toReal",
-   "Set.image2",
-   "closure",
-   "OfNat.ofNat"],
+  ["SphericallyCompleteSpace.SchikhofCounterexample.IsDenseMetric.casesOn"],
   "name": "SphericallyCompleteSpace.SchikhofCounterexample.IsDenseMetric.recOn",
   "constType":
   "{α : Type u_1} →\n  [inst : MetricSpace α] →\n    {motive : SphericallyCompleteSpace.SchikhofCounterexample.IsDenseMetric α → Sort u} →\n      (t : SphericallyCompleteSpace.SchikhofCounterexample.IsDenseMetric α) →\n        ((dense_metric :\n              ∀ (z : α) (r : NNReal),\n                closure (Set.image2 dist (Metric.closedBall z ↑r) (Metric.closedBall z ↑r)) =\n                  Set.Icc 0 (Metric.diam (Metric.closedBall z ↑r))) →\n            motive ⋯) →\n          motive t",
@@ -600,7 +557,6 @@
  {"references":
   ["Metric.closedBall",
    "Set.Nonempty",
-   "Set",
    "Antitone",
    "NNReal",
    "NNReal.toReal",
@@ -662,6 +618,11 @@
   "constType":
   "∀ (α : Type u_1) [inst : PseudoMetricSpace α] [ProperSpace α], SphericallyCompleteSpace α",
   "constCategory": "Theorem"},
+ {"references": [],
+  "name": "SphericallyCompleteSpace.IsVOrtho.smul_right",
+  "constType":
+  "∀ {𝕜 : Type u_1} [inst : NontriviallyNormedField 𝕜] {E : Type u_2} [inst_1 : SeminormedAddCommGroup E]\n  [inst_2 : NormedSpace 𝕜 E] [iud : IsUltrametricDist E] {x y : E} (a : 𝕜), (x ⟂[𝕜] y) → x ⟂[𝕜] a • y",
+  "constCategory": "Theorem"},
  {"references":
   ["LinearIsometry.toLinearMap",
    "SphericallyCompleteSpace.IsImmediate._proof_1",
@@ -673,11 +634,6 @@
   "constType":
   "{𝕜 : Type u_1} →\n  [inst : NontriviallyNormedField 𝕜] →\n    {E : Type u} →\n      [inst_1 : SeminormedAddCommGroup E] →\n        [inst_2 : NormedSpace 𝕜 E] →\n          [IsUltrametricDist E] →\n            {F : Type v} →\n              [inst_4 : SeminormedAddCommGroup F] →\n                [inst_5 : NormedSpace 𝕜 F] → [IsUltrametricDist F] → (E →ₗᵢ[𝕜] F) → Prop",
   "constCategory": "Definition"},
- {"references": [],
-  "name": "SphericallyCompleteSpace.IsVOrtho.smul_right",
-  "constType":
-  "∀ {𝕜 : Type u_1} [inst : NontriviallyNormedField 𝕜] {E : Type u_2} [inst_1 : SeminormedAddCommGroup E]\n  [inst_2 : NormedSpace 𝕜 E] [iud : IsUltrametricDist E] {x y : E} (a : 𝕜), (x ⟂[𝕜] y) → x ⟂[𝕜] a • y",
-  "constCategory": "Theorem"},
  {"references":
   ["SetLike.coe",
    "Equiv.invFun",
@@ -700,27 +656,11 @@
   "constType":
   "∀ {α : Type u_1} {inst : PseudoMetricSpace α} [self : SphericallyCompleteSpace.IsSphericallyDense α] (c : α)\n  (r : NNReal), Metric.diam (Metric.closedBall c ↑r) = ↑r",
   "constCategory": "Theorem"},
- {"references":
-  ["LinearIsometry.toLinearMap",
-   "RingHom.id",
-   "LinearMap.range",
-   "LE.le",
-   "Membership.mem",
-   "Top.top"],
+ {"references": ["SphericallyCompleteSpace.IsSphericalCompletion.casesOn"],
   "name": "SphericallyCompleteSpace.IsSphericalCompletion.recOn",
   "constType":
   "{𝕜 : Type u_1} →\n  [inst : NontriviallyNormedField 𝕜] →\n    {E : Type u_2} →\n      [inst_1 : SeminormedAddCommGroup E] →\n        [inst_2 : NormedSpace 𝕜 E] →\n          [inst_3 : IsUltrametricDist E] →\n            {F : Type u_3} →\n              [inst_4 : SeminormedAddCommGroup F] →\n                [inst_5 : NormedSpace 𝕜 F] →\n                  [inst_6 : IsUltrametricDist F] →\n                    {ι : E →ₗᵢ[𝕜] F} →\n                      {motive : SphericallyCompleteSpace.IsSphericalCompletion ι → Sort u} →\n                        (t : SphericallyCompleteSpace.IsSphericalCompletion ι) →\n                          ([toSphericallyCompleteSpace : SphericallyCompleteSpace F] →\n                              (minimal_of_sphericallyComplete :\n                                  ∀ (D : Submodule 𝕜 F), SphericallyCompleteSpace ↥D → ι.range ≤ D → D = ⊤) →\n                                motive ⋯) →\n                            motive t",
   "constCategory": "Definition"},
- {"references": [],
-  "name": "SphericallyCompleteSpace.IsMOrtho.directProdIsoSum._proof_9",
-  "constType":
-  "∀ (𝕜 : Type u_2) [inst : NontriviallyNormedField 𝕜] {E : Type u_1} [inst_1 : NormedAddCommGroup E]\n  [inst_2 : NormedSpace 𝕜 E] (x : E) (F : Subspace 𝕜 E) (z : ↥(𝕜 ∙ x ⊔ F)), ⋯.choose ∈ F",
-  "constCategory": "Theorem"},
- {"references": [],
-  "name": "SphericallyCompleteSpace.IsMOrtho.directProdIsoSum._proof_12",
-  "constType":
-  "∀ (𝕜 : Type u_2) [inst : NontriviallyNormedField 𝕜] {E : Type u_1} [inst_1 : NormedAddCommGroup E]\n  [inst_2 : NormedSpace 𝕜 E] (x : E) (F : Subspace 𝕜 E),\n  Function.RightInverse (⋯.mpr fun z ↦ (⟨⋯.choose, ⋯⟩, ⟨⋯.choose, ⋯⟩)) fun z ↦ ⟨↑z.1 + ↑z.2, ⋯⟩",
-  "constCategory": "Theorem"},
  {"references":
   ["Membership.mem", "SphericallyCompleteSpace.IsMOrtho", "Subspace"],
   "name": "SphericallyCompleteSpace.IsOrtho",
@@ -735,7 +675,7 @@
  {"references": [],
   "name": "SphericallyCompleteSpace.IsMOrtho.directProdIsoSum._proof_3",
   "constType":
-  "∀ (𝕜 : Type u_2) [inst : NontriviallyNormedField 𝕜] {E : Type u_1} [inst_1 : NormedAddCommGroup E]\n  [inst_2 : NormedSpace 𝕜 E] (x : E) (F : Subspace 𝕜 E), (↥(𝕜 ∙ x + F) → ↥(𝕜 ∙ x) × ↥F) = (↥(𝕜 ∙ x ⊔ F) → ↥(𝕜 ∙ x) × ↥F)",
+  "∀ (𝕜 : Type u_1) [inst : NontriviallyNormedField 𝕜], RingHomCompTriple (RingHom.id 𝕜) (RingHom.id 𝕜) (RingHom.id 𝕜)",
   "constCategory": "Theorem"},
  {"references": [],
   "name": "SphericallyCompleteSpace.codimOneExtension.congr_simp",
@@ -768,13 +708,7 @@
   "∀ {𝕜 : Type u_1} [inst : NontriviallyNormedField 𝕜] {E : Type u_2} [inst_1 : NormedAddCommGroup E]\n  [inst_2 : NormedSpace 𝕜 E] {D : Submodule 𝕜 E} {F : Type u_3} [inst_3 : NormedAddCommGroup F]\n  [inst_4 : NormedSpace 𝕜 F] [inst_5 : IsUltrametricDist E] [inst_6 : IsUltrametricDist F],\n  (∀ (f : ↥D →L[𝕜] F), ∃ f', (∀ (v : E) (hv : v ∈ D), f' v = f ⟨v, hv⟩) ∧ ‖f'‖ = ‖f‖) →\n    SphericallyCompleteSpace.IsHahnBanachPair D F",
   "constCategory": "Definition"},
  {"references":
-  ["PreLp",
-   "ENNReal",
-   "Memℓp.add",
-   "Set.ofPred",
-   "Memℓp",
-   "zero_memℓp",
-   "Memℓp.neg"],
+  ["PreLp", "ENNReal", "Memℓp.add", "Memℓp", "zero_memℓp", "Memℓp.neg"],
   "name": "lp",
   "constType":
   "{α : Type u_3} → (E : α → Type u_5) → [inst : (i : α) → NormedAddCommGroup (E i)] → ENNReal → AddSubgroup (PreLp E)",
@@ -799,11 +733,6 @@
   "constType": "NNReal → ℝ",
   "constCategory": "Definition"},
  {"references": [],
-  "name": "SphericallyCompleteSpace.IsMOrtho.directProdIsoSum._proof_8",
-  "constType":
-  "∀ (𝕜 : Type u_2) [inst : NontriviallyNormedField 𝕜] {E : Type u_1} [inst_1 : NormedAddCommGroup E]\n  [inst_2 : NormedSpace 𝕜 E] (x : E) (F : Subspace 𝕜 E) (z : ↥(𝕜 ∙ x ⊔ F)), ∃ z_1 ∈ F, ⋯.choose + z_1 = ↑z",
-  "constCategory": "Theorem"},
- {"references": [],
   "name":
   "SphericallyCompleteSpace.IsSphericalCompletion.exists_linearIsometryEquiv_of_isImmediate",
   "constType":
@@ -822,7 +751,7 @@
  {"references": [],
   "name": "SphericallyCompleteSpace.IsMOrtho.directProdIsoSum._proof_5",
   "constType":
-  "∀ (𝕜 : Type u_2) [inst : NontriviallyNormedField 𝕜] {E : Type u_1} [inst_1 : NormedAddCommGroup E]\n  [inst_2 : NormedSpace 𝕜 E] (x : E) (F : Subspace 𝕜 E) (m : 𝕜) (x_1 : ↥(𝕜 ∙ x) × ↥F),\n  ⟨↑(m • x_1).1 + ↑(m • x_1).2, ⋯⟩ = (RingHom.id 𝕜) m • ⟨↑x_1.1 + ↑x_1.2, ⋯⟩",
+  "∀ (𝕜 : Type u_1) [inst : NontriviallyNormedField 𝕜], RingHomInvPair (RingHom.id 𝕜) (RingHom.id 𝕜)",
   "constCategory": "Theorem"},
  {"references":
   ["Submodule.inclusion._proof_1",
@@ -850,7 +779,7 @@
   "constType":
   "∀ {𝕜 : Type u_2} [inst : NontriviallyNormedField 𝕜] {E : Type u_3} [inst_1 : NormedAddCommGroup E]\n  [inst_2 : NormedSpace 𝕜 E] [inst_3 : IsUltrametricDist E] {E₀ : Type u_1} [inst_4 : NormedAddCommGroup E₀]\n  [inst_5 : NormedSpace 𝕜 E₀] [inst_6 : IsUltrametricDist E₀] (f : E →ₗᵢ[𝕜] E₀) (x : E), f x ∈ ⋯.choose",
   "constCategory": "Theorem"},
- {"references": ["Set", "Metric.infEDist", "ENNReal.toReal"],
+ {"references": ["Metric.infEDist", "ENNReal.toReal"],
   "name": "Metric.infDist",
   "constType": "{α : Type u} → [PseudoMetricSpace α] → α → Set α → ℝ",
   "constCategory": "Definition"},
@@ -859,7 +788,7 @@
   "constType":
   "∀ {𝕜 : Type u_1} [inst : NontriviallyNormedField 𝕜], RingHomInvPair (RingHom.id 𝕜) (RingHom.id 𝕜)",
   "constCategory": "Theorem"},
- {"references": ["Set.sInter", "Set.ofPred", "Set", "LE.le"],
+ {"references": ["Set.sInter", "LE.le"],
   "name": "closure",
   "constType": "{X : Type u} → [TopologicalSpace X] → Set X → Set X",
   "constCategory": "Definition"},
@@ -888,11 +817,6 @@
   "{𝕜 : Type u_1} →\n  [inst : NontriviallyNormedField 𝕜] →\n    {E : Type u_2} →\n      [inst_1 : NormedAddCommGroup E] →\n        [inst_2 : NormedSpace 𝕜 E] →\n          {D : Submodule 𝕜 E} →\n            {F : Type u_3} →\n              [inst_3 : NormedAddCommGroup F] →\n                [inst_4 : NormedSpace 𝕜 F] →\n                  [inst_5 : IsUltrametricDist E] →\n                    [inst_6 : IsUltrametricDist F] →\n                      {motive : SphericallyCompleteSpace.IsHahnBanachPair D F → Sort u} →\n                        (t : SphericallyCompleteSpace.IsHahnBanachPair D F) →\n                          ((is_hb : ∀ (f : ↥D →L[𝕜] F), ∃ f', (∀ (v : E) (hv : v ∈ D), f' v = f ⟨v, hv⟩) ∧ ‖f'‖ = ‖f‖) →\n                              motive ⋯) →\n                            motive t",
   "constCategory": "Definition"},
  {"references": [],
-  "name": "SphericallyCompleteSpace.isCompl_ker_of_forall_apply_eq",
-  "constType":
-  "∀ (𝕜 : Type u_1) [inst : NontriviallyNormedField 𝕜] {E : Type u_2} [inst_1 : SeminormedAddCommGroup E]\n  [IsUltrametricDist E] [inst_3 : NormedSpace 𝕜 E] (F : Submodule 𝕜 E) [SphericallyCompleteSpace ↥F] (T : E →L[𝕜] ↥F),\n  (∀ (a : E) (b : a ∈ F), T a = ⟨a, b⟩) → IsCompl F (↑T).ker",
-  "constCategory": "Theorem"},
- {"references": [],
   "name": "Not",
   "constType": "Prop → Prop",
   "constCategory": "Definition"},
@@ -901,7 +825,7 @@
   "constType":
   "∀ {𝕜 : Type u_1} [inst : NontriviallyNormedField 𝕜] {E : Type u} [inst_1 : SeminormedAddCommGroup E]\n  [inst_2 : NormedSpace 𝕜 E] [inst_3 : IsUltrametricDist E] {F : Type v} [inst_4 : SeminormedAddCommGroup F]\n  [inst_5 : NormedSpace 𝕜 F] [inst_6 : IsUltrametricDist F] (f f_1 : E →ₗᵢ[𝕜] F),\n  f = f_1 → SphericallyCompleteSpace.IsImmediate f = SphericallyCompleteSpace.IsImmediate f_1",
   "constCategory": "Theorem"},
- {"references": ["Set", "Membership.mem"],
+ {"references": ["Membership.mem"],
   "name": "Set.Nonempty",
   "constType": "{α : Type u} → Set α → Prop",
   "constCategory": "Definition"},
@@ -910,6 +834,15 @@
   "constType":
   "∀ {𝕜 : Type u_1} [inst : NontriviallyNormedField 𝕜] {E : Type u_2} [inst_1 : SeminormedAddCommGroup E]\n  [inst_2 : NormedSpace 𝕜 E] {D : Submodule 𝕜 E} {a : E} (ha : a ∉ D) (d : ↥D) (l : 𝕜),\n  ↑((SphericallyCompleteSpace.spanSupDecomp ha).symm (d, l)) = ↑d + l • a",
   "constCategory": "Theorem"},
+ {"references":
+  ["LinearMap.codRestrict._proof_1",
+   "Membership.mem",
+   "LinearMap.codRestrict._proof_2",
+   "DFunLike.coe"],
+  "name": "LinearMap.codRestrict",
+  "constType":
+  "{R : Type u_1} →\n  {R₂ : Type u_2} →\n    {M : Type u_4} →\n      {M₂ : Type u_5} →\n        [inst : Semiring R] →\n          [inst_1 : Semiring R₂] →\n            [inst_2 : AddCommMonoid M] →\n              [inst_3 : AddCommMonoid M₂] →\n                [inst_4 : _root_.Module R M] →\n                  [inst_5 : _root_.Module R₂ M₂] →\n                    {σ₁₂ : R →+* R₂} →\n                      (p : Submodule R₂ M₂) → (f : M →ₛₗ[σ₁₂] M₂) → (∀ (c : M), f c ∈ p) → M →ₛₗ[σ₁₂] ↥p",
+  "constCategory": "Definition"},
  {"references": ["Lean.Name.mkStr1", "Lean.Name.mkStr2", "OfNat.ofNat"],
   "name": "SphericallyCompleteSpace.«term_⟂[_]_»",
   "constType": "TrailingParserDescr",
@@ -1018,7 +951,6 @@
  {"references":
   ["SetLike.coe",
    "Norm.norm",
-   "Set",
    "Singleton.singleton",
    "Metric.infDist",
    "Submodule.span"],
@@ -1069,24 +1001,23 @@
   "constType": "Type",
   "constCategory": "Definition"},
  {"references":
-  ["Set.Nonempty",
-   "Set",
-   "LinearMap.range",
-   "NNReal",
-   "Membership.mem",
-   "NNReal.toReal",
-   "Set.iInter",
-   "Metric.closedBall",
+  ["Metric.closedBall",
+   "Set.Nonempty",
    "LinearIsometry.toLinearMap",
    "RingHom.id",
+   "LinearMap.range",
    "Antitone",
    "LE.le",
-   "Top.top"],
+   "Membership.mem",
+   "NNReal",
+   "Top.top",
+   "NNReal.toReal",
+   "Set.iInter"],
   "name": "SphericallyCompleteSpace.IsSphericalCompletion.mk._flat_ctor",
   "constType":
   "∀ {𝕜 : Type u_1} [inst : NontriviallyNormedField 𝕜] {E : Type u_2} [inst_1 : SeminormedAddCommGroup E]\n  [inst_2 : NormedSpace 𝕜 E] [inst_3 : IsUltrametricDist E] {F : Type u_3} [inst_4 : SeminormedAddCommGroup F]\n  [inst_5 : NormedSpace 𝕜 F] [inst_6 : IsUltrametricDist F] {ι : E →ₗᵢ[𝕜] F},\n  (∀ ⦃ci : ℕ → F⦄ ⦃ri : ℕ → NNReal⦄,\n      (Antitone fun i ↦ Metric.closedBall (ci i) ↑(ri i)) → (⋂ i, Metric.closedBall (ci i) ↑(ri i)).Nonempty) →\n    (∀ (D : Submodule 𝕜 F), SphericallyCompleteSpace ↥D → ι.range ≤ D → D = ⊤) →\n      SphericallyCompleteSpace.IsSphericalCompletion ι",
   "constCategory": "Definition"},
- {"references": ["Set", "iInf"],
+ {"references": ["iInf"],
   "name": "Set.iInter",
   "constType": "{α : Type u} → {ι : Sort v} → (ι → Set α) → Set α",
   "constCategory": "Definition"},
@@ -1104,7 +1035,7 @@
   "name": "Subtype.val",
   "constType": "{α : Sort u} → {p : α → Prop} → Subtype p → α",
   "constCategory": "Definition"},
- {"references": ["Set", "Membership.mem"],
+ {"references": ["Membership.mem"],
   "name": "Set.Elem",
   "constType": "{α : Type u} → Set α → Type u",
   "constCategory": "Definition"},
@@ -1130,14 +1061,14 @@
   "∀ {𝕜 : Type u_1} [inst : NontriviallyNormedField 𝕜] {E : Type u_2} [inst_1 : NormedAddCommGroup E]\n  [inst_2 : NormedSpace 𝕜 E] [inst_3 : IsUltrametricDist E] {E₀ : Type u_3} [inst_4 : NormedAddCommGroup E₀]\n  [inst_5 : NormedSpace 𝕜 E₀] [inst_6 : IsUltrametricDist E₀] [inst_7 : SphericallyCompleteSpace E₀] (f : E →ₗᵢ[𝕜] E₀),\n  SphericallyCompleteSpace.IsSphericalCompletion\n    (SphericallyCompleteSpace.IsImmediate.maximalImmediateExtensionEmbedding f)",
   "constCategory": "Theorem"},
  {"references": [],
-  "name": "SphericallyCompleteSpace.IsSphericallyDense",
-  "constType": "(α : Type u_1) → [PseudoMetricSpace α] → Prop",
-  "constCategory": "Other"},
- {"references": [],
   "name": "SphericallyCompleteSpace.codimOneExtension._proof_2",
   "constType":
   "∀ {𝕜 : Type u_2} [inst : NontriviallyNormedField 𝕜] {E : Type u_1} [inst_1 : SeminormedAddCommGroup E]\n  [inst_2 : NormedSpace 𝕜 E] {D : Submodule 𝕜 E} {a : E} (M : ↥(D + 𝕜 ∙ a)), ∃ y ∈ D, ∃ z ∈ 𝕜 ∙ a, y + z = ↑M",
   "constCategory": "Theorem"},
+ {"references": [],
+  "name": "SphericallyCompleteSpace.IsSphericallyDense",
+  "constType": "(α : Type u_1) → [PseudoMetricSpace α] → Prop",
+  "constCategory": "Other"},
  {"references": [],
   "name":
   "SphericallyCompleteSpace.IsImmediate.immediateExtensionSubmodules._proof_1",
@@ -1149,19 +1080,14 @@
   "constType":
   "∀ {𝕜 : Type u_1} [inst : NontriviallyNormedField 𝕜] {E : Type u_2} [inst_1 : SeminormedAddCommGroup E]\n  [inst_2 : NormedSpace 𝕜 E] {D : Submodule 𝕜 E} {a : E} (M : ↥(D + 𝕜 ∙ a)) (this : ∃ y ∈ D, ∃ z ∈ 𝕜 ∙ a, y + z = ↑M),\n  ∃ a_1, a_1 • a = ⋯.choose",
   "constCategory": "Theorem"},
- {"references": [],
+ {"references": ["IsOpen", "Membership.mem", "iInf", "Filter.principal"],
   "name": "nhds",
-  "constType": "{X : Type u_3} → [TopologicalSpace X] → X → Filter X",
+  "constType": "{X : Type u_1} → [TopologicalSpace X] → X → Filter X",
   "constCategory": "Definition"},
  {"references": [],
   "name": "Unit.unit",
   "constType": "Unit",
   "constCategory": "Definition"},
- {"references": [],
-  "name": "SphericallyCompleteSpace.IsMOrtho.directProdIsoSum._proof_7",
-  "constType":
-  "∀ (𝕜 : Type u_2) [inst : NontriviallyNormedField 𝕜] {E : Type u_1} [inst_1 : NormedAddCommGroup E]\n  [inst_2 : NormedSpace 𝕜 E] (x : E) (F : Subspace 𝕜 E) (z : ↥(𝕜 ∙ x ⊔ F)), ⋯.choose ∈ 𝕜 ∙ x",
-  "constCategory": "Theorem"},
  {"references": [],
   "name": "SphericallyCompleteSpace.lpQuotientEmbedding._proof_9",
   "constType":
@@ -1184,10 +1110,6 @@
  {"references": ["LE.le", "OfNat.ofNat"],
   "name": "NNReal",
   "constType": "Type",
-  "constCategory": "Definition"},
- {"references": [],
-  "name": "Prod.snd",
-  "constType": "{α : Type u} → {β : Type v} → α × β → β",
   "constCategory": "Definition"},
  {"references":
   ["Lean.PrettyPrinter.UnexpandM",
@@ -1243,10 +1165,6 @@
   "name": "SphericallyCompleteSpace.orthProj",
   "constType":
   "(𝕜 : Type u_1) →\n  [inst : NontriviallyNormedField 𝕜] →\n    {E : Type u_2} →\n      [inst_1 : SeminormedAddCommGroup E] →\n        [iud : IsUltrametricDist E] →\n          [inst_2 : NormedSpace 𝕜 E] → (F : Submodule 𝕜 E) → [SphericallyCompleteSpace ↥F] → E →L[𝕜] ↥F",
-  "constCategory": "Definition"},
- {"references": [],
-  "name": "Set.ofPred",
-  "constType": "{α : Type u} → (α → Prop) → Set α",
   "constCategory": "Definition"},
  {"references":
   ["Lean.Name.mkStr4",
@@ -1345,7 +1263,6 @@
  {"references":
   ["Metric.closedBall",
    "Set.Nonempty",
-   "Set",
    "Antitone",
    "NNReal",
    "NNReal.toReal",
@@ -1354,7 +1271,7 @@
   "constType":
   "∀ {α : Type u_1} [inst : PseudoMetricSpace α],\n  (∀ ⦃ci : ℕ → α⦄ ⦃ri : ℕ → NNReal⦄,\n      (Antitone fun i ↦ Metric.closedBall (ci i) ↑(ri i)) → (⋂ i, Metric.closedBall (ci i) ↑(ri i)).Nonempty) →\n    SphericallyCompleteSpace α",
   "constCategory": "Definition"},
- {"references": ["Norm.norm", "RingHom.id", "Membership.mem", "DFunLike.coe"],
+ {"references": ["SphericallyCompleteSpace.IsHahnBanachPair.casesOn"],
   "name": "SphericallyCompleteSpace.IsHahnBanachPair.recOn",
   "constType":
   "{𝕜 : Type u_1} →\n  [inst : NontriviallyNormedField 𝕜] →\n    {E : Type u_2} →\n      [inst_1 : NormedAddCommGroup E] →\n        [inst_2 : NormedSpace 𝕜 E] →\n          {D : Submodule 𝕜 E} →\n            {F : Type u_3} →\n              [inst_3 : NormedAddCommGroup F] →\n                [inst_4 : NormedSpace 𝕜 F] →\n                  [inst_5 : IsUltrametricDist E] →\n                    [inst_6 : IsUltrametricDist F] →\n                      {motive : SphericallyCompleteSpace.IsHahnBanachPair D F → Sort u} →\n                        (t : SphericallyCompleteSpace.IsHahnBanachPair D F) →\n                          ((is_hb : ∀ (f : ↥D →L[𝕜] F), ∃ f', (∀ (v : E) (hv : v ∈ D), f' v = f ⟨v, hv⟩) ∧ ‖f'‖ = ‖f‖) →\n                              motive ⋯) →\n                            motive t",
@@ -1371,7 +1288,6 @@
  {"references":
   ["Metric.closedBall",
    "Set.Icc",
-   "Set",
    "Dist.dist",
    "NNReal",
    "Metric.diam",
@@ -1402,7 +1318,7 @@
   "constType":
   "{𝕜 : Type u_1} →\n  [inst : NontriviallyNormedField 𝕜] →\n    {E : Type u} →\n      [inst_1 : SeminormedAddCommGroup E] → [inst_2 : NormedSpace 𝕜 E] → [IsUltrametricDist E] → Submodule 𝕜 E → Prop",
   "constCategory": "Definition"},
- {"references": ["Not", "Decidable.casesOn"],
+ {"references": ["Not", "dite"],
   "name": "ite",
   "constType": "{α : Sort u} → (c : Prop) → [h : Decidable c] → α → α → α",
   "constCategory": "Definition"},
@@ -1435,7 +1351,7 @@
   "constType":
   "∀ {𝕜 : Type u_2} [inst : NontriviallyNormedField 𝕜] {E : Type u_3} [inst_1 : NormedAddCommGroup E]\n  [inst_2 : NormedSpace 𝕜 E] [inst_3 : IsUltrametricDist E] {E₀ : Type u_1} [inst_4 : NormedAddCommGroup E₀]\n  [inst_5 : NormedSpace 𝕜 E₀] [inst_6 : IsUltrametricDist E₀] (f : E →ₗᵢ[𝕜] E₀) (x x_1 : E),\n  ⟨f (x + x_1), ⋯⟩ = ⟨f x, ⋯⟩ + ⟨f x_1, ⋯⟩",
   "constCategory": "Theorem"},
- {"references": ["Set.ofPred", "Dist.dist", "LE.le"],
+ {"references": ["Dist.dist", "LE.le"],
   "name": "Metric.closedBall",
   "constType": "{α : Type u} → [PseudoMetricSpace α] → α → ℝ → Set α",
   "constCategory": "Definition"},
@@ -1500,32 +1416,21 @@
   "∀ (E : Type u_1) [inst : NormedAddCommGroup E] (x : E), Memℓp (fun x_1 ↦ x) ⊤",
   "constCategory": "Theorem"},
  {"references":
-  ["SphericallyCompleteSpace.IsMOrtho.directProdIsoSum._proof_3",
+  ["LinearMap.codRestrict",
    "Singleton.singleton",
+   "LinearMap.coprod",
    "Membership.mem",
-   "SphericallyCompleteSpace.IsMOrtho.directProdIsoSum._proof_8",
    "Submodule.span",
    "SphericallyCompleteSpace.IsMOrtho.directProdIsoSum._proof_1",
-   "Subtype.val",
    "SphericallyCompleteSpace.IsMOrtho",
    "SphericallyCompleteSpace.IsMOrtho.directProdIsoSum._proof_2",
    "Subspace",
-   "Prod.fst",
+   "Submodule.subtype",
    "SphericallyCompleteSpace.IsMOrtho.directProdIsoSum._proof_5",
-   "SphericallyCompleteSpace.IsMOrtho.directProdIsoSum._proof_6",
-   "RingHom.id",
-   "SphericallyCompleteSpace.IsMOrtho.directProdIsoSum._proof_7",
-   "SphericallyCompleteSpace.IsMOrtho.directProdIsoSum._proof_16",
-   "Set",
-   "Prod.snd",
-   "Exists.choose",
-   "SphericallyCompleteSpace.IsMOrtho.directProdIsoSum._proof_11",
    "HAdd.hAdd",
    "SphericallyCompleteSpace.IsMOrtho.directProdIsoSum._proof_4",
-   "Max.max",
-   "Eq.mpr",
-   "SphericallyCompleteSpace.IsMOrtho.directProdIsoSum._proof_9",
-   "SphericallyCompleteSpace.IsMOrtho.directProdIsoSum._proof_12"],
+   "RingHom.id",
+   "LinearIsometryEquiv.ofSurjective"],
   "name": "SphericallyCompleteSpace.IsMOrtho.directProdIsoSum",
   "constType":
   "(𝕜 : Type u_1) →\n  [inst : NontriviallyNormedField 𝕜] →\n    {E : Type u_2} →\n      [inst_1 : NormedAddCommGroup E] →\n        [inst_2 : NormedSpace 𝕜 E] →\n          [inst_3 : IsUltrametricDist E] → (x : E) → (F : Subspace 𝕜 E) → (x ⟂ₘ F) → ↥(𝕜 ∙ x) × ↥F ≃ₗᵢ[𝕜] ↥(𝕜 ∙ x + F)",
@@ -1734,6 +1639,17 @@
   "constType":
   "{α : Type u} → {β : Type v} → {γ : outParam (Type w)} → [self : HSMul α β γ] → α → β → γ",
   "constCategory": "Definition"},
+ {"references":
+  ["LinearIsometry.toLinearMap",
+   "LinearIsometryEquiv.ofSurjective._proof_2",
+   "DFunLike.coe",
+   "Function.Surjective",
+   "LinearIsometryEquiv.ofSurjective._proof_1",
+   "LinearEquiv.ofBijective"],
+  "name": "LinearIsometryEquiv.ofSurjective",
+  "constType":
+  "{R : Type u_1} →\n  {R₂ : Type u_2} →\n    {E₂ : Type u_5} →\n      {F : Type u_7} →\n        [inst : Semiring R] →\n          [inst_1 : Semiring R₂] →\n            {σ₁₂ : R →+* R₂} →\n              {σ₂₁ : R₂ →+* R} →\n                [inst_2 : RingHomInvPair σ₁₂ σ₂₁] →\n                  [inst_3 : RingHomInvPair σ₂₁ σ₁₂] →\n                    [inst_4 : SeminormedAddCommGroup E₂] →\n                      [inst_5 : _root_.Module R₂ E₂] →\n                        [inst_6 : NormedAddCommGroup F] →\n                          [inst_7 : _root_.Module R F] → (f : F →ₛₗᵢ[σ₁₂] E₂) → Function.Surjective ⇑f → F ≃ₛₗᵢ[σ₁₂] E₂",
+  "constCategory": "Definition"},
  {"references": [],
   "name": "SphericallyCompleteSpace.SchikhofCounterexample.IsDenseMetric",
   "constType": "(α : Type u_1) → [MetricSpace α] → Prop",
@@ -1755,18 +1671,17 @@
   "constCategory": "Theorem"},
  {"references":
   ["SphericallyCompleteSpace.IsImmediate.immediateExtensionSubmodules._proof_2",
+   "Submodule.inclusion",
    "SphericallyCompleteSpace.IsImmediate.immediateExtensionSubmodules._proof_3",
-   "Set.ofPred",
+   "LinearIsometry.toLinearMap",
+   "SphericallyCompleteSpace.IsImmediate.immediateExtensionSubmodules._proof_1",
    "SphericallyCompleteSpace.IsImmediate._proof_1",
+   "RingHom.id",
    "LinearMap.range",
    "Membership.mem",
+   "LE.le",
    "SphericallyCompleteSpace.IsMOrtho",
-   "OfNat.ofNat",
-   "Submodule.inclusion",
-   "LinearIsometry.toLinearMap",
-   "RingHom.id",
-   "SphericallyCompleteSpace.IsImmediate.immediateExtensionSubmodules._proof_1",
-   "LE.le"],
+   "OfNat.ofNat"],
   "name": "SphericallyCompleteSpace.IsImmediate.immediateExtensionSubmodules",
   "constType":
   "{𝕜 : Type u_1} →\n  [inst : NontriviallyNormedField 𝕜] →\n    (E : Type u_2) →\n      [inst_1 : NormedAddCommGroup E] →\n        [inst_2 : NormedSpace 𝕜 E] →\n          [IsUltrametricDist E] →\n            (E₀ : Type u_3) →\n              [inst_4 : NormedAddCommGroup E₀] →\n                [inst_5 : NormedSpace 𝕜 E₀] → [IsUltrametricDist E₀] → (E →ₗᵢ[𝕜] E₀) → Set (Submodule 𝕜 E₀)",
@@ -1826,7 +1741,7 @@
  {"references": [],
   "name": "SphericallyCompleteSpace.IsMOrtho.directProdIsoSum._proof_2",
   "constType":
-  "∀ (𝕜 : Type u_1) [inst : NontriviallyNormedField 𝕜], RingHomInvPair (RingHom.id 𝕜) (RingHom.id 𝕜)",
+  "∀ (𝕜 : Type u_2) [inst : NontriviallyNormedField 𝕜] {E : Type u_1} [inst_1 : NormedAddCommGroup E]\n  [inst_2 : NormedSpace 𝕜 E] [inst_3 : IsUltrametricDist E] (x : E) (F : Subspace 𝕜 E) (hxF : x ⟂ₘ F),\n  Function.Surjective\n    ⇑(let __LinearMap := LinearMap.codRestrict (𝕜 ∙ x + F) ((𝕜 ∙ x).subtype.coprod (Submodule.subtype F)) ⋯;\n      { toLinearMap := __LinearMap, norm_map' := ⋯ })",
   "constCategory": "Theorem"},
  {"references": [],
   "name": "SphericallyCompleteSpace.IsMOrtho.iff_forall_isVOrtho",
@@ -1888,11 +1803,6 @@
   "name": "SphericallyCompleteSpace.tfae",
   "constType":
   "∀ (α : Type u_1) [inst : PseudoMetricSpace α] [iud : IsUltrametricDist α],\n  [SphericallyCompleteSpace α,\n      ∀ ⦃ci : ℕ → α⦄ ⦃ri : ℕ → NNReal⦄,\n        Antitone ri →\n          (Antitone fun i ↦ Metric.closedBall (ci i) ↑(ri i)) → (⋂ i, Metric.closedBall (ci i) ↑(ri i)).Nonempty,\n      ∀ ⦃ci : ℕ → α⦄ ⦃ri : ℕ → NNReal⦄,\n        StrictAnti ri →\n          (Antitone fun i ↦ Metric.closedBall (ci i) ↑(ri i)) → (⋂ i, Metric.closedBall (ci i) ↑(ri i)).Nonempty,\n      ∀ (S : Set (α × NNReal)),\n        S.Nonempty →\n          (∀ (w1 w2 : ↑S), (Metric.closedBall (↑w1).1 ↑(↑w1).2 ∩ Metric.closedBall (↑w2).1 ↑(↑w2).2).Nonempty) →\n            (⋂ w, Metric.closedBall (↑w).1 ↑(↑w).2).Nonempty].TFAE",
-  "constCategory": "Theorem"},
- {"references": [],
-  "name": "SphericallyCompleteSpace.IsMOrtho.directProdIsoSum._proof_16",
-  "constType":
-  "∀ (𝕜 : Type u_2) [inst : NontriviallyNormedField 𝕜] {E : Type u_1} [inst_1 : NormedAddCommGroup E]\n  [inst_2 : NormedSpace 𝕜 E] [inst_3 : IsUltrametricDist E] (x : E) (F : Subspace 𝕜 E) (hxF : x ⟂ₘ F)\n  (x_1 : ↥(𝕜 ∙ x) × ↥F),\n  ‖{ toFun := fun z ↦ ⟨↑z.1 + ↑z.2, ⋯⟩, map_add' := ⋯, map_smul' := ⋯,\n          invFun := ⋯.mpr fun z ↦ (⟨⋯.choose, ⋯⟩, ⟨⋯.choose, ⋯⟩), left_inv := ⋯, right_inv := ⋯ }\n        x_1‖ =\n    ‖x_1‖",
   "constCategory": "Theorem"},
  {"references": [],
   "name": "SphericallyCompleteSpace.IsVOrtho.congr_simp",

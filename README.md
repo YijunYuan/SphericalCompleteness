@@ -1,8 +1,8 @@
 # SphericalCompleteness
 
 [![CI](https://github.com/YijunYuan/SphericalCompleteness/actions/workflows/lean_action_ci.yml/badge.svg)](https://github.com/YijunYuan/SphericalCompleteness/actions/workflows/lean_action_ci.yml)
-[![Lean](https://img.shields.io/badge/Lean-4.34.1-5C2D91)](https://github.com/leanprover/lean4)
-[![mathlib](https://img.shields.io/badge/mathlib-d13f23b-5C2D91)](https://github.com/leanprover-community/mathlib4/commit/d13f23b723b8a846827a245b89c10fc7d3f11612)
+[![Lean](https://img.shields.io/badge/Lean-4.36.0-5C2D91)](https://github.com/leanprover/lean4)
+[![mathlib](https://img.shields.io/badge/mathlib-4.36.0-5C2D91)](https://github.com/leanprover-community/mathlib4/releases/tag/v4.36.0)
 [![License](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
 
 [![Graph](https://img.shields.io/badge/Dependency_graph-100000?style=for-the-badge&logo=GitHub&logoColor=white&labelColor=black&color=black)](https://yijunyuan.github.io/lean-graph/?url=https://raw.githubusercontent.com/YijunYuan/SphericalCompleteness/refs/heads/master/SphericallyCompleteSpace.json#dark)
@@ -130,8 +130,8 @@ The library is organized in layers.
 
 ### Prerequisites
 
-- Lean toolchain: `leanprover/lean4:v4.34.1` (see `lean-toolchain`).
-- mathlib revision: `d13f23b723b8a846827a245b89c10fc7d3f11612` (see `lakefile.toml`).
+- Lean toolchain: `leanprover/lean4:v4.36.0` (see `lean-toolchain`).
+- mathlib version: `v4.36.0` (see `lakefile.toml`), pinned to `fc4f59e577feb1a4956671bc04ac18aaaf8cd842` in `lake-manifest.json`.
 - Recommended editor: VS Code + the Lean 4 extension.
 
 ### Build

@@ -7,6 +7,7 @@ module
 
 public import Mathlib.Algebra.Module.Submodule.Ker
 public import Mathlib.Analysis.Normed.Group.Submodule
+public import Mathlib.LinearAlgebra.Projection
 public import SphericalCompleteness.External.Ultrametric
 public import SphericalCompleteness.NormedVectorSpace.ContinuousLinearMap.Extension
 public import SphericalCompleteness.NormedVectorSpace.Orthogonal.Basic
@@ -22,39 +23,6 @@ Orthogonal complements and projections in ultrametric normed spaces.
 open Metric
 
 namespace SphericallyCompleteSpace
-
-/--
-Shows that `F` is a complementary submodule to the kernel of a continuous linear projection
-`T : E →L[𝕜] F` which acts as the identity on `F`.
-
-More precisely, assuming `T a = ⟨a, b⟩` whenever `a ∈ F`
-(so `T` restricts to `LinearMap.id` on `F`), the theorem concludes `IsCompl F (LinearMap.ker T)`,
-i.e. every `x : E` decomposes uniquely as `x = f + k` with `f ∈ F` and `k ∈ ker T`, and
-`F ⊓ ker T = ⊥`.
-
-The additional hypotheses (`IsUltrametricDist E` and `[SphericallyCompleteSpace F]`) provide the
-ambient setting used elsewhere in the development; the complement statement itself is driven by the
-projection property of `T`.
--/
-theorem isCompl_ker_of_forall_apply_eq
-    (𝕜 : Type*) [NontriviallyNormedField 𝕜] {E : Type*} [SeminormedAddCommGroup E]
-    [IsUltrametricDist E] [NormedSpace 𝕜 E] (F : Submodule 𝕜 E) [SphericallyCompleteSpace ↥F]
-    (T : E →L[𝕜] ↥F) (hT1 : ∀ (a : E) (b : a ∈ F), T a = ⟨a, b⟩)
-    : IsCompl F (LinearMap.ker T.toLinearMap) := by
-  refine IsCompl.of_eq ?_ ?_
-  · ext x
-    simp only [Submodule.mem_inf, LinearMap.mem_ker, Submodule.mem_bot]
-    refine ⟨fun h ↦ ?_, fun h ↦ ?_⟩
-    · specialize hT1 x h.1
-      simp only [ContinuousLinearMap.coe_coe] at h
-      simp only [h.2] at hT1
-      exact (AddSubmonoid.mk_eq_zero F.toAddSubmonoid).mp hT1.symm
-    · simp only [h,zero_mem, map_zero, and_self]
-  · ext x
-    simp only [Submodule.mem_top, iff_true]
-    rw [(by abel : x = (T x) + (x - T x))]
-    refine Submodule.add_mem_sup (T x).prop <| LinearMap.sub_mem_ker_iff.mpr ?_
-    simp only [ContinuousLinearMap.coe_coe, SetLike.coe_mem, hT1, Subtype.coe_eta]
 
 section
 variable (𝕜 : Type*) [NontriviallyNormedField 𝕜]
@@ -117,9 +85,9 @@ completeness providing the completeness hypothesis needed to construct the compl
 theorem isCompl_orthComp :
     IsCompl F (orthComp 𝕜 F) := by
   unfold orthComp
-  apply isCompl_ker_of_forall_apply_eq
-  have := (exists_orthProj_of_sphericallyComplete 𝕜 F).choose_spec.1
-  exact fun a ha ↦ SetLike.coe_eq_coe.mp <| this a ha
+  refine LinearMap.isCompl_of_proj fun x ↦ ?_
+  exact SetLike.coe_eq_coe.mp <|
+    (exists_orthProj_of_sphericallyComplete 𝕜 F).choose_spec.1 x x.property
 
 namespace IsOrtho
 

@@ -52,77 +52,20 @@ equivalence that preserves norms.
 noncomputable def directProdIsoSum (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [IsUltrametricDist E]
     (x : E) (F : Subspace 𝕜 E) (hxF : x ⟂ₘ F) :
-    (Submodule.span 𝕜 {x}) × F ≃ₛₗᵢ[RingHom.id 𝕜] (Submodule.span 𝕜 {x}) + F where
-  toFun z := ⟨z.1.val + z.2.val, by
-    simpa only [Submodule.add_eq_sup] using Submodule.add_mem_sup z.1.prop z.2.prop
-    ⟩
-  map_add' := by
-    simp only [Submodule.add_eq_sup, Prod.fst_add, Submodule.coe_add, Prod.snd_add,
-      AddMemClass.mk_add_mk, Subtype.mk.injEq, Prod.forall, Subtype.forall]
-    intros; exact add_add_add_comm _ _ _ _
-  map_smul' := by
-    intro m a
-    simp only [Submodule.add_eq_sup, Prod.smul_fst, SetLike.val_smul, Prod.smul_snd,
-      RingHom.id_apply, SetLike.mk_smul_mk, smul_add]
-  norm_map' := by
-    simp only [Submodule.add_eq_sup, LinearEquiv.coe_mk, LinearMap.coe_mk, AddHom.coe_mk,
-      ← Submodule.norm_coe, Prod.forall, Prod.norm_mk, Subtype.forall]
-    intro a ha b hab
-    if hh : a = 0 ∨ b = 0 then
-      cases hh <;> simp [*]
-    else
-      refine eq_of_le_of_not_lt (IsUltrametricDist.norm_add_le_max _ _) ?_
-      by_contra hc
-      if h : ‖b‖ ≤ ‖a‖ then
-        rw [sup_of_le_left h] at hc
-        have : dist a (-b) = ‖a + b‖ := by simp only [dist_eq_norm, sub_neg_eq_add]
-        rw [← this, ← of_mem_span_singleton 𝕜 x F hxF a ha] at hc
-        exact (notMem_of_dist_lt_infDist hc) <| neg_mem hab
-      else
-        simp only [not_le] at h
-        rw [sup_of_le_right <| le_of_lt h] at hc
-        have := IsUltrametricDist.norm_add_le_max (a + b) (-a)
-        simp only [add_neg_cancel_comm, norm_neg, le_sup_iff] at this
-        replace := this.resolve_right <| not_le_of_gt h
-        linarith
-  invFun := by
-    rw [Submodule.add_eq_sup]
-    intro z
-    exact (⟨(Submodule.mem_sup.mp z.prop).choose,
-            (Submodule.mem_sup.mp z.prop).choose_spec.1⟩,
-           ⟨(Submodule.mem_sup.mp z.prop).choose_spec.2.choose,
-            (Submodule.mem_sup.mp z.prop).choose_spec.2.choose_spec.1⟩)
-  left_inv := by
-    intro t
-    simp only [Submodule.add_eq_sup, eq_mpr_eq_cast, cast_eq]
-    have := (Submodule.mem_sup.mp (Subtype.prop ⟨↑t.1 + (↑t.2 : E),
-      id (Submodule.add_mem_sup (Subtype.prop t.1) (Subtype.prop t.2))⟩))
-    have this' := this.choose_spec.2.choose_spec.2
-    simp only at this'
-    refine Prod.ext_iff.mpr ?_
-    have h1 := (Submodule.sub_mem_iff_left (Submodule.span 𝕜 {x}) t.1.prop).mpr this.choose_spec.1
-    have h2 := (Submodule.sub_mem_iff_left F t.2.prop).mpr this.choose_spec.2.choose_spec.1
-    have h3 : this.choose - t.1 = - (this.choose_spec.2.choose - t.2) := by
-      rw [neg_sub, sub_eq_sub_iff_add_eq_add, this', add_comm]
-    have h1' : this.choose - t.1 ∈ (↑(Submodule.span 𝕜 {x}) : Set E) ∩ ↑F := by
-      simp only [Set.mem_inter_iff, SetLike.mem_coe, h1, true_and]
-      simpa only [h3, neg_sub] using sub_mem_comm_iff.mp h2
-    have h2' : this.choose_spec.2.choose - t.2 ∈ (↑(Submodule.span 𝕜 {x}) : Set E) ∩ ↑F := by
-      simp only [Set.mem_inter_iff, SetLike.mem_coe, h2, and_true]
-      simpa only [← neg_eq_iff_eq_neg.2 h3] using Submodule.neg_mem (Submodule.span 𝕜 {x}) h1
-    have hh : (↑(Submodule.span 𝕜 {x}) : Set E) ∩ ↑F = {0} := by
-      ext w
-      simp only [Set.mem_inter_iff, SetLike.mem_coe, Set.mem_singleton_iff]
-      constructor
-      · rintro ⟨hw1, hw2⟩
-        exact eq_zero_of_mem hw2 <| of_mem_span_singleton 𝕜 x F hxF w hw1
-      · intro h; simp only [h, zero_mem, and_self]
-    simp only [hh, Set.mem_singleton_iff, sub_eq_zero] at h1' h2'
-    simpa only [h2', and_true] using SetLike.coe_eq_coe.mp h1'
-  right_inv := by
-    intro t
-    simp only [Submodule.add_eq_sup, eq_mpr_eq_cast, cast_eq,
-      (Submodule.mem_sup.mp t.prop).choose_spec.2.choose_spec.2, Subtype.coe_eta]
+    (Submodule.span 𝕜 {x}) × F ≃ₛₗᵢ[RingHom.id 𝕜] (Submodule.span 𝕜 {x}) + F := by
+  let f : (Submodule.span 𝕜 {x}) × F →ₗᵢ[𝕜] (Submodule.span 𝕜 {x}) + F :=
+    { toLinearMap := ((Submodule.span 𝕜 {x}).subtype.coprod F.subtype).codRestrict _
+        (fun z ↦ Submodule.add_mem_sup z.1.property z.2.property)
+      norm_map' := by
+        intro z
+        change ‖(z.1 : E) + (z.2 : E)‖ = max ‖(z.1 : E)‖ ‖(z.2 : E)‖
+        have h := (iff_forall_isVOrtho (z.1 : E) F).mp
+          (of_mem_span_singleton 𝕜 x F hxF z.1 z.1.property) z.2 z.2.property
+        simpa only [one_smul] using IsVOrtho.iff_norm_add_eq_max.mp h 1 1 }
+  exact LinearIsometryEquiv.ofSurjective f (by
+    rintro ⟨z, hz⟩
+    obtain ⟨a, ha, b, hb, hab⟩ := Submodule.mem_sup.mp hz
+    exact ⟨(⟨a, ha⟩, ⟨b, hb⟩), Subtype.ext hab⟩)
 
 end IsMOrtho
 
